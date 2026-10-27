@@ -21,6 +21,16 @@ public class ProcessRunnerTests
     }
 
     [Fact]
+    public async Task Decodes_accented_output_written_in_the_oem_code_page()
+    {
+        var result = await CreateRunner().RunAsync(
+            new ProcessSpec("cmd.exe", ["/c", "echo Utilitário"], TimeSpan.FromSeconds(10)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("Utilitário", result.StdOut.Trim());
+    }
+
+    [Fact]
     public async Task Kills_process_after_timeout()
     {
         var result = await CreateRunner().RunAsync(

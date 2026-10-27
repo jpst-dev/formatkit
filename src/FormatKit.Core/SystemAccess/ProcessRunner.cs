@@ -37,8 +37,8 @@ public sealed class ProcessRunner(ILogger log) : IProcessRunner
             throw new FileNotFoundException($"Executable not found: {spec.FileName}", spec.FileName, ex);
         }
 
-        var stdOutTask = process.StandardOutput.ReadToEndAsync();
-        var stdErrTask = process.StandardError.ReadToEndAsync();
+        var stdOutTask = ProcessOutputDecoder.ReadAsync(process.StandardOutput.BaseStream);
+        var stdErrTask = ProcessOutputDecoder.ReadAsync(process.StandardError.BaseStream);
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeoutCts.CancelAfter(spec.Timeout);
