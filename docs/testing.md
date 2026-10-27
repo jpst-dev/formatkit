@@ -5,7 +5,13 @@ FormatKit changes the system. Run this script in a disposable VM, never first on
 ## Setup
 
 1. Build or download `formatkit.exe` (`dotnet publish src/FormatKit.Cli -c Release -o artifacts`).
-2. In Hyper-V create a **Generation 2** VM with a fresh **Windows 11** (at least 4 GB RAM, a virtual switch, TPM and Secure Boot enabled). Install Windows and finish OOBE with a local account.
+2. In Hyper-V create a **Generation 2** VM with a fresh **Windows 11** (at least 4 GB RAM, a virtual switch, TPM and Secure Boot enabled). Install Windows and finish OOBE with a local account. Shortcut, from an elevated PowerShell on the host:
+
+   ```powershell
+   .\tools\New-TestVm.ps1 -IsoPath C:\path\to\Win11.iso
+   ```
+
+   It installs Windows unattended (local admin with auto-logon, credentials in the git-ignored `.vm\test-vm.json`) and waits until PowerShell Direct answers. Take the `clean` checkpoint right after.
 3. Take a checkpoint named `clean`. Restore it between scenarios.
 4. Create a shared folder on the host (for example `C:\FormatKitShare`) reachable from the VM (Enhanced Session drive redirection or an SMB share).
 

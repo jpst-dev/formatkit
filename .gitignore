@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local test VM credentials (tools/New-TestVm.ps1)
+.vm/
