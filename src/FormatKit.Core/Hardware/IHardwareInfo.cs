@@ -1,4 +1,6 @@
 namespace FormatKit.Core.Hardware;
 
-// Placeholder: defined fully in a later task.
-public interface IHardwareInfo { }
+public interface IHardwareInfo
+{
+    Task<HardwareSnapshot> ReadAsync(CancellationToken ct);
+}
