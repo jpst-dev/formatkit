@@ -159,6 +159,21 @@ public sealed class CliAppTests : IDisposable
     }
 
     [Fact]
+    public async Task Run_prints_each_step_as_it_starts()
+    {
+        _module.Steps.Add(new FakeStep("a") { Title = "Step A", CheckResult = false });
+        _module.Steps.Add(new FakeStep("b") { Title = "Step B", CheckResult = false });
+        _elevation.IsElevated = true;
+
+        await Run("run", "--profile", WriteProfile());
+
+        var output = _out.ToString();
+        Assert.Contains("[1/2] Step A...", output);
+        Assert.Contains("[2/2] Step B...", output);
+        Assert.True(output.IndexOf("[1/2] Step A...", StringComparison.Ordinal) < output.IndexOf("[2/2]", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task Failures_map_to_one()
     {
         _module.Steps.Add(new FakeStep("a") { CheckResult = false, ExecuteResult = StepResult.Fail("do it by hand", "boom") });

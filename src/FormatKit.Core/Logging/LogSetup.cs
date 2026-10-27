@@ -17,7 +17,7 @@ public static class LogSetup
             .MinimumLevel.Debug()
             .WriteTo.File(file)
             .WriteTo.Console(
-                restrictedToMinimumLevel: verbose ? LogEventLevel.Debug : LogEventLevel.Information,
+                restrictedToMinimumLevel: verbose ? LogEventLevel.Debug : LogEventLevel.Warning,
                 outputTemplate: "{Message:lj}{NewLine}{Exception}")
             .CreateLogger();
     }

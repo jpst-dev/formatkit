@@ -40,7 +40,7 @@ internal static class Output
     private const int LabelWidth = 30;
 
     public static void Field(TextWriter o, string label, string value) =>
-        o.WriteLine($"{(label + ":").PadRight(LabelWidth)}{value}");
+        o.WriteLine($"{(label + ":").PadRight(LabelWidth - 1)} {value}");
 
     public static void List(TextWriter o, string label, IReadOnlyList<string> items)
     {

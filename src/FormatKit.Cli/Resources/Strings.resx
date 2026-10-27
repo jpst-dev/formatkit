@@ -54,6 +54,7 @@
   <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Run stopped on a critical failure.</value></data>
   <data name="Run_RebootPending" xml:space="preserve"><value>The run will resume automatically at the next logon. You can reboot now or later.</value></data>
   <data name="Run_ReportDir" xml:space="preserve"><value>Report: {0}</value></data>
+  <data name="Run_StepStarted" xml:space="preserve"><value>[{0}/{1}] {2}...</value></data>
   <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
   <data name="Outcome_Succeeded" xml:space="preserve"><value>Succeeded</value></data>
   <data name="Outcome_Skipped" xml:space="preserve"><value>Skipped</value></data>

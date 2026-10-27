@@ -29,6 +29,8 @@ public sealed class NetworkDriverBackup(ServiceSet services)
 
             var folder = UniqueName(Sanitize(adapter.Name), usedNames);
             var target = Path.Combine(outputDirectory, folder);
+            // pnputil /export-driver requires an existing target folder.
+            services.Files.CreateDirectory(target);
             var result = await services.PnpUtil.ExportDriverAsync(adapter.InfName, target, ct);
             (result.Success ? exported : failed).Add(adapter.Name);
         }

@@ -111,7 +111,7 @@ internal static class RunFlow
             return exit;
 
         var env = context.Env;
-        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log);
+        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log, new ConsoleRunProgress(o));
         var request = new RunRequest(profile.Path, profile.Hash, plan, new StepContext(env.Services, env.Log), resume);
 
         RunSummary summary;

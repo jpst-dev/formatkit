@@ -33,6 +33,8 @@ public class NetworkDriverBackupTests
         Assert.Single(result.SkippedInbox);
         Assert.Empty(result.Failed);
         Assert.True(fs.DirectoryExists(Out));
+        // pnputil /export-driver fails with exit 2 when the target folder does not exist yet.
+        Assert.True(fs.DirectoryExists(Path.Combine(Out, "Realtek_ PCIe GbE")));
         var call = Assert.Single(procs.Calls);
         Assert.Contains("oem12.inf", call.Arguments);
         Assert.Contains(Path.Combine(Out, "Realtek_ PCIe GbE"), call.Arguments);
