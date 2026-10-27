@@ -34,4 +34,5 @@
   <data name="WindowsUpdate_Error_ServiceDisabled" xml:space="preserve"><value>O serviço do Windows Update está desabilitado. Defina o serviço &apos;Windows Update&apos; (wuauserv) como Manual ou Automático e tente novamente.</value></data>
   <data name="WindowsUpdate_Error_ServiceStopped" xml:space="preserve"><value>O serviço do Windows Update foi interrompido. Inicie o serviço &apos;Windows Update&apos; (wuauserv) e tente novamente.</value></data>
   <data name="WindowsUpdate_Error_Unknown" xml:space="preserve"><value>O Windows Update falhou com o erro {0}.</value></data>
+  <data name="WindowsUpdate_Error_Timeout" xml:space="preserve"><value>O Windows Update não respondeu a tempo.</value></data>
 </root>

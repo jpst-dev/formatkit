@@ -8,4 +8,6 @@
   <data name="Step_WindowsUpdateDrivers_Installed" xml:space="preserve"><value>Instalado: {0}</value></data>
   <data name="Step_WindowsUpdateDrivers_RebootRequired" xml:space="preserve"><value>Drivers instalados; é necessário reiniciar para concluir: {0}</value></data>
   <data name="Step_WindowsUpdateDrivers_Failed" xml:space="preserve"><value>Falhou: {0}</value></data>
+  <data name="Step_WindowsUpdateDrivers_ErrorCode" xml:space="preserve"><value>Código de erro do Windows Update 0x{0:X8}</value></data>
+  <data name="Step_WindowsUpdateDrivers_Partial" xml:space="preserve"><value>Estes drivers não puderam ser instalados: {0}. Instale-os manualmente ou verifique o histórico do Windows Update.</value></data>
 </root>

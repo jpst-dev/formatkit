@@ -8,4 +8,6 @@
   <data name="Step_WindowsUpdateDrivers_Installed" xml:space="preserve"><value>Installed: {0}</value></data>
   <data name="Step_WindowsUpdateDrivers_RebootRequired" xml:space="preserve"><value>Drivers installed; a reboot is required to finish: {0}</value></data>
   <data name="Step_WindowsUpdateDrivers_Failed" xml:space="preserve"><value>Failed: {0}</value></data>
+  <data name="Step_WindowsUpdateDrivers_ErrorCode" xml:space="preserve"><value>Windows Update error code 0x{0:X8}</value></data>
+  <data name="Step_WindowsUpdateDrivers_Partial" xml:space="preserve"><value>These drivers could not be installed: {0}. Install them manually or check the Windows Update history.</value></data>
 </root>

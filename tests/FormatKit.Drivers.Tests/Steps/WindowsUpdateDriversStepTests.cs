@@ -82,5 +82,43 @@ public class WindowsUpdateDriversStepTests
         Assert.Equal(StepOutcome.Failed, result.Outcome);
         Assert.Equal(WindowsUpdateErrors.Describe(hr), result.NextAction);
         Assert.Contains(result.Messages, m => m.Contains("Driver 2"));
+        Assert.Contains(result.Messages, m => m.Contains("0x8024402C"));
+    }
+
+    [Fact]
+    public async Task Partial_failure_fails_and_lists_only_installed_titles_as_installed()
+    {
+        var (step, wu, ctx) = Arrange();
+        wu.InstallResult = new WindowsUpdateInstallResult(true, false, 0, ["Driver 2"]);
+
+        var result = await step.ExecuteAsync(ctx, CancellationToken.None);
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Contains(result.Messages, m => m.Contains("Driver 2"));
+        Assert.Contains("Driver 2", result.NextAction);
+        Assert.DoesNotContain(result.Messages, m => m.Contains("Driver 1") && m.Contains("Driver 2"));
+    }
+
+    [Fact]
+    public async Task Partial_failure_with_reboot_returns_RebootRequired_mentioning_failed()
+    {
+        var (step, wu, ctx) = Arrange();
+        wu.InstallResult = new WindowsUpdateInstallResult(true, true, 0, ["Driver 2"]);
+
+        var result = await step.ExecuteAsync(ctx, CancellationToken.None);
+
+        Assert.Equal(StepOutcome.RebootRequired, result.Outcome);
+        Assert.Contains(result.Messages, m => m.Contains("Driver 2"));
+    }
+
+    [Fact]
+    public async Task Nothing_installed_is_skipped()
+    {
+        var (step, wu, ctx) = Arrange();
+        wu.InstallResult = new WindowsUpdateInstallResult(true, false, 0, [], []);
+
+        var result = await step.ExecuteAsync(ctx, CancellationToken.None);
+
+        Assert.Equal(StepOutcome.Skipped, result.Outcome);
     }
 }

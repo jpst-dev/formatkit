@@ -32,14 +32,36 @@ public sealed class WindowsUpdateDriversStep : IStep
         if (!result.Succeeded)
         {
             ctx.Log.Warning("Windows Update driver install failed with HRESULT 0x{HResult:X8}", result.HResult);
-            var failed = result.FailedTitles.Count > 0 ? string.Join(", ", result.FailedTitles) : titles;
+            var failedAll = result.FailedTitles.Count > 0 ? string.Join(", ", result.FailedTitles) : titles;
             return StepResult.Fail(
                 WindowsUpdateErrors.Describe(result.HResult),
-                Strings.Format("Step_WindowsUpdateDrivers_Failed", failed));
+                Strings.Format("Step_WindowsUpdateDrivers_Failed", failedAll),
+                Strings.Format("Step_WindowsUpdateDrivers_ErrorCode", result.HResult));
         }
 
-        return result.RebootRequired
-            ? StepResult.Reboot(Strings.Format("Step_WindowsUpdateDrivers_RebootRequired", titles))
-            : StepResult.Success(Strings.Format("Step_WindowsUpdateDrivers_Installed", titles));
+        var installed = result.InstalledTitles
+            ?? updates.Select(u => u.Title).Except(result.FailedTitles).ToList();
+        var messages = new List<string>();
+        if (installed.Count > 0)
+        {
+            var key = result.RebootRequired ? "Step_WindowsUpdateDrivers_RebootRequired" : "Step_WindowsUpdateDrivers_Installed";
+            messages.Add(Strings.Format(key, string.Join(", ", installed)));
+        }
+
+        if (result.FailedTitles.Count > 0)
+        {
+            var failed = string.Join(", ", result.FailedTitles);
+            messages.Add(Strings.Format("Step_WindowsUpdateDrivers_Failed", failed));
+            return result.RebootRequired
+                ? StepResult.Reboot([.. messages])
+                : StepResult.Fail(Strings.Format("Step_WindowsUpdateDrivers_Partial", failed), [.. messages]);
+        }
+
+        if (installed.Count == 0)
+        {
+            return StepResult.Skip();
+        }
+
+        return result.RebootRequired ? StepResult.Reboot([.. messages]) : StepResult.Success([.. messages]);
     }
 }

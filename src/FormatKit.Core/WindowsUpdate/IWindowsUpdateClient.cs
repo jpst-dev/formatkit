@@ -6,7 +6,8 @@ public sealed record WindowsUpdateInstallResult(
     bool Succeeded,
     bool RebootRequired,
     int HResult,
-    IReadOnlyList<string> FailedTitles);
+    IReadOnlyList<string> FailedTitles,
+    IReadOnlyList<string>? InstalledTitles = null);
 
 public interface IWindowsUpdateClient
 {

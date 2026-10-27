@@ -34,4 +34,5 @@
   <data name="WindowsUpdate_Error_ServiceDisabled" xml:space="preserve"><value>The Windows Update service is disabled. Set the &apos;Windows Update&apos; service (wuauserv) to Manual or Automatic and try again.</value></data>
   <data name="WindowsUpdate_Error_ServiceStopped" xml:space="preserve"><value>The Windows Update service stopped. Start the &apos;Windows Update&apos; service (wuauserv) and try again.</value></data>
   <data name="WindowsUpdate_Error_Unknown" xml:space="preserve"><value>Windows Update failed with error {0}.</value></data>
+  <data name="WindowsUpdate_Error_Timeout" xml:space="preserve"><value>Windows Update did not respond in time.</value></data>
 </root>

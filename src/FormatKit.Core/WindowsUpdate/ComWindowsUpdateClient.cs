@@ -1,15 +1,22 @@
 using System.Runtime.InteropServices;
+using FormatKit.Core.Localization;
 
 namespace FormatKit.Core.WindowsUpdate;
 
 /// <summary>Windows Update Agent access through late-bound COM, run on a dedicated STA thread.</summary>
-public sealed class ComWindowsUpdateClient : IWindowsUpdateClient
+public sealed class ComWindowsUpdateClient(TimeSpan? searchTimeout = null, TimeSpan? installTimeout = null)
+    : IWindowsUpdateClient
 {
     private const string SearchCriteria = "IsInstalled=0 and Type='Driver'";
     private const int FailureHResult = unchecked((int)0x80004005); // E_FAIL
+    private const int TimeoutHResult = unchecked((int)0x800705B4); // ERROR_TIMEOUT
 
-    public Task<IReadOnlyList<DriverUpdate>> SearchDriversAsync(CancellationToken ct) =>
-        RunOnStaThread<IReadOnlyList<DriverUpdate>>(() =>
+    private readonly TimeSpan _searchTimeout = searchTimeout ?? Timeouts.Query;
+    private readonly TimeSpan _installTimeout = installTimeout ?? Timeouts.Install;
+
+    public async Task<IReadOnlyList<DriverUpdate>> SearchDriversAsync(CancellationToken ct)
+    {
+        var work = RunOnStaThread<IReadOnlyList<DriverUpdate>>(() =>
         {
             ct.ThrowIfCancellationRequested();
             try
@@ -19,12 +26,23 @@ public sealed class ComWindowsUpdateClient : IWindowsUpdateClient
             catch (COMException ex)
             {
                 // Surface as a non-COM exception so callers never deal with COM types.
-                throw new InvalidOperationException(WindowsUpdateErrors.Describe(ex.HResult), ex);
+                throw new InvalidOperationException($"{WindowsUpdateErrors.Describe(ex.HResult)} (0x{ex.HResult:X8})", ex);
             }
         });
 
-    public Task<WindowsUpdateInstallResult> InstallAsync(IReadOnlyList<DriverUpdate> updates, CancellationToken ct) =>
-        RunOnStaThread(() =>
+        try
+        {
+            return await work.WaitAsync(_searchTimeout, ct);
+        }
+        catch (TimeoutException)
+        {
+            throw new InvalidOperationException($"{Strings.Get("WindowsUpdate_Error_Timeout")} (0x{TimeoutHResult:X8})");
+        }
+    }
+
+    public async Task<WindowsUpdateInstallResult> InstallAsync(IReadOnlyList<DriverUpdate> updates, CancellationToken ct)
+    {
+        var work = RunOnStaThread(() =>
         {
             try
             {
@@ -36,23 +54,42 @@ public sealed class ComWindowsUpdateClient : IWindowsUpdateClient
             }
         });
 
+        try
+        {
+            return await work.WaitAsync(_installTimeout, ct);
+        }
+        catch (TimeoutException)
+        {
+            // The STA thread is a background thread and is left to finish on its own.
+            return new WindowsUpdateInstallResult(false, false, TimeoutHResult, updates.Select(u => u.Title).ToList());
+        }
+    }
+
     private static IReadOnlyList<DriverUpdate> Search()
     {
-        dynamic session = CreateComObject("Microsoft.Update.Session");
-        dynamic searcher = session.CreateUpdateSearcher();
-        dynamic found = searcher.Search(SearchCriteria).Updates;
-
-        var list = new List<DriverUpdate>();
-        int count = found.Count;
-        for (var i = 0; i < count; i++)
+        var com = new List<object>();
+        try
         {
-            dynamic update = found.Item(i);
-            string id = update.Identity.UpdateID;
-            string title = update.Title;
-            list.Add(new DriverUpdate(id, title, ReadDriverHardwareId(update)));
-        }
+            dynamic session = Track(com, CreateComObject("Microsoft.Update.Session"));
+            dynamic searcher = Track(com, session.CreateUpdateSearcher());
+            dynamic found = Track(com, searcher.Search(SearchCriteria).Updates);
 
-        return list;
+            var list = new List<DriverUpdate>();
+            int count = found.Count;
+            for (var i = 0; i < count; i++)
+            {
+                dynamic update = Track(com, found.Item(i));
+                string id = update.Identity.UpdateID;
+                string title = update.Title;
+                list.Add(new DriverUpdate(id, title, ReadDriverHardwareId(update)));
+            }
+
+            return list;
+        }
+        finally
+        {
+            Release(com);
+        }
     }
 
     private static string? ReadDriverHardwareId(dynamic update)
@@ -70,61 +107,100 @@ public sealed class ComWindowsUpdateClient : IWindowsUpdateClient
 
     private static WindowsUpdateInstallResult Install(IReadOnlyList<DriverUpdate> updates, CancellationToken ct)
     {
-        ct.ThrowIfCancellationRequested();
-        dynamic session = CreateComObject("Microsoft.Update.Session");
-        dynamic searcher = session.CreateUpdateSearcher();
-        dynamic found = searcher.Search(SearchCriteria).Updates;
-
-        // Match the requested updates against a fresh search: COM update objects cannot cross calls.
-        var wanted = updates.Select(u => u.UpdateId).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        dynamic toInstall = CreateComObject("Microsoft.Update.UpdateColl");
-        var titles = new List<string>();
-        int count = found.Count;
-        for (var i = 0; i < count; i++)
+        var com = new List<object>();
+        try
         {
-            dynamic update = found.Item(i);
-            string id = update.Identity.UpdateID;
-            if (wanted.Contains(id))
+            ct.ThrowIfCancellationRequested();
+            dynamic session = Track(com, CreateComObject("Microsoft.Update.Session"));
+            dynamic searcher = Track(com, session.CreateUpdateSearcher());
+            dynamic found = Track(com, searcher.Search(SearchCriteria).Updates);
+
+            // Match the requested updates against a fresh search: COM update objects cannot cross calls.
+            var wanted = updates.Select(u => u.UpdateId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            dynamic toInstall = Track(com, CreateComObject("Microsoft.Update.UpdateColl"));
+            var titles = new List<string>();
+            int count = found.Count;
+            for (var i = 0; i < count; i++)
             {
+                dynamic update = Track(com, found.Item(i));
+                string id = update.Identity.UpdateID;
+                if (!wanted.Contains(id))
+                {
+                    continue;
+                }
+
+                bool eulaAccepted = update.EulaAccepted;
+                if (!eulaAccepted)
+                {
+                    update.AcceptEula();
+                }
+
                 toInstall.Add(update);
                 titles.Add((string)update.Title);
             }
-        }
 
-        if (titles.Count == 0)
-        {
-            return new WindowsUpdateInstallResult(true, false, 0, []);
-        }
-
-        ct.ThrowIfCancellationRequested();
-        dynamic downloader = session.CreateUpdateDownloader();
-        downloader.Updates = toInstall;
-        dynamic download = downloader.Download();
-        int downloadCode = download.ResultCode;
-        if (downloadCode != 2 && downloadCode != 3)
-        {
-            return new WindowsUpdateInstallResult(false, false, SafeHResult(download), titles);
-        }
-
-        ct.ThrowIfCancellationRequested();
-        dynamic installer = session.CreateUpdateInstaller();
-        installer.Updates = toInstall;
-        dynamic result = installer.Install();
-
-        int code = result.ResultCode;
-        bool reboot = result.RebootRequired;
-        var failed = new List<string>();
-        for (var i = 0; i < titles.Count; i++)
-        {
-            int perUpdate = result.GetUpdateResult(i).ResultCode;
-            if (perUpdate != 2)
+            if (titles.Count == 0)
             {
-                failed.Add(titles[i]);
+                return new WindowsUpdateInstallResult(true, false, 0, [], []);
+            }
+
+            ct.ThrowIfCancellationRequested();
+            dynamic downloader = Track(com, session.CreateUpdateDownloader());
+            downloader.Updates = toInstall;
+            dynamic download = Track(com, downloader.Download());
+            int downloadCode = download.ResultCode;
+            if (downloadCode != 2 && downloadCode != 3)
+            {
+                return new WindowsUpdateInstallResult(false, false, SafeHResult(download), titles);
+            }
+
+            ct.ThrowIfCancellationRequested();
+            dynamic installer = Track(com, session.CreateUpdateInstaller());
+            installer.Updates = toInstall;
+            dynamic result = Track(com, installer.Install());
+
+            int code = result.ResultCode;
+            bool reboot = result.RebootRequired;
+            var failed = new List<string>();
+            var installed = new List<string>();
+            for (var i = 0; i < titles.Count; i++)
+            {
+                int perUpdate = result.GetUpdateResult(i).ResultCode;
+                (perUpdate == 2 ? installed : failed).Add(titles[i]);
+            }
+
+            var succeeded = code == 2 || code == 3;
+            return new WindowsUpdateInstallResult(succeeded, reboot, succeeded ? 0 : SafeHResult(result), failed, installed);
+        }
+        finally
+        {
+            Release(com);
+        }
+    }
+
+    private static T Track<T>(List<object> com, T value)
+    {
+        if (value is not null && Marshal.IsComObject(value))
+        {
+            com.Add(value);
+        }
+
+        return value;
+    }
+
+    private static void Release(List<object> com)
+    {
+        foreach (var o in com)
+        {
+            try
+            {
+                Marshal.FinalReleaseComObject(o);
+            }
+            catch (Exception)
+            {
+                // Best effort: releasing must never mask the real result.
             }
         }
-
-        var succeeded = code == 2 || code == 3;
-        return new WindowsUpdateInstallResult(succeeded, reboot, succeeded ? 0 : SafeHResult(result), failed);
     }
 
     private static int SafeHResult(dynamic result)
