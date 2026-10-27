@@ -12,7 +12,7 @@ public static class LogSetup
     public static Serilog.ILogger Create(AppPaths paths, TimeProvider clock, bool verbose)
     {
         var stamp = clock.GetLocalNow().ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
-        var file = Path.Combine(paths.LogsDirectory, $"run-{stamp}.log");
+        var file = Path.Combine(paths.LogsDirectory, $"run-{stamp}-{Environment.ProcessId}.log");
         return new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.File(file)

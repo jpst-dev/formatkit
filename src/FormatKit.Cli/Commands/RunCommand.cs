@@ -52,6 +52,12 @@ internal static class RunCommand
             var profile = path == BuiltInProfiles.DriversOnlyPath
                 ? new LoadedProfile(BuiltInProfiles.DriversOnly, path, BuiltInProfiles.DriversOnlyHash)
                 : LoadProfile(context, path!);
+            if (profile is null && resuming)
+            {
+                o.WriteLine(Strings.Get("Run_ResumeProfileInvalid"));
+                return ExitCodes.NothingToResume;
+            }
+
             if (profile is null)
                 return ExitCodes.InvalidInput;
 

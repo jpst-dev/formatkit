@@ -104,11 +104,17 @@ public sealed class CliAppTests : IDisposable
     [Fact]
     public async Task Drivers_install_dry_run_prints_builtin_plan_without_elevating()
     {
-        var exit = await App().RunAsync(["drivers", "install", "--dry-run"], CancellationToken.None);
+        var services = TestServices.Create(files: _fs);
+        var env = new CliEnvironment(
+            services, _elevation, _tasks, _rebooter, _reports,
+            new RunStateStore(_fs, _paths), Serilog.Core.Logger.None, _out, TimeSpan.Zero, TimeSpan.Zero);
 
-        // The fake module list has no "drivers" module, so the built-in profile yields an empty plan.
+        var exit = await new CliApp(env).RunAsync(["drivers", "install", "--dry-run"], CancellationToken.None);
+
         Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("drivers.network-check", _out.ToString());
         Assert.Equal(0, _elevation.RelaunchCalls);
+        Assert.Equal(0, _fs.WriteCount);
     }
 
     [Fact]
@@ -267,6 +273,95 @@ public sealed class CliAppTests : IDisposable
 
         Assert.Equal(ExitCodes.Cancelled, exit);
         Assert.Contains("run --resume", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Cancelled_hardware_query_returns_130()
+    {
+        var exit = await App(new ThrowingHardware(new OperationCanceledException())).RunAsync(["hardware"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.Cancelled, exit);
+        Assert.Contains("Cancelled", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Unexpected_exception_prints_one_line_error_without_stack_trace()
+    {
+        var exit = await App(new ThrowingHardware(new IOException("disk gone"))).RunAsync(["hardware"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.CompletedWithFailures, exit);
+        Assert.Contains("Unexpected error: disk gone", _out.ToString());
+        Assert.DoesNotContain("   at ", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Relaunch_uses_absolute_paths_and_marks_the_elevated_child()
+    {
+        _module.Steps.Add(new FakeStep("a") { RequiresAdmin = true });
+        _elevation.RelaunchResult = 3;
+        var absolute = WriteProfile();
+        var relative = Path.GetRelativePath(Environment.CurrentDirectory, absolute);
+
+        var exit = await Run("run", "--profile", relative);
+
+        Assert.Equal(3, exit);
+        var args = Assert.Single(_elevation.RelaunchArgs);
+        Assert.Contains(absolute, args);
+        Assert.Contains("--elevated-child", args);
+        Assert.Contains("exit code 3", _out.ToString());
+        Assert.Contains("critical failure", _out.ToString());
+        Assert.Contains("reports", _out.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Saved_state_records_an_absolute_profile_path()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false, ExecuteResult = StepResult.Reboot("restart") });
+        _elevation.IsElevated = true;
+        var relative = Path.GetRelativePath(Environment.CurrentDirectory, WriteProfile());
+
+        await Run("run", "--profile", relative);
+
+        var saved = new RunStateStore(_fs, _paths).Load().State!;
+        Assert.True(Path.IsPathRooted(saved.ProfilePath));
+    }
+
+    [Fact]
+    public async Task Elevated_child_waits_for_enter_except_when_rebooting()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        var waits = 0;
+        var app = App();
+        app.WaitForClose = () => { waits++; return Task.CompletedTask; };
+
+        var exit = await app.RunAsync(["run", "--profile", WriteProfile(), "--elevated-child"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Equal(1, waits);
+        Assert.Contains("Press Enter to close", _out.ToString());
+
+        _module.Steps.Clear();
+        _module.Steps.Add(new FakeStep("r") { CheckResult = false, ExecuteResult = StepResult.Reboot("restart") });
+        var app2 = App();
+        app2.WaitForClose = () => { waits++; return Task.CompletedTask; };
+
+        var exit2 = await app2.RunAsync(["run", "--profile", WriteProfile(), "--elevated-child"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.RebootPending, exit2);
+        Assert.Equal(1, waits);
+    }
+
+    [Fact]
+    public async Task Resume_with_missing_profile_file_returns_six_with_hint()
+    {
+        new RunStateStore(_fs, _paths).Save(new RunState(Path.Combine(_tempDir, "gone.json"), "h", ["a"],
+            new Dictionary<string, StepRecord>(), DateTimeOffset.UtcNow));
+
+        var exit = await Run("run", "--resume");
+
+        Assert.Equal(ExitCodes.NothingToResume, exit);
+        Assert.Contains("run --profile", _out.ToString());
     }
 
     [Fact]

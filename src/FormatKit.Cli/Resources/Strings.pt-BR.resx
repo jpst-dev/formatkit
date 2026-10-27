@@ -63,4 +63,17 @@
   <data name="Backup_Exported" xml:space="preserve"><value>Exportados</value></data>
   <data name="Backup_Skipped" xml:space="preserve"><value>Ignorados (driver nativo do Windows)</value></data>
   <data name="Backup_Failed" xml:space="preserve"><value>Falharam</value></data>
+  <data name="Error_Unexpected" xml:space="preserve"><value>Erro inesperado: {0}</value></data>
+  <data name="Elevated_Close" xml:space="preserve"><value>Pressione Enter para fechar esta janela.</value></data>
+  <data name="Elevated_Result" xml:space="preserve"><value>A execução elevada terminou com código de saída {0} ({1}). Os relatórios estão em: {2}</value></data>
+  <data name="ExitMeaning_0" xml:space="preserve"><value>concluída</value></data>
+  <data name="ExitMeaning_1" xml:space="preserve"><value>concluída com falhas</value></data>
+  <data name="ExitMeaning_2" xml:space="preserve"><value>entrada inválida</value></data>
+  <data name="ExitMeaning_3" xml:space="preserve"><value>interrompida por uma falha crítica</value></data>
+  <data name="ExitMeaning_4" xml:space="preserve"><value>reinício pendente; a execução continua no próximo logon</value></data>
+  <data name="ExitMeaning_5" xml:space="preserve"><value>permissão de administrador recusada</value></data>
+  <data name="ExitMeaning_6" xml:space="preserve"><value>nada para retomar</value></data>
+  <data name="ExitMeaning_130" xml:space="preserve"><value>cancelada; execute formatkit run --resume para continuar</value></data>
+  <data name="ExitMeaning_Other" xml:space="preserve"><value>desconhecido</value></data>
+  <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>Não foi possível usar o perfil registrado para a execução interrompida. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
 </root>

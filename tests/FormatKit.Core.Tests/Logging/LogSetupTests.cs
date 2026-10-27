@@ -18,7 +18,7 @@ public class LogSetupTests
             logger.Information("hello");
             ((IDisposable)logger).Dispose();
 
-            var file = Path.Combine(paths.LogsDirectory, "run-20261027-140305.log");
+            var file = Path.Combine(paths.LogsDirectory, $"run-20261027-140305-{Environment.ProcessId}.log");
             Assert.True(File.Exists(file));
             Assert.Contains("hello", File.ReadAllText(file));
         }

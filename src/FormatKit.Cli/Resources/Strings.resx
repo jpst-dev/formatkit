@@ -63,4 +63,17 @@
   <data name="Backup_Exported" xml:space="preserve"><value>Exported</value></data>
   <data name="Backup_Skipped" xml:space="preserve"><value>Skipped (inbox driver)</value></data>
   <data name="Backup_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Error_Unexpected" xml:space="preserve"><value>Unexpected error: {0}</value></data>
+  <data name="Elevated_Close" xml:space="preserve"><value>Press Enter to close this window.</value></data>
+  <data name="Elevated_Result" xml:space="preserve"><value>The elevated run finished with exit code {0} ({1}). Reports are in: {2}</value></data>
+  <data name="ExitMeaning_0" xml:space="preserve"><value>completed</value></data>
+  <data name="ExitMeaning_1" xml:space="preserve"><value>completed with failures</value></data>
+  <data name="ExitMeaning_2" xml:space="preserve"><value>invalid input</value></data>
+  <data name="ExitMeaning_3" xml:space="preserve"><value>stopped on a critical failure</value></data>
+  <data name="ExitMeaning_4" xml:space="preserve"><value>reboot pending; the run resumes at the next logon</value></data>
+  <data name="ExitMeaning_5" xml:space="preserve"><value>administrator permission declined</value></data>
+  <data name="ExitMeaning_6" xml:space="preserve"><value>nothing to resume</value></data>
+  <data name="ExitMeaning_130" xml:space="preserve"><value>cancelled; run formatkit run --resume to continue</value></data>
+  <data name="ExitMeaning_Other" xml:space="preserve"><value>unknown</value></data>
+  <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>The profile recorded for the interrupted run could not be used. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
 </root>
