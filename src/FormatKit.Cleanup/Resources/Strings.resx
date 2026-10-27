@@ -4,6 +4,8 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Undo_NothingToUndo" xml:space="preserve"><value>nothing to undo: no unreverted change recorded for this item</value></data>
+  <data name="Undo_Reverted" xml:space="preserve"><value>reverted</value></data>
   <data name="Undo_WingetMissing" xml:space="preserve"><value>winget is not available. Install App Installer from the Microsoft Store, then run undo again (Store app ID {0}).</value></data>
   <data name="Undo_StoreReinstallFailed" xml:space="preserve"><value>Could not reinstall '{0}' (winget exit code {1}). Install it from the Store, then run undo again: {2}</value></data>
   <data name="Step_Title_Apps" xml:space="preserve"><value>Cleanup: remove apps</value></data>
