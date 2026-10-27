@@ -66,8 +66,10 @@ Also decline the UAC prompt on one run. **Expected:** exit code **5** (Elevation
 
 ## 4. Reboot required: countdown, cancel, scheduled task, resume
 
-1. Restore `clean` and enable the network. Use a scenario that triggers `RebootRequired` (for example a Windows Update driver install that needs a restart).
-2. Run `.\formatkit.exe run --profile example.json`.
+1. Restore `clean` and enable the network. A fresh VM usually has nothing that needs a restart, so force one with the test switch, set machine-wide so the resume task sees it after the reboot (elevated PowerShell):
+   `[Environment]::SetEnvironmentVariable('FORMATKIT_TEST_REBOOT_AFTER', 'drivers.windows-update', 'Machine')`
+   The named step runs normally and then reports `RebootRequired`; any step id from `--dry-run` works.
+2. Run `.\formatkit.exe run --profile example.json` from an elevated console, so the countdown has the keyboard focus (with UAC the countdown runs in the elevated child's window).
 3. When the reboot countdown appears, press **Esc**.
 4. Check the task: `schtasks /query /fo LIST /v | findstr /i formatkit` (or Task Scheduler).
 5. Run again until the countdown appears and let it finish.
@@ -77,6 +79,7 @@ Also decline the UAC prompt on one run. **Expected:** exit code **5** (Elevation
 - The countdown is displayed; Esc cancels it and the VM does not reboot; the resume scheduled task exists (trigger: at logon) and the run is left to resume at the next logon (exit code **4**, RebootPending).
 - When the countdown completes the VM reboots; after logon the scheduled task starts `formatkit run --resume` in its own console window (the task passes the hidden `--wait-on-exit` flag, so the window waits for Enter at the end unless the exit code is 4) and the run continues from the next step instead of restarting.
 - `.\formatkit.exe run --resume` with no interrupted run exits with code **6** (NothingToResume).
+- When done, clear the switch: `[Environment]::SetEnvironmentVariable('FORMATKIT_TEST_REBOOT_AFTER', $null, 'Machine')`.
 
 ## 5. Report contents
 

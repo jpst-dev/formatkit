@@ -15,12 +15,13 @@ public class RunEngineTests
         public FakeScheduledTasks Tasks { get; } = new();
         public FakeRebooter Rebooter { get; } = new();
         public FakeReportWriter Reports { get; } = new();
+        public RecordingProgress Progress { get; } = new();
         public RunEngine Engine { get; }
 
         public Harness()
         {
             Store = new RunStateStore(Fs, Paths);
-            Engine = new RunEngine(Store, Tasks, Rebooter, Reports, TimeSpan.FromSeconds(60));
+            Engine = new RunEngine(Store, Tasks, Rebooter, Reports, TimeSpan.FromSeconds(60), progress: Progress);
         }
 
         public static RunRequest Request(bool resume, params IStep[] plan) =>
@@ -29,6 +30,51 @@ public class RunEngineTests
     }
 
     private static FakeStep Work(string id) => new(id) { CheckResult = false };
+
+    private sealed class RecordingProgress : IRunProgress
+    {
+        public List<string> Events { get; } = [];
+        public void StepStarted(IStep step, int number, int total) => Events.Add($"start {step.Id} {number}/{total}");
+        public void StepFinished(IStep step, StepResult result) => Events.Add($"end {step.Id} {result.Outcome}");
+    }
+
+    [Fact]
+    public async Task Reports_progress_for_each_step_it_runs()
+    {
+        var h = new Harness();
+        var a = Work("a"); var b = new FakeStep("b") { CheckResult = true };
+
+        await h.Engine.RunAsync(Harness.Request(false, a, b), TestContext.Current.CancellationToken);
+
+        Assert.Equal(["start a 1/2", "end a Succeeded", "start b 2/2", "end b Skipped"], h.Progress.Events);
+    }
+
+    [Fact]
+    public async Task Resume_reports_progress_only_for_unfinished_steps_with_plan_numbers()
+    {
+        var h = new Harness();
+        h.Store.Save(new RunState("profile.json", "hash1", ["a", "b"],
+            new Dictionary<string, StepRecord> { ["a"] = new(StepOutcome.Succeeded, DateTimeOffset.UtcNow, [], null) },
+            DateTimeOffset.UtcNow));
+
+        await h.Engine.RunAsync(Harness.Request(true, Work("a"), Work("b")), TestContext.Current.CancellationToken);
+
+        Assert.Equal(["start b 2/2", "end b Succeeded"], h.Progress.Events);
+    }
+
+    [Fact]
+    public async Task Step_skipped_by_its_check_says_why()
+    {
+        var h = new Harness();
+        var a = new FakeStep("a") { CheckResult = true };
+
+        var summary = await h.Engine.RunAsync(Harness.Request(false, a), TestContext.Current.CancellationToken);
+
+        var step = Assert.Single(summary.Steps);
+        Assert.Equal(StepOutcome.Skipped, step.Outcome);
+        Assert.Single(step.Messages);
+        Assert.False(string.IsNullOrWhiteSpace(step.Messages[0]));
+    }
 
     [Fact]
     public async Task Runs_all_steps_and_completes()

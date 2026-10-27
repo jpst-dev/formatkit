@@ -54,6 +54,7 @@
   <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Execução interrompida por uma falha crítica.</value></data>
   <data name="Run_RebootPending" xml:space="preserve"><value>A execução continuará automaticamente no próximo logon. Você pode reiniciar agora ou depois.</value></data>
   <data name="Run_ReportDir" xml:space="preserve"><value>Relatório: {0}</value></data>
+  <data name="Run_StepStarted" xml:space="preserve"><value>[{0}/{1}] {2}...</value></data>
   <data name="Run_NextAction" xml:space="preserve"><value>Próximo passo: {0}</value></data>
   <data name="Outcome_Succeeded" xml:space="preserve"><value>Sucesso</value></data>
   <data name="Outcome_Skipped" xml:space="preserve"><value>Ignorado</value></data>
@@ -61,7 +62,7 @@
   <data name="Outcome_RebootRequired" xml:space="preserve"><value>Requer reinício</value></data>
   <data name="Backup_Header" xml:space="preserve"><value>Backup dos drivers de rede em {0}</value></data>
   <data name="Backup_Exported" xml:space="preserve"><value>Exportados</value></data>
-  <data name="Backup_Skipped" xml:space="preserve"><value>Ignorados (driver nativo do Windows)</value></data>
+  <data name="Backup_Skipped" xml:space="preserve"><value>Ignorados (driver nativo)</value></data>
   <data name="Backup_Failed" xml:space="preserve"><value>Falharam</value></data>
   <data name="Error_Unexpected" xml:space="preserve"><value>Erro inesperado: {0}</value></data>
   <data name="Elevated_Close" xml:space="preserve"><value>Pressione Enter para fechar esta janela.</value></data>

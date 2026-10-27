@@ -1,3 +1,4 @@
+using FormatKit.Core.Localization;
 using FormatKit.Core.Reporting;
 using FormatKit.Core.Steps;
 using FormatKit.Core.SystemAccess;
@@ -10,7 +11,8 @@ public sealed class RunEngine(
     IRebooter rebooter,
     IReportWriter reports,
     TimeSpan rebootCountdown,
-    Serilog.ILogger? log = null)
+    Serilog.ILogger? log = null,
+    IRunProgress? progress = null)
 {
     public async Task<RunSummary> RunAsync(RunRequest request, CancellationToken ct)
     {
@@ -42,12 +44,15 @@ public sealed class RunEngine(
         }
 
         var stoppedOnCritical = false;
-        foreach (var step in request.Plan)
+        for (var i = 0; i < request.Plan.Count; i++)
         {
+            var step = request.Plan[i];
             if (state.Results.ContainsKey(step.Id))
                 continue;
 
+            progress?.StepStarted(step, i + 1, request.Plan.Count);
             var result = await RunStepAsync(step, request.Context, ct).ConfigureAwait(false);
+            progress?.StepFinished(step, result);
             state.Results[step.Id] = new StepRecord(result.Outcome, DateTimeOffset.UtcNow, result.Messages, result.NextAction);
             store.Save(state);
 
@@ -101,7 +106,7 @@ public sealed class RunEngine(
         try
         {
             if (await step.CheckAsync(ctx, ct).ConfigureAwait(false))
-                return StepResult.Skip();
+                return StepResult.Skip(Strings.Get("Step_AlreadyInPlace"));
             return await step.ExecuteAsync(ctx, ct).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

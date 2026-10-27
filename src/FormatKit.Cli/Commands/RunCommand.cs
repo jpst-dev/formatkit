@@ -93,7 +93,7 @@ internal static class RunFlow
         CommandContext context, LoadedProfile profile, bool resume, bool dryRun, CancellationToken ct)
     {
         var o = context.Out;
-        var plan = PlanBuilder.Build(profile.Profile, context.Modules);
+        var plan = SimulatedRebootStep.Apply(PlanBuilder.Build(profile.Profile, context.Modules), context.Env.SimulateRebootAfterStep);
 
         if (dryRun)
         {
@@ -111,7 +111,7 @@ internal static class RunFlow
             return exit;
 
         var env = context.Env;
-        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log);
+        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log, new ConsoleRunProgress(o));
         var request = new RunRequest(profile.Path, profile.Hash, plan, new StepContext(env.Services, env.Log), resume);
 
         RunSummary summary;
@@ -136,8 +136,8 @@ internal static class RunFlow
     {
         try
         {
-            await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct);
-            context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
+            if (await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct))
+                context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

@@ -19,7 +19,8 @@ public sealed record CliEnvironment(
     Serilog.ILogger Log,
     TextWriter Out,
     TimeSpan RebootCountdown,
-    TimeSpan NetworkRetryDelay);
+    TimeSpan NetworkRetryDelay,
+    string? SimulateRebootAfterStep = null);
 
 /// <summary>The composition root: the only place that builds real adapters.</summary>
 public static class Services
@@ -50,6 +51,7 @@ public static class Services
             log,
             Console.Out,
             RebootCountdown: TimeSpan.FromSeconds(60),
-            NetworkRetryDelay: TimeSpan.FromSeconds(5));
+            NetworkRetryDelay: TimeSpan.FromSeconds(5),
+            SimulateRebootAfterStep: Environment.GetEnvironmentVariable(Commands.SimulatedRebootStep.EnvironmentVariable));
     }
 }
