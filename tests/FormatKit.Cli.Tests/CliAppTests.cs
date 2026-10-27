@@ -46,8 +46,42 @@ public sealed class CliAppTests : IDisposable
         var env = new CliEnvironment(
             services, _elevation, _tasks, _rebooter, _reports,
             new RunStateStore(_fs, _paths), Serilog.Core.Logger.None, _out,
-            TimeSpan.Zero, TimeSpan.Zero);
+            TimeSpan.Zero, TimeSpan.Zero, _simulateRebootAfter);
         return new CliApp(env, VendorCatalog.LoadEmbedded(), [_module]);
+    }
+
+    private string? _simulateRebootAfter;
+
+    [Fact]
+    public async Task Test_switch_turns_the_named_step_into_a_reboot()
+    {
+        var a = new FakeStep("a") { Title = "Step A", CheckResult = false };
+        var b = new FakeStep("b") { Title = "Step B", CheckResult = false };
+        _module.Steps.Add(a);
+        _module.Steps.Add(b);
+        _elevation.IsElevated = true;
+        _simulateRebootAfter = "a";
+
+        var exit = await Run("run", "--profile", WriteProfile());
+
+        Assert.Equal(ExitCodes.RebootPending, exit);
+        Assert.Equal(1, a.ExecuteCalls);
+        Assert.Equal(0, b.ExecuteCalls);
+        Assert.Equal(1, _tasks.RegisterCalls);
+        Assert.Single(_rebooter.Calls);
+    }
+
+    [Fact]
+    public async Task Test_switch_for_an_unknown_step_changes_nothing()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        _simulateRebootAfter = "nope";
+
+        var exit = await Run("run", "--profile", WriteProfile());
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Empty(_rebooter.Calls);
     }
 
     private Task<int> Run(params string[] args) => App().RunAsync(args, CancellationToken.None);

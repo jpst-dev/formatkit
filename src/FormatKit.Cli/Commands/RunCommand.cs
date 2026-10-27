@@ -93,7 +93,7 @@ internal static class RunFlow
         CommandContext context, LoadedProfile profile, bool resume, bool dryRun, CancellationToken ct)
     {
         var o = context.Out;
-        var plan = PlanBuilder.Build(profile.Profile, context.Modules);
+        var plan = SimulatedRebootStep.Apply(PlanBuilder.Build(profile.Profile, context.Modules), context.Env.SimulateRebootAfterStep);
 
         if (dryRun)
         {
