@@ -39,6 +39,6 @@ public class OptionalFeatureHandlerTests
         Assert.True(await handler.IsAppliedAsync(new OptionalFeatureAction("Missing", OptionalFeatureState.Disabled), ctx, ct));
         var enable = new OptionalFeatureAction("Missing", OptionalFeatureState.Enabled);
         Assert.False(await handler.IsAppliedAsync(enable, ctx, ct));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.CaptureAsync(enable, ctx, ct));
+        await Assert.ThrowsAsync<TargetNotPresentException>(() => handler.CaptureAsync(enable, ctx, ct));
     }
 }

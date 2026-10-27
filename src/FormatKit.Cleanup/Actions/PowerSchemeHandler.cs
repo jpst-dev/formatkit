@@ -89,6 +89,28 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes
         ctx.Log.Information("Power scheme restored to {Scheme}", previous);
     }
 
+    /// <summary>The schemes created by unreverted journal entries: the source of the <c>createdSchemes</c> provider.</summary>
+    internal static IReadOnlySet<Guid> CreatedSchemes(CleanupJournal? journal)
+    {
+        var created = new HashSet<Guid>();
+        if (journal is null)
+            return created;
+
+        foreach (var action in journal.Entries.Where(e => e.RevertedAt is null).SelectMany(e => e.Actions))
+        {
+            if (action.Type == Type
+                && action.Previous.ValueKind == JsonValueKind.Object
+                && action.Previous.TryGetProperty("created", out var value)
+                && value.ValueKind == JsonValueKind.String
+                && Guid.TryParse(value.GetString(), out var scheme))
+            {
+                created.Add(scheme);
+            }
+        }
+
+        return created;
+    }
+
     private static JsonElement Previous(Guid previous, Guid? created) =>
         JsonSerializer.SerializeToElement(new { previous = previous.ToString(), created = created?.ToString() });
 

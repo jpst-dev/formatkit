@@ -6,4 +6,21 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Undo_WingetMissing" xml:space="preserve"><value>O winget não está disponível. Instale o App Installer pela Microsoft Store e execute o desfazer novamente (ID do app na Store: {0}).</value></data>
   <data name="Undo_StoreReinstallFailed" xml:space="preserve"><value>Não foi possível reinstalar '{0}' (código de saída do winget {1}). Instale-o pela Store e execute o desfazer novamente: {2}</value></data>
+  <data name="Step_Title_Apps" xml:space="preserve"><value>Limpeza: remover apps</value></data>
+  <data name="Step_Title_Privacy" xml:space="preserve"><value>Limpeza: configurações de privacidade</value></data>
+  <data name="Step_Title_Performance" xml:space="preserve"><value>Limpeza: configurações de desempenho</value></data>
+  <data name="Status_Applied" xml:space="preserve"><value>aplicado</value></data>
+  <data name="Status_AlreadyInPlace" xml:space="preserve"><value>já aplicado</value></data>
+  <data name="Status_Failed" xml:space="preserve"><value>falhou: {0}</value></data>
+  <data name="Skip_NotPresent" xml:space="preserve"><value>ignorado: não existe neste sistema</value></data>
+  <data name="Skip_Battery" xml:space="preserve"><value>ignorado: esta máquina tem bateria (adicione o item a &quot;include&quot; para aplicá-lo mesmo assim)</value></data>
+  <data name="Skip_OtherUser" xml:space="preserve"><value>ignorado: o FormatKit está elevado com um usuário diferente do que está conectado, então as configurações por usuário iriam para a conta errada</value></data>
+  <data name="NextAction_SeeLog" xml:space="preserve"><value>Alguns itens de limpeza falharam e foram revertidos. Veja o motivo no log, corrija-o e execute novamente.</value></data>
+  <data name="NextAction_JournalCorrupt" xml:space="preserve"><value>O diário de limpeza {0} está corrompido. Inspecione ou mova o arquivo do diário e execute novamente.</value></data>
+  <data name="Validation_MissingField" xml:space="preserve"><value>O campo obrigatório &apos;{0}&apos; está ausente.</value></data>
+  <data name="Validation_InvalidValue" xml:space="preserve"><value>Valor inválido: esperado {0}.</value></data>
+  <data name="Validation_UnknownProperty" xml:space="preserve"><value>Propriedade desconhecida &apos;{0}&apos; no módulo cleanup.</value></data>
+  <data name="Validation_UnknownItem" xml:space="preserve"><value>item de limpeza desconhecido &quot;{0}&quot;</value></data>
+  <data name="Validation_IncludeExcludeOverlap" xml:space="preserve"><value>O item de limpeza &quot;{0}&quot; está em include e em exclude.</value></data>
+  <data name="Validation_ConfirmAggressive" xml:space="preserve"><value>Itens de limpeza agressivos estão selecionados ({0}); defina &quot;confirmAggressive&quot; como true para aplicá-los.</value></data>
 </root>

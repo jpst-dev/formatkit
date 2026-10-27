@@ -22,7 +22,7 @@ internal sealed class ServiceHandler : IActionHandler
     {
         var a = (ServiceAction)action;
         var current = ctx.Services.ServiceControl.GetStartType(a.Name)
-            ?? throw new InvalidOperationException($"Service '{a.Name}' does not exist.");
+            ?? throw new TargetNotPresentException(a.Name);
         ctx.Log.Debug("Service {Service} previous start type: {StartType}", a.Name, current);
         var previous = JsonSerializer.SerializeToElement(new { startType = current.ToString().ToLowerInvariant() });
         return Task.FromResult(new JournalAction(Type, a.Name, previous));

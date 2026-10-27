@@ -1,5 +1,7 @@
+using System.Text.Json;
 using FormatKit.Cleanup.Actions;
 using FormatKit.Cleanup.Catalog;
+using FormatKit.Cleanup.Journal;
 using FormatKit.Core.SystemAccess;
 using FormatKit.Core.Tests.Fakes;
 
@@ -11,6 +13,23 @@ public class PowerSchemeHandlerTests
 
     private static PowerSchemeHandler NewHandler(params Guid[] created) =>
         new(() => new HashSet<Guid>(created));
+
+    [Fact]
+    public void Created_schemes_come_from_unreverted_power_entries()
+    {
+        static JournalAction Power(Guid? created) => new(PowerSchemeHandler.Type, "power",
+            JsonSerializer.SerializeToElement(new { previous = Guid.NewGuid().ToString(), created = created?.ToString() }));
+        var kept = Guid.NewGuid();
+        var reverted = Guid.NewGuid();
+        var journal = new CleanupJournal(1,
+        [
+            new JournalEntry("performance.a", DateTimeOffset.Now, [Power(kept), Power(null)], null),
+            new JournalEntry("performance.b", DateTimeOffset.Now, [Power(reverted)], DateTimeOffset.Now),
+        ]);
+
+        Assert.Equal([kept], PowerSchemeHandler.CreatedSchemes(journal));
+        Assert.Empty(PowerSchemeHandler.CreatedSchemes(null));
+    }
 
     [Fact]
     public async Task Apply_activates_existing_builtin()

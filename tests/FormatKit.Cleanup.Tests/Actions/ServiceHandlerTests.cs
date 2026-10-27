@@ -28,4 +28,16 @@ public class ServiceHandlerTests
         await handler.UndoAsync(recorded, ctx, ct);
         Assert.Equal(ServiceStartType.Manual, services.Services["DiagTrack"]);
     }
+
+    [Fact]
+    public async Task Absent_service_is_applied_and_capture_reports_not_present()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var ctx = TestServices.Context(TestServices.Create());
+        var handler = new ServiceHandler();
+        var action = new ServiceAction("Missing", ServiceStartType.Disabled);
+
+        Assert.True(await handler.IsAppliedAsync(action, ctx, ct));
+        await Assert.ThrowsAsync<TargetNotPresentException>(() => handler.CaptureAsync(action, ctx, ct));
+    }
 }

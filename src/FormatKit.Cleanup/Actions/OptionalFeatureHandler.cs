@@ -23,7 +23,7 @@ internal sealed class OptionalFeatureHandler : IActionHandler
         var state = await ctx.Services.Features.GetStateAsync(a.Name, ct).ConfigureAwait(false);
         if (state == OptionalFeatureState.Absent)
         {
-            throw new InvalidOperationException($"Optional feature '{a.Name}' is not present on this system.");
+            throw new TargetNotPresentException(a.Name);
         }
 
         ctx.Log.Debug("Optional feature {Feature} previous state: {State}", a.Name, state);

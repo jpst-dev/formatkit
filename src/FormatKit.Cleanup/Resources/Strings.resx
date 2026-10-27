@@ -6,4 +6,21 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Undo_WingetMissing" xml:space="preserve"><value>winget is not available. Install App Installer from the Microsoft Store, then run undo again (Store app ID {0}).</value></data>
   <data name="Undo_StoreReinstallFailed" xml:space="preserve"><value>Could not reinstall '{0}' (winget exit code {1}). Install it from the Store, then run undo again: {2}</value></data>
+  <data name="Step_Title_Apps" xml:space="preserve"><value>Cleanup: remove apps</value></data>
+  <data name="Step_Title_Privacy" xml:space="preserve"><value>Cleanup: privacy settings</value></data>
+  <data name="Step_Title_Performance" xml:space="preserve"><value>Cleanup: performance settings</value></data>
+  <data name="Status_Applied" xml:space="preserve"><value>applied</value></data>
+  <data name="Status_AlreadyInPlace" xml:space="preserve"><value>already in place</value></data>
+  <data name="Status_Failed" xml:space="preserve"><value>failed: {0}</value></data>
+  <data name="Skip_NotPresent" xml:space="preserve"><value>skipped: not present on this system</value></data>
+  <data name="Skip_Battery" xml:space="preserve"><value>skipped: this machine has a battery (add the item to &quot;include&quot; to apply it anyway)</value></data>
+  <data name="Skip_OtherUser" xml:space="preserve"><value>skipped: FormatKit is elevated as a different user than the one signed in, so per-user settings would go to the wrong account</value></data>
+  <data name="NextAction_SeeLog" xml:space="preserve"><value>Some cleanup items failed and were rolled back. See the log for the reason, fix it and run again.</value></data>
+  <data name="NextAction_JournalCorrupt" xml:space="preserve"><value>The cleanup journal {0} is corrupt. Inspect or move the journal file, then run again.</value></data>
+  <data name="Validation_MissingField" xml:space="preserve"><value>Required field &apos;{0}&apos; is missing.</value></data>
+  <data name="Validation_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
+  <data name="Validation_UnknownProperty" xml:space="preserve"><value>Unknown property &apos;{0}&apos; in the cleanup module.</value></data>
+  <data name="Validation_UnknownItem" xml:space="preserve"><value>unknown cleanup item &quot;{0}&quot;</value></data>
+  <data name="Validation_IncludeExcludeOverlap" xml:space="preserve"><value>Cleanup item &quot;{0}&quot; is in both include and exclude.</value></data>
+  <data name="Validation_ConfirmAggressive" xml:space="preserve"><value>Aggressive cleanup items are selected ({0}); set &quot;confirmAggressive&quot; to true to apply them.</value></data>
 </root>
