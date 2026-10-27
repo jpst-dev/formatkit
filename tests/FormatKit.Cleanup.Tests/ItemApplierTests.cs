@@ -72,7 +72,7 @@ public class ItemApplierTests
     [Fact]
     public async Task Failure_rolls_back_earlier_actions_and_marks_entry_reverted()
     {
-        var registry = new FailingRegistry("B");
+        var registry = new FailingRegistry((name, attempt) => name == "B" && attempt == 1);
         registry.Set(Key, "A", RegistryKind.Dword, "1");
         registry.Set(Key, "B", RegistryKind.Dword, "1");
         var item = Item("privacy.a", actions: [Dword(Key, "A", 0), Dword(Key, "B", 0)]);
@@ -84,6 +84,48 @@ public class ItemApplierTests
         Assert.Equal("1", registry.Read(Key, "A")!.Data);
         var entry = Assert.Single(_journal.Load().Journal!.Entries);
         Assert.NotNull(entry.RevertedAt);
+    }
+
+    [Fact]
+    public async Task Failing_action_is_rolled_back_after_verify_mismatch()
+    {
+        var registry = new MismatchingRegistry();
+        registry.Set(Key, "A", RegistryKind.Dword, "1");
+
+        var outcome = await NewApplier().ApplyAsync(Item("privacy.a", actions: [Dword(Key, "A", 0)]), Context(registry), Ct);
+
+        Assert.Equal(ItemStatus.Failed, outcome.Status);
+        Assert.Equal("1", registry.Read(Key, "A")!.Data);
+        Assert.NotNull(Assert.Single(_journal.Load().Journal!.Entries).RevertedAt);
+    }
+
+    [Fact]
+    public async Task Journal_save_failure_after_change_rolls_back_and_fails()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(Key, "A", RegistryKind.Dword, "1");
+        var files = new FailingFileSystem(_files, failingWrite: 2);
+        var applier = new ItemApplier(new ActionHandlers(() => new HashSet<Guid>()), new JournalStore(files, new AppPaths(@"C:\FormatKitTest")));
+
+        var outcome = await applier.ApplyAsync(Item("privacy.a", actions: [Dword(Key, "A", 0)]), Context(registry), Ct);
+
+        Assert.Equal(ItemStatus.Failed, outcome.Status);
+        Assert.Contains("disk full", outcome.Message);
+        Assert.Equal("1", registry.Read(Key, "A")!.Data);
+    }
+
+    [Fact]
+    public async Task Incomplete_rollback_leaves_entry_unreverted()
+    {
+        var registry = new FailingRegistry((name, attempt) => (name == "B" && attempt == 1) || (name == "A" && attempt == 2));
+        registry.Set(Key, "A", RegistryKind.Dword, "1");
+        registry.Set(Key, "B", RegistryKind.Dword, "1");
+        var item = Item("privacy.a", actions: [Dword(Key, "A", 0), Dword(Key, "B", 0)]);
+
+        var outcome = await NewApplier().ApplyAsync(item, Context(registry), Ct);
+
+        Assert.Equal(ItemStatus.Failed, outcome.Status);
+        Assert.Null(Assert.Single(_journal.Load().Journal!.Entries).RevertedAt);
     }
 
     [Fact]
@@ -123,13 +165,46 @@ public class ItemApplierTests
         }
     }
 
-    private sealed class FailingRegistry(string failingName) : FakeRegistry
+    /// <summary>Throws on the writes <paramref name="fails"/> selects by value name and 1-based write count for that name.</summary>
+    private sealed class FailingRegistry(Func<string, int, bool> fails) : FakeRegistry
     {
+        private readonly Dictionary<string, int> _writes = [];
+
         public override void Write(string path, string name, RegistryValue value)
         {
-            if (name == failingName)
+            _writes[name] = _writes.GetValueOrDefault(name) + 1;
+            if (fails(name, _writes[name]))
                 throw new InvalidOperationException("write refused");
             base.Write(path, name, value);
+        }
+    }
+
+    /// <summary>The first write of each value stores different data, so the handler's verify fails after the change.</summary>
+    private sealed class MismatchingRegistry : FakeRegistry
+    {
+        private readonly HashSet<string> _corrupted = [];
+
+        public override void Write(string path, string name, RegistryValue value) =>
+            base.Write(path, name, _corrupted.Add(name) ? value with { Data = "5" } : value);
+    }
+
+    /// <summary>Delegates to an in-memory file system and throws on the selected (1-based) write.</summary>
+    private sealed class FailingFileSystem(InMemoryFileSystem inner, int failingWrite) : IFileSystem
+    {
+        private int _writes;
+
+        public bool FileExists(string path) => inner.FileExists(path);
+        public bool DirectoryExists(string path) => inner.DirectoryExists(path);
+        public string ReadAllText(string path) => inner.ReadAllText(path);
+        public void Delete(string path) => inner.Delete(path);
+        public void CreateDirectory(string path) => inner.CreateDirectory(path);
+        public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => inner.EnumerateFiles(dir, pattern, recursive);
+
+        public void WriteAllTextAtomic(string path, string contents)
+        {
+            if (++_writes == failingWrite)
+                throw new IOException("disk full");
+            inner.WriteAllTextAtomic(path, contents);
         }
     }
 }

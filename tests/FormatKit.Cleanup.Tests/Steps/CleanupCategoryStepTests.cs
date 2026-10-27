@@ -141,14 +141,47 @@ public class CleanupCategoryStepTests
     [Fact]
     public async Task Check_true_when_everything_applied()
     {
-        _hardware.HasBattery = true;
-        var applied = Item("performance.applied");
-        var laptop = Item("performance.laptop", laptopSensitive: true);
-        var step = Step([applied, laptop]);
+        var step = Step([Item("performance.applied")]);
 
         Assert.False(await step.CheckAsync(_ctx, Ct));
 
         _registry.Set(@"HKLM\Software\Test", "performance.applied", RegistryKind.Dword, "0");
         Assert.True(await step.CheckAsync(_ctx, Ct));
+    }
+
+    [Fact]
+    public async Task All_items_ineligible_still_reports_skip_reasons()
+    {
+        _hardware.HasBattery = true;
+        _session.IsConsoleUser = false;
+        var laptop = Item("privacy.laptop", laptopSensitive: true);
+        var user = Item("privacy.user", scope: ItemScope.User, actions: [Dword(@"HKCU\Software\Test", "U", 0)]);
+        _registry.Set(@"HKLM\Software\Test", "privacy.laptop", RegistryKind.Dword, "0");
+        _registry.Set(@"HKCU\Software\Test", "U", RegistryKind.Dword, "0");
+        var step = Step([laptop, user]);
+
+        Assert.False(await step.CheckAsync(_ctx, Ct));
+        var result = await step.ExecuteAsync(_ctx, Ct);
+
+        Assert.Equal(StepOutcome.Skipped, result.Outcome);
+        Assert.Equal(
+            [Message(laptop, Strings.Get("Skip_Battery")), Message(user, Strings.Get("Skip_OtherUser"))],
+            result.Messages);
+    }
+
+    [Fact]
+    public async Task Throwing_item_fails_alone_and_does_not_break_check()
+    {
+        var bad = Item("apps.bad", actions: [new NamedAction("unknownHandler")]);
+        var good = Item("apps.good");
+        var step = Step([bad, good]);
+
+        Assert.False(await step.CheckAsync(_ctx, Ct));
+        var result = await step.ExecuteAsync(_ctx, Ct);
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.StartsWith($"{bad.LocalizedText().Title}: ", result.Messages[0]);
+        Assert.Contains("unknownHandler", result.Messages[0]);
+        Assert.Equal(Message(good, Strings.Get("Status_Applied")), result.Messages[1]);
     }
 }

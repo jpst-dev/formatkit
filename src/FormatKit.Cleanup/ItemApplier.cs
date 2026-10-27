@@ -36,6 +36,7 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
         var current = loaded.Journal ?? new CleanupJournal(JournalSchemaVersion, []);
 
         var applied = new List<JournalAction>();
+        JournalAction? inFlight = null;
         var entryIndex = -1;
         try
         {
@@ -66,10 +67,13 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
                 actions.Add(captured);
                 journal.Save(current);
 
+                // A handler may change state and then throw on verify, so the capture is undone too if Apply fails.
+                inFlight = captured;
                 var record = await handler.ApplyAsync(action, captured, ctx, ct).ConfigureAwait(false);
+                inFlight = null;
+                applied.Add(record);
                 actions[^1] = record;
                 journal.Save(current);
-                applied.Add(record);
             }
 
             ctx.Log.Information("Cleanup item {Item} applied", item.Id);
@@ -77,11 +81,22 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
         }
         catch (Exception ex)
         {
-            await RollBackAsync(item, applied, ctx).ConfigureAwait(false);
-            if (entryIndex >= 0)
+            if (inFlight is not null)
+                applied.Add(inFlight);
+            var rolledBack = await RollBackAsync(item, applied, ctx).ConfigureAwait(false);
+
+            // An incomplete rollback leaves the entry unreverted so `cleanup undo` can retry it.
+            if (entryIndex >= 0 && rolledBack)
             {
                 current.Entries[entryIndex] = current.Entries[entryIndex] with { RevertedAt = DateTimeOffset.Now };
-                journal.Save(current);
+                try
+                {
+                    journal.Save(current);
+                }
+                catch (Exception saveError)
+                {
+                    ctx.Log.Warning(saveError, "Could not mark cleanup item {Item} as reverted in the journal", item.Id);
+                }
             }
 
             if (ex is OperationCanceledException && ct.IsCancellationRequested)
@@ -98,9 +113,10 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
         }
     }
 
-    /// <summary>Undoes this attempt's applied actions, newest first. Best effort: an undo failure is logged, not thrown.</summary>
-    private async Task RollBackAsync(CleanupItem item, List<JournalAction> applied, StepContext ctx)
+    /// <summary>Undoes this attempt's actions, newest first (the failing one included). Best effort: an undo failure is logged, not thrown. Returns whether every undo succeeded.</summary>
+    private async Task<bool> RollBackAsync(CleanupItem item, List<JournalAction> applied, StepContext ctx)
     {
+        var complete = true;
         for (var i = applied.Count - 1; i >= 0; i--)
         {
             try
@@ -109,8 +125,11 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
             }
             catch (Exception undoError)
             {
+                complete = false;
                 ctx.Log.Warning(undoError, "Could not roll back {Type} {Target} of cleanup item {Item}", applied[i].Type, applied[i].Target, item.Id);
             }
         }
+
+        return complete;
     }
 }

@@ -21,13 +21,26 @@ internal sealed class CleanupCategoryStep(
 
     public bool IsCritical => false;
 
+    /// <summary>False when any item is ineligible here, so <see cref="ExecuteAsync"/> runs and reports the skip reason (spec 8.3).</summary>
     public async Task<bool> CheckAsync(StepContext ctx, CancellationToken ct)
     {
         var hasBattery = await HasBatteryAsync(ctx, ct).ConfigureAwait(false);
         foreach (var item in items)
         {
-            if (SkipReason(item, hasBattery, ctx) is null && !await applier.IsAppliedAsync(item, ctx, ct).ConfigureAwait(false))
+            if (SkipReason(item, hasBattery, ctx) is not null)
                 return false;
+
+            try
+            {
+                if (!await applier.IsAppliedAsync(item, ctx, ct).ConfigureAwait(false))
+                    return false;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // ExecuteAsync reports this item as failed; the other items still run.
+                ctx.Log.Warning(ex, "Could not check cleanup item {Item}", item.Id);
+                return false;
+            }
         }
 
         return true;
@@ -45,7 +58,7 @@ internal sealed class CleanupCategoryStep(
             var skip = SkipReason(item, hasBattery, ctx);
             if (skip is not null)
             {
-                ctx.Log.Information("Cleanup item {Item} skipped ({Reason})", item.Id, skip);
+                ctx.Log.Warning("Cleanup item {Item} skipped ({Reason})", item.Id, skip);
                 messages.Add($"{title}: {Strings.Get(skip)}");
                 continue;
             }
