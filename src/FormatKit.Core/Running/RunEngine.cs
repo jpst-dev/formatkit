@@ -12,8 +12,12 @@ public sealed class RunEngine(
     IReportWriter reports,
     TimeSpan rebootCountdown,
     Serilog.ILogger? log = null,
-    IRunProgress? progress = null)
+    IRunProgress? progress = null,
+    Func<DateTimeOffset>? lastBootTime = null)
 {
+    private readonly Func<DateTimeOffset> _lastBootTime =
+        lastBootTime ?? (() => DateTimeOffset.UtcNow - TimeSpan.FromMilliseconds(Environment.TickCount64));
+
     public async Task<RunSummary> RunAsync(RunRequest request, CancellationToken ct)
     {
         RunState state;
@@ -31,6 +35,8 @@ public sealed class RunEngine(
             state = load.State!;
             if (!string.Equals(state.ProfileHash, request.ProfileHash, StringComparison.Ordinal))
                 return Early(RunStatus.ProfileChanged, null);
+
+            MarkRebootedSteps(state);
         }
         else
         {
@@ -112,6 +118,21 @@ public sealed class RunEngine(
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return StepResult.Fail(null, ex.Message);
+        }
+    }
+
+    /// <summary>A step that asked for a reboot is done once the machine has actually restarted since it finished.</summary>
+    private void MarkRebootedSteps(RunState state)
+    {
+        var lastBoot = _lastBootTime();
+        foreach (var (id, record) in state.Results.ToList())
+        {
+            if (record.Outcome == StepOutcome.RebootRequired && record.FinishedAt < lastBoot)
+                state.Results[id] = record with
+                {
+                    Outcome = StepOutcome.Succeeded,
+                    Messages = [.. record.Messages, Strings.Get("Step_DoneAfterReboot")],
+                };
         }
     }
 

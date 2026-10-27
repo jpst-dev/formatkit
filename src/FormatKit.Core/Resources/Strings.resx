@@ -16,6 +16,7 @@
   <data name="Report_Result" xml:space="preserve"><value>Result</value></data>
   <data name="Report_Details" xml:space="preserve"><value>Details</value></data>
   <data name="Report_NextSteps" xml:space="preserve"><value>What to do next</value></data>
+  <data name="Step_DoneAfterReboot" xml:space="preserve"><value>Reboot done; step complete.</value></data>
   <data name="Step_AlreadyInPlace" xml:space="preserve"><value>Nothing to do: already in place.</value></data>
   <data name="Report_Status_Completed" xml:space="preserve"><value>Completed</value></data>
   <data name="Report_Status_CompletedWithFailures" xml:space="preserve"><value>Completed with failures</value></data>

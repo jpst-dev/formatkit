@@ -17,11 +17,12 @@ public class RunEngineTests
         public FakeReportWriter Reports { get; } = new();
         public RecordingProgress Progress { get; } = new();
         public RunEngine Engine { get; }
+        public DateTimeOffset LastBoot { get; set; } = DateTimeOffset.MinValue;
 
         public Harness()
         {
             Store = new RunStateStore(Fs, Paths);
-            Engine = new RunEngine(Store, Tasks, Rebooter, Reports, TimeSpan.FromSeconds(60), progress: Progress);
+            Engine = new RunEngine(Store, Tasks, Rebooter, Reports, TimeSpan.FromSeconds(60), progress: Progress, lastBootTime: () => LastBoot);
         }
 
         public static RunRequest Request(bool resume, params IStep[] plan) =>
@@ -183,6 +184,40 @@ public class RunEngineTests
         var loaded = h.Store.Load();
         Assert.Equal(StateLoadStatus.Loaded, loaded.Status);
         Assert.Equal(StepOutcome.RebootRequired, loaded.State!.Results["a"].Outcome);
+    }
+
+    [Fact]
+    public async Task Resume_after_a_reboot_marks_the_reboot_step_as_succeeded()
+    {
+        var h = new Harness();
+        var finished = DateTimeOffset.UtcNow.AddMinutes(-5);
+        h.Store.Save(new RunState("profile.json", "hash1", ["a", "b"],
+            new Dictionary<string, StepRecord> { ["a"] = new(StepOutcome.RebootRequired, finished, ["restart"], null) },
+            finished));
+        h.LastBoot = finished.AddMinutes(1);
+
+        var summary = await h.Engine.RunAsync(Harness.Request(true, Work("a"), Work("b")), TestContext.Current.CancellationToken);
+
+        Assert.Equal(StepOutcome.Succeeded, summary.Steps[0].Outcome);
+        Assert.Equal(2, summary.Steps[0].Messages.Count);
+        Assert.Equal("restart", summary.Steps[0].Messages[0]);
+        Assert.Equal(RunStatus.Completed, summary.Status);
+    }
+
+    [Fact]
+    public async Task Resume_without_a_reboot_keeps_the_step_as_reboot_required()
+    {
+        var h = new Harness();
+        var finished = DateTimeOffset.UtcNow.AddMinutes(-5);
+        h.Store.Save(new RunState("profile.json", "hash1", ["a", "b"],
+            new Dictionary<string, StepRecord> { ["a"] = new(StepOutcome.RebootRequired, finished, ["restart"], null) },
+            finished));
+        h.LastBoot = finished.AddMinutes(-60);
+
+        var summary = await h.Engine.RunAsync(Harness.Request(true, Work("a"), Work("b")), TestContext.Current.CancellationToken);
+
+        Assert.Equal(StepOutcome.RebootRequired, summary.Steps[0].Outcome);
+        Assert.Equal(["restart"], summary.Steps[0].Messages);
     }
 
     [Fact]
