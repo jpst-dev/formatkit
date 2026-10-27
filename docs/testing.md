@@ -49,7 +49,7 @@ Setup: restore checkpoint `clean`, copy `formatkit.exe`, the profile and the bac
 
 **3b. Backup configured**
 
-1. Keep the adapter disabled. Edit the VM copy of the profile so `modules.drivers` contains `"networkDriverBackup": "C:\fk\netdrivers"` (JSON needs doubled backslashes; the path must match the copied folder).
+1. Keep the adapter disabled. Edit the VM copy of the profile so `modules.drivers` contains `"networkDriverBackup": "C:\\fk\\netdrivers"` (JSON needs doubled backslashes; the path must match the copied folder).
 2. Run `.\formatkit.exe run --profile example.json --verbose` and accept the UAC prompt.
 
 **Expected:** the log shows `pnputil /add-driver ... /subdirs /install` running against that folder; the step then fails with the "installed from ... but there is still no internet connection" message; the run exits with code **3**.
