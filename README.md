@@ -23,7 +23,7 @@ FormatKit installs drivers and software, runs vendor tools, needs administrator 
 
 ## Installation
 
-Download `formatkit.exe` from the [Releases](../../releases) page. It is self-contained; no .NET install is needed. Requires Windows 10/11 x64.
+Download `formatkit.exe` from the [Releases](../../releases) page. It is self-contained; no .NET install is needed. Requires Windows 11 x64.
 
 The binary is **not code-signed**, so Windows SmartScreen may show "Windows protected your PC". Click **More info**, then **Run anyway** if you trust the source. You can also build it yourself (see below).
 
@@ -45,11 +45,11 @@ Output language follows the Windows UI language (English and Brazilian Portugues
 
 - **Windows Update**: for all vendors. AMD GPUs get their drivers from Windows Update only; there is no AMD package.
 - **OEM tool**: Dell, HP and Lenovo vendor tooling.
-- **GPU**: Nvidia is installed through the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`).
+- **GPU**: Nvidia is installed through the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`); Intel through Intel Driver & Support Assistant (winget).
 
 ### Elevation, reboots and resume
 
-- Steps that need administrator rights trigger a UAC prompt. The elevated run opens a **second window** that waits for **Enter** at the end, so you can read the result.
+- Steps that need administrator rights trigger a UAC prompt. The elevated run opens a **second window** that waits for **Enter** at the end so you can read the result (except when the run ends with exit code 4, reboot pending, where the window closes by itself).
 - If a step needs a reboot, FormatKit shows a countdown and creates a scheduled task that resumes the run at the next logon. Pressing Esc **cancels the countdown**; the run is then left to resume at your next logon.
 - If the network is down, the run falls back to a backed-up network driver; a critical failure stops the run.
 
@@ -63,7 +63,7 @@ Output language follows the Windows UI language (English and Brazilian Portugues
 | 3 | StoppedOnCriticalFailure | A critical step failed and the run stopped. |
 | 4 | RebootPending | A reboot is required to continue. |
 | 5 | ElevationDeclined | The UAC prompt was declined. |
-| 6 | NothingToResume | `run --resume` found no interrupted run. |
+| 6 | NothingToResume | Nothing to resume: no interrupted run, corrupt saved state, or the profile changed or became invalid since the run started. |
 | 130 | Cancelled | Cancelled with Ctrl+C. |
 
 ## Example profile
@@ -78,6 +78,12 @@ Output language follows the Windows UI language (English and Brazilian Portugues
     "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] }
   }
 }
+```
+
+Optional `modules.drivers.networkDriverBackup`: path to a folder created by `drivers backup-network`. If the machine is offline, the network check step installs the drivers from that folder with `pnputil`. Without it, an offline run stops with exit code 3. In JSON, backslashes must be doubled:
+
+```json
+"drivers": { "enabled": true, "networkDriverBackup": "D:\\netdrivers" }
 ```
 
 ```powershell

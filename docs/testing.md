@@ -36,11 +36,15 @@ On the physical host (or any machine with working network drivers):
 
 ## 3. Run with the network disabled (fallback and critical stop)
 
-1. Restore checkpoint `clean`. Copy `formatkit.exe`, the profile and the backed-up `netdrivers` folder into the VM.
-2. Disable the VM network adapter (Hyper-V settings, or `Disable-NetAdapter` in the VM).
-3. Run `.\formatkit.exe run --profile example.json` and accept the UAC prompt.
+1. Restore checkpoint `clean`. Copy `formatkit.exe`, the profile and the backed-up `netdrivers` folder into the VM (for example to `C:\fk\netdrivers`).
+2. Edit the VM copy of the profile so `modules.drivers` contains `"networkDriverBackup": "C:\\fk\\netdrivers"` (JSON needs doubled backslashes). The path must match the folder used by the backup step.
+3. Disable the VM network adapter (Hyper-V settings, or `Disable-NetAdapter` in the VM).
+4. Run `.\formatkit.exe run --profile example.json` and accept the UAC prompt.
+5. Repeat from step 1 with the `networkDriverBackup` key removed.
 
-**Expected:** an elevated second window opens and, at the end, waits for **Enter**. The network check step falls back to the backed-up network driver. If the network cannot be restored, steps that need it are not attempted and the run stops with exit code **3** (StoppedOnCriticalFailure); the report states why. Re-enable the adapter and run again to confirm the run proceeds.
+**Expected, backup configured:** an elevated second window opens and waits for **Enter** at the end. The network check step installs the backed-up drivers with `pnputil` (fallback) and connectivity returns, so the run continues.
+
+**Expected, backup not configured:** the network check step fails with an actionable message (configure `networkDriverBackup`), steps that need the network are not attempted, and the run stops with exit code **3** (StoppedOnCriticalFailure). Re-enable the adapter and run again to confirm the run proceeds.
 
 Also decline the UAC prompt on one run. **Expected:** exit code **5** (ElevationDeclined).
 
@@ -55,14 +59,14 @@ Also decline the UAC prompt on one run. **Expected:** exit code **5** (Elevation
 
 **Expected:**
 - The countdown is displayed; Esc cancels it and the VM does not reboot; the resume scheduled task exists (trigger: at logon) and the run is left to resume at the next logon (exit code **4**, RebootPending).
-- When the countdown completes the VM reboots; after logon the task starts `formatkit run --resume` (elevated window) and the run continues from the next step instead of restarting.
+- When the countdown completes the VM reboots; after logon the task starts `formatkit run --resume` (elevated window; it closes by itself when the run ends with code 4, otherwise it waits for Enter) and the run continues from the next step instead of restarting.
 - `.\formatkit.exe run --resume` with no interrupted run exits with code **6** (NothingToResume).
 
 ## 5. Report contents
 
-Open the run report/log of the last run (its path is printed at the end of the run).
+Reports (`report.md` and `report.json`) are written only when a run finishes (completed or failed). A run that exits with code 4 (RebootPending) writes no report; the report appears after the post-reboot `--resume` run completes. Open the report of the last finished run (its folder is printed at the end of the run).
 
-**Expected:** it lists each step with its status (succeeded, failed, skipped), timestamps, the reason for any failure, whether a reboot was required, and the leftover devices without drivers. No credentials or personal data.
+**Expected:** it contains the overall status, each step's title and outcome, the step messages, and a "next steps" list for steps that need manual action. No credentials or personal data.
 
 ## 6. Task removed at the end
 
