@@ -32,19 +32,19 @@ On the physical host (or any machine with working network drivers):
 .\formatkit.exe drivers backup-network --output C:\FormatKitShare\netdrivers
 ```
 
-**Expected:** exit code 0; the folder contains the exported network driver packages (`.inf`, `.sys`, `.cat`). Running it again does not fail.
+**Expected (confirm):** exit code 0; the output folder contains one subfolder per physical network adapter that uses an OEM INF (adapters on inbox drivers are skipped), each with the exported `.inf`, `.sys` and `.cat` files. Confirm that running the command again also succeeds.
 
-## 3. Run with the network disabled (fallback and critical stop)
+## 3. Run with a missing network driver (fallback and critical stop)
 
 1. Restore checkpoint `clean`. Copy `formatkit.exe`, the profile and the backed-up `netdrivers` folder into the VM (for example to `C:\fk\netdrivers`).
 2. Edit the VM copy of the profile so `modules.drivers` contains `"networkDriverBackup": "C:\\fk\\netdrivers"` (JSON needs doubled backslashes). The path must match the folder used by the backup step.
-3. Disable the VM network adapter (Hyper-V settings, or `Disable-NetAdapter` in the VM).
+3. Simulate a missing network driver in the VM: in Device Manager, uninstall the network adapter and tick "Attempt to remove the driver for this device" (or run `pnputil /delete-driver <oemNN.inf> /uninstall /force`), so the VM has no connectivity. Do not merely disable the adapter: the fallback installs drivers but does not re-enable a disabled adapter.
 4. Run `.\formatkit.exe run --profile example.json` and accept the UAC prompt.
 5. Repeat from step 1 with the `networkDriverBackup` key removed.
 
-**Expected, backup configured:** an elevated second window opens and waits for **Enter** at the end. The network check step installs the backed-up drivers with `pnputil` (fallback) and connectivity returns, so the run continues.
+**Expected, backup configured:** an elevated second window opens (UAC relaunch) and waits for **Enter** at the end. The network check step installs the backed-up drivers with `pnputil`, re-probes connectivity, and reports the network restored; the run continues. (If the machine is still offline after the install, the step fails with the "installed from ... but still no internet" message and the run exits with code **3**.)
 
-**Expected, backup not configured:** the network check step fails with an actionable message (configure `networkDriverBackup`), steps that need the network are not attempted, and the run stops with exit code **3** (StoppedOnCriticalFailure). Re-enable the adapter and run again to confirm the run proceeds.
+**Expected, backup not configured:** the network check step fails with an actionable message (configure `networkDriverBackup`), steps that need the network are not attempted, and the run stops with exit code **3** (StoppedOnCriticalFailure). Restore the driver manually (or re-add `networkDriverBackup`) and run again to confirm the run proceeds.
 
 Also decline the UAC prompt on one run. **Expected:** exit code **5** (ElevationDeclined).
 
@@ -59,7 +59,7 @@ Also decline the UAC prompt on one run. **Expected:** exit code **5** (Elevation
 
 **Expected:**
 - The countdown is displayed; Esc cancels it and the VM does not reboot; the resume scheduled task exists (trigger: at logon) and the run is left to resume at the next logon (exit code **4**, RebootPending).
-- When the countdown completes the VM reboots; after logon the task starts `formatkit run --resume` (elevated window; it closes by itself when the run ends with code 4, otherwise it waits for Enter) and the run continues from the next step instead of restarting.
+- When the countdown completes the VM reboots; after logon the scheduled task starts `formatkit run --resume` in its own console window (this is not the UAC relaunch, so it never waits for Enter and closes when the process exits; read the result in the log or report) and the run continues from the next step instead of restarting.
 - `.\formatkit.exe run --resume` with no interrupted run exits with code **6** (NothingToResume).
 
 ## 5. Report contents

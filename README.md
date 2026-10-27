@@ -49,7 +49,7 @@ Output language follows the Windows UI language (English and Brazilian Portugues
 
 ### Elevation, reboots and resume
 
-- Steps that need administrator rights trigger a UAC prompt. The elevated run opens a **second window** that waits for **Enter** at the end so you can read the result (except when the run ends with exit code 4, reboot pending, where the window closes by itself).
+- Steps that need administrator rights trigger a UAC prompt. The elevated run opens a **second window** that waits for **Enter** at the end so you can read the result (except when the run ends with exit code 4, reboot pending, where it closes by itself). The run resumed by the scheduled task after a reboot is not a UAC relaunch: it runs in the task's own console window, which closes when the process exits, so check the log or report for the result.
 - If a step needs a reboot, FormatKit shows a countdown and creates a scheduled task that resumes the run at the next logon. Pressing Esc **cancels the countdown**; the run is then left to resume at your next logon.
 - If the network is down, the run falls back to a backed-up network driver; a critical failure stops the run.
 
