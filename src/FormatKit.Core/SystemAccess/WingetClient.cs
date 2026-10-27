@@ -9,7 +9,7 @@ public class WingetClient(IProcessRunner runner)
     private const int AlreadyInstalledA = -1978335189; // 0x8A15002B
     private const int AlreadyInstalledB = -1978335135; // 0x8A150061
 
-    public async Task<WingetResult> InstallAsync(string id, CancellationToken ct)
+    public async Task<WingetResult> InstallAsync(string id, CancellationToken ct, string? source = null)
     {
         ProcessResult result;
         try
@@ -17,7 +17,7 @@ public class WingetClient(IProcessRunner runner)
             result = await runner.RunAsync(
                 new ProcessSpec(
                     "winget.exe",
-                    ["install", "--id", id, "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"],
+                    WithSource(["install", "--id", id, "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"], source),
                     Timeouts.Install),
                 ct).ConfigureAwait(false);
         }
@@ -41,14 +41,14 @@ public class WingetClient(IProcessRunner runner)
         return new WingetResult(status, result.ExitCode, output);
     }
 
-    public async Task<bool> IsInstalledAsync(string id, CancellationToken ct)
+    public async Task<bool> IsInstalledAsync(string id, CancellationToken ct, string? source = null)
     {
         try
         {
             var result = await runner.RunAsync(
                 new ProcessSpec(
                     "winget.exe",
-                    ["list", "--id", id, "--exact", "--accept-source-agreements", "--disable-interactivity"],
+                    WithSource(["list", "--id", id, "--exact", "--accept-source-agreements", "--disable-interactivity"], source),
                     Timeouts.Query),
                 ct).ConfigureAwait(false);
             return !result.TimedOut && result.ExitCode == 0;
@@ -58,4 +58,7 @@ public class WingetClient(IProcessRunner runner)
             return false;
         }
     }
+
+    private static string[] WithSource(string[] args, string? source) =>
+        source is null ? args : [.. args, "--source", source];
 }

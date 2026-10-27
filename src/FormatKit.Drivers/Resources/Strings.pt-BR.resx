@@ -20,4 +20,25 @@
   <data name="Step_NetworkCheck_Restored" xml:space="preserve"><value>Drivers de rede instalados de {0}; a conexão com a internet está disponível.</value></data>
   <data name="Step_NetworkCheck_StillOffline" xml:space="preserve"><value>Os drivers de rede foram instalados de {0}, mas ainda não há conexão com a internet.</value></data>
   <data name="Step_NetworkCheck_StillOfflineAction" xml:space="preserve"><value>Verifique o cabo de rede ou as configurações de Wi-Fi, ou conecte um cabo e execute novamente.</value></data>
+  <data name="Step_OemTool_Title" xml:space="preserve"><value>Instalar e executar a ferramenta de drivers do fabricante</value></data>
+  <data name="Step_OemTool_WingetMissing" xml:space="preserve"><value>O winget não está disponível, então {0} não pôde ser instalado.</value></data>
+  <data name="Step_OemTool_WingetMissingAction" xml:space="preserve"><value>Instale ou atualize o Instalador de Aplicativo na Microsoft Store e execute novamente.</value></data>
+  <data name="Step_OemTool_InstallFailed" xml:space="preserve"><value>A instalação de {0} falhou (código de saída do winget {1}).</value></data>
+  <data name="Step_OemTool_InstallFailedAction" xml:space="preserve"><value>Verifique a conexão com a internet e execute novamente, ou instale {0} manualmente.</value></data>
+  <data name="Step_OemTool_Done" xml:space="preserve"><value>{0} terminou de atualizar os drivers.</value></data>
+  <data name="Step_OemTool_Reboot" xml:space="preserve"><value>{0} instalou drivers; é necessário reiniciar para concluir.</value></data>
+  <data name="Step_OemTool_RunFailed" xml:space="preserve"><value>{0} falhou com o código de saída {1}.</value></data>
+  <data name="Step_OemTool_RunFailedAction" xml:space="preserve"><value>Execute {0} manualmente para ver o que deu errado.</value></data>
+  <data name="Step_OemTool_TimedOut" xml:space="preserve"><value>{0} não terminou a tempo e foi interrompido.</value></data>
+  <data name="Step_OemTool_NotFound" xml:space="preserve"><value>{0} foi instalado, mas o executável não foi encontrado em {1}.</value></data>
+  <data name="Step_Gpu_Title" xml:space="preserve"><value>Instalar o software do driver de vídeo</value></data>
+  <data name="Step_Gpu_Installed" xml:space="preserve"><value>{0} instalado.</value></data>
+  <data name="Step_Gpu_Failed" xml:space="preserve"><value>Não foi possível instalar: {0}.</value></data>
+  <data name="Step_Gpu_FailedAction" xml:space="preserve"><value>Instale o driver de vídeo manualmente pelo site do fabricante da GPU, ou verifique se o winget funciona e execute novamente.</value></data>
+  <data name="Step_Gpu_WingetMissingAction" xml:space="preserve"><value>Instale ou atualize o Instalador de Aplicativo na Microsoft Store e execute novamente.</value></data>
+  <data name="Step_LeftoverReport_Title" xml:space="preserve"><value>Relatar dispositivos sem driver</value></data>
+  <data name="Step_LeftoverReport_AllGood" xml:space="preserve"><value>Todos os dispositivos têm drivers.</value></data>
+  <data name="Step_LeftoverReport_Device" xml:space="preserve"><value>{0} (código {1}): {2} — {3}</value></data>
+  <data name="Step_LeftoverReport_NoHardwareId" xml:space="preserve"><value>(sem ID de hardware)</value></data>
+  <data name="Step_LeftoverReport_BoardSupport" xml:space="preserve"><value>Página de suporte da placa-mãe: {0}</value></data>
 </root>

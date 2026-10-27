@@ -85,4 +85,30 @@ public class WingetClientTests
 
         Assert.False(await new WingetClient(runner).IsInstalledAsync("Git.Git", TestContext.Current.CancellationToken));
     }
+
+    [Fact]
+    public async Task Install_appends_source_when_given()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("winget.exe", Result(0));
+
+        await new WingetClient(runner).InstallAsync("XP8CLZL93F5Z4P", TestContext.Current.CancellationToken, "msstore");
+
+        Assert.Equal(
+            ["install", "--id", "XP8CLZL93F5Z4P", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--source", "msstore"],
+            runner.Calls[0].Arguments);
+    }
+
+    [Fact]
+    public async Task IsInstalled_appends_source_when_given()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("winget.exe", Result(0));
+
+        await new WingetClient(runner).IsInstalledAsync("XP8CLZL93F5Z4P", TestContext.Current.CancellationToken, "msstore");
+
+        Assert.Equal(
+            ["list", "--id", "XP8CLZL93F5Z4P", "--exact", "--accept-source-agreements", "--disable-interactivity", "--source", "msstore"],
+            runner.Calls[0].Arguments);
+    }
 }

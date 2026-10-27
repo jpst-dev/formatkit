@@ -20,4 +20,25 @@
   <data name="Step_NetworkCheck_Restored" xml:space="preserve"><value>Network drivers installed from {0}; internet connection is available.</value></data>
   <data name="Step_NetworkCheck_StillOffline" xml:space="preserve"><value>Network drivers were installed from {0}, but there is still no internet connection.</value></data>
   <data name="Step_NetworkCheck_StillOfflineAction" xml:space="preserve"><value>Check the network cable or Wi-Fi settings, or connect a cable and run again.</value></data>
+  <data name="Step_OemTool_Title" xml:space="preserve"><value>Install and run the manufacturer driver tool</value></data>
+  <data name="Step_OemTool_WingetMissing" xml:space="preserve"><value>winget is not available, so {0} could not be installed.</value></data>
+  <data name="Step_OemTool_WingetMissingAction" xml:space="preserve"><value>Install or update App Installer from the Microsoft Store, then run again.</value></data>
+  <data name="Step_OemTool_InstallFailed" xml:space="preserve"><value>Installing {0} failed (winget exit code {1}).</value></data>
+  <data name="Step_OemTool_InstallFailedAction" xml:space="preserve"><value>Check the internet connection and run again, or install {0} manually.</value></data>
+  <data name="Step_OemTool_Done" xml:space="preserve"><value>{0} finished updating drivers.</value></data>
+  <data name="Step_OemTool_Reboot" xml:space="preserve"><value>{0} installed drivers; a reboot is required to finish.</value></data>
+  <data name="Step_OemTool_RunFailed" xml:space="preserve"><value>{0} failed with exit code {1}.</value></data>
+  <data name="Step_OemTool_RunFailedAction" xml:space="preserve"><value>Run {0} manually to see what went wrong.</value></data>
+  <data name="Step_OemTool_TimedOut" xml:space="preserve"><value>{0} did not finish in time and was stopped.</value></data>
+  <data name="Step_OemTool_NotFound" xml:space="preserve"><value>{0} was installed but its executable was not found at {1}.</value></data>
+  <data name="Step_Gpu_Title" xml:space="preserve"><value>Install graphics driver software</value></data>
+  <data name="Step_Gpu_Installed" xml:space="preserve"><value>Installed {0}.</value></data>
+  <data name="Step_Gpu_Failed" xml:space="preserve"><value>Could not install: {0}.</value></data>
+  <data name="Step_Gpu_FailedAction" xml:space="preserve"><value>Install the graphics driver manually from the GPU vendor website, or check that winget works and run again.</value></data>
+  <data name="Step_Gpu_WingetMissingAction" xml:space="preserve"><value>Install or update App Installer from the Microsoft Store, then run again.</value></data>
+  <data name="Step_LeftoverReport_Title" xml:space="preserve"><value>Report devices without drivers</value></data>
+  <data name="Step_LeftoverReport_AllGood" xml:space="preserve"><value>All devices have drivers.</value></data>
+  <data name="Step_LeftoverReport_Device" xml:space="preserve"><value>{0} (code {1}): {2} — {3}</value></data>
+  <data name="Step_LeftoverReport_NoHardwareId" xml:space="preserve"><value>(no hardware ID)</value></data>
+  <data name="Step_LeftoverReport_BoardSupport" xml:space="preserve"><value>Motherboard support page: {0}</value></data>
 </root>
