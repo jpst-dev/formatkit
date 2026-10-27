@@ -30,4 +30,8 @@
   <data name="Reboot_Cancelled" xml:space="preserve"><value>Reboot cancelled.</value></data>
   <data name="Reboot_Countdown" xml:space="preserve"><value>Rebooting in {0} s (press Esc to cancel)...</value></data>
   <data name="Reboot_ShutdownFailed" xml:space="preserve"><value>The automatic reboot failed. Please reboot manually.</value></data>
+  <data name="WindowsUpdate_Error_CannotReach" xml:space="preserve"><value>Cannot reach Windows Update. Check the internet connection and try again.</value></data>
+  <data name="WindowsUpdate_Error_ServiceDisabled" xml:space="preserve"><value>The Windows Update service is disabled. Set the &apos;Windows Update&apos; service (wuauserv) to Manual or Automatic and try again.</value></data>
+  <data name="WindowsUpdate_Error_ServiceStopped" xml:space="preserve"><value>The Windows Update service stopped. Start the &apos;Windows Update&apos; service (wuauserv) and try again.</value></data>
+  <data name="WindowsUpdate_Error_Unknown" xml:space="preserve"><value>Windows Update failed with error {0}.</value></data>
 </root>

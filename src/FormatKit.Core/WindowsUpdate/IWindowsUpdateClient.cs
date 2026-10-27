@@ -1,4 +1,16 @@
 namespace FormatKit.Core.WindowsUpdate;
 
-// Placeholder: defined fully in a later task.
-public interface IWindowsUpdateClient { }
+public sealed record DriverUpdate(string UpdateId, string Title, string? DriverHardwareId);
+
+public sealed record WindowsUpdateInstallResult(
+    bool Succeeded,
+    bool RebootRequired,
+    int HResult,
+    IReadOnlyList<string> FailedTitles);
+
+public interface IWindowsUpdateClient
+{
+    Task<IReadOnlyList<DriverUpdate>> SearchDriversAsync(CancellationToken ct);
+
+    Task<WindowsUpdateInstallResult> InstallAsync(IReadOnlyList<DriverUpdate> updates, CancellationToken ct);
+}
