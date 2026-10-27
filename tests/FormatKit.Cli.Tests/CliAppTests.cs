@@ -613,5 +613,7 @@ public sealed class CliAppTests : IDisposable
     private sealed class ThrowingHardware(Exception ex) : IHardwareInfo
     {
         public Task<HardwareSnapshot> ReadAsync(CancellationToken ct) => throw ex;
+        public Task<IReadOnlyList<ProblemDevice>> ReadDisabledDevicesAsync(CancellationToken ct) => throw ex;
+        public Task<bool> HasBatteryAsync(CancellationToken ct) => throw ex;
     }
 }

@@ -32,6 +32,7 @@ public static class Services
         var files = new FileSystem();
         var processes = new ProcessRunner(log);
 
+        var registry = new WindowsRegistry();
         var services = new ServiceSet(
             processes,
             files,
@@ -39,7 +40,13 @@ public static class Services
             new ComWindowsUpdateClient(),
             new HttpNetworkProbe(),
             new WingetClient(processes),
-            new PnpUtil(processes));
+            new PnpUtil(processes),
+            registry,
+            new ServiceControl(registry, processes),
+            new PowerCfg(processes),
+            new PowerShellAppxPackages(processes),
+            new PowerShellOptionalFeatures(processes),
+            new WindowsUserSession());
 
         return new CliEnvironment(
             services,

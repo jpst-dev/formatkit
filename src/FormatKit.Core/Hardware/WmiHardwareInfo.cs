@@ -6,6 +6,26 @@ public sealed class WmiHardwareInfo : IHardwareInfo
 {
     public Task<HardwareSnapshot> ReadAsync(CancellationToken ct) => Task.Run(() => Read(ct), ct);
 
+    public Task<IReadOnlyList<ProblemDevice>> ReadDisabledDevicesAsync(CancellationToken ct) =>
+        Task.Run<IReadOnlyList<ProblemDevice>>(() =>
+        {
+            ct.ThrowIfCancellationRequested();
+            return Query("SELECT Name, DeviceID, ConfigManagerErrorCode, HardwareID FROM Win32_PnPEntity WHERE ConfigManagerErrorCode = 22")
+                .Select(o => new ProblemDevice(
+                    Str(o, "Name"),
+                    Str(o, "DeviceID"),
+                    o["ConfigManagerErrorCode"] is null ? 0 : Convert.ToInt32(o["ConfigManagerErrorCode"]),
+                    o["HardwareID"] is string[] ids ? ids : []))
+                .ToList();
+        }, ct);
+
+    public Task<bool> HasBatteryAsync(CancellationToken ct) =>
+        Task.Run(() =>
+        {
+            ct.ThrowIfCancellationRequested();
+            return Query("SELECT DeviceID FROM Win32_Battery").Count > 0;
+        }, ct);
+
     private static HardwareSnapshot Read(CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();

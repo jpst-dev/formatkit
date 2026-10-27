@@ -11,4 +11,10 @@ public sealed record ServiceSet(
     IWindowsUpdateClient WindowsUpdate,
     INetworkProbe Network,
     WingetClient Winget,
-    PnpUtil PnpUtil);
+    PnpUtil PnpUtil,
+    IRegistry Registry,
+    IServiceControl ServiceControl,
+    IPowerSchemes Power,
+    IAppxPackages Appx,
+    IOptionalFeatures Features,
+    IUserSession UserSession);

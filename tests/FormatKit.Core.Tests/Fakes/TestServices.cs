@@ -11,7 +11,13 @@ public static class TestServices
         FakeHardwareInfo? hardware = null,
         FakeWindowsUpdateClient? wu = null,
         FakeNetworkProbe? network = null,
-        InMemoryFileSystem? files = null)
+        InMemoryFileSystem? files = null,
+        FakeRegistry? registry = null,
+        FakeServiceControl? services = null,
+        FakePowerSchemes? power = null,
+        FakeAppxPackages? appx = null,
+        FakeOptionalFeatures? features = null,
+        FakeUserSession? session = null)
     {
         processes ??= new FakeProcessRunner();
         return new ServiceSet(
@@ -21,7 +27,13 @@ public static class TestServices
             wu ?? new FakeWindowsUpdateClient(),
             network ?? new FakeNetworkProbe(true),
             new WingetClient(processes),
-            new PnpUtil(processes));
+            new PnpUtil(processes),
+            registry ?? new FakeRegistry(),
+            services ?? new FakeServiceControl(),
+            power ?? new FakePowerSchemes(),
+            appx ?? new FakeAppxPackages(),
+            features ?? new FakeOptionalFeatures(),
+            session ?? new FakeUserSession());
     }
 
     public static StepContext Context(ServiceSet services) =>

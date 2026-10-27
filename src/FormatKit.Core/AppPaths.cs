@@ -8,4 +8,5 @@ public sealed record AppPaths(string Root)
     public string StateFile => Path.Combine(Root, "state.json");
     public string LogsDirectory => Path.Combine(Root, "logs");
     public string ReportsDirectory => Path.Combine(Root, "reports");
+    public string CleanupJournalFile => Path.Combine(Root, "cleanup-journal.json");
 }
