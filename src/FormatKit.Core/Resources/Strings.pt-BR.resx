@@ -10,4 +10,21 @@
   <data name="ProfileError_InvalidValue" xml:space="preserve"><value>Valor inválido: esperado {0}.</value></data>
   <data name="ProfileError_UnsupportedSchemaVersion" xml:space="preserve"><value>schemaVersion {0} não suportado; esta versão do FormatKit suporta a versão {1}.</value></data>
   <data name="ProfileError_UnknownModule" xml:space="preserve"><value>Módulo desconhecido &apos;{0}&apos;.</value></data>
+  <data name="Report_Title" xml:space="preserve"><value>Relatório de execução do FormatKit</value></data>
+  <data name="Report_Status" xml:space="preserve"><value>Status da execução</value></data>
+  <data name="Report_Step" xml:space="preserve"><value>Etapa</value></data>
+  <data name="Report_Result" xml:space="preserve"><value>Resultado</value></data>
+  <data name="Report_Details" xml:space="preserve"><value>Detalhes</value></data>
+  <data name="Report_NextSteps" xml:space="preserve"><value>O que fazer a seguir</value></data>
+  <data name="Report_Status_Completed" xml:space="preserve"><value>Concluída</value></data>
+  <data name="Report_Status_CompletedWithFailures" xml:space="preserve"><value>Concluída com falhas</value></data>
+  <data name="Report_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Interrompida por falha crítica</value></data>
+  <data name="Report_Status_RebootPending" xml:space="preserve"><value>Reinicialização pendente</value></data>
+  <data name="Report_Status_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde o início da execução</value></data>
+  <data name="Report_Status_NothingToResume" xml:space="preserve"><value>Nada para retomar</value></data>
+  <data name="Report_Status_StateCorrupt" xml:space="preserve"><value>O estado salvo da execução está corrompido</value></data>
+  <data name="Report_Outcome_Succeeded" xml:space="preserve"><value>Sucesso</value></data>
+  <data name="Report_Outcome_Skipped" xml:space="preserve"><value>Ignorada</value></data>
+  <data name="Report_Outcome_Failed" xml:space="preserve"><value>Falhou</value></data>
+  <data name="Report_Outcome_RebootRequired" xml:space="preserve"><value>Reinicialização necessária</value></data>
 </root>

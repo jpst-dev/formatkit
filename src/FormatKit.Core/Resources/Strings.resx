@@ -10,4 +10,21 @@
   <data name="ProfileError_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
   <data name="ProfileError_UnsupportedSchemaVersion" xml:space="preserve"><value>Unsupported schemaVersion {0}; this version of FormatKit supports version {1}.</value></data>
   <data name="ProfileError_UnknownModule" xml:space="preserve"><value>Unknown module &apos;{0}&apos;.</value></data>
+  <data name="Report_Title" xml:space="preserve"><value>FormatKit run report</value></data>
+  <data name="Report_Status" xml:space="preserve"><value>Run status</value></data>
+  <data name="Report_Step" xml:space="preserve"><value>Step</value></data>
+  <data name="Report_Result" xml:space="preserve"><value>Result</value></data>
+  <data name="Report_Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Report_NextSteps" xml:space="preserve"><value>What to do next</value></data>
+  <data name="Report_Status_Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="Report_Status_CompletedWithFailures" xml:space="preserve"><value>Completed with failures</value></data>
+  <data name="Report_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Stopped on a critical failure</value></data>
+  <data name="Report_Status_RebootPending" xml:space="preserve"><value>Reboot pending</value></data>
+  <data name="Report_Status_ProfileChanged" xml:space="preserve"><value>The profile changed since the run started</value></data>
+  <data name="Report_Status_NothingToResume" xml:space="preserve"><value>Nothing to resume</value></data>
+  <data name="Report_Status_StateCorrupt" xml:space="preserve"><value>The saved run state is corrupt</value></data>
+  <data name="Report_Outcome_Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="Report_Outcome_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="Report_Outcome_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Report_Outcome_RebootRequired" xml:space="preserve"><value>Reboot required</value></data>
 </root>
