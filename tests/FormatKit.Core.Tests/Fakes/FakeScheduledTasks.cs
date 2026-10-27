@@ -6,16 +6,18 @@ public sealed class FakeScheduledTasks : IScheduledTasks
 {
     public int RegisterCalls { get; private set; }
     public int RemoveCalls { get; private set; }
+    public Exception? RegisterException { get; set; }
+    public Exception? RemoveException { get; set; }
 
     public Task RegisterResumeTaskAsync(CancellationToken ct)
     {
         RegisterCalls++;
-        return Task.CompletedTask;
+        return RegisterException is null ? Task.CompletedTask : Task.FromException(RegisterException);
     }
 
     public Task RemoveResumeTaskAsync(CancellationToken ct)
     {
         RemoveCalls++;
-        return Task.CompletedTask;
+        return RemoveException is null ? Task.CompletedTask : Task.FromException(RemoveException);
     }
 }

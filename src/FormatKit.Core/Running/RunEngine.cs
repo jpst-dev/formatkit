@@ -9,7 +9,8 @@ public sealed class RunEngine(
     IScheduledTasks tasks,
     IRebooter rebooter,
     IReportWriter reports,
-    TimeSpan rebootCountdown)
+    TimeSpan rebootCountdown,
+    Serilog.ILogger? log = null)
 {
     public async Task<RunSummary> RunAsync(RunRequest request, CancellationToken ct)
     {
@@ -58,9 +59,20 @@ public sealed class RunEngine(
 
             if (result.Outcome == StepOutcome.RebootRequired)
             {
-                await tasks.RegisterResumeTaskAsync(ct).ConfigureAwait(false);
+                var scheduleFailed = false;
+                try
+                {
+                    await tasks.RegisterResumeTaskAsync(ct).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    // State is already saved; the user can resume manually after the reboot.
+                    scheduleFailed = true;
+                    log?.Warning(ex, "Could not register the resume scheduled task");
+                }
+
                 await rebooter.RebootAsync(rebootCountdown, ct).ConfigureAwait(false);
-                return new RunSummary(RunStatus.RebootPending, BuildReports(request, state), null, null);
+                return new RunSummary(RunStatus.RebootPending, BuildReports(request, state), null, null, scheduleFailed);
             }
         }
 
@@ -69,7 +81,15 @@ public sealed class RunEngine(
             ? RunStatus.StoppedOnCriticalFailure
             : steps.Any(s => s.Outcome == StepOutcome.Failed) ? RunStatus.CompletedWithFailures : RunStatus.Completed;
 
-        await tasks.RemoveResumeTaskAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await tasks.RemoveResumeTaskAsync(ct).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            log?.Warning(ex, "Could not remove the resume scheduled task");
+        }
+
         var summary = new RunSummary(status, steps, null, null);
         var dir = reports.Write(summary);
         store.Delete();

@@ -76,4 +76,6 @@
   <data name="ExitMeaning_130" xml:space="preserve"><value>cancelled; run formatkit run --resume to continue</value></data>
   <data name="ExitMeaning_Other" xml:space="preserve"><value>unknown</value></data>
   <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>The profile recorded for the interrupted run could not be used. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_ResumeTaskRemoved" xml:space="preserve"><value>The automatic resume was removed.</value></data>
+  <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Automatic resume could not be scheduled. After rebooting, run `formatkit run --resume`.</value></data>
 </root>

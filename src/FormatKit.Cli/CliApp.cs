@@ -11,6 +11,7 @@ namespace FormatKit.Cli;
 public sealed class CliApp
 {
     internal const string ElevatedChildFlag = "--elevated-child";
+    internal const string WaitOnExitFlag = "--wait-on-exit";
 
     private readonly CliEnvironment _env;
     private readonly IReadOnlyList<IModule> _modules;
@@ -35,11 +36,12 @@ public sealed class CliApp
     public async Task<int> RunAsync(string[] args, CancellationToken ct)
     {
         args = AbsolutizePaths(args);
-        var elevatedChild = args.Contains(ElevatedChildFlag, StringComparer.Ordinal);
+        var waitOnExit = args.Contains(ElevatedChildFlag, StringComparer.Ordinal)
+            || args.Contains(WaitOnExitFlag, StringComparer.Ordinal);
 
         var exit = await ExecuteAsync(args, ct);
 
-        if (elevatedChild && exit != ExitCodes.RebootPending)
+        if (waitOnExit && exit != ExitCodes.RebootPending)
         {
             _env.Out.WriteLine(Strings.Get("Elevated_Close"));
             if (WaitForClose is not null)
@@ -55,7 +57,8 @@ public sealed class CliApp
     {
         var verbose = new Option<bool>("--verbose") { Description = Strings.Get("Opt_Verbose"), Recursive = true };
         var elevatedChild = new Option<bool>(ElevatedChildFlag) { Hidden = true, Recursive = true };
-        var root = new RootCommand(Strings.Get("Cmd_Root")) { Options = { verbose, elevatedChild } };
+        var waitOnExit = new Option<bool>(WaitOnExitFlag) { Hidden = true, Recursive = true };
+        var root = new RootCommand(Strings.Get("Cmd_Root")) { Options = { verbose, elevatedChild, waitOnExit } };
         var context = new CommandContext(_env, _modules, _catalog, RelaunchArgs(args));
 
         root.Subcommands.Add(HardwareCommand.Create(context));

@@ -230,4 +230,46 @@ public class RunEngineTests
 
         Assert.True(h.Fs.WriteCount >= 4);
     }
+
+    [Fact]
+    public async Task Task_removal_failure_does_not_prevent_report_or_state_cleanup()
+    {
+        var h = new Harness();
+        h.Tasks.RemoveException = new InvalidOperationException("schtasks broke");
+        var a = Work("a");
+
+        var summary = await h.Engine.RunAsync(Harness.Request(false, a), TestContext.Current.CancellationToken);
+
+        Assert.Equal(RunStatus.Completed, summary.Status);
+        Assert.Equal(1, h.Tasks.RemoveCalls);
+        Assert.Single(h.Reports.Written);
+        Assert.Equal(FakeReportWriter.Directory, summary.ReportDirectory);
+        Assert.Equal(StateLoadStatus.None, h.Store.Load().Status);
+    }
+
+    [Fact]
+    public async Task Reboot_task_registration_failure_still_reboots_and_flags_summary()
+    {
+        var h = new Harness();
+        h.Tasks.RegisterException = new InvalidOperationException("access denied");
+        var a = Work("a"); a.ExecuteResult = StepResult.Reboot("restart");
+
+        var summary = await h.Engine.RunAsync(Harness.Request(false, a), TestContext.Current.CancellationToken);
+
+        Assert.Equal(RunStatus.RebootPending, summary.Status);
+        Assert.True(summary.ResumeScheduleFailed);
+        Assert.Single(h.Rebooter.Calls);
+        Assert.Equal(StateLoadStatus.Loaded, h.Store.Load().Status);
+    }
+
+    [Fact]
+    public async Task Reboot_with_successful_registration_does_not_flag_summary()
+    {
+        var h = new Harness();
+        var a = Work("a"); a.ExecuteResult = StepResult.Reboot("restart");
+
+        var summary = await h.Engine.RunAsync(Harness.Request(false, a), TestContext.Current.CancellationToken);
+
+        Assert.False(summary.ResumeScheduleFailed);
+    }
 }

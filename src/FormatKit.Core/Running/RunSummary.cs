@@ -24,4 +24,5 @@ public sealed record RunSummary(
     RunStatus Status,
     IReadOnlyList<StepReport> Steps,
     string? ReportDirectory,
-    string? Error);
+    string? Error,
+    bool ResumeScheduleFailed = false);

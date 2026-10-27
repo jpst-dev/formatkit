@@ -69,7 +69,7 @@ Also decline the UAC prompt on one run. **Expected:** exit code **5** (Elevation
 
 **Expected:**
 - The countdown is displayed; Esc cancels it and the VM does not reboot; the resume scheduled task exists (trigger: at logon) and the run is left to resume at the next logon (exit code **4**, RebootPending).
-- When the countdown completes the VM reboots; after logon the scheduled task starts `formatkit run --resume` in its own console window (this is not the UAC relaunch, so it never waits for Enter and closes when the process exits; read the result in the log or report) and the run continues from the next step instead of restarting.
+- When the countdown completes the VM reboots; after logon the scheduled task starts `formatkit run --resume` in its own console window (the task passes the hidden `--wait-on-exit` flag, so the window waits for Enter at the end unless the exit code is 4) and the run continues from the next step instead of restarting.
 - `.\formatkit.exe run --resume` with no interrupted run exits with code **6** (NothingToResume).
 
 ## 5. Report contents

@@ -365,6 +365,117 @@ public sealed class CliAppTests : IDisposable
     }
 
     [Fact]
+    public async Task Resume_without_state_removes_the_resume_task()
+    {
+        var exit = await Run("run", "--resume");
+
+        Assert.Equal(ExitCodes.NothingToResume, exit);
+        Assert.Equal(1, _tasks.RemoveCalls);
+        Assert.Contains("automatic resume was removed", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Resume_with_corrupt_state_removes_the_resume_task()
+    {
+        _fs.Seed(_paths.StateFile, "{ not json");
+
+        await Run("run", "--resume");
+
+        Assert.Equal(1, _tasks.RemoveCalls);
+    }
+
+    [Fact]
+    public async Task Resume_with_changed_profile_removes_the_resume_task()
+    {
+        var profile = WriteProfile();
+        _module.Steps.Add(new FakeStep("a"));
+        new RunStateStore(_fs, _paths).Save(new RunState(profile, "other-hash", ["a"],
+            new Dictionary<string, StepRecord>(), DateTimeOffset.UtcNow));
+        _elevation.IsElevated = true;
+
+        await Run("run", "--resume");
+
+        Assert.Equal(1, _tasks.RemoveCalls);
+    }
+
+    [Fact]
+    public async Task Resume_with_invalid_profile_removes_the_resume_task()
+    {
+        new RunStateStore(_fs, _paths).Save(new RunState(Path.Combine(_tempDir, "gone.json"), "h", ["a"],
+            new Dictionary<string, StepRecord>(), DateTimeOffset.UtcNow));
+
+        await Run("run", "--resume");
+
+        Assert.Equal(1, _tasks.RemoveCalls);
+    }
+
+    [Fact]
+    public async Task Resume_early_exit_survives_a_failing_task_removal()
+    {
+        _tasks.RemoveException = new InvalidOperationException("schtasks broke");
+
+        var exit = await Run("run", "--resume");
+
+        Assert.Equal(ExitCodes.NothingToResume, exit);
+        Assert.DoesNotContain("automatic resume was removed", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Reboot_with_failed_task_registration_still_returns_reboot_pending_with_manual_hint()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false, ExecuteResult = StepResult.Reboot("restart") });
+        _elevation.IsElevated = true;
+        _tasks.RegisterException = new InvalidOperationException("denied");
+
+        var exit = await Run("run", "--profile", WriteProfile());
+
+        Assert.Equal(ExitCodes.RebootPending, exit);
+        Assert.Contains("Automatic resume could not be scheduled", _out.ToString());
+        Assert.Contains("formatkit run --resume", _out.ToString());
+        Assert.DoesNotContain("will resume automatically", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Wait_on_exit_waits_for_enter_except_when_rebooting()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        var waits = 0;
+        var app = App();
+        app.WaitForClose = () => { waits++; return Task.CompletedTask; };
+
+        var exit = await app.RunAsync(["run", "--profile", WriteProfile(), "--wait-on-exit"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Equal(1, waits);
+        Assert.Contains("Press Enter to close", _out.ToString());
+
+        _module.Steps.Clear();
+        _module.Steps.Add(new FakeStep("r") { CheckResult = false, ExecuteResult = StepResult.Reboot("restart") });
+        var app2 = App();
+        app2.WaitForClose = () => { waits++; return Task.CompletedTask; };
+
+        var exit2 = await app2.RunAsync(["run", "--profile", WriteProfile(), "--wait-on-exit"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.RebootPending, exit2);
+        Assert.Equal(1, waits);
+    }
+
+    [Fact]
+    public async Task Without_wait_flags_the_window_does_not_wait()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        var waits = 0;
+        var app = App();
+        app.WaitForClose = () => { waits++; return Task.CompletedTask; };
+
+        await app.RunAsync(["run", "--profile", WriteProfile()], CancellationToken.None);
+
+        Assert.Equal(0, waits);
+    }
+
+    [Fact]
     public void Example_profile_is_valid()
     {
         var loader = new ProfileLoader([new DriversModule(VendorCatalog.LoadEmbedded(), TimeSpan.Zero)]);

@@ -40,9 +40,11 @@ internal static class RunCommand
                 {
                     case StateLoadStatus.None:
                         o.WriteLine(Strings.Get("Run_NothingToResume"));
+                        await RunFlow.RemoveResumeTaskAsync(context, ct);
                         return ExitCodes.NothingToResume;
                     case StateLoadStatus.Corrupt:
                         o.WriteLine(Strings.Format("Run_StateCorrupt", load.Error ?? ""));
+                        await RunFlow.RemoveResumeTaskAsync(context, ct);
                         return ExitCodes.NothingToResume;
                 }
 
@@ -55,6 +57,7 @@ internal static class RunCommand
             if (profile is null && resuming)
             {
                 o.WriteLine(Strings.Get("Run_ResumeProfileInvalid"));
+                await RunFlow.RemoveResumeTaskAsync(context, ct);
                 return ExitCodes.NothingToResume;
             }
 
@@ -108,7 +111,7 @@ internal static class RunFlow
             return exit;
 
         var env = context.Env;
-        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown);
+        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log);
         var request = new RunRequest(profile.Path, profile.Hash, plan, new StepContext(env.Services, env.Log), resume);
 
         RunSummary summary;
@@ -122,7 +125,24 @@ internal static class RunFlow
             return ExitCodes.Cancelled;
         }
 
+        if (resume && summary.Status is RunStatus.NothingToResume or RunStatus.StateCorrupt or RunStatus.ProfileChanged)
+            await RemoveResumeTaskAsync(context, ct);
+
         return Report(o, summary);
+    }
+
+    /// <summary>Best-effort removal of the automatic resume task when a resume ends early.</summary>
+    public static async Task RemoveResumeTaskAsync(CommandContext context, CancellationToken ct)
+    {
+        try
+        {
+            await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct);
+            context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            context.Env.Log.Warning(ex, "Could not remove the resume scheduled task");
+        }
     }
 
     private static int Report(TextWriter o, RunSummary summary)
@@ -155,7 +175,10 @@ internal static class RunFlow
         switch (summary.Status)
         {
             case RunStatus.RebootPending:
-                o.WriteLine(Strings.Get("Run_RebootPending"));
+                if (summary.ResumeScheduleFailed)
+                    o.WriteLine(Strings.Get("Run_ResumeNotScheduled"));
+                else
+                    o.WriteLine(Strings.Get("Run_RebootPending"));
                 return ExitCodes.RebootPending;
             case RunStatus.StoppedOnCriticalFailure:
                 o.WriteLine(Strings.Get("Run_Status_StoppedOnCriticalFailure"));

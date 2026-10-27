@@ -20,7 +20,7 @@ public class SchtasksScheduledTasksTests
 
         var call = Assert.Single(runner.Calls);
         Assert.Equal(
-            ["/Create", "/TN", "FormatKit\\Resume", "/TR", "\"C:\\Tools\\formatkit.exe\" run --resume", "/SC", "ONLOGON", "/RL", "HIGHEST", "/F"],
+            ["/Create", "/TN", "FormatKit\\Resume", "/TR", "\"C:\\Tools\\formatkit.exe\" run --resume --wait-on-exit","/SC", "ONLOGON", "/RL", "HIGHEST", "/F"],
             call.Arguments);
     }
 
@@ -37,16 +37,6 @@ public class SchtasksScheduledTasksTests
     }
 
     [Fact]
-    public async Task Remove_failure_without_error_marker_throws()
-    {
-        var runner = new FakeProcessRunner();
-        runner.Enqueue("schtasks.exe", Result(1, stderr: "something else"));
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken));
-    }
-
-    [Fact]
     public async Task Register_timeout_throws()
     {
         var runner = new FakeProcessRunner();
@@ -57,14 +47,39 @@ public class SchtasksScheduledTasksTests
     }
 
     [Fact]
-    public async Task Remove_ignores_missing_task()
+    public async Task Remove_queries_then_deletes_when_task_present()
     {
         var runner = new FakeProcessRunner();
-        runner.Enqueue("schtasks.exe", Result(1, stderr: "ERROR: The system cannot find the file specified."));
+        runner.Enqueue("schtasks.exe", Result(0));
+        runner.Enqueue("schtasks.exe", Result(0));
+
+        await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, runner.Calls.Count);
+        Assert.Equal(["/Query", "/TN", "FormatKit\\Resume"], runner.Calls[0].Arguments);
+        Assert.Equal(["/Delete", "/TN", "FormatKit\\Resume", "/F"], runner.Calls[1].Arguments);
+    }
+
+    [Fact]
+    public async Task Remove_does_nothing_when_query_reports_missing_in_localized_text()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("schtasks.exe", Result(1, stderr: "ERRO: O sistema nao pode encontrar o arquivo especificado."));
 
         await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
 
         var call = Assert.Single(runner.Calls);
-        Assert.Equal(["/Delete", "/TN", "FormatKit\\Resume", "/F"], call.Arguments);
+        Assert.Equal("/Query", call.Arguments[0]);
+    }
+
+    [Fact]
+    public async Task Remove_delete_failure_throws()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("schtasks.exe", Result(0));
+        runner.Enqueue("schtasks.exe", Result(1, stderr: "ERRO: Acesso negado."));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken));
     }
 }

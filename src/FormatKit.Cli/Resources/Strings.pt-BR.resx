@@ -76,4 +76,6 @@
   <data name="ExitMeaning_130" xml:space="preserve"><value>cancelada; execute formatkit run --resume para continuar</value></data>
   <data name="ExitMeaning_Other" xml:space="preserve"><value>desconhecido</value></data>
   <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>Não foi possível usar o perfil registrado para a execução interrompida. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_ResumeTaskRemoved" xml:space="preserve"><value>A retomada automática foi removida.</value></data>
+  <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Não foi possível agendar a retomada automática. Após reiniciar, execute `formatkit run --resume`.</value></data>
 </root>
