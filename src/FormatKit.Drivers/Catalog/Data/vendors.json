@@ -22,15 +22,14 @@
       "id": "hp",
       "manufacturerMatches": ["HP", "Hewlett-Packard"],
       "wingetId": "HP.ImageAssistant",
-      "executable": "%ProgramFiles%\\HP\\HPIA\\HPImageAssistant.exe",
+      "executable": "C:\\SWSetup\\HPImageAssistant\\HPImageAssistant.exe",
       "arguments": ["/Operation:Analyze", "/Action:Install", "/Selection:All", "/Silent", "/Noninteractive"],
       "successExitCodes": [0, 256],
       "rebootExitCodes": [3010]
     }
   ],
   "gpu": [
-    { "vendor": "nvidia", "wingetId": "XP8CLZL93F5Z4P" },
-    { "vendor": "amd", "wingetId": "AMD.Adrenalin" },
+    { "vendor": "nvidia", "wingetId": "XP8CLZL93F5Z4P", "source": "msstore" },
     { "vendor": "intel", "wingetId": "Intel.IntelDriverAndSupportAssistant" }
   ],
   "boards": [

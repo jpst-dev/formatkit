@@ -14,7 +14,7 @@ public sealed record OemTool(
     IReadOnlyList<int> SuccessExitCodes,
     IReadOnlyList<int> RebootExitCodes);
 
-public sealed record GpuPackage(GpuVendor Vendor, string WingetId);
+public sealed record GpuPackage(GpuVendor Vendor, string WingetId, string? Source = null);
 
 public sealed record BoardSupport(IReadOnlyList<string> ManufacturerMatches, string SupportUrl);
 

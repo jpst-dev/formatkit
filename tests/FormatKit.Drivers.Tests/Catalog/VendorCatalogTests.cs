@@ -25,12 +25,25 @@ public class VendorCatalogTests
     }
 
     [Fact]
-    public void Every_gpu_vendor_except_unknown_has_a_package()
+    public void Nvidia_and_intel_have_packages_and_amd_has_none_because_it_uses_windows_update()
     {
         var catalog = VendorCatalog.LoadEmbedded();
-        foreach (var vendor in Enum.GetValues<GpuVendor>().Where(v => v != GpuVendor.Unknown))
-            Assert.Contains(catalog.Gpu, g => g.Vendor == vendor && g.WingetId.Length > 0);
+        Assert.Contains(catalog.Gpu, g => g.Vendor == GpuVendor.Nvidia && g.WingetId.Length > 0);
+        Assert.Contains(catalog.Gpu, g => g.Vendor == GpuVendor.Intel && g.WingetId.Length > 0);
+        Assert.DoesNotContain(catalog.Gpu, g => g.Vendor == GpuVendor.Amd);
     }
+
+    [Fact]
+    public void Nvidia_uses_msstore_source_and_intel_uses_default()
+    {
+        var catalog = VendorCatalog.LoadEmbedded();
+        Assert.Equal("msstore", catalog.Gpu.Single(g => g.Vendor == GpuVendor.Nvidia).Source);
+        Assert.Null(catalog.Gpu.Single(g => g.Vendor == GpuVendor.Intel).Source);
+    }
+
+    [Fact]
+    public void Hp_executable_points_at_default_swsetup_location()
+        => Assert.Equal(@"C:SWSetupHPImageAssistantHPImageAssistant.exe", VendorCatalog.LoadEmbedded().Oem.Single(o => o.Id == "hp").Executable);
 
     [Fact]
     public void Parse_reads_camelCase_json_with_string_gpu_vendors()
