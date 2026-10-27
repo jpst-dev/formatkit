@@ -10,4 +10,14 @@
   <data name="Step_WindowsUpdateDrivers_Failed" xml:space="preserve"><value>Failed: {0}</value></data>
   <data name="Step_WindowsUpdateDrivers_ErrorCode" xml:space="preserve"><value>Windows Update error code 0x{0:X8}</value></data>
   <data name="Step_WindowsUpdateDrivers_Partial" xml:space="preserve"><value>These drivers could not be installed: {0}. Install them manually or check the Windows Update history.</value></data>
+  <data name="Step_NetworkCheck_Title" xml:space="preserve"><value>Check network connectivity</value></data>
+  <data name="Step_NetworkCheck_NoBackup" xml:space="preserve"><value>No internet connection and no network driver backup is configured.</value></data>
+  <data name="Step_NetworkCheck_NoBackupAction" xml:space="preserve"><value>Connect an Ethernet cable (or a USB tethered phone) and run again, or set modules.drivers.networkDriverBackup in your profile to a folder containing your network driver backup.</value></data>
+  <data name="Step_NetworkCheck_MissingDir" xml:space="preserve"><value>The network driver backup folder does not exist: {0}</value></data>
+  <data name="Step_NetworkCheck_MissingDirAction" xml:space="preserve"><value>Create or restore the folder {0}, or fix modules.drivers.networkDriverBackup in your profile. Alternatively, connect an Ethernet cable and run again.</value></data>
+  <data name="Step_NetworkCheck_AddFailed" xml:space="preserve"><value>Installing the network drivers from {0} failed (pnputil exit code {1}).</value></data>
+  <data name="Step_NetworkCheck_AddFailedAction" xml:space="preserve"><value>Check that the backup folder contains valid .inf driver packages, or connect an Ethernet cable and run again.</value></data>
+  <data name="Step_NetworkCheck_Restored" xml:space="preserve"><value>Network drivers installed from {0}; internet connection is available.</value></data>
+  <data name="Step_NetworkCheck_StillOffline" xml:space="preserve"><value>Network drivers were installed from {0}, but there is still no internet connection.</value></data>
+  <data name="Step_NetworkCheck_StillOfflineAction" xml:space="preserve"><value>Check the network cable or Wi-Fi settings, or connect a cable and run again.</value></data>
 </root>

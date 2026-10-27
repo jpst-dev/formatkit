@@ -10,4 +10,14 @@
   <data name="Step_WindowsUpdateDrivers_Failed" xml:space="preserve"><value>Falhou: {0}</value></data>
   <data name="Step_WindowsUpdateDrivers_ErrorCode" xml:space="preserve"><value>Código de erro do Windows Update 0x{0:X8}</value></data>
   <data name="Step_WindowsUpdateDrivers_Partial" xml:space="preserve"><value>Estes drivers não puderam ser instalados: {0}. Instale-os manualmente ou verifique o histórico do Windows Update.</value></data>
+  <data name="Step_NetworkCheck_Title" xml:space="preserve"><value>Verificar conexão de rede</value></data>
+  <data name="Step_NetworkCheck_NoBackup" xml:space="preserve"><value>Sem conexão com a internet e nenhum backup de drivers de rede configurado.</value></data>
+  <data name="Step_NetworkCheck_NoBackupAction" xml:space="preserve"><value>Conecte um cabo Ethernet (ou um celular via USB) e execute novamente, ou defina modules.drivers.networkDriverBackup no seu perfil com uma pasta que contenha o backup dos drivers de rede.</value></data>
+  <data name="Step_NetworkCheck_MissingDir" xml:space="preserve"><value>A pasta de backup dos drivers de rede não existe: {0}</value></data>
+  <data name="Step_NetworkCheck_MissingDirAction" xml:space="preserve"><value>Crie ou restaure a pasta {0}, ou corrija modules.drivers.networkDriverBackup no seu perfil. Como alternativa, conecte um cabo Ethernet e execute novamente.</value></data>
+  <data name="Step_NetworkCheck_AddFailed" xml:space="preserve"><value>A instalação dos drivers de rede de {0} falhou (código de saída do pnputil {1}).</value></data>
+  <data name="Step_NetworkCheck_AddFailedAction" xml:space="preserve"><value>Verifique se a pasta de backup contém pacotes de driver .inf válidos, ou conecte um cabo Ethernet e execute novamente.</value></data>
+  <data name="Step_NetworkCheck_Restored" xml:space="preserve"><value>Drivers de rede instalados de {0}; a conexão com a internet está disponível.</value></data>
+  <data name="Step_NetworkCheck_StillOffline" xml:space="preserve"><value>Os drivers de rede foram instalados de {0}, mas ainda não há conexão com a internet.</value></data>
+  <data name="Step_NetworkCheck_StillOfflineAction" xml:space="preserve"><value>Verifique o cabo de rede ou as configurações de Wi-Fi, ou conecte um cabo e execute novamente.</value></data>
 </root>
