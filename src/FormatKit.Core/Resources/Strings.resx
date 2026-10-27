@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ProfileError_FileNotFound" xml:space="preserve"><value>Profile file not found: {0}</value></data>
+  <data name="ProfileError_InvalidJson" xml:space="preserve"><value>The profile is not valid JSON: {0}</value></data>
+  <data name="ProfileError_MissingField" xml:space="preserve"><value>Required field &apos;{0}&apos; is missing.</value></data>
+  <data name="ProfileError_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
+  <data name="ProfileError_UnsupportedSchemaVersion" xml:space="preserve"><value>Unsupported schemaVersion {0}; this version of FormatKit supports version {1}.</value></data>
+  <data name="ProfileError_UnknownModule" xml:space="preserve"><value>Unknown module &apos;{0}&apos;.</value></data>
+</root>
