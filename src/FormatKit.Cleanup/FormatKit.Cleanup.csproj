@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Cleanup.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Catalog\Data\cleanup.json" LogicalName="FormatKit.Cleanup.Catalog.Data.cleanup.json" />
+    <EmbeddedResource Include="Catalog\Data\known-issues.json" LogicalName="FormatKit.Cleanup.Catalog.Data.known-issues.json" />
+  </ItemGroup>
+</Project>
