@@ -10,7 +10,7 @@ public interface IStep
     bool RequiresAdmin { get; }
     bool IsCritical { get; }
 
-    /// <summary>Returns true when the step has work to do.</summary>
+    /// <summary>Returns true when the step's goal is already met (the step is then skipped).</summary>
     Task<bool> CheckAsync(StepContext ctx, CancellationToken ct);
 
     Task<StepResult> ExecuteAsync(StepContext ctx, CancellationToken ct);
