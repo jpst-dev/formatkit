@@ -88,21 +88,17 @@ public class GpuStepTests
     }
 
     [Fact]
-    public async Task Hybrid_intel_and_nvidia_installs_both()
+    public async Task Hybrid_intel_and_nvidia_installs_only_the_nvidia_package()
     {
         var (step, runner, ctx) = Arrange(Intel, Nvidia);
-        runner.Enqueue("winget.exe", Result(1));
-        runner.Enqueue("winget.exe", Result(0));
         runner.Enqueue("winget.exe", Result(1));
         runner.Enqueue("winget.exe", Result(0));
 
         var result = await step.ExecuteAsync(ctx, TestContext.Current.CancellationToken);
 
         Assert.Equal(StepOutcome.Succeeded, result.Outcome);
-        var installs = runner.Calls.Where(c => c.Arguments[0] == "install").ToList();
-        Assert.Equal(2, installs.Count);
-        Assert.Contains(installs, c => c.Arguments.Contains("Intel.IntelDriverAndSupportAssistant"));
-        Assert.Contains(installs, c => c.Arguments.Contains("XP8CLZL93F5Z4P"));
+        var install = Assert.Single(runner.Calls, c => c.Arguments[0] == "install");
+        Assert.Contains("XP8CLZL93F5Z4P", install.Arguments);
     }
 
     [Fact]

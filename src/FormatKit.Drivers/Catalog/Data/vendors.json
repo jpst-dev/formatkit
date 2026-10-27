@@ -29,8 +29,7 @@
     }
   ],
   "gpu": [
-    { "vendor": "nvidia", "wingetId": "XP8CLZL93F5Z4P", "source": "msstore" },
-    { "vendor": "intel", "wingetId": "Intel.IntelDriverAndSupportAssistant" }
+    { "vendor": "nvidia", "wingetId": "XP8CLZL93F5Z4P", "source": "msstore" }
   ],
   "boards": [
     { "manufacturerMatches": ["ASUSTeK"], "supportUrl": "https://www.asus.com/support/" },

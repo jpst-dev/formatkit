@@ -96,6 +96,6 @@ Confirm on real machines and fix the code/docs if wrong:
 - [ ] **Lenovo**: the System Update command-line arguments and its exit codes (R17, unverified).
 - [ ] **HP**: the `C:\SWSetup` path used by HP packages (R16, unverified).
 - [ ] **Nvidia**: the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`) installs and launches.
-- [ ] **AMD**: the GPU driver arrives through Windows Update only.
+- [ ] **AMD** and **Intel**: the GPU driver arrives through Windows Update (or the OEM tool) only.
 - [ ] The published `formatkit.exe` runs on a clean machine without .NET installed, and the SmartScreen prompt behaves as documented.
 - [ ] **Network fallback** (spare physical machine): back up its NIC driver with `drivers backup-network`, uninstall the NIC device together with its oem driver, set `networkDriverBackup` in the profile, then run. Expect the driver to be reinstalled via `pnputil`, connectivity to return and the run to continue.

@@ -43,9 +43,9 @@ Output language follows the Windows UI language (English and Brazilian Portugues
 
 ### Driver sources
 
-- **Windows Update**: for all vendors. AMD GPUs get their drivers from Windows Update only; there is no AMD package.
+- **Windows Update**: for all vendors. AMD and Intel GPUs get their drivers from Windows Update (or the OEM tool) only; FormatKit installs no AMD or Intel GPU software, to avoid resident updaters.
 - **OEM tool**: Dell, HP and Lenovo vendor tooling.
-- **GPU**: Nvidia is installed through the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`); Intel through Intel Driver & Support Assistant (winget).
+- **GPU**: Nvidia is installed through the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`).
 
 ### Elevation, reboots and resume
 
