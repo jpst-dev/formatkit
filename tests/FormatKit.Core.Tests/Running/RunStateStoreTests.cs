@@ -164,4 +164,16 @@ public class RunStateStoreTests
         public void CreateDirectory(string path) { }
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => [];
     }
+
+    [Fact]
+    public void Step_record_without_outcome_returns_Corrupt()
+    {
+        var fs = new InMemoryFileSystem();
+        fs.Seed(Paths.StateFile,
+            "{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":{\"finishedAt\":\"2026-10-27T10:00:00+00:00\",\"messages\":[]}}}");
+
+        var result = new RunStateStore(fs, Paths).Load();
+
+        Assert.Equal(StateLoadStatus.Corrupt, result.Status);
+    }
 }

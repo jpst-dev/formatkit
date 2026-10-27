@@ -83,7 +83,7 @@ Output language follows the Windows UI language (English and Brazilian Portugues
 Optional `modules.drivers.networkDriverBackup`: path to a folder created by `drivers backup-network`. If the machine is offline, the network check step installs the drivers from that folder with `pnputil`. Without it, an offline run stops with exit code 3. In JSON, backslashes must be doubled:
 
 ```json
-"drivers": { "enabled": true, "networkDriverBackup": "D:\\netdrivers" }
+"drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"], "networkDriverBackup": "D:\\netdrivers" }
 ```
 
 ```powershell

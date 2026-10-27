@@ -31,7 +31,7 @@ public sealed class ProfileLoader(IReadOnlyList<IModule> modules)
         JsonDocument doc;
         try
         {
-            doc = JsonDocument.Parse(bytes, new JsonDocumentOptions
+            doc = JsonDocument.Parse(StripUtf8Bom(bytes), new JsonDocumentOptions
             {
                 CommentHandling = JsonCommentHandling.Skip,
                 AllowTrailingCommas = true,
@@ -97,6 +97,9 @@ public sealed class ProfileLoader(IReadOnlyList<IModule> modules)
             return new ProfileLoadResult(new LoadedProfile(profile, path, hash), []);
         }
     }
+
+    private static ReadOnlyMemory<byte> StripUtf8Bom(byte[] bytes) =>
+        bytes.AsSpan().StartsWith(System.Text.Encoding.UTF8.Preamble) ? bytes.AsMemory(System.Text.Encoding.UTF8.Preamble.Length) : bytes;
 
     private static ProfileError Missing(string field) =>
         Error(ProfileErrorCode.MissingField, field, Strings.Format("ProfileError_MissingField", field));

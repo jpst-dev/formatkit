@@ -146,4 +146,17 @@ public class ProfileLoaderTests : IDisposable
         Assert.Equal(ProfileErrorCode.InvalidValue, result.Errors.Single().Code);
         Assert.Equal("", result.Errors.Single().Path);
     }
+
+    [Fact]
+    public void Utf8_bom_prefixed_profile_loads()
+    {
+        var path = Path.Combine(_dir, "bom.json");
+        File.WriteAllText(path, Valid, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+        Assert.Equal(0xEF, File.ReadAllBytes(path)[0]);
+
+        var result = Loader().Load(path);
+
+        Assert.True(result.IsValid);
+        Assert.Equal("PC", result.Value!.Profile.Name);
+    }
 }

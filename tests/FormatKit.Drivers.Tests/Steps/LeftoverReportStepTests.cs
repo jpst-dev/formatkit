@@ -89,4 +89,20 @@ public class LeftoverReportStepTests
 
         Assert.Contains("Late", result.Messages[0]);
     }
+
+    [Theory]
+    [InlineData("", "PCI\\VEN_1", "PCI\\VEN_1")]
+    [InlineData("  ", "PCI\\VEN_1", "PCI\\VEN_1")]
+    [InlineData("", "", "ACPI\\HID_1")]
+    public async Task Blank_device_name_falls_back_to_device_id_then_hardware_id(string name, string deviceId, string expected)
+    {
+        var device = new ProblemDevice(name, deviceId, 28, ["ACPI\\HID_1"]);
+        var ctx = Arrange(new FakeHardwareInfo(FakeHardwareInfo.Sample(problemDevices: [device])));
+
+        var result = await new LeftoverReportStep(Catalog).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        var message = Assert.Single(result.Messages);
+        Assert.StartsWith(expected, message.TrimStart());
+        Assert.DoesNotContain("  (", message);
+    }
 }

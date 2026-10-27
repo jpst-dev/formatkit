@@ -29,7 +29,7 @@ public sealed class WmiHardwareInfo : IHardwareInfo
             .ToList();
 
         ct.ThrowIfCancellationRequested();
-        var problems = Query("SELECT Name, DeviceID, ConfigManagerErrorCode, HardwareID FROM Win32_PnPEntity WHERE ConfigManagerErrorCode <> 0")
+        var problems = Query("SELECT Name, DeviceID, ConfigManagerErrorCode, HardwareID FROM Win32_PnPEntity WHERE ConfigManagerErrorCode <> 0 AND ConfigManagerErrorCode <> 22")
             .Select(o => new ProblemDevice(
                 Str(o, "Name"),
                 Str(o, "DeviceID"),

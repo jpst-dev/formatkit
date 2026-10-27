@@ -7,6 +7,7 @@ namespace FormatKit.Core.SystemAccess;
 public sealed class ProcessRunner(ILogger log) : IProcessRunner
 {
     private const int ErrorFileNotFound = 2;
+    private static readonly TimeSpan DrainTimeout = TimeSpan.FromSeconds(10);
 
     public async Task<ProcessResult> RunAsync(ProcessSpec spec, CancellationToken ct)
     {
@@ -59,8 +60,8 @@ public sealed class ProcessRunner(ILogger log) : IProcessRunner
         }
 
         await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
-        var stdOut = await stdOutTask.ConfigureAwait(false);
-        var stdErr = await stdErrTask.ConfigureAwait(false);
+        var stdOut = await DrainAsync(stdOutTask, "stdout", commandLine, ct).ConfigureAwait(false);
+        var stdErr = await DrainAsync(stdErrTask, "stderr", commandLine, ct).ConfigureAwait(false);
         stopwatch.Stop();
 
         var exitCode = process.ExitCode;
@@ -72,6 +73,20 @@ public sealed class ProcessRunner(ILogger log) : IProcessRunner
             spec.FileName, exitCode, stopwatch.Elapsed.TotalSeconds, timedOut ? " (timed out)" : string.Empty);
 
         return new ProcessResult(exitCode, stdOut, stdErr, stopwatch.Elapsed, timedOut);
+    }
+
+    /// <summary>Waits a bounded time for a redirected stream: a grandchild can keep the pipe open.</summary>
+    private async Task<string> DrainAsync(Task<string> read, string stream, string commandLine, CancellationToken ct)
+    {
+        try
+        {
+            return await read.WaitAsync(DrainTimeout, ct).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            log.Warning("Timed out reading {Stream} of {CommandLine}; returning what was captured", stream, commandLine);
+            return string.Empty;
+        }
     }
 
     private static void KillTree(Process process)

@@ -8,7 +8,14 @@ public sealed record BoardInfo(string Manufacturer, string Product);
 
 public sealed record GpuInfo(string Name, string PnpDeviceId, GpuVendor Vendor, string? DriverVersion);
 
-public sealed record ProblemDevice(string Name, string DeviceId, int ErrorCode, IReadOnlyList<string> HardwareIds);
+public sealed record ProblemDevice(string Name, string DeviceId, int ErrorCode, IReadOnlyList<string> HardwareIds)
+{
+    /// <summary>The name, or the device id (then the first hardware id) when the name is blank.</summary>
+    public string DisplayName =>
+        !string.IsNullOrWhiteSpace(Name) ? Name
+        : !string.IsNullOrWhiteSpace(DeviceId) ? DeviceId
+        : HardwareIds.FirstOrDefault(id => !string.IsNullOrWhiteSpace(id)) ?? string.Empty;
+}
 
 public sealed record NetworkAdapterInfo(string Name, string PnpDeviceId, string? InfName, string? DriverVersion);
 

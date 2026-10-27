@@ -27,8 +27,8 @@ public sealed class LeftoverReportStep(VendorCatalog catalog) : IStep
         {
             var hardwareId = d.HardwareIds.FirstOrDefault();
             return hardwareId is null
-                ? Strings.Format("Step_LeftoverReport_Device", d.Name, d.ErrorCode, Strings.Get("Step_LeftoverReport_NoHardwareId"), CatalogSearchUrl)
-                : Strings.Format("Step_LeftoverReport_Device", d.Name, d.ErrorCode, hardwareId, CatalogSearchUrl + Uri.EscapeDataString(hardwareId));
+                ? Strings.Format("Step_LeftoverReport_Device", d.DisplayName, d.ErrorCode, Strings.Get("Step_LeftoverReport_NoHardwareId"), CatalogSearchUrl)
+                : Strings.Format("Step_LeftoverReport_Device", d.DisplayName, d.ErrorCode, hardwareId, CatalogSearchUrl + Uri.EscapeDataString(hardwareId));
         }).ToList();
 
         var board = MachineClassifier.Classify(hw, catalog).Board;

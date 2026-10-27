@@ -1,9 +1,10 @@
+using System.Text.Json.Serialization;
 using FormatKit.Core.Steps;
 
 namespace FormatKit.Core.Running;
 
 public sealed record StepRecord(
-    StepOutcome Outcome,
+    [property: JsonRequired] StepOutcome Outcome,
     DateTimeOffset FinishedAt,
     IReadOnlyList<string> Messages,
     string? NextAction);

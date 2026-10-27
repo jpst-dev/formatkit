@@ -29,7 +29,7 @@ internal static class HardwareCommand
         Output.List(o, Strings.Get("Hw_Gpus"),
             hw.Gpus.Select(g => Strings.Format("Hw_Gpu", g.Name, g.DriverVersion ?? unknown)).ToList());
         Output.List(o, Strings.Get("Hw_ProblemDevices"),
-            hw.ProblemDevices.Select(d => Strings.Format("Hw_Problem", d.Name, d.ErrorCode)).ToList());
+            hw.ProblemDevices.Select(d => Strings.Format("Hw_Problem", d.DisplayName, d.ErrorCode)).ToList());
         Output.List(o, Strings.Get("Hw_NetworkAdapters"),
             hw.NetworkAdapters.Select(a => Strings.Format("Hw_Adapter", a.Name, a.InfName ?? unknown, a.DriverVersion ?? unknown)).ToList());
     }
