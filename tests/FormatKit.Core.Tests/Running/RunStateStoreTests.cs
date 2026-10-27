@@ -122,4 +122,46 @@ public class RunStateStoreTests
         Assert.Equal(@"C:\FormatKitTest\reports", Paths.ReportsDirectory);
         Assert.EndsWith("FormatKit", AppPaths.Default.Root);
     }
+
+    private const string Head = "\"profilePath\":\"p\",\"profileHash\":\"h\",\"startedAt\":\"2026-10-27T10:00:00+00:00\"";
+
+    [Theory]
+    [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":null}}")]
+    [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":{\"outcome\":\"Failed\",\"finishedAt\":\"2026-10-27T10:00:00+00:00\"}}}")]
+    [InlineData("{" + Head + ",\"planStepIds\":[null],\"results\":{}}")]
+    [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":{\"outcome\":99,\"finishedAt\":\"2026-10-27T10:00:00+00:00\",\"messages\":[]}}}")]
+    public void Null_entries_or_integer_outcome_return_Corrupt(string json)
+    {
+        var fs = new InMemoryFileSystem();
+        fs.Seed(Paths.StateFile, json);
+
+        var result = new RunStateStore(fs, Paths).Load();
+
+        Assert.Equal(StateLoadStatus.Corrupt, result.Status);
+        Assert.False(string.IsNullOrWhiteSpace(result.Error));
+    }
+
+    [Theory]
+    [InlineData(typeof(IOException))]
+    [InlineData(typeof(UnauthorizedAccessException))]
+    public void Read_failure_returns_Corrupt(Type exceptionType)
+    {
+        var fs = new ThrowingReadFileSystem((Exception)Activator.CreateInstance(exceptionType, "locked")!);
+
+        var result = new RunStateStore(fs, Paths).Load();
+
+        Assert.Equal(StateLoadStatus.Corrupt, result.Status);
+        Assert.Equal("locked", result.Error);
+    }
+
+    private sealed class ThrowingReadFileSystem(Exception toThrow) : FormatKit.Core.SystemAccess.IFileSystem
+    {
+        public bool FileExists(string path) => true;
+        public bool DirectoryExists(string path) => true;
+        public string ReadAllText(string path) => throw toThrow;
+        public void WriteAllTextAtomic(string path, string contents) { }
+        public void Delete(string path) { }
+        public void CreateDirectory(string path) { }
+        public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => [];
+    }
 }

@@ -10,7 +10,7 @@ public sealed class RunStateStore(IFileSystem files, AppPaths paths)
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
+        Converters = { new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: false) },
     };
 
     public StateLoadResult Load()
@@ -24,9 +24,12 @@ public sealed class RunStateStore(IFileSystem files, AppPaths paths)
             if (state is null || state.ProfilePath is null || state.ProfileHash is null
                 || state.PlanStepIds is null || state.Results is null)
                 return Corrupt("State file is missing required fields.");
+            if (state.PlanStepIds.Any(id => id is null)
+                || state.Results.Any(kv => kv.Value is null || kv.Value.Messages is null || kv.Value.Messages.Any(m => m is null)))
+                return Corrupt("State file contains null entries.");
             return new StateLoadResult(StateLoadStatus.Loaded, state, null);
         }
-        catch (JsonException ex)
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
         {
             return Corrupt(ex.Message);
         }
