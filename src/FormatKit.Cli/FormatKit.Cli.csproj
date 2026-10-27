@@ -9,6 +9,9 @@
     <ProjectReference Include="..\FormatKit.Drivers\FormatKit.Drivers.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="2.0.14" />
   </ItemGroup>
 </Project>

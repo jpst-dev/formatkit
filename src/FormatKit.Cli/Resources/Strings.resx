@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Cmd_Root" xml:space="preserve"><value>Automates a clean Windows reinstall.</value></data>
+  <data name="Cmd_Hardware" xml:space="preserve"><value>Print the detected hardware.</value></data>
+  <data name="Cmd_Drivers" xml:space="preserve"><value>Driver commands.</value></data>
+  <data name="Cmd_Scan" xml:space="preserve"><value>Report which driver work applies to this PC (read-only).</value></data>
+  <data name="Cmd_Install" xml:space="preserve"><value>Install drivers using the built-in drivers-only profile.</value></data>
+  <data name="Cmd_Backup" xml:space="preserve"><value>Export the installed network drivers to a folder.</value></data>
+  <data name="Cmd_Run" xml:space="preserve"><value>Run a profile, or resume an interrupted run.</value></data>
+  <data name="Opt_Verbose" xml:space="preserve"><value>Show detailed log output.</value></data>
+  <data name="Opt_DryRun" xml:space="preserve"><value>Print the plan without running anything.</value></data>
+  <data name="Opt_Output" xml:space="preserve"><value>Folder that receives the exported drivers.</value></data>
+  <data name="Opt_Profile" xml:space="preserve"><value>Path to the profile JSON file.</value></data>
+  <data name="Opt_Resume" xml:space="preserve"><value>Resume the interrupted run.</value></data>
+  <data name="Error_Wmi" xml:space="preserve"><value>Could not read the system information: {0}</value></data>
+  <data name="Cancelled" xml:space="preserve"><value>Cancelled.</value></data>
+  <data name="Cancelled_Run" xml:space="preserve"><value>Cancelled. Run 'formatkit run --resume' to continue the run.</value></data>
+  <data name="Elevation_Declined" xml:space="preserve"><value>The administrator permission was declined. Run the command again and accept the prompt, or start formatkit from an elevated terminal.</value></data>
+  <data name="Hw_Machine" xml:space="preserve"><value>Machine</value></data>
+  <data name="Hw_Board" xml:space="preserve"><value>Board</value></data>
+  <data name="Hw_Bios" xml:space="preserve"><value>BIOS</value></data>
+  <data name="Hw_Gpus" xml:space="preserve"><value>GPUs</value></data>
+  <data name="Hw_ProblemDevices" xml:space="preserve"><value>Problem devices</value></data>
+  <data name="Hw_NetworkAdapters" xml:space="preserve"><value>Network adapters</value></data>
+  <data name="Hw_None" xml:space="preserve"><value>none</value></data>
+  <data name="Hw_Unknown" xml:space="preserve"><value>unknown</value></data>
+  <data name="Hw_Gpu" xml:space="preserve"><value>{0} (driver {1})</value></data>
+  <data name="Hw_Problem" xml:space="preserve"><value>{0} (error code {1})</value></data>
+  <data name="Hw_Adapter" xml:space="preserve"><value>{0} (inf {1}, driver {2})</value></data>
+  <data name="Scan_MachineType" xml:space="preserve"><value>Machine type</value></data>
+  <data name="Scan_Oem" xml:space="preserve"><value>OEM ({0})</value></data>
+  <data name="Scan_Board" xml:space="preserve"><value>Custom build (board support: {0})</value></data>
+  <data name="Scan_Custom" xml:space="preserve"><value>Custom build (no OEM tool)</value></data>
+  <data name="Scan_Online" xml:space="preserve"><value>Online</value></data>
+  <data name="Scan_Updates" xml:space="preserve"><value>Windows Update drivers</value></data>
+  <data name="Scan_GpuPackages" xml:space="preserve"><value>GPU packages</value></data>
+  <data name="Scan_WuError" xml:space="preserve"><value>Windows Update search failed: {0}</value></data>
+  <data name="Value_Yes" xml:space="preserve"><value>yes</value></data>
+  <data name="Value_No" xml:space="preserve"><value>no</value></data>
+  <data name="Plan_Header" xml:space="preserve"><value>Plan: {0}</value></data>
+  <data name="Plan_Admin" xml:space="preserve"><value>administrator</value></data>
+  <data name="Profile_Errors" xml:space="preserve"><value>The profile has {0} problem(s); nothing was run:</value></data>
+  <data name="Run_UsageBoth" xml:space="preserve"><value>Use either --profile or --resume, not both.</value></data>
+  <data name="Run_UsageNeither" xml:space="preserve"><value>Specify --profile with a file, or --resume.</value></data>
+  <data name="Run_NothingToResume" xml:space="preserve"><value>There is no interrupted run to resume.</value></data>
+  <data name="Run_StateCorrupt" xml:space="preserve"><value>The saved run state is unreadable ({0}). Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_ProfileChanged" xml:space="preserve"><value>The profile changed since the run started, so it cannot be resumed. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_Status_Completed" xml:space="preserve"><value>Run completed.</value></data>
+  <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Run completed with failures.</value></data>
+  <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Run stopped on a critical failure.</value></data>
+  <data name="Run_RebootPending" xml:space="preserve"><value>The run will resume automatically at the next logon. You can reboot now or later.</value></data>
+  <data name="Run_ReportDir" xml:space="preserve"><value>Report: {0}</value></data>
+  <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
+  <data name="Outcome_Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="Outcome_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="Outcome_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Outcome_RebootRequired" xml:space="preserve"><value>Reboot required</value></data>
+  <data name="Backup_Header" xml:space="preserve"><value>Network driver backup to {0}</value></data>
+  <data name="Backup_Exported" xml:space="preserve"><value>Exported</value></data>
+  <data name="Backup_Skipped" xml:space="preserve"><value>Skipped (inbox driver)</value></data>
+  <data name="Backup_Failed" xml:space="preserve"><value>Failed</value></data>
+</root>

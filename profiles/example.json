@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "Example",
+  "modules": {
+    "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] }
+  }
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Cmd_Root" xml:space="preserve"><value>Automatiza uma reinstalação limpa do Windows.</value></data>
+  <data name="Cmd_Hardware" xml:space="preserve"><value>Mostra o hardware detectado.</value></data>
+  <data name="Cmd_Drivers" xml:space="preserve"><value>Comandos de drivers.</value></data>
+  <data name="Cmd_Scan" xml:space="preserve"><value>Mostra quais drivers se aplicam a este PC (somente leitura).</value></data>
+  <data name="Cmd_Install" xml:space="preserve"><value>Instala drivers com o perfil interno somente de drivers.</value></data>
+  <data name="Cmd_Backup" xml:space="preserve"><value>Exporta os drivers de rede instalados para uma pasta.</value></data>
+  <data name="Cmd_Run" xml:space="preserve"><value>Executa um perfil ou retoma uma execução interrompida.</value></data>
+  <data name="Opt_Verbose" xml:space="preserve"><value>Mostra o log detalhado.</value></data>
+  <data name="Opt_DryRun" xml:space="preserve"><value>Mostra o plano sem executar nada.</value></data>
+  <data name="Opt_Output" xml:space="preserve"><value>Pasta que receberá os drivers exportados.</value></data>
+  <data name="Opt_Profile" xml:space="preserve"><value>Caminho do arquivo JSON do perfil.</value></data>
+  <data name="Opt_Resume" xml:space="preserve"><value>Retoma a execução interrompida.</value></data>
+  <data name="Error_Wmi" xml:space="preserve"><value>Não foi possível ler as informações do sistema: {0}</value></data>
+  <data name="Cancelled" xml:space="preserve"><value>Cancelado.</value></data>
+  <data name="Cancelled_Run" xml:space="preserve"><value>Cancelado. Execute 'formatkit run --resume' para continuar a execução.</value></data>
+  <data name="Elevation_Declined" xml:space="preserve"><value>A permissão de administrador foi recusada. Execute o comando novamente e aceite a solicitação, ou inicie o formatkit em um terminal elevado.</value></data>
+  <data name="Hw_Machine" xml:space="preserve"><value>Máquina</value></data>
+  <data name="Hw_Board" xml:space="preserve"><value>Placa-mãe</value></data>
+  <data name="Hw_Bios" xml:space="preserve"><value>BIOS</value></data>
+  <data name="Hw_Gpus" xml:space="preserve"><value>GPUs</value></data>
+  <data name="Hw_ProblemDevices" xml:space="preserve"><value>Dispositivos com problema</value></data>
+  <data name="Hw_NetworkAdapters" xml:space="preserve"><value>Adaptadores de rede</value></data>
+  <data name="Hw_None" xml:space="preserve"><value>nenhum</value></data>
+  <data name="Hw_Unknown" xml:space="preserve"><value>desconhecido</value></data>
+  <data name="Hw_Gpu" xml:space="preserve"><value>{0} (driver {1})</value></data>
+  <data name="Hw_Problem" xml:space="preserve"><value>{0} (código de erro {1})</value></data>
+  <data name="Hw_Adapter" xml:space="preserve"><value>{0} (inf {1}, driver {2})</value></data>
+  <data name="Scan_MachineType" xml:space="preserve"><value>Tipo de máquina</value></data>
+  <data name="Scan_Oem" xml:space="preserve"><value>OEM ({0})</value></data>
+  <data name="Scan_Board" xml:space="preserve"><value>Montada (suporte da placa: {0})</value></data>
+  <data name="Scan_Custom" xml:space="preserve"><value>Montada (sem ferramenta OEM)</value></data>
+  <data name="Scan_Online" xml:space="preserve"><value>Online</value></data>
+  <data name="Scan_Updates" xml:space="preserve"><value>Drivers do Windows Update</value></data>
+  <data name="Scan_GpuPackages" xml:space="preserve"><value>Pacotes de GPU</value></data>
+  <data name="Scan_WuError" xml:space="preserve"><value>A busca no Windows Update falhou: {0}</value></data>
+  <data name="Value_Yes" xml:space="preserve"><value>sim</value></data>
+  <data name="Value_No" xml:space="preserve"><value>não</value></data>
+  <data name="Plan_Header" xml:space="preserve"><value>Plano: {0}</value></data>
+  <data name="Plan_Admin" xml:space="preserve"><value>administrador</value></data>
+  <data name="Profile_Errors" xml:space="preserve"><value>O perfil tem {0} problema(s); nada foi executado:</value></data>
+  <data name="Run_UsageBoth" xml:space="preserve"><value>Use --profile ou --resume, não ambos.</value></data>
+  <data name="Run_UsageNeither" xml:space="preserve"><value>Informe --profile com um arquivo, ou --resume.</value></data>
+  <data name="Run_NothingToResume" xml:space="preserve"><value>Não há execução interrompida para retomar.</value></data>
+  <data name="Run_StateCorrupt" xml:space="preserve"><value>O estado salvo da execução está ilegível ({0}). Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde o início da execução, então ela não pode ser retomada. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_Status_Completed" xml:space="preserve"><value>Execução concluída.</value></data>
+  <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Execução concluída com falhas.</value></data>
+  <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Execução interrompida por uma falha crítica.</value></data>
+  <data name="Run_RebootPending" xml:space="preserve"><value>A execução continuará automaticamente no próximo logon. Você pode reiniciar agora ou depois.</value></data>
+  <data name="Run_ReportDir" xml:space="preserve"><value>Relatório: {0}</value></data>
+  <data name="Run_NextAction" xml:space="preserve"><value>Próximo passo: {0}</value></data>
+  <data name="Outcome_Succeeded" xml:space="preserve"><value>Sucesso</value></data>
+  <data name="Outcome_Skipped" xml:space="preserve"><value>Ignorado</value></data>
+  <data name="Outcome_Failed" xml:space="preserve"><value>Falhou</value></data>
+  <data name="Outcome_RebootRequired" xml:space="preserve"><value>Requer reinício</value></data>
+  <data name="Backup_Header" xml:space="preserve"><value>Backup dos drivers de rede em {0}</value></data>
+  <data name="Backup_Exported" xml:space="preserve"><value>Exportados</value></data>
+  <data name="Backup_Skipped" xml:space="preserve"><value>Ignorados (driver nativo do Windows)</value></data>
+  <data name="Backup_Failed" xml:space="preserve"><value>Falharam</value></data>
+</root>

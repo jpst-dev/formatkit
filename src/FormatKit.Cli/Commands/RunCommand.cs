@@ -1,0 +1,165 @@
+using System.CommandLine;
+using FormatKit.Cli.Localization;
+using FormatKit.Core.Profiles;
+using FormatKit.Core.Running;
+using FormatKit.Core.Steps;
+
+namespace FormatKit.Cli.Commands;
+
+internal static class RunCommand
+{
+    public static Command Create(CommandContext context)
+    {
+        var profileOption = new Option<string?>("--profile") { Description = Strings.Get("Opt_Profile") };
+        var dryRun = new Option<bool>("--dry-run") { Description = Strings.Get("Opt_DryRun") };
+        var resume = new Option<bool>("--resume") { Description = Strings.Get("Opt_Resume") };
+        var run = new Command("run", Strings.Get("Cmd_Run")) { Options = { profileOption, dryRun, resume } };
+
+        run.SetAction(async (parse, ct) =>
+        {
+            var path = parse.GetValue(profileOption);
+            var resuming = parse.GetValue(resume);
+            var o = context.Out;
+
+            if (path is not null && resuming)
+            {
+                o.WriteLine(Strings.Get("Run_UsageBoth"));
+                return ExitCodes.InvalidInput;
+            }
+
+            if (path is null && !resuming)
+            {
+                o.WriteLine(Strings.Get("Run_UsageNeither"));
+                return ExitCodes.InvalidInput;
+            }
+
+            if (resuming)
+            {
+                var load = context.Env.StateStore.Load();
+                switch (load.Status)
+                {
+                    case StateLoadStatus.None:
+                        o.WriteLine(Strings.Get("Run_NothingToResume"));
+                        return ExitCodes.NothingToResume;
+                    case StateLoadStatus.Corrupt:
+                        o.WriteLine(Strings.Format("Run_StateCorrupt", load.Error ?? ""));
+                        return ExitCodes.NothingToResume;
+                }
+
+                path = load.State!.ProfilePath;
+            }
+
+            var profile = path == BuiltInProfiles.DriversOnlyPath
+                ? new LoadedProfile(BuiltInProfiles.DriversOnly, path, BuiltInProfiles.DriversOnlyHash)
+                : LoadProfile(context, path!);
+            if (profile is null)
+                return ExitCodes.InvalidInput;
+
+            return await RunFlow.ExecuteAsync(context, profile, resuming, parse.GetValue(dryRun), ct);
+        });
+        return run;
+    }
+
+    private static LoadedProfile? LoadProfile(CommandContext context, string path)
+    {
+        var result = new ProfileLoader(context.Modules).Load(path);
+        if (result.IsValid)
+            return result.Value;
+
+        context.Out.WriteLine(Strings.Format("Profile_Errors", result.Errors.Count));
+        foreach (var error in result.Errors)
+        {
+            context.Out.WriteLine(error.Path.Length == 0
+                ? $"  {error.Message}"
+                : $"  {error.Path}: {error.Message}");
+        }
+
+        return null;
+    }
+}
+
+internal static class RunFlow
+{
+    public static async Task<int> ExecuteAsync(
+        CommandContext context, LoadedProfile profile, bool resume, bool dryRun, CancellationToken ct)
+    {
+        var o = context.Out;
+        var plan = PlanBuilder.Build(profile.Profile, context.Modules);
+
+        if (dryRun)
+        {
+            o.WriteLine(Strings.Format("Plan_Header", profile.Profile.Name));
+            foreach (var step in plan)
+            {
+                var admin = step.RequiresAdmin ? $" [{Strings.Get("Plan_Admin")}]" : "";
+                o.WriteLine($"  {step.Id}  {step.Title}{admin}");
+            }
+
+            return ExitCodes.Ok;
+        }
+
+        if (plan.Any(s => s.RequiresAdmin) && await context.EnsureElevatedAsync() is { } exit)
+            return exit;
+
+        var env = context.Env;
+        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown);
+        var request = new RunRequest(profile.Path, profile.Hash, plan, new StepContext(env.Services, env.Log), resume);
+
+        RunSummary summary;
+        try
+        {
+            summary = await engine.RunAsync(request, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            o.WriteLine(Strings.Get("Cancelled_Run"));
+            return ExitCodes.Cancelled;
+        }
+
+        return Report(o, summary);
+    }
+
+    private static int Report(TextWriter o, RunSummary summary)
+    {
+        switch (summary.Status)
+        {
+            case RunStatus.NothingToResume:
+                o.WriteLine(Strings.Get("Run_NothingToResume"));
+                return ExitCodes.NothingToResume;
+            case RunStatus.StateCorrupt:
+                o.WriteLine(Strings.Format("Run_StateCorrupt", summary.Error ?? ""));
+                return ExitCodes.NothingToResume;
+            case RunStatus.ProfileChanged:
+                o.WriteLine(Strings.Get("Run_ProfileChanged"));
+                return ExitCodes.NothingToResume;
+        }
+
+        foreach (var step in summary.Steps)
+        {
+            o.WriteLine($"[{Strings.Get("Outcome_" + step.Outcome)}] {step.Title}");
+            foreach (var message in step.Messages)
+                o.WriteLine($"    {message}");
+            if (!string.IsNullOrWhiteSpace(step.NextAction))
+                o.WriteLine($"    {Strings.Format("Run_NextAction", step.NextAction)}");
+        }
+
+        if (summary.ReportDirectory is not null)
+            o.WriteLine(Strings.Format("Run_ReportDir", summary.ReportDirectory));
+
+        switch (summary.Status)
+        {
+            case RunStatus.RebootPending:
+                o.WriteLine(Strings.Get("Run_RebootPending"));
+                return ExitCodes.RebootPending;
+            case RunStatus.StoppedOnCriticalFailure:
+                o.WriteLine(Strings.Get("Run_Status_StoppedOnCriticalFailure"));
+                return ExitCodes.StoppedOnCriticalFailure;
+            case RunStatus.CompletedWithFailures:
+                o.WriteLine(Strings.Get("Run_Status_CompletedWithFailures"));
+                return ExitCodes.CompletedWithFailures;
+            default:
+                o.WriteLine(Strings.Get("Run_Status_Completed"));
+                return ExitCodes.Ok;
+        }
+    }
+}
