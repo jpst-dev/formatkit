@@ -1,0 +1,42 @@
+{
+  "oem": [
+    {
+      "id": "dell",
+      "manufacturerMatches": ["Dell"],
+      "wingetId": "Dell.CommandUpdate",
+      "executable": "%ProgramFiles%\\Dell\\CommandUpdate\\dcu-cli.exe",
+      "arguments": ["/applyUpdates", "-silent", "-reboot=disable"],
+      "successExitCodes": [0, 500],
+      "rebootExitCodes": [1]
+    },
+    {
+      "id": "lenovo",
+      "manufacturerMatches": ["LENOVO"],
+      "wingetId": "Lenovo.SystemUpdate",
+      "executable": "%ProgramFiles(x86)%\\Lenovo\\System Update\\Tvsu.exe",
+      "arguments": ["/CM", "-search", "A", "-action", "INSTALL", "-includerebootpackages", "1,3,4", "-noreboot", "-noicon", "-nolicense"],
+      "successExitCodes": [0],
+      "rebootExitCodes": []
+    },
+    {
+      "id": "hp",
+      "manufacturerMatches": ["HP", "Hewlett-Packard"],
+      "wingetId": "HP.ImageAssistant",
+      "executable": "%ProgramFiles%\\HP\\HPIA\\HPImageAssistant.exe",
+      "arguments": ["/Operation:Analyze", "/Action:Install", "/Selection:All", "/Silent", "/Noninteractive"],
+      "successExitCodes": [0, 256],
+      "rebootExitCodes": [3010]
+    }
+  ],
+  "gpu": [
+    { "vendor": "nvidia", "wingetId": "XP8CLZL93F5Z4P" },
+    { "vendor": "amd", "wingetId": "AMD.Adrenalin" },
+    { "vendor": "intel", "wingetId": "Intel.IntelDriverAndSupportAssistant" }
+  ],
+  "boards": [
+    { "manufacturerMatches": ["ASUSTeK"], "supportUrl": "https://www.asus.com/support/" },
+    { "manufacturerMatches": ["Micro-Star"], "supportUrl": "https://www.msi.com/support" },
+    { "manufacturerMatches": ["Gigabyte"], "supportUrl": "https://www.gigabyte.com/Support" },
+    { "manufacturerMatches": ["ASRock"], "supportUrl": "https://www.asrock.com/support/index.asp" }
+  ]
+}
