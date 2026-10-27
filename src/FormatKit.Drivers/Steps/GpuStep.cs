@@ -71,10 +71,6 @@ public sealed class GpuStep(VendorCatalog catalog) : IStep
     private async Task<List<GpuPackage>> GetPackagesAsync(StepContext ctx, CancellationToken ct)
     {
         var hw = await ctx.Services.Hardware.ReadAsync(ct);
-        return hw.Gpus
-            .Select(g => catalog.Gpu.FirstOrDefault(p => p.Vendor == g.Vendor))
-            .OfType<GpuPackage>()
-            .DistinctBy(p => p.WingetId)
-            .ToList();
+        return GpuPackageSelector.Select(hw, catalog);
     }
 }

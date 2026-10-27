@@ -41,4 +41,9 @@
   <data name="Step_LeftoverReport_Device" xml:space="preserve"><value>{0} (code {1}): {2} — {3}</value></data>
   <data name="Step_LeftoverReport_NoHardwareId" xml:space="preserve"><value>(no hardware ID)</value></data>
   <data name="Step_LeftoverReport_BoardSupport" xml:space="preserve"><value>Motherboard support page: {0}</value></data>
+  <data name="Validation_MissingField" xml:space="preserve"><value>Required field &apos;{0}&apos; is missing.</value></data>
+  <data name="Validation_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
+  <data name="Validation_UnknownProperty" xml:space="preserve"><value>Unknown property &apos;{0}&apos; in the drivers module.</value></data>
+  <data name="Validation_UnknownSource" xml:space="preserve"><value>Unknown driver source &apos;{0}&apos;; expected one of: {1}.</value></data>
+  <data name="Validation_DuplicateSource" xml:space="preserve"><value>Driver source &apos;{0}&apos; is listed more than once.</value></data>
 </root>

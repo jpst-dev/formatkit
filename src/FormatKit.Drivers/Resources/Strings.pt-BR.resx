@@ -41,4 +41,9 @@
   <data name="Step_LeftoverReport_Device" xml:space="preserve"><value>{0} (código {1}): {2} — {3}</value></data>
   <data name="Step_LeftoverReport_NoHardwareId" xml:space="preserve"><value>(sem ID de hardware)</value></data>
   <data name="Step_LeftoverReport_BoardSupport" xml:space="preserve"><value>Página de suporte da placa-mãe: {0}</value></data>
+  <data name="Validation_MissingField" xml:space="preserve"><value>O campo obrigatório &apos;{0}&apos; está ausente.</value></data>
+  <data name="Validation_InvalidValue" xml:space="preserve"><value>Valor inválido: esperado {0}.</value></data>
+  <data name="Validation_UnknownProperty" xml:space="preserve"><value>Propriedade desconhecida &apos;{0}&apos; no módulo drivers.</value></data>
+  <data name="Validation_UnknownSource" xml:space="preserve"><value>Fonte de drivers desconhecida &apos;{0}&apos;; esperado um de: {1}.</value></data>
+  <data name="Validation_DuplicateSource" xml:space="preserve"><value>A fonte de drivers &apos;{0}&apos; está listada mais de uma vez.</value></data>
 </root>
