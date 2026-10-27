@@ -3,6 +3,11 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>formatkit</AssemblyName>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained Condition="'$(_IsPublishing)' == 'true'">true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />

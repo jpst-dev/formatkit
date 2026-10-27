@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Unit tests
+        run: dotnet test -c Release -- --filter-not-trait "Category=Integration"
+      - name: Publish
+        run: dotnet publish src/FormatKit.Cli -c Release -o artifacts
+      - name: Upload to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/formatkit.exe
