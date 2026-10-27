@@ -1,0 +1,14 @@
+using FormatKit.Core.Hardware;
+using FormatKit.Core.SystemAccess;
+using FormatKit.Core.WindowsUpdate;
+
+namespace FormatKit.Core.Steps;
+
+public sealed record ServiceSet(
+    IProcessRunner Processes,
+    IFileSystem Files,
+    IHardwareInfo Hardware,
+    IWindowsUpdateClient WindowsUpdate,
+    INetworkProbe Network,
+    WingetClient Winget,
+    PnpUtil PnpUtil);
