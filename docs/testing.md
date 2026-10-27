@@ -32,19 +32,29 @@ On the physical host (or any machine with working network drivers):
 .\formatkit.exe drivers backup-network --output C:\FormatKitShare\netdrivers
 ```
 
-**Expected (confirm):** exit code 0; the output folder contains one subfolder per physical network adapter that uses an OEM INF (adapters on inbox drivers are skipped), each with the exported `.inf`, `.sys` and `.cat` files. Confirm that running the command again also succeeds.
+**Expected (confirm):** exit code 0; the output folder contains one subfolder per physical network adapter that uses an OEM INF, each with the exported `.inf`, `.sys` and `.cat` files. Adapters with no INF or on inbox drivers are skipped. Confirm that running the command again also succeeds. If any export fails, the command lists the failed adapters and exits with code 1.
 
-## 3. Run with a missing network driver (fallback and critical stop)
+## 3. Run with the network disabled (critical stop, with and without a backup)
 
-1. Restore checkpoint `clean`. Copy `formatkit.exe`, the profile and the backed-up `netdrivers` folder into the VM (for example to `C:\fk\netdrivers`).
-2. Edit the VM copy of the profile so `modules.drivers` contains `"networkDriverBackup": "C:\\fk\\netdrivers"` (JSON needs doubled backslashes). The path must match the folder used by the backup step.
-3. Simulate a missing network driver in the VM: in Device Manager, uninstall the network adapter and tick "Attempt to remove the driver for this device" (or run `pnputil /delete-driver <oemNN.inf> /uninstall /force`), so the VM has no connectivity. Do not merely disable the adapter: the fallback installs drivers but does not re-enable a disabled adapter.
-4. Run `.\formatkit.exe run --profile example.json` and accept the UAC prompt.
-5. Repeat from step 1 with the `networkDriverBackup` key removed.
+A Hyper-V VM uses the inbox synthetic network driver, which cannot bind a physical NIC driver and cannot be removed with `pnputil /delete-driver`. So this scenario only checks what a VM can show: the step's messages, logging and exit code. The real "driver missing, fallback restores the network" check is in the hardware checklist below.
 
-**Expected, backup configured:** an elevated second window opens (UAC relaunch) and waits for **Enter** at the end. The network check step installs the backed-up drivers with `pnputil`, re-probes connectivity, and reports the network restored; the run continues. (If the machine is still offline after the install, the step fails with the "installed from ... but still no internet" message and the run exits with code **3**.)
+Setup: restore checkpoint `clean`, copy `formatkit.exe`, the profile and the backed-up `netdrivers` folder into the VM (for example `C:\fk\netdrivers`).
 
-**Expected, backup not configured:** the network check step fails with an actionable message (configure `networkDriverBackup`), steps that need the network are not attempted, and the run stops with exit code **3** (StoppedOnCriticalFailure). Restore the driver manually (or re-add `networkDriverBackup`) and run again to confirm the run proceeds.
+**3a. No backup configured**
+
+1. Disable the VM network adapter (Hyper-V settings, or `Disable-NetAdapter` in the VM).
+2. Run `.\formatkit.exe run --profile example.json` and accept the UAC prompt.
+
+**Expected:** the network check step fails with the actionable "no backup" message (configure `networkDriverBackup`), steps that need the network are not attempted, and the run stops with exit code **3** (StoppedOnCriticalFailure). The elevated second window (UAC relaunch) waits for **Enter** at the end.
+
+**3b. Backup configured**
+
+1. Keep the adapter disabled. Edit the VM copy of the profile so `modules.drivers` contains `"networkDriverBackup": "C:\fk\netdrivers"` (JSON needs doubled backslashes; the path must match the copied folder).
+2. Run `.\formatkit.exe run --profile example.json --verbose` and accept the UAC prompt.
+
+**Expected:** the log shows `pnputil /add-driver ... /subdirs /install` running against that folder; the step then fails with the "installed from ... but there is still no internet connection" message; the run exits with code **3**.
+
+Cleanup only: re-enable the adapter afterwards.
 
 Also decline the UAC prompt on one run. **Expected:** exit code **5** (ElevationDeclined).
 
@@ -88,3 +98,4 @@ Confirm on real machines and fix the code/docs if wrong:
 - [ ] **Nvidia**: the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`) installs and launches.
 - [ ] **AMD**: the GPU driver arrives through Windows Update only.
 - [ ] The published `formatkit.exe` runs on a clean machine without .NET installed, and the SmartScreen prompt behaves as documented.
+- [ ] **Network fallback** (spare physical machine): back up its NIC driver with `drivers backup-network`, uninstall the NIC device together with its oem driver, set `networkDriverBackup` in the profile, then run. Expect the driver to be reinstalled via `pnputil`, connectivity to return and the run to continue.
