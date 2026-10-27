@@ -13,7 +13,8 @@ internal sealed class OptionalFeatureHandler : IActionHandler
     public async Task<bool> IsAppliedAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
     {
         var a = (OptionalFeatureAction)action;
-        return await ctx.Services.Features.GetStateAsync(a.Name, ct).ConfigureAwait(false) == a.State;
+        var state = await ctx.Services.Features.GetStateAsync(a.Name, ct).ConfigureAwait(false);
+        return state == a.State || (state == OptionalFeatureState.Absent && a.State == OptionalFeatureState.Disabled);
     }
 
     public async Task<JournalAction> CaptureAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
@@ -39,6 +40,7 @@ internal sealed class OptionalFeatureHandler : IActionHandler
             throw new InvalidOperationException($"Optional feature '{a.Name}' is {actual}, expected {a.State}.");
         }
 
+        ctx.Log.Debug("Optional feature {Feature} new state: {State}", a.Name, actual);
         ctx.Log.Information("Optional feature {Feature} set to {State} (restart needed: {Restart})", a.Name, a.State, restart);
         return captured;
     }

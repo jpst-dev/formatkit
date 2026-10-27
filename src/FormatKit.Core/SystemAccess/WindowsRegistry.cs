@@ -15,13 +15,19 @@ public sealed class WindowsRegistry : IRegistry
             return null;
         }
 
-        var raw = key.GetValue(name, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-        return raw switch
+        var raw = key.GetValue(name);
+        if (raw is null)
         {
-            null => null,
-            int i => new RegistryValue(RegistryKind.Dword, unchecked((uint)i).ToString(CultureInfo.InvariantCulture)),
-            long l => new RegistryValue(RegistryKind.Qword, unchecked((ulong)l).ToString(CultureInfo.InvariantCulture)),
-            _ => new RegistryValue(RegistryKind.String, raw.ToString() ?? string.Empty),
+            return null;
+        }
+
+        var kind = key.GetValueKind(name);
+        return kind switch
+        {
+            RegistryValueKind.DWord => new RegistryValue(RegistryKind.Dword, unchecked((uint)(int)raw).ToString(CultureInfo.InvariantCulture)),
+            RegistryValueKind.QWord => new RegistryValue(RegistryKind.Qword, unchecked((ulong)(long)raw).ToString(CultureInfo.InvariantCulture)),
+            RegistryValueKind.String => new RegistryValue(RegistryKind.String, (string)raw),
+            _ => throw new NotSupportedException($"Registry value '{path}|{name}' has unsupported kind {kind}; only REG_DWORD, REG_QWORD and REG_SZ are supported."),
         };
     }
 

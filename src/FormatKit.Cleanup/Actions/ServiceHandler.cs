@@ -38,6 +38,7 @@ internal sealed class ServiceHandler : IActionHandler
             throw new InvalidOperationException($"Service '{a.Name}' start type is {actual?.ToString() ?? "unknown"}, expected {a.StartType}.");
         }
 
+        ctx.Log.Debug("Service {Service} new start type: {StartType}", a.Name, actual);
         ctx.Log.Information("Service {Service} start type set to {StartType}", a.Name, a.StartType);
         return captured;
     }

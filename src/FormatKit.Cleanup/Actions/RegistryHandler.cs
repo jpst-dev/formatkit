@@ -31,6 +31,7 @@ internal sealed class RegistryHandler : IActionHandler
         var a = (RegistryAction)action;
         var desired = a.Delete ? null : Desired(a);
         WriteAndVerify(ctx.Services.Registry, a.Path, a.Name, desired);
+        ctx.Log.Debug("Registry {Path}|{Name} new state: {State}", a.Path, a.Name, Describe(desired));
         ctx.Log.Information("Registry {Path}|{Name} {Outcome}", a.Path, a.Name, desired is null ? "deleted" : $"set to {desired.Kind} {desired.Data}");
         return Task.FromResult(captured);
     }

@@ -40,6 +40,20 @@ public sealed class WindowsRegistryTests : IDisposable
     }
 
     [Fact]
+    public void Read_unsupported_kind_throws()
+    {
+        using (var hive = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+        using (var key = hive.CreateSubKey(_root["HKCU\\".Length..], writable: true))
+        {
+            key.SetValue("multi", new[] { "a", "b" }, RegistryValueKind.MultiString);
+        }
+
+        var ex = Assert.Throws<NotSupportedException>(() => _registry.Read(_root, "multi"));
+        Assert.Contains("multi", ex.Message);
+        Assert.Contains("MultiString", ex.Message);
+    }
+
+    [Fact]
     public void Read_missing_value_returns_null()
     {
         _registry.Write(_root, "other", new RegistryValue(RegistryKind.String, "x"));

@@ -36,6 +36,7 @@ internal sealed class MemoryIntegrityHandler : IActionHandler
     {
         RegistryHandler.WriteAndVerify(ctx.Services.Registry, HvciPath, HvciName, Off);
         RegistryHandler.WriteAndVerify(ctx.Services.Registry, VbsPath, VbsName, Off);
+        ctx.Log.Debug("Memory integrity new state: hvci={Hvci}, vbs={Vbs}", Off, Off);
         ctx.Log.Information("Memory integrity and virtualization-based security disabled");
         return Task.FromResult(captured);
     }

@@ -78,4 +78,25 @@ public class PowerSchemeHandlerTests
         power.Active = BuiltInPowerSchemes.Ultimate;
         Assert.True(await NewHandler().IsAppliedAsync(action, ctx, Ct));
     }
+
+    [Fact]
+    public async Task Apply_failure_after_duplicate_deletes_created_scheme()
+    {
+        var power = new ThrowingPowerSchemes();
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var handler = NewHandler();
+        var action = new PowerSchemeAction("ultimate");
+        var captured = await handler.CaptureAsync(action, ctx, Ct);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.ApplyAsync(action, captured, ctx, Ct));
+
+        Assert.Single(power.Deleted);
+        Assert.Equal([BuiltInPowerSchemes.Balanced], power.Schemes);
+    }
+
+    private sealed class ThrowingPowerSchemes : FakePowerSchemes
+    {
+        public override Task SetActiveAsync(Guid scheme, CancellationToken ct) =>
+            throw new InvalidOperationException("powercfg failed");
+    }
 }

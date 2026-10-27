@@ -4,5 +4,6 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Undo_WingetMissing" xml:space="preserve"><value>O winget não está disponível. Instale manualmente o aplicativo da Store (ID {0}) para restaurá-lo.</value></data>
+  <data name="Undo_WingetMissing" xml:space="preserve"><value>O winget não está disponível. Instale o App Installer pela Microsoft Store e execute o desfazer novamente (ID do app na Store: {0}).</value></data>
+  <data name="Undo_StoreReinstallFailed" xml:space="preserve"><value>Não foi possível reinstalar '{0}' (código de saída do winget {1}). Instale-o pela Store e execute o desfazer novamente: {2}</value></data>
 </root>

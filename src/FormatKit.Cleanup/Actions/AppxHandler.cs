@@ -36,6 +36,7 @@ internal sealed class AppxHandler : IActionHandler
             throw new InvalidOperationException($"Appx package '{a.Package}' is still present after removal.");
         }
 
+        ctx.Log.Debug("Appx {Package} new state: installed={Installed}, provisioned={Provisioned}", a.Package, state.InstalledForUser, state.Provisioned);
         ctx.Log.Information("Appx {Package} removed", a.Package);
         return captured;
     }
@@ -53,8 +54,8 @@ internal sealed class AppxHandler : IActionHandler
             case WingetStatus.WingetMissing:
                 throw new InvalidOperationException(Strings.Format("Undo_WingetMissing", storeId));
             default:
-                throw new InvalidOperationException(
-                    $"Could not reinstall '{recorded.Target}' (winget exit code {result.ExitCode}). Install it from the Store: ms-windows-store://pdp/?ProductId={storeId}");
+                throw new InvalidOperationException(Strings.Format(
+                    "Undo_StoreReinstallFailed", recorded.Target, result.ExitCode, $"ms-windows-store://pdp/?ProductId={storeId}"));
         }
     }
 }

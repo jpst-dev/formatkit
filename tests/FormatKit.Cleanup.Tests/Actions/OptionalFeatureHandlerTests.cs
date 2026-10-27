@@ -28,4 +28,17 @@ public class OptionalFeatureHandlerTests
         await handler.UndoAsync(recorded, ctx, ct);
         Assert.Equal(OptionalFeatureState.Enabled, features.States["Recall"]);
     }
+
+    [Fact]
+    public async Task Disable_target_on_absent_feature_is_already_applied_but_enable_capture_throws()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var ctx = TestServices.Context(TestServices.Create());
+        var handler = new OptionalFeatureHandler();
+
+        Assert.True(await handler.IsAppliedAsync(new OptionalFeatureAction("Missing", OptionalFeatureState.Disabled), ctx, ct));
+        var enable = new OptionalFeatureAction("Missing", OptionalFeatureState.Enabled);
+        Assert.False(await handler.IsAppliedAsync(enable, ctx, ct));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.CaptureAsync(enable, ctx, ct));
+    }
 }

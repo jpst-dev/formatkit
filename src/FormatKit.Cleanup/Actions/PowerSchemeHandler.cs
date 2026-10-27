@@ -41,11 +41,30 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes
             ctx.Log.Debug("Power scheme {Target} is hidden; created {Created}", target, created);
         }
 
-        await power.SetActiveAsync(activate, ct).ConfigureAwait(false);
-        var active = await power.GetActiveAsync(ct).ConfigureAwait(false);
-        if (active != activate)
+        try
         {
-            throw new InvalidOperationException($"Active power scheme is {active}, expected {activate}.");
+            await power.SetActiveAsync(activate, ct).ConfigureAwait(false);
+            var active = await power.GetActiveAsync(ct).ConfigureAwait(false);
+            if (active != activate)
+            {
+                throw new InvalidOperationException($"Active power scheme is {active}, expected {activate}.");
+            }
+
+            ctx.Log.Debug("Power scheme new active: {Scheme}", active);
+        }
+        catch when (created is not null)
+        {
+            // The journal never learns about the duplicate, so remove it here rather than leak it.
+            try
+            {
+                await power.DeleteAsync(created.Value, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception cleanupError)
+            {
+                ctx.Log.Warning(cleanupError, "Could not delete the power scheme {Created} created before the failure", created);
+            }
+
+            throw;
         }
 
         ctx.Log.Information("Power scheme {Scheme} activated", activate);

@@ -2,7 +2,7 @@ using FormatKit.Core.SystemAccess;
 
 namespace FormatKit.Core.Tests.Fakes;
 
-public sealed class FakePowerSchemes : IPowerSchemes
+public class FakePowerSchemes : IPowerSchemes
 {
     public Guid Active { get; set; } = BuiltInPowerSchemes.Balanced;
 
@@ -22,7 +22,7 @@ public sealed class FakePowerSchemes : IPowerSchemes
         return Task.FromResult(created);
     }
 
-    public Task SetActiveAsync(Guid scheme, CancellationToken ct)
+    public virtual Task SetActiveAsync(Guid scheme, CancellationToken ct)
     {
         Active = scheme;
         return Task.CompletedTask;

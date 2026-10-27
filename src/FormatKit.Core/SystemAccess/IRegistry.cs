@@ -12,7 +12,7 @@ public sealed record RegistryValue(RegistryKind Kind, string Data);
 
 public interface IRegistry
 {
-    /// <summary>Returns null when the key or value is absent.</summary>
+    /// <summary>Returns null when the key or value is absent. Throws <see cref="NotSupportedException"/> for a value that is not REG_DWORD, REG_QWORD or REG_SZ.</summary>
     RegistryValue? Read(string path, string name);
 
     /// <summary>Creates missing keys.</summary>
