@@ -43,7 +43,7 @@ public class VendorCatalogTests
 
     [Fact]
     public void Hp_executable_points_at_default_swsetup_location()
-        => Assert.Equal(@"C:SWSetupHPImageAssistantHPImageAssistant.exe", VendorCatalog.LoadEmbedded().Oem.Single(o => o.Id == "hp").Executable);
+        => Assert.Equal(@"C:\SWSetup\HPImageAssistant\HPImageAssistant.exe", VendorCatalog.LoadEmbedded().Oem.Single(o => o.Id == "hp").Executable);
 
     [Fact]
     public void Parse_reads_camelCase_json_with_string_gpu_vendors()
