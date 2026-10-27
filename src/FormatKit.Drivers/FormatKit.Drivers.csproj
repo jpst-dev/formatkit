@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Drivers.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+  </ItemGroup>
+</Project>

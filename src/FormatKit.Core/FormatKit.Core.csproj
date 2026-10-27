@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Core.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Drivers.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.14" />
+  </ItemGroup>
+</Project>

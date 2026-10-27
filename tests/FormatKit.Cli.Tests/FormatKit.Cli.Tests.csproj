@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <!-- Exit code 8 = zero tests ran; tolerated until this project gets its first tests. -->
+    <TestingPlatformCommandLineArguments>--ignore-exit-code 8</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FormatKit.Core\FormatKit.Core.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Drivers\FormatKit.Drivers.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Cli\FormatKit.Cli.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\FormatKit.Core.Tests\Fakes\**\*.cs" LinkBase="Fakes" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>
