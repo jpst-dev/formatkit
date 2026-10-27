@@ -136,8 +136,8 @@ internal static class RunFlow
     {
         try
         {
-            await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct);
-            context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
+            if (await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct))
+                context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

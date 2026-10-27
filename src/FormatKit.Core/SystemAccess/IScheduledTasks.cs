@@ -4,5 +4,6 @@ public interface IScheduledTasks
 {
     Task RegisterResumeTaskAsync(CancellationToken ct);
 
-    Task RemoveResumeTaskAsync(CancellationToken ct);
+    /// <returns>True when a resume task existed and was removed; false when there was none.</returns>
+    Task<bool> RemoveResumeTaskAsync(CancellationToken ct);
 }

@@ -15,9 +15,12 @@ public sealed class FakeScheduledTasks : IScheduledTasks
         return RegisterException is null ? Task.CompletedTask : Task.FromException(RegisterException);
     }
 
-    public Task RemoveResumeTaskAsync(CancellationToken ct)
+    /// <summary>Whether a resume task exists for RemoveResumeTaskAsync to remove.</summary>
+    public bool TaskPresent { get; set; } = true;
+
+    public Task<bool> RemoveResumeTaskAsync(CancellationToken ct)
     {
         RemoveCalls++;
-        return RemoveException is null ? Task.CompletedTask : Task.FromException(RemoveException);
+        return RemoveException is null ? Task.FromResult(TaskPresent) : Task.FromException<bool>(RemoveException);
     }
 }

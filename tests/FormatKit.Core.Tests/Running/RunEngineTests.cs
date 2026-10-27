@@ -63,6 +63,20 @@ public class RunEngineTests
     }
 
     [Fact]
+    public async Task Step_skipped_by_its_check_says_why()
+    {
+        var h = new Harness();
+        var a = new FakeStep("a") { CheckResult = true };
+
+        var summary = await h.Engine.RunAsync(Harness.Request(false, a), TestContext.Current.CancellationToken);
+
+        var step = Assert.Single(summary.Steps);
+        Assert.Equal(StepOutcome.Skipped, step.Outcome);
+        Assert.Single(step.Messages);
+        Assert.False(string.IsNullOrWhiteSpace(step.Messages[0]));
+    }
+
+    [Fact]
     public async Task Runs_all_steps_and_completes()
     {
         var h = new Harness();

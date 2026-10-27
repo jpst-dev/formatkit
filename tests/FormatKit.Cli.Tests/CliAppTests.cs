@@ -390,6 +390,18 @@ public sealed class CliAppTests : IDisposable
     }
 
     [Fact]
+    public async Task Resume_without_state_and_without_task_does_not_claim_removal()
+    {
+        _tasks.TaskPresent = false;
+
+        var exit = await Run("run", "--resume");
+
+        Assert.Equal(ExitCodes.NothingToResume, exit);
+        Assert.Equal(1, _tasks.RemoveCalls);
+        Assert.DoesNotContain("automatic resume was removed", _out.ToString());
+    }
+
+    [Fact]
     public async Task Resume_with_corrupt_state_removes_the_resume_task()
     {
         _fs.Seed(_paths.StateFile, "{ not json");

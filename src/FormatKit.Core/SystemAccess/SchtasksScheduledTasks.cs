@@ -20,7 +20,7 @@ public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath
         }
     }
 
-    public async Task RemoveResumeTaskAsync(CancellationToken ct)
+    public async Task<bool> RemoveResumeTaskAsync(CancellationToken ct)
     {
         // Schtasks output is localized, so never parse it: a non-zero query means "not present".
         var query = await runner.RunAsync(
@@ -28,7 +28,7 @@ public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath
             ct).ConfigureAwait(false);
         if (query.ExitCode != 0 || query.TimedOut)
         {
-            return;
+            return false;
         }
 
         var result = await runner.RunAsync(
@@ -40,5 +40,7 @@ public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath
             throw new InvalidOperationException(
                 $"Failed to remove the resume scheduled task (exit {result.ExitCode}): {result.StdErr.Trim()}");
         }
+
+        return true;
     }
 }

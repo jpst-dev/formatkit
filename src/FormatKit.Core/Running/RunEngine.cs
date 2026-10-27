@@ -1,3 +1,4 @@
+using FormatKit.Core.Localization;
 using FormatKit.Core.Reporting;
 using FormatKit.Core.Steps;
 using FormatKit.Core.SystemAccess;
@@ -105,7 +106,7 @@ public sealed class RunEngine(
         try
         {
             if (await step.CheckAsync(ctx, ct).ConfigureAwait(false))
-                return StepResult.Skip();
+                return StepResult.Skip(Strings.Get("Step_AlreadyInPlace"));
             return await step.ExecuteAsync(ctx, ct).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

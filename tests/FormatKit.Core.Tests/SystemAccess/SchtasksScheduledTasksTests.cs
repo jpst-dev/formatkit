@@ -53,8 +53,9 @@ public class SchtasksScheduledTasksTests
         runner.Enqueue("schtasks.exe", Result(0));
         runner.Enqueue("schtasks.exe", Result(0));
 
-        await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
+        var removed = await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
 
+        Assert.True(removed);
         Assert.Equal(2, runner.Calls.Count);
         Assert.Equal(["/Query", "/TN", "FormatKit\\Resume"], runner.Calls[0].Arguments);
         Assert.Equal(["/Delete", "/TN", "FormatKit\\Resume", "/F"], runner.Calls[1].Arguments);
@@ -66,8 +67,9 @@ public class SchtasksScheduledTasksTests
         var runner = new FakeProcessRunner();
         runner.Enqueue("schtasks.exe", Result(1, stderr: "ERRO: O sistema nao pode encontrar o arquivo especificado."));
 
-        await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
+        var removed = await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
 
+        Assert.False(removed);
         var call = Assert.Single(runner.Calls);
         Assert.Equal("/Query", call.Arguments[0]);
     }
