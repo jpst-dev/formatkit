@@ -1,4 +1,6 @@
 namespace FormatKit.Core.SystemAccess;
 
-// Placeholder: defined fully in a later task.
-public interface INetworkProbe { }
+public interface INetworkProbe
+{
+    Task<bool> IsOnlineAsync(CancellationToken ct);
+}
