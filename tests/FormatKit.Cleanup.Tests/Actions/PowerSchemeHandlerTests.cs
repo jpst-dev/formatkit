@@ -1,0 +1,81 @@
+using FormatKit.Cleanup.Actions;
+using FormatKit.Cleanup.Catalog;
+using FormatKit.Core.SystemAccess;
+using FormatKit.Core.Tests.Fakes;
+
+namespace FormatKit.Cleanup.Tests.Actions;
+
+public class PowerSchemeHandlerTests
+{
+    private static readonly CancellationToken Ct = TestContext.Current.CancellationToken;
+
+    private static PowerSchemeHandler NewHandler(params Guid[] created) =>
+        new(() => new HashSet<Guid>(created));
+
+    [Fact]
+    public async Task Apply_activates_existing_builtin()
+    {
+        var power = new FakePowerSchemes();
+        power.Schemes.Add(BuiltInPowerSchemes.HighPerformance);
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var handler = NewHandler();
+        var action = new PowerSchemeAction("highPerformance");
+
+        var captured = await handler.CaptureAsync(action, ctx, Ct);
+        var recorded = await handler.ApplyAsync(action, captured, ctx, Ct);
+
+        Assert.Equal(BuiltInPowerSchemes.HighPerformance, power.Active);
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, recorded.Previous.GetProperty("created").ValueKind);
+        Assert.Equal(BuiltInPowerSchemes.Balanced.ToString(), recorded.Previous.GetProperty("previous").GetString());
+    }
+
+    [Fact]
+    public async Task Apply_duplicates_hidden_scheme_and_records_created()
+    {
+        var power = new FakePowerSchemes();
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var handler = NewHandler();
+        var action = new PowerSchemeAction("ultimate");
+
+        var captured = await handler.CaptureAsync(action, ctx, Ct);
+        var recorded = await handler.ApplyAsync(action, captured, ctx, Ct);
+
+        var created = Guid.Parse(recorded.Previous.GetProperty("created").GetString()!);
+        Assert.NotEqual(BuiltInPowerSchemes.Ultimate, created);
+        Assert.Equal(created, power.Active);
+        Assert.Contains(created, power.Schemes);
+    }
+
+    [Fact]
+    public async Task Undo_restores_previous_and_deletes_created()
+    {
+        var power = new FakePowerSchemes();
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var handler = NewHandler();
+        var action = new PowerSchemeAction("ultimate");
+        var captured = await handler.CaptureAsync(action, ctx, Ct);
+        var recorded = await handler.ApplyAsync(action, captured, ctx, Ct);
+        var created = power.Active;
+
+        await handler.UndoAsync(recorded, ctx, Ct);
+
+        Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
+        Assert.Equal([created], power.Deleted);
+    }
+
+    [Fact]
+    public async Task Applied_when_active_is_created_scheme()
+    {
+        var created = Guid.NewGuid();
+        var power = new FakePowerSchemes { Active = created };
+        power.Schemes.Add(created);
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var action = new PowerSchemeAction("ultimate");
+
+        Assert.True(await NewHandler(created).IsAppliedAsync(action, ctx, Ct));
+        Assert.False(await NewHandler().IsAppliedAsync(action, ctx, Ct));
+
+        power.Active = BuiltInPowerSchemes.Ultimate;
+        Assert.True(await NewHandler().IsAppliedAsync(action, ctx, Ct));
+    }
+}

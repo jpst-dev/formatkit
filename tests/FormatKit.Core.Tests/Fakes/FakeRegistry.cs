@@ -2,7 +2,7 @@ using FormatKit.Core.SystemAccess;
 
 namespace FormatKit.Core.Tests.Fakes;
 
-public sealed class FakeRegistry : IRegistry
+public class FakeRegistry : IRegistry
 {
     private readonly Dictionary<(string Path, string Name), RegistryValue> _values = new(KeyComparer.Instance);
 
@@ -14,7 +14,7 @@ public sealed class FakeRegistry : IRegistry
     public RegistryValue? Read(string path, string name) =>
         _values.TryGetValue((path, name), out var value) ? value : null;
 
-    public void Write(string path, string name, RegistryValue value) => _values[(path, name)] = value;
+    public virtual void Write(string path, string name, RegistryValue value) => _values[(path, name)] = value;
 
     public void Delete(string path, string name) => _values.Remove((path, name));
 

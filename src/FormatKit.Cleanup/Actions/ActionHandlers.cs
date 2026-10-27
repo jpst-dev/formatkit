@@ -1,0 +1,37 @@
+using FormatKit.Cleanup.Catalog;
+using FormatKit.Cleanup.Journal;
+
+namespace FormatKit.Cleanup.Actions;
+
+internal sealed class ActionHandlers(Func<IReadOnlySet<Guid>> createdSchemes)
+{
+    private readonly RegistryHandler _registry = new();
+    private readonly ServiceHandler _service = new();
+    private readonly AppxHandler _appx = new();
+    private readonly PowerSchemeHandler _power = new(createdSchemes);
+    private readonly OptionalFeatureHandler _feature = new();
+    private readonly MemoryIntegrityHandler _memoryIntegrity = new();
+
+    public IActionHandler For(CleanupAction action) => action switch
+    {
+        RegistryAction => _registry,
+        ServiceAction => _service,
+        AppxAction => _appx,
+        PowerSchemeAction => _power,
+        OptionalFeatureAction => _feature,
+        NamedAction { Handler: MemoryIntegrityHandler.Name } => _memoryIntegrity,
+        NamedAction named => throw new ArgumentException($"Unknown named action handler '{named.Handler}'.", nameof(action)),
+        _ => throw new ArgumentException($"Unsupported action type '{action.GetType().Name}'.", nameof(action)),
+    };
+
+    public IActionHandler For(JournalAction recorded) => recorded.Type switch
+    {
+        RegistryHandler.Type => _registry,
+        ServiceHandler.Type => _service,
+        AppxHandler.Type => _appx,
+        PowerSchemeHandler.Type => _power,
+        OptionalFeatureHandler.Type => _feature,
+        MemoryIntegrityHandler.Name => _memoryIntegrity,
+        _ => throw new ArgumentException($"Unknown journal action type '{recorded.Type}'.", nameof(recorded)),
+    };
+}
