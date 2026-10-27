@@ -27,4 +27,7 @@
   <data name="Report_Outcome_Skipped" xml:space="preserve"><value>Ignorada</value></data>
   <data name="Report_Outcome_Failed" xml:space="preserve"><value>Falhou</value></data>
   <data name="Report_Outcome_RebootRequired" xml:space="preserve"><value>Reinicialização necessária</value></data>
+  <data name="Reboot_Cancelled" xml:space="preserve"><value>Reinicialização cancelada.</value></data>
+  <data name="Reboot_Countdown" xml:space="preserve"><value>Reiniciando em {0} s (pressione Esc para cancelar)...</value></data>
+  <data name="Reboot_ShutdownFailed" xml:space="preserve"><value>A reinicialização automática falhou. Reinicie manualmente.</value></data>
 </root>

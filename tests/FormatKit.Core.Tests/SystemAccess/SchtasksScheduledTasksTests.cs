@@ -37,6 +37,26 @@ public class SchtasksScheduledTasksTests
     }
 
     [Fact]
+    public async Task Remove_failure_without_error_marker_throws()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("schtasks.exe", Result(1, stderr: "something else"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Register_timeout_throws()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("schtasks.exe", new ProcessResult(0, "", "", TimeSpan.Zero, true));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new SchtasksScheduledTasks(runner, Exe).RegisterResumeTaskAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task Remove_ignores_missing_task()
     {
         var runner = new FakeProcessRunner();

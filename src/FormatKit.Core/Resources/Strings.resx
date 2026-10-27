@@ -27,4 +27,7 @@
   <data name="Report_Outcome_Skipped" xml:space="preserve"><value>Skipped</value></data>
   <data name="Report_Outcome_Failed" xml:space="preserve"><value>Failed</value></data>
   <data name="Report_Outcome_RebootRequired" xml:space="preserve"><value>Reboot required</value></data>
+  <data name="Reboot_Cancelled" xml:space="preserve"><value>Reboot cancelled.</value></data>
+  <data name="Reboot_Countdown" xml:space="preserve"><value>Rebooting in {0} s (press Esc to cancel)...</value></data>
+  <data name="Reboot_ShutdownFailed" xml:space="preserve"><value>The automatic reboot failed. Please reboot manually.</value></data>
 </root>
