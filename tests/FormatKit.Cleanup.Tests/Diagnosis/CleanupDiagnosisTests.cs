@@ -95,6 +95,22 @@ public class CleanupDiagnosisTests
     }
 
     [Fact]
+    public async Task Device_rule_matches_whole_id_or_child_path_only()
+    {
+        _hardware.DisabledDevices =
+        [
+            Device("Exact", @"acpi\pnp0103"),
+            Device("Child", @"ACPI\PNP0103\0"),
+            Device("Longer id", @"ACPI\PNP01030"),
+            Device("Contains", @"X\ACPI\PNP0103"),
+        ];
+
+        var report = await Run(Rules(Issue("hpet", IssueSeverity.Info, new DeviceDisabledRule(@"ACPI\PNP0103"))));
+
+        Assert.Equal(["Exact", "Child"], report.Findings.Select(f => f.Detail));
+    }
+
+    [Fact]
     public async Task Clean_system_has_no_findings()
     {
         _services.Services["W32Time"] = ServiceStartType.Automatic;

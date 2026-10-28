@@ -52,7 +52,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths)
             case DeviceDisabledRule device:
                 var disabled = await services.Hardware.ReadDisabledDevicesAsync(ct);
                 return disabled
-                    .Where(d => d.HardwareIds.Any(id => id.Contains(device.HardwareId, StringComparison.OrdinalIgnoreCase)))
+                    .Where(d => d.HardwareIds.Any(id => HardwareIdMatches(id, device.HardwareId)))
                     .Select(d => d.DisplayName)
                     .ToList();
             case ServiceDisabledRule service:
@@ -70,6 +70,11 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths)
                 return [];
         }
     }
+
+    /// <summary>The rule id itself or a child of it (R10), so <c>ACPI\PNP0103</c> never matches <c>ACPI\PNP01030</c>.</summary>
+    private static bool HardwareIdMatches(string id, string rule) =>
+        string.Equals(id, rule, StringComparison.OrdinalIgnoreCase)
+        || id.StartsWith(rule + "\\", StringComparison.OrdinalIgnoreCase);
 
     private static bool RegistryMatches(RegistryValueRule rule, RegistryValue? value)
     {
