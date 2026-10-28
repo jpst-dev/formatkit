@@ -47,4 +47,5 @@
   <data name="NextAction_WingetMissing" xml:space="preserve"><value>Install or repair App Installer (winget), then run again.</value></data>
   <data name="NextAction_SeeLog" xml:space="preserve"><value>See the log for the failed programs, then run again.</value></data>
   <data name="NextAction_SignIn" xml:space="preserve"><value>Sign in to Windows and run again.</value></data>
+  <data name="Item_Failed_Error" xml:space="preserve"><value>failed: unexpected error (see the log)</value></data>
 </root>

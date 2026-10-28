@@ -47,4 +47,5 @@
   <data name="NextAction_WingetMissing" xml:space="preserve"><value>Instale ou repare o Instalador de Aplicativo (winget) e execute novamente.</value></data>
   <data name="NextAction_SeeLog" xml:space="preserve"><value>Veja o log para os programas que falharam e execute novamente.</value></data>
   <data name="NextAction_SignIn" xml:space="preserve"><value>Entre no Windows e execute novamente.</value></data>
+  <data name="Item_Failed_Error" xml:space="preserve"><value>falhou: erro inesperado (veja o log)</value></data>
 </root>

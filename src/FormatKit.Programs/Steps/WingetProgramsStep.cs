@@ -74,7 +74,7 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 ctx.Log.Warning(ex, "Program {Program} failed", program.Key);
-                text = Strings.Format("Item_Failed_Code", ex.GetType().Name);
+                text = Strings.Get("Item_Failed_Error");
                 anyFailed = true;
             }
 
@@ -126,11 +126,10 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
         WingetResult result;
         if (user)
         {
-            var args = upgrade ? WingetClient.UpgradeArguments(package) : WingetClient.InstallArguments(package);
-            var run = await ctx.Services.UserContext.RunAsync(new ProcessSpec("winget.exe", args, Timeouts.Install), ct)
-                .ConfigureAwait(false);
-            result = new WingetResult(
-                WingetClient.MapExitCode(run.ExitCode, upgrade, run.TimedOut), run.ExitCode, run.StdOut + run.StdErr, run.TimedOut);
+            // Install first: winget answers "already installed" itself, and only then does an upgrade make sense.
+            result = await RunAsUserAsync(WingetClient.InstallArguments(package), upgrade: false, ctx, ct).ConfigureAwait(false);
+            if (upgrade && result.Status == WingetStatus.AlreadyInstalled)
+                result = await RunAsUserAsync(WingetClient.UpgradeArguments(package), upgrade: true, ctx, ct).ConfigureAwait(false);
         }
         else if (installed)
         {
@@ -142,6 +141,13 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
         }
 
         return Describe(result);
+    }
+
+    private static async Task<WingetResult> RunAsUserAsync(IReadOnlyList<string> args, bool upgrade, StepContext ctx, CancellationToken ct)
+    {
+        var run = await ctx.Services.UserContext.RunAsync(new ProcessSpec("winget.exe", args, Timeouts.Install), ct).ConfigureAwait(false);
+        return new WingetResult(
+            WingetClient.MapExitCode(run.ExitCode, upgrade, run.TimedOut), run.ExitCode, run.StdOut + run.StdErr, run.TimedOut);
     }
 
     private static Outcome Describe(WingetResult result)

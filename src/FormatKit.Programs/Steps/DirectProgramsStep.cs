@@ -85,7 +85,7 @@ internal sealed class DirectProgramsStep(IReadOnlyList<DirectEntry> entries, App
             {
                 ctx.Log.Warning(ex, "Direct installer {Name} failed", entry.Name);
                 anyFailed = true;
-                text = Strings.Format("Item_Failed_Code", ex.GetType().Name);
+                text = Strings.Get("Item_Failed_Error");
             }
 
             messages.Add($"{entry.Name}: {text}");

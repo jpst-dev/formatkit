@@ -204,6 +204,45 @@ public class WingetProgramsStepTests : IDisposable
     }
 
     [Fact]
+    public async Task User_item_with_upgrade_and_not_installed_installs_once()
+    {
+        var (runner, ctx, user, _) = Setup();
+        runner.Enqueue("winget.exe", Ok);
+
+        var result = await Step(true, Program("U.U", InstallContext.User)).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Contains("installed", result.Messages[0]);
+        Assert.Equal("install", Assert.Single(user.Calls).Arguments[0]);
+    }
+
+    private sealed class SequenceRunner(params int[] codes) : IUserContextRunner
+    {
+        public List<ProcessSpec> Calls { get; } = [];
+
+        public Task<ProcessResult> RunAsync(ProcessSpec spec, CancellationToken ct)
+        {
+            Calls.Add(spec);
+            return Task.FromResult(new ProcessResult(codes[Calls.Count - 1], "", "", TimeSpan.Zero, false));
+        }
+    }
+
+    [Fact]
+    public async Task User_item_with_upgrade_and_already_installed_installs_then_upgrades()
+    {
+        var runner = new FakeProcessRunner();
+        var user = new SequenceRunner(unchecked((int)0x8A150061), 0);
+        var ctx = TestServices.Context(TestServices.Create(processes: runner, userContext: user));
+        runner.Enqueue("winget.exe", Ok);
+
+        var result = await Step(true, Program("U.U", InstallContext.User)).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Contains("upgraded", result.Messages[0]);
+        Assert.Equal(["install", "upgrade"], user.Calls.Select(c => c.Arguments[0]));
+    }
+
+    [Fact]
     public async Task Check_true_only_when_all_installed_and_no_upgrade()
     {
         var (runner, ctx, _, _) = Setup();
