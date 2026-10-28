@@ -39,6 +39,11 @@ public static partial class ProgramCatalogValidator
             if (program.Source is not ("winget" or "msstore"))
                 errors.Add($"{id}: source must be 'winget' or 'msstore', not '{program.Source}'.");
 
+            if (program.Scope is not (null or "machine" or "user"))
+                errors.Add($"{id}: scope must be 'machine' or 'user', not '{program.Scope}'.");
+            else if (program.Scope == "machine" && program.Context == InstallContext.User)
+                errors.Add($"{id}: scope 'machine' on a user-context entry.");
+
             foreach (var language in new[] { "en", "pt-BR" })
             {
                 if (program.Text is null || !program.Text.TryGetValue(language, out var text))

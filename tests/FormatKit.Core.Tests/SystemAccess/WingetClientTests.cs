@@ -322,4 +322,39 @@ public class WingetClientTests
             ["upgrade", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"],
             WingetClient.UpgradeArguments(new WingetPackageRef("Git.Git")));
     }
+
+    [Theory]
+    [InlineData("machine")]
+    [InlineData("user")]
+    public void Scope_is_appended_after_source_and_version(string scope)
+    {
+        var package = new WingetPackageRef("Git.Git", "winget", "2.0", scope);
+
+        Assert.Equal(["--source", "winget", "--version", "2.0", "--scope", scope], WingetClient.InstallArguments(package).TakeLast(6));
+        Assert.Equal(["--source", "winget", "--version", "2.0", "--scope", scope], WingetClient.UpgradeArguments(package).TakeLast(6));
+    }
+
+    [Fact]
+    public async Task Scope_is_not_passed_to_list()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("winget.exe", Result(0));
+
+        await new WingetClient(runner).IsInstalledAsync(new WingetPackageRef("Git.Git", Scope: "machine"), TestContext.Current.CancellationToken);
+
+        Assert.DoesNotContain("--scope", runner.Calls[0].Arguments);
+    }
+
+    [Theory]
+    [InlineData("Machine")]
+    [InlineData("system")]
+    [InlineData("")]
+    [InlineData("user; calc")]
+    public void Unknown_scope_throws(string scope)
+    {
+        var package = new WingetPackageRef("Git.Git", Scope: scope);
+
+        Assert.Throws<ArgumentException>(() => WingetClient.InstallArguments(package));
+        Assert.Throws<ArgumentException>(() => WingetClient.UpgradeArguments(package));
+    }
 }

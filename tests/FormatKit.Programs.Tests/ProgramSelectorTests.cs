@@ -41,4 +41,14 @@ public class ProgramSelectorTests
         Assert.Null(selected[2].Category);
         Assert.Equal("winget:msstore:9NKSQGP7F2NH", selected[2].Key);
     }
+
+    [Fact]
+    public void Catalog_scope_is_copied_and_other_entries_have_none()
+    {
+        var options = Options(["browsers.firefox", "communication.discord", "games.steam"], [new("Git.Git", "winget", null, InstallContext.Machine)]);
+
+        var selected = ProgramSelector.Select(options, TestCatalog(), [new("7zip.7zip", "winget", null, InstallContext.Machine)]);
+
+        Assert.Equal(["machine", "user", null, null, null], selected.Select(s => s.Package.Scope));
+    }
 }

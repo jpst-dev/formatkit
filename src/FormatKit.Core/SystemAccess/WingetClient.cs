@@ -18,7 +18,8 @@ public enum WingetStatus
 
 public sealed record WingetResult(WingetStatus Status, int ExitCode, string Output, bool TimedOut = false);
 
-public sealed record WingetPackageRef(string Id, string? Source = null, string? Version = null);
+/// <summary>A package to install or upgrade. <paramref name="Scope"/>, when set, is "machine" or "user" and is passed as --scope.</summary>
+public sealed record WingetPackageRef(string Id, string? Source = null, string? Version = null, string? Scope = null);
 
 public partial class WingetClient(IProcessRunner runner)
 {
@@ -78,10 +79,10 @@ public partial class WingetClient(IProcessRunner runner)
     }
 
     public static IReadOnlyList<string> InstallArguments(WingetPackageRef package) =>
-        Build("install", package, SilentFlags);
+        Build("install", package, SilentFlags, withScope: true);
 
     public static IReadOnlyList<string> UpgradeArguments(WingetPackageRef package) =>
-        Build("upgrade", package, SilentFlags);
+        Build("upgrade", package, SilentFlags, withScope: true);
 
     public Task<WingetResult> InstallAsync(string id, CancellationToken ct, string? source = null) =>
         InstallAsync(new WingetPackageRef(id, source), ct);
@@ -173,7 +174,7 @@ public partial class WingetClient(IProcessRunner runner)
             result.TimedOut);
     }
 
-    private static string[] Build(string verb, WingetPackageRef package, string[] tail)
+    private static string[] Build(string verb, WingetPackageRef package, string[] tail, bool withScope = false)
     {
         List<string> args = [verb, "--id", Validate(package.Id, "id"), "--exact", .. tail];
         if (package.Source is not null)
@@ -186,6 +187,14 @@ public partial class WingetClient(IProcessRunner runner)
         {
             args.Add("--version");
             args.Add(Validate(package.Version, "version"));
+        }
+
+        if (withScope && package.Scope is not null)
+        {
+            if (package.Scope is not ("machine" or "user"))
+                throw new ArgumentException($"Winget scope must be 'machine' or 'user', not '{package.Scope}'.", nameof(package));
+            args.Add("--scope");
+            args.Add(package.Scope);
         }
 
         return [.. args];

@@ -56,10 +56,20 @@ public class EmbeddedCatalogTests
     // Riot Client: winget has no standalone Riot Client package, only per-game, per-region ones.
     private static readonly string[] Dropped = ["games.riot-client"];
 
-    // Discord, Zoom and Spotify per the spec; Playnite and JetBrains Toolbox because winget offers only a user-scope installer.
+    // Discord, Zoom and Spotify per the spec; Playnite and JetBrains Toolbox because winget offers only a user-scope installer;
+    // Telegram because its only machine-scope option is a portable zip, its installer is per-user.
     private static readonly string[] PerUser =
     [
-        "communication.discord", "communication.zoom", "media.spotify", "games.playnite", "development.jetbrains-toolbox",
+        "communication.discord", "communication.telegram", "communication.zoom", "media.spotify", "games.playnite",
+        "development.jetbrains-toolbox",
+    ];
+
+    // Machine-context entries whose winget manifests offer both a machine and a user installer.
+    private static readonly string[] MachineScope =
+    [
+        "browsers.brave", "browsers.opera-gx", "browsers.vivaldi", "communication.slack", "media.obs-studio",
+        "utilities.powertoys", "utilities.everything", "utilities.sharex", "utilities.bitwarden",
+        "productivity.notion", "productivity.obsidian", "development.vscode", "development.git", "development.python",
     ];
 
     private static readonly string[] ExcludedKinds = ["cleaner", "driver", "booster", "antivirus"];
@@ -98,11 +108,21 @@ public class EmbeddedCatalogTests
     }
 
     [Fact]
+    public void Scopes_are_set_where_both_installers_exist_and_on_user_entries()
+    {
+        var machine = Catalog.Programs.Where(p => p.Scope == "machine").Select(p => p.Id).Order(StringComparer.Ordinal);
+        var user = Catalog.Programs.Where(p => p.Scope == "user").Select(p => p.Id).Order(StringComparer.Ordinal);
+
+        Assert.Equal(MachineScope.Except(Dropped).Order(StringComparer.Ordinal), machine);
+        Assert.Equal(PerUser.Except(Dropped).Order(StringComparer.Ordinal), user);
+    }
+
+    [Fact]
     public void No_excluded_kinds()
     {
         foreach (var program in Catalog.Programs)
         {
-            var names = program.Text.Values.Select(t => t.Name).Append(program.Id);
+            var names = program.Text.Values.Select(t => t.Name).Append(program.Id).Append(program.WingetId);
             foreach (var kind in ExcludedKinds)
                 Assert.DoesNotContain(names, n => n.Contains(kind, StringComparison.OrdinalIgnoreCase));
         }

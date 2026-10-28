@@ -175,7 +175,7 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
     private static string Line(SelectedProgram program, string text) => $"{program.DisplayName}: {text}";
 
     private static WingetPackageRef Ref(SelectedProgram program) =>
-        new(program.Package.Id, program.Package.Source, program.Package.Version);
+        new(program.Package.Id, program.Package.Source, program.Package.Version, program.Package.Scope);
 
     private readonly record struct Outcome(string Text, bool Failed = false, bool Reboot = false, bool NoUser = false);
 }

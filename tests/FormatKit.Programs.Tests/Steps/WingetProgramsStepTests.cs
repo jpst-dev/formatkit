@@ -145,6 +145,36 @@ public class WingetProgramsStepTests : IDisposable
     }
 
     [Fact]
+    public async Task Package_scope_is_passed_to_install()
+    {
+        var (runner, ctx, user, _) = Setup();
+        runner.Enqueue("winget.exe", Ok);      // --version
+        runner.Enqueue("winget.exe", Exit(1)); // list: not installed
+        runner.Enqueue("winget.exe", Ok);      // install
+        var machine = new SelectedProgram("m", "M.M", null, new WingetEntry("M.M", "winget", null, InstallContext.Machine, "machine"));
+        var perUser = new SelectedProgram("u", "U.U", null, new WingetEntry("U.U", "winget", null, InstallContext.User, "user"));
+
+        await Step(false, machine, perUser).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.DoesNotContain("--scope", runner.Calls.Single(c => c.Arguments[0] == "list").Arguments);
+        Assert.Equal(["--scope", "machine"], runner.Calls.Single(c => c.Arguments[0] == "install").Arguments.TakeLast(2));
+        Assert.Equal(["--scope", "user"], Assert.Single(user.Calls).Arguments.TakeLast(2));
+    }
+
+    [Fact]
+    public async Task Entry_without_scope_passes_no_scope()
+    {
+        var (runner, ctx, _, _) = Setup();
+        runner.Enqueue("winget.exe", Ok);
+        runner.Enqueue("winget.exe", Exit(1));
+        runner.Enqueue("winget.exe", Ok);
+
+        await Step(false, Program("A.A")).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.DoesNotContain("--scope", runner.Calls.Single(c => c.Arguments[0] == "install").Arguments);
+    }
+
+    [Fact]
     public async Task User_context_item_without_signed_in_user_fails_with_sign_in_action()
     {
         var (runner, ctx, user, session) = Setup();

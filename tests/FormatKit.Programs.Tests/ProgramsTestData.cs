@@ -13,9 +13,9 @@ internal static class ProgramsTestData
 
     public static ProgramCatalog TestCatalog() => ProgramCatalog.Parse("""
         { "schemaVersion": 1, "programs": [
-          { "id": "browsers.firefox", "category": "browsers", "wingetId": "Mozilla.Firefox", "source": "winget",
+          { "id": "browsers.firefox", "category": "browsers", "wingetId": "Mozilla.Firefox", "source": "winget", "scope": "machine",
             "text": { "en": { "name": "Firefox", "description": "Browser" }, "pt-BR": { "name": "Firefox", "description": "Navegador" } } },
-          { "id": "communication.discord", "category": "communication", "wingetId": "Discord.Discord", "source": "winget", "context": "user",
+          { "id": "communication.discord", "category": "communication", "wingetId": "Discord.Discord", "source": "winget", "context": "user", "scope": "user",
             "text": { "en": { "name": "Discord", "description": "Chat" }, "pt-BR": { "name": "Discord", "description": "Bate-papo" } } },
           { "id": "games.steam", "category": "games", "wingetId": "Valve.Steam", "source": "winget",
             "text": { "en": { "name": "Steam", "description": "Games" }, "pt-BR": { "name": "Steam", "description": "Jogos" } } }

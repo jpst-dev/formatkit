@@ -7,7 +7,8 @@ using FormatKit.Programs.Localization;
 
 namespace FormatKit.Programs;
 
-public sealed record WingetEntry(string Id, string Source, string? Version, InstallContext Context);
+/// <summary><paramref name="Scope"/> comes only from the catalog; profile and import entries leave it null.</summary>
+public sealed record WingetEntry(string Id, string Source, string? Version, InstallContext Context, string? Scope = null);
 
 public sealed record DirectEntry(string Name, string? Url, string? Path, string? Sha256, IReadOnlyList<string> Args);
 

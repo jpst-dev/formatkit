@@ -21,7 +21,7 @@ public static class ProgramSelector
             var program = catalog.Find(id);
             if (program is null)
                 continue;
-            var entry = new WingetEntry(program.WingetId, program.Source, null, program.Context);
+            var entry = new WingetEntry(program.WingetId, program.Source, null, program.Context, program.Scope);
             if (Add(entry))
                 result.Add(new SelectedProgram(program.Id, program.LocalizedText().Name, program.Category, entry));
         }

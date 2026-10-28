@@ -93,6 +93,30 @@ public class ProgramCatalogTests
         AssertRejected(Catalog(Entry(en: """{ "name": " ", "description": "Browser" }""")), "must not be blank");
 
     [Fact]
+    public void Parse_reads_scope_and_defaults_it_to_null()
+    {
+        var catalog = ProgramCatalog.Parse(Catalog(
+            Entry(),
+            Entry("browsers.brave", wingetId: "Brave.Brave").Replace("\"source\": \"winget\"", "\"source\": \"winget\", \"scope\": \"machine\""),
+            Entry("browsers.opera", wingetId: "Opera.Opera", context: "user").Replace("\"source\": \"winget\"", "\"source\": \"winget\", \"scope\": \"user\"")));
+
+        Assert.Equal([null, "machine", "user"], catalog.Programs.Select(p => p.Scope));
+    }
+
+    [Theory]
+    [InlineData("Machine")]
+    [InlineData("system")]
+    [InlineData("")]
+    public void Rejects_unknown_scope(string scope) =>
+        AssertRejected(Catalog(Entry().Replace("\"source\": \"winget\"", $"\"source\": \"winget\", \"scope\": \"{scope}\"")), "scope must be");
+
+    [Fact]
+    public void Rejects_machine_scope_on_user_context() =>
+        AssertRejected(
+            Catalog(Entry(context: "user").Replace("\"source\": \"winget\"", "\"source\": \"winget\", \"scope\": \"machine\"")),
+            "scope 'machine' on a user-context");
+
+    [Fact]
     public void Rejects_same_winget_id_and_source_twice() =>
         AssertRejected(Catalog(Entry(), Entry(id: "browsers.firefox-again")), "duplicate winget package");
 }

@@ -11,13 +11,15 @@ public enum InstallContext { Machine, User }
 /// <summary>The name and description shown for one catalog program in one language.</summary>
 public sealed record ProgramText(string Name, string Description);
 
+/// <summary><paramref name="Scope"/>, when set, is the winget installer scope ("machine" or "user") passed as --scope.</summary>
 public sealed record CatalogProgram(
     string Id,
     ProgramCategory Category,
     string WingetId,
     string Source,
     IReadOnlyDictionary<string, ProgramText> Text,
-    InstallContext Context = InstallContext.Machine)
+    InstallContext Context = InstallContext.Machine,
+    string? Scope = null)
 {
     /// <summary>The pt-BR text when the UI culture is Portuguese, else the English text.</summary>
     public ProgramText LocalizedText() =>
