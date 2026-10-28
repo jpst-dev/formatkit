@@ -11,7 +11,7 @@ public class FakeRegistry : IRegistry
     public void Set(string path, string name, RegistryKind kind, string data) =>
         _values[(path, name)] = new RegistryValue(kind, data);
 
-    public RegistryValue? Read(string path, string name) =>
+    public virtual RegistryValue? Read(string path, string name) =>
         _values.TryGetValue((path, name), out var value) ? value : null;
 
     public virtual void Write(string path, string name, RegistryValue value) => _values[(path, name)] = value;

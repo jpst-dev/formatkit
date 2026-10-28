@@ -101,6 +101,7 @@
   <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
   <data name="Check_Applied" xml:space="preserve"><value>Applied cleanup items (revert with: formatkit cleanup undo &lt;id&gt;):</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
+  <data name="Check_NotChecked" xml:space="preserve"><value>{0} checks could not be run (see log).</value></data>
   <data name="Undo_UsageBoth" xml:space="preserve"><value>Use either item ids or --all, not both.</value></data>
   <data name="Undo_UsageNeither" xml:space="preserve"><value>Specify the item ids to revert, or --all.</value></data>
   <data name="Undo_UnknownIds" xml:space="preserve"><value>Unknown cleanup item(s): {0}. Run 'formatkit cleanup list' to see the catalog.</value></data>

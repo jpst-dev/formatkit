@@ -10,17 +10,33 @@ public sealed record Finding(KnownIssue Issue, string Detail);
 
 public sealed record AppliedItem(string ItemId, bool CanUndo);
 
-public sealed record DiagnosisReport(IReadOnlyList<Finding> Findings, IReadOnlyList<AppliedItem> Applied, string? JournalError);
+/// <param name="NotChecked">Rules whose evaluation threw; each is logged (R16).</param>
+public sealed record DiagnosisReport(IReadOnlyList<Finding> Findings, IReadOnlyList<AppliedItem> Applied, string? JournalError, int NotChecked);
 
 /// <summary>Read-only: evaluates the known-issue rules and lists what the journal can still undo. Never writes to the system.</summary>
-public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths)
+/// <param name="log">Hears rules that could not be evaluated.</param>
+public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog.ILogger? log = null)
 {
     public async Task<DiagnosisReport> RunAsync(ServiceSet services, CancellationToken ct)
     {
         var findings = new List<Finding>();
+        var notChecked = 0;
         foreach (var issue in issues.Issues)
         {
-            foreach (var detail in await EvaluateAsync(issue.Rule, services, ct))
+            IReadOnlyList<string> details;
+            try
+            {
+                details = await EvaluateAsync(issue.Rule, services, ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // One unreadable value must not hide every other finding.
+                log?.Warning(ex, "Could not evaluate known issue {Issue}", issue.Id);
+                notChecked++;
+                continue;
+            }
+
+            foreach (var detail in details)
                 findings.Add(new Finding(issue, detail));
         }
 
@@ -42,7 +58,8 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths)
         return new DiagnosisReport(
             sorted,
             applied,
-            load.Status == JournalLoadStatus.Corrupt ? load.Error : null);
+            load.Status == JournalLoadStatus.Corrupt ? load.Error : null,
+            notChecked);
     }
 
     private static async Task<IReadOnlyList<string>> EvaluateAsync(IssueRule rule, ServiceSet services, CancellationToken ct)

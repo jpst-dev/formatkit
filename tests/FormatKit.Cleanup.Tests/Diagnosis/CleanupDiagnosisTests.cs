@@ -44,9 +44,9 @@ public class CleanupDiagnosisTests
         Issue("reg-throttle", IssueSeverity.Contested, new RegistryValueRule(Profile, "NetworkThrottlingIndex", "4294967295", null)),
         Issue("power-custom", IssueSeverity.Info, new NonBuiltInPowerSchemeRule()));
 
-    private Task<DiagnosisReport> Run(KnownIssues rules) =>
+    private Task<DiagnosisReport> Run(KnownIssues rules, FakeRegistry? registry = null) =>
         new CleanupDiagnosis(rules, _paths).RunAsync(
-            TestServices.Create(files: _files, registry: _registry, services: _services, power: _power, hardware: _hardware), Ct);
+            TestServices.Create(files: _files, registry: registry ?? _registry, services: _services, power: _power, hardware: _hardware), Ct);
 
     private static ProblemDevice Device(string name, params string[] ids) => new(name, "", 22, ids);
 
@@ -111,6 +111,20 @@ public class CleanupDiagnosisTests
     }
 
     [Fact]
+    public async Task Failing_rule_is_counted_and_the_others_still_report()
+    {
+        _services.Services["W32Time"] = ServiceStartType.Disabled;
+
+        var report = await Run(Rules(
+            Issue("reg-hvci", IssueSeverity.Security, new RegistryValueRule(Hvci, "Enabled", "0", null)),
+            Issue("svc-w32time", IssueSeverity.Breaks, new ServiceDisabledRule("W32Time"))),
+            new UnreadableRegistry());
+
+        Assert.Equal(["svc-w32time"], report.Findings.Select(f => f.Issue.Id));
+        Assert.Equal(1, report.NotChecked);
+    }
+
+    [Fact]
     public async Task Clean_system_has_no_findings()
     {
         _services.Services["W32Time"] = ServiceStartType.Automatic;
@@ -123,6 +137,7 @@ public class CleanupDiagnosisTests
         Assert.Empty(report.Findings);
         Assert.Empty(report.Applied);
         Assert.Null(report.JournalError);
+        Assert.Equal(0, report.NotChecked);
     }
 
     [Fact]
@@ -201,6 +216,12 @@ public class CleanupDiagnosisTests
 
         Assert.Equal(before, _registry.Values.ToDictionary(kv => kv.Key, kv => kv.Value));
         Assert.Equal(0, _files.WriteCount);
+    }
+
+    private sealed class UnreadableRegistry : FakeRegistry
+    {
+        public override RegistryValue? Read(string path, string name) =>
+            throw new NotSupportedException("REG_BINARY is not supported");
     }
 
     [Fact]

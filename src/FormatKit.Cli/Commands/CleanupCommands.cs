@@ -74,7 +74,7 @@ internal static class CleanupCommands
         var check = new Command("check", Strings.Get("Cmd_CleanupCheck"));
         check.SetAction(async (_, ct) => await Output.GuardSystemQueryAsync(context.Out, async () =>
         {
-            var report = await new CleanupDiagnosis(context.Issues, AppPaths.Default)
+            var report = await new CleanupDiagnosis(context.Issues, AppPaths.Default, context.Env.Log)
                 .RunAsync(context.Env.Services, ct);
             PrintCheck(context.Out, report);
             return report.Findings.Any(f => f.Issue.Severity is IssueSeverity.Breaks or IssueSeverity.Security)
@@ -110,6 +110,9 @@ internal static class CleanupCommands
 
         if (report.JournalError is not null)
             o.WriteLine(Strings.Format("Check_JournalError", report.JournalError));
+
+        if (report.NotChecked > 0)
+            o.WriteLine(Strings.Format("Check_NotChecked", report.NotChecked));
     }
 
     private static Command CreateUndo(CommandContext context)

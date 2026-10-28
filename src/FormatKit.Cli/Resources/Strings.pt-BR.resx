@@ -101,6 +101,7 @@
   <data name="Check_Fix" xml:space="preserve"><value>Correção: {0}</value></data>
   <data name="Check_Applied" xml:space="preserve"><value>Itens de limpeza aplicados (reverta com: formatkit cleanup undo &lt;id&gt;):</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>O diário de limpeza não pôde ser lido: {0}</value></data>
+  <data name="Check_NotChecked" xml:space="preserve"><value>{0} verificações não puderam ser executadas (veja o log).</value></data>
   <data name="Undo_UsageBoth" xml:space="preserve"><value>Use os IDs dos itens ou --all, não os dois.</value></data>
   <data name="Undo_UsageNeither" xml:space="preserve"><value>Informe os IDs dos itens a reverter ou --all.</value></data>
   <data name="Undo_UnknownIds" xml:space="preserve"><value>Itens de limpeza desconhecidos: {0}. Execute 'formatkit cleanup list' para ver o catálogo.</value></data>

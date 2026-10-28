@@ -20,7 +20,7 @@ public sealed class CleanupCommandsTests : IDisposable
     private readonly InMemoryFileSystem _fs = new();
     private readonly FakeElevation _elevation = new() { IsElevated = true };
     private readonly FakeServiceControl _services = new();
-    private readonly FakeRegistry _registry = new();
+    private FakeRegistry _registry = new();
     private readonly StringWriter _out = new();
     private readonly CleanupCatalog _catalog = CleanupCatalog.LoadEmbedded();
 
@@ -144,6 +144,28 @@ public sealed class CleanupCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task Check_reports_rules_that_could_not_run()
+    {
+        _registry = new UnreadableRegistry();
+
+        var exit = await Run("cleanup", "check");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Matches(@"[1-9]\d* checks could not be run \(see log\)\.", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Check_reports_rules_that_could_not_run_in_Portuguese()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("pt-BR");
+        _registry = new UnreadableRegistry();
+
+        await Run("cleanup", "check");
+
+        Assert.Contains("verificações não puderam ser executadas (veja o log).", _out.ToString());
+    }
+
+    [Fact]
     public async Task Undo_requires_ids_or_all()
     {
         Assert.Equal(ExitCodes.InvalidInput, await Run("cleanup", "undo"));
@@ -234,6 +256,12 @@ public sealed class CleanupCommandsTests : IDisposable
         Assert.Contains($"    {contested.Id}  {contested.LocalizedText().Title} [aggressive] [contested]", output);
         Assert.Equal(0, _elevation.RelaunchCalls);
         Assert.Equal(0, _fs.WriteCount);
+    }
+
+    private sealed class UnreadableRegistry : FakeRegistry
+    {
+        public override RegistryValue? Read(string path, string name) =>
+            throw new NotSupportedException("REG_BINARY is not supported");
     }
 
     [Fact]
