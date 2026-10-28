@@ -75,6 +75,39 @@ public class ScheduledTaskUserContextRunnerTests
     }
 
     [Fact]
+    public void Script_has_finally_attached_to_try()
+    {
+        var script = ScheduledTaskUserContextRunner.BuildScript(new ProcessSpec("a.exe", [], TimeSpan.FromMinutes(1)));
+        Assert.Contains("} finally{", script);
+        Assert.DoesNotContain("}; finally", script);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Script_parses_without_errors()
+    {
+        var script = ScheduledTaskUserContextRunner.BuildScript(
+            new ProcessSpec(@"C:\Program Files\X\app it's.exe", ["--name", "it's \u2019 x"], TimeSpan.FromMinutes(1)));
+        var tmp = Path.Combine(Path.GetTempPath(), $"fk-script-{Guid.NewGuid():N}.ps1");
+        await File.WriteAllTextAsync(tmp, script, new System.Text.UTF8Encoding(true), TestContext.Current.CancellationToken);
+        try
+        {
+            var result = await new ProcessRunner(Serilog.Core.Logger.None).RunAsync(
+                new ProcessSpec(
+                    "powershell.exe",
+                    ["-NoProfile", "-NonInteractive", "-Command",
+                     $"$e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile('{tmp}', [ref]$null, [ref]$e); $e.Count"],
+                    TimeSpan.FromMinutes(1)),
+                CancellationToken.None);
+            Assert.Equal("0", result.StdOut.Trim());
+        }
+        finally
+        {
+            File.Delete(tmp);
+        }
+    }
+
+    [Fact]
     public async Task Outer_timeout_returns_timed_out()
     {
         var fake = new FakeProcessRunner();

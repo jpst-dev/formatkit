@@ -62,7 +62,7 @@ public sealed class ScheduledTaskUserContextRunner(IProcessRunner runner) : IUse
             "; ",
             "$ErrorActionPreference='Stop'",
             $"$n={Quote(taskName)}",
-            "try{ " + body + " }",
+            "try{ " + body + " } " +
             "finally{ Stop-ScheduledTask -TaskName $n -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName $n -Confirm:$false -ErrorAction SilentlyContinue }");
     }
 
