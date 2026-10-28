@@ -30,7 +30,7 @@ public class CleanupCategoryStepTests
 
     private CleanupCategoryStep Step(CleanupItem[] items, params string[] included) =>
         new(items[0].Category, items, new HashSet<string>(included),
-            new ItemApplier(new ActionHandlers(() => new HashSet<Guid>()), _journal));
+            new ItemApplier(new ActionHandlers(() => new Dictionary<Guid, Guid?>()), _journal));
 
     private static string Message(CleanupItem item, string status) => $"{item.LocalizedText().Title}: {status}";
 

@@ -12,7 +12,8 @@ using FormatKit.Core.SystemAccess;
 namespace FormatKit.Cleanup;
 
 /// <param name="files">The file system holding the journal; the real one unless a test supplies another.</param>
-public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileSystem? files = null) : IModule
+/// <param name="log">Hears selection notes, such as a power scheme item dropped in favor of a higher-level one.</param>
+public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileSystem? files = null, Serilog.ILogger? log = null) : IModule
 {
     private static readonly string[] KnownProperties = ["enabled", "level", "include", "exclude", "confirmAggressive"];
 
@@ -91,7 +92,7 @@ public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileS
         if (!options.Enabled)
             return [];
 
-        var selected = ItemSelector.Select(catalog, options);
+        var selected = ItemSelector.Select(catalog, options, log);
         var journal = new JournalStore(files ?? new FileSystem(), paths);
         var handlers = new ActionHandlers(() => PowerSchemeHandler.CreatedSchemes(journal.Load().Journal));
         var applier = new ItemApplier(handlers, journal);

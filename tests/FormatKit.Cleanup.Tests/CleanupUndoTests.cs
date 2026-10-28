@@ -24,7 +24,7 @@ public class CleanupUndoTests
         TestServices.Context(TestServices.Create(files: _files, registry: registry));
 
     private Task<ItemOutcome> Apply(CleanupItem item, FakeRegistry registry) =>
-        new ItemApplier(new ActionHandlers(() => new HashSet<Guid>()), _journal).ApplyAsync(item, Context(registry), Ct);
+        new ItemApplier(new ActionHandlers(() => new Dictionary<Guid, Guid?>()), _journal).ApplyAsync(item, Context(registry), Ct);
 
     private Task<IReadOnlyList<ItemOutcome>> Undo(FakeRegistry registry, IReadOnlyList<string>? ids = null) =>
         new CleanupUndo(NewCatalog(), _paths, _files).UndoAsync(ids, Context(registry), Ct);

@@ -28,4 +28,31 @@ public class ItemSelectorTests
     [Fact]
     public void Exclude_removes() =>
         Assert.Equal(["privacy.safe", "performance.aggressive"], Select(CleanupLevel.Aggressive, exclude: ["apps.balanced"]));
+
+    [Fact]
+    public void Only_highest_level_power_scheme_item_is_kept()
+    {
+        var catalog = NewCatalog(
+            Item("performance.high", CleanupLevel.Balanced, actions: new PowerSchemeAction("highPerformance")),
+            Item("privacy.safe", CleanupLevel.Safe),
+            Item("performance.ultimate", CleanupLevel.Aggressive, actions: new PowerSchemeAction("ultimate")));
+        var log = new CollectingSink();
+        var logger = new Serilog.LoggerConfiguration().WriteTo.Sink(log).CreateLogger();
+
+        var aggressive = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Aggressive, [], [], true), logger);
+        var balanced = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Balanced, [], [], false), logger);
+
+        Assert.Equal(["privacy.safe", "performance.ultimate"], aggressive.Select(i => i.Id));
+        Assert.Equal(["performance.high", "privacy.safe"], balanced.Select(i => i.Id));
+        var dropped = Assert.Single(log.Events);
+        Assert.Equal(Serilog.Events.LogEventLevel.Information, dropped.Level);
+        Assert.Contains("performance.high", dropped.RenderMessage());
+    }
+
+    private sealed class CollectingSink : Serilog.Core.ILogEventSink
+    {
+        public List<Serilog.Events.LogEvent> Events { get; } = [];
+
+        public void Emit(Serilog.Events.LogEvent logEvent) => Events.Add(logEvent);
+    }
 }

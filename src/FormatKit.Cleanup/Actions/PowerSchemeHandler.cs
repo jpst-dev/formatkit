@@ -6,8 +6,8 @@ using FormatKit.Core.SystemAccess;
 
 namespace FormatKit.Cleanup.Actions;
 
-/// <param name="createdSchemes">GUIDs of schemes created by unreverted journal entries; an active scheme in this set counts as applied, so a second run never duplicates again.</param>
-internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes) : IActionHandler
+/// <param name="createdSchemes">Schemes created by unreverted journal entries, mapped to the scheme each one duplicated (null when the entry predates that field). An active created scheme counts as applied for its source, so a second run never duplicates again.</param>
+internal sealed class PowerSchemeHandler(Func<IReadOnlyDictionary<Guid, Guid?>> createdSchemes) : IActionHandler
 {
     public const string Type = "powerScheme";
     private const string JournalTarget = "power";
@@ -16,14 +16,15 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes
     {
         var target = TargetGuid((PowerSchemeAction)action);
         var active = await ctx.Services.Power.GetActiveAsync(ct).ConfigureAwait(false);
-        return active == target || createdSchemes().Contains(active);
+        return active == target
+            || (createdSchemes().TryGetValue(active, out var source) && (source is null || source == target));
     }
 
     public async Task<JournalAction> CaptureAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
     {
         var active = await ctx.Services.Power.GetActiveAsync(ct).ConfigureAwait(false);
         ctx.Log.Debug("Power scheme previous active: {Scheme}", active);
-        return new JournalAction(Type, JournalTarget, Previous(active, null));
+        return new JournalAction(Type, JournalTarget, Previous(active, null, null));
     }
 
     public async Task<JournalAction> ApplyAsync(CleanupAction action, JournalAction captured, StepContext ctx, CancellationToken ct)
@@ -74,7 +75,7 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes
         }
 
         var previous = Guid.Parse(captured.Previous.GetProperty("previous").GetString()!);
-        return captured with { Previous = Previous(previous, created) };
+        return captured with { Previous = Previous(previous, created, target) };
     }
 
     public async Task UndoAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
@@ -89,10 +90,10 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes
         ctx.Log.Information("Power scheme restored to {Scheme}", previous);
     }
 
-    /// <summary>The schemes created by unreverted journal entries: the source of the <c>createdSchemes</c> provider.</summary>
-    internal static IReadOnlySet<Guid> CreatedSchemes(CleanupJournal? journal)
+    /// <summary>The schemes created by unreverted journal entries, with the scheme each duplicated: the source of the <c>createdSchemes</c> provider.</summary>
+    internal static IReadOnlyDictionary<Guid, Guid?> CreatedSchemes(CleanupJournal? journal)
     {
-        var created = new HashSet<Guid>();
+        var created = new Dictionary<Guid, Guid?>();
         if (journal is null)
             return created;
 
@@ -104,15 +105,20 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlySet<Guid>> createdSchemes
                 && value.ValueKind == JsonValueKind.String
                 && Guid.TryParse(value.GetString(), out var scheme))
             {
-                created.Add(scheme);
+                created[scheme] = action.Previous.TryGetProperty("source", out var source)
+                    && source.ValueKind == JsonValueKind.String
+                    && Guid.TryParse(source.GetString(), out var from)
+                        ? from
+                        : null;
             }
         }
 
         return created;
     }
 
-    private static JsonElement Previous(Guid previous, Guid? created) =>
-        JsonSerializer.SerializeToElement(new { previous = previous.ToString(), created = created?.ToString() });
+    /// <param name="source">The scheme <paramref name="created"/> duplicated.</param>
+    private static JsonElement Previous(Guid previous, Guid? created, Guid? source) =>
+        JsonSerializer.SerializeToElement(new { previous = previous.ToString(), created = created?.ToString(), source = source?.ToString() });
 
     private static Guid TargetGuid(PowerSchemeAction action) => action.Scheme switch
     {

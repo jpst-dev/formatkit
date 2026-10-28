@@ -12,13 +12,16 @@ public class PowerSchemeHandlerTests
     private static readonly CancellationToken Ct = TestContext.Current.CancellationToken;
 
     private static PowerSchemeHandler NewHandler(params Guid[] created) =>
-        new(() => new HashSet<Guid>(created));
+        new(() => created.ToDictionary(g => g, _ => (Guid?)null));
+
+    private static PowerSchemeHandler NewHandler(Guid created, Guid source) =>
+        new(() => new Dictionary<Guid, Guid?> { [created] = source });
 
     [Fact]
     public void Created_schemes_come_from_unreverted_power_entries()
     {
         static JournalAction Power(Guid? created) => new(PowerSchemeHandler.Type, "power",
-            JsonSerializer.SerializeToElement(new { previous = Guid.NewGuid().ToString(), created = created?.ToString() }));
+            JsonSerializer.SerializeToElement(new { previous = Guid.NewGuid().ToString(), created = created?.ToString(), source = BuiltInPowerSchemes.Ultimate.ToString() }));
         var kept = Guid.NewGuid();
         var reverted = Guid.NewGuid();
         var journal = new CleanupJournal(1,
@@ -27,7 +30,9 @@ public class PowerSchemeHandlerTests
             new JournalEntry("performance.b", DateTimeOffset.Now, [Power(reverted)], DateTimeOffset.Now),
         ]);
 
-        Assert.Equal([kept], PowerSchemeHandler.CreatedSchemes(journal));
+        var created = PowerSchemeHandler.CreatedSchemes(journal);
+        Assert.Equal([kept], created.Keys);
+        Assert.Equal(BuiltInPowerSchemes.Ultimate, created[kept]);
         Assert.Empty(PowerSchemeHandler.CreatedSchemes(null));
     }
 
@@ -63,6 +68,20 @@ public class PowerSchemeHandlerTests
         Assert.NotEqual(BuiltInPowerSchemes.Ultimate, created);
         Assert.Equal(created, power.Active);
         Assert.Contains(created, power.Schemes);
+        Assert.Equal(BuiltInPowerSchemes.Ultimate.ToString(), recorded.Previous.GetProperty("source").GetString());
+    }
+
+    [Fact]
+    public async Task Created_scheme_counts_as_applied_only_for_its_source()
+    {
+        var created = Guid.NewGuid();
+        var power = new FakePowerSchemes { Active = created };
+        power.Schemes.Add(created);
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var handler = NewHandler(created, BuiltInPowerSchemes.HighPerformance);
+
+        Assert.True(await handler.IsAppliedAsync(new PowerSchemeAction("highPerformance"), ctx, Ct));
+        Assert.False(await handler.IsAppliedAsync(new PowerSchemeAction("ultimate"), ctx, Ct));
     }
 
     [Fact]

@@ -48,7 +48,7 @@ public class MemoryIntegrityHandlerTests
     [Fact]
     public void ActionHandlers_dispatch_by_type_and_handler_name()
     {
-        var handlers = new ActionHandlers(() => new HashSet<Guid>());
+        var handlers = new ActionHandlers(() => new Dictionary<Guid, Guid?>());
 
         Assert.IsType<MemoryIntegrityHandler>(handlers.For(Action));
         Assert.IsType<MemoryIntegrityHandler>(handlers.For(new FormatKit.Cleanup.Journal.JournalAction("memoryIntegrity", "memoryIntegrity", default)));

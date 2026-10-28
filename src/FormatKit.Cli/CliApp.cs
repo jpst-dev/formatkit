@@ -39,7 +39,7 @@ public sealed class CliApp
         _modules = modules ??
         [
             new DriversModule(catalog, env.NetworkRetryDelay),
-            new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files),
+            new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files, env.Log),
         ];
     }
 

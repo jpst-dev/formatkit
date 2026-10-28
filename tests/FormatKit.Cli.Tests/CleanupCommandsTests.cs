@@ -182,7 +182,7 @@ public sealed class CleanupCommandsTests : IDisposable
         var action = (RegistryAction)item.Actions[0];
         _registry.Set(action.Path, action.Name, RegistryKind.Dword, "99");
         var ctx = TestServices.Context(TestServices.Create(files: _fs, services: _services, registry: _registry));
-        var applied = await new ItemApplier(new ActionHandlers(() => new HashSet<Guid>()), new JournalStore(_fs, AppPaths.Default))
+        var applied = await new ItemApplier(new ActionHandlers(() => new Dictionary<Guid, Guid?>()), new JournalStore(_fs, AppPaths.Default))
             .ApplyAsync(item, ctx, TestContext.Current.CancellationToken);
         Assert.Equal(ItemStatus.Applied, applied.Status);
 

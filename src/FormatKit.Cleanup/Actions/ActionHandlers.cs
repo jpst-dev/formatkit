@@ -3,7 +3,7 @@ using FormatKit.Cleanup.Journal;
 
 namespace FormatKit.Cleanup.Actions;
 
-internal sealed class ActionHandlers(Func<IReadOnlySet<Guid>> createdSchemes)
+internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> createdSchemes)
 {
     private readonly RegistryHandler _registry = new();
     private readonly ServiceHandler _service = new();

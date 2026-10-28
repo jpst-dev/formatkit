@@ -19,7 +19,7 @@ public class ItemApplierTests
 
     public ItemApplierTests() => _journal = new JournalStore(_files, new AppPaths(@"C:\FormatKitTest"));
 
-    private ItemApplier NewApplier() => new(new ActionHandlers(() => new HashSet<Guid>()), _journal);
+    private ItemApplier NewApplier() => new(new ActionHandlers(() => new Dictionary<Guid, Guid?>()), _journal);
 
     private StepContext Context(FakeRegistry registry, FakeOptionalFeatures? features = null) =>
         TestServices.Context(TestServices.Create(files: _files, registry: registry, features: features));
@@ -105,7 +105,7 @@ public class ItemApplierTests
         var registry = new FakeRegistry();
         registry.Set(Key, "A", RegistryKind.Dword, "1");
         var files = new FailingFileSystem(_files, failingWrite: 2);
-        var applier = new ItemApplier(new ActionHandlers(() => new HashSet<Guid>()), new JournalStore(files, new AppPaths(@"C:\FormatKitTest")));
+        var applier = new ItemApplier(new ActionHandlers(() => new Dictionary<Guid, Guid?>()), new JournalStore(files, new AppPaths(@"C:\FormatKitTest")));
 
         var outcome = await applier.ApplyAsync(Item("privacy.a", actions: [Dword(Key, "A", 0)]), Context(registry), Ct);
 
