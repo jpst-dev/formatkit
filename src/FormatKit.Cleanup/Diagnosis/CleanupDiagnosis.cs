@@ -1,3 +1,4 @@
+using FormatKit.Cleanup.Actions;
 using FormatKit.Cleanup.Journal;
 using FormatKit.Core;
 using FormatKit.Core.Steps;
@@ -20,6 +21,9 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
 {
     public async Task<DiagnosisReport> RunAsync(ServiceSet services, CancellationToken ct)
     {
+        var load = new JournalStore(services.Files, paths).Load();
+        // A scheme cleanup itself created (ultimate-plan) is not a foreign import worth reporting.
+        var ownSchemes = PowerSchemeHandler.CreatedSchemes(load.Journal);
         var findings = new List<Finding>();
         var notChecked = 0;
         foreach (var issue in issues.Issues)
@@ -27,7 +31,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
             IReadOnlyList<string> details;
             try
             {
-                details = await EvaluateAsync(issue.Rule, services, ct);
+                details = await EvaluateAsync(issue.Rule, services, ownSchemes, ct);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -46,7 +50,6 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
             .ThenBy(f => f.Issue.Id, StringComparer.Ordinal)
             .ToList();
 
-        var load = new JournalStore(services.Files, paths).Load();
         var currentSid = services.UserSession.CurrentUserSid;
         var applied = load.Journal is null
             ? []
@@ -63,7 +66,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
             notChecked);
     }
 
-    private static async Task<IReadOnlyList<string>> EvaluateAsync(IssueRule rule, ServiceSet services, CancellationToken ct)
+    private static async Task<IReadOnlyList<string>> EvaluateAsync(IssueRule rule, ServiceSet services, IReadOnlyDictionary<Guid, Guid?> ownSchemes, CancellationToken ct)
     {
         switch (rule)
         {
@@ -83,7 +86,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
                     .ToList();
             case NonBuiltInPowerSchemeRule:
                 var active = await services.Power.GetActiveAsync(ct);
-                return BuiltInPowerSchemes.IsBuiltIn(active) ? [] : [active.ToString()];
+                return BuiltInPowerSchemes.IsBuiltIn(active) || ownSchemes.ContainsKey(active) ? [] : [active.ToString()];
             default:
                 return [];
         }

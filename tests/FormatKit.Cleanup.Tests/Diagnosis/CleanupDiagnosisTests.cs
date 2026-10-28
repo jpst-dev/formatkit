@@ -178,6 +178,24 @@ public class CleanupDiagnosisTests
     }
 
     [Fact]
+    public async Task Scheme_created_by_cleanup_is_not_reported_as_foreign()
+    {
+        var created = Guid.NewGuid();
+        _power.Active = created;
+        new JournalStore(_files, _paths).Save(new CleanupJournal(1,
+        [
+            new JournalEntry("performance.ultimate-plan", DateTimeOffset.UtcNow,
+                [new JournalAction(FormatKit.Cleanup.Actions.PowerSchemeHandler.Type, "power", System.Text.Json.JsonSerializer.SerializeToElement(
+                    new { previous = BuiltInPowerSchemes.Balanced.ToString(), created = created.ToString(), source = BuiltInPowerSchemes.Ultimate.ToString() }))],
+                null),
+        ]));
+
+        var report = await Run(Rules(Issue("p", IssueSeverity.Info, new NonBuiltInPowerSchemeRule())));
+
+        Assert.Empty(report.Findings);
+    }
+
+    [Fact]
     public async Task Applied_lists_each_item_with_unreverted_entries_once()
     {
         var now = DateTimeOffset.UtcNow;

@@ -109,6 +109,6 @@
   <data name="Undo_JournalCorrupt" xml:space="preserve"><value>The cleanup journal at {0} is unreadable ({1}); nothing was reverted.</value></data>
   <data name="Undo_NothingToDo" xml:space="preserve"><value>There is nothing to revert.</value></data>
   <data name="Undo_Line_Reverted" xml:space="preserve"><value>{0}: reverted</value></data>
-  <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: failed ({1})</value></data>
+  <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="Undo_Line_Skipped" xml:space="preserve"><value>{0}: skipped ({1})</value></data>
 </root>

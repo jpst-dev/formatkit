@@ -109,6 +109,6 @@
   <data name="Undo_JournalCorrupt" xml:space="preserve"><value>O diário de limpeza em {0} não pôde ser lido ({1}); nada foi revertido.</value></data>
   <data name="Undo_NothingToDo" xml:space="preserve"><value>Não há nada para reverter.</value></data>
   <data name="Undo_Line_Reverted" xml:space="preserve"><value>{0}: revertido</value></data>
-  <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: falhou ({1})</value></data>
+  <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="Undo_Line_Skipped" xml:space="preserve"><value>{0}: ignorado ({1})</value></data>
 </root>

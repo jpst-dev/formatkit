@@ -18,7 +18,8 @@ public static class LogSetup
             .WriteTo.File(file)
             .WriteTo.Console(
                 restrictedToMinimumLevel: verbose ? LogEventLevel.Debug : LogEventLevel.Warning,
-                outputTemplate: "{Message:lj}{NewLine}{Exception}")
+                // Stack traces stay in the log file unless --verbose asks for them on screen.
+                outputTemplate: verbose ? "{Message:lj}{NewLine}{Exception}" : "{Message:lj}{NewLine}")
             .CreateLogger();
     }
 }

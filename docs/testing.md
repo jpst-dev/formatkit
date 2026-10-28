@@ -143,22 +143,24 @@ The cleanup levels are described in the README; the tweaks FormatKit refuses to 
    fc.exe before-cu.reg after-cu.reg
    ```
 
-   **Expected:** the exports are identical except for volatile keys. Write down every key that differs and why; the list seen so far is:
+   Reboot from inside Windows (`Restart-Computer`), never with a hard reset such as `Restart-VM -Force`: a reset can drop registry writes that were not flushed yet and makes undo look broken.
 
-   - _none recorded yet_: add each differing key here after the first real run, with the reason it is volatile (for example Windows Update or Defender state, or MRU lists under `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer`).
+   **Expected:** every registry value the catalog touches (the `registry` actions in `cleanup.json`) has the same value, or is absent, exactly as in the `before` export. A whole-hive `fc` is not useful here: the Store reinstalls in step 6 bring newer app versions, which rewrite thousands of keys under `AppModel`, `Appx`, `PackagedCom`, `Local Settings` and `Extensions\ContractId`, and Windows itself changes `FeatureManagement`, per-session service instances (`*_xxxxx`), `bam`, `Schedule` and Search state on every boot. Compare only the catalog targets: parse both exports into `key|value` pairs and check each `path|name` from `cleanup.json`.
 
-   Any other difference means undo did not restore a value: file it as a bug. Apps removed by `appx` actions come back through undo (see scenario 8), so also check `Get-AppxPackage` lists the same packages as at `clean`. Power plans that FormatKit created must be gone from `powercfg /list`.
+   Seen on the first run (Windows 11 Pro build 26300, 2026-10-28): all 22 catalog registry targets matched. The only leftover is an empty `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity` key: undo removes the `Enabled` value it added but keeps the key it created, which Windows treats as "not configured".
+
+   Any catalog target that differs means undo did not restore a value: file it as a bug. Apps removed by `appx` actions come back through undo (see scenario 8), so also check `Get-AppxPackage` lists the same packages as at `clean`, apart from frameworks the reinstalls pull in (`Microsoft.UI.Xaml`, `VCLibs`, `NET.Native`, `WindowsAppRuntime`, and `Microsoft.StartExperiencesApp` on build 26300) and Solitaire, which winget cannot reinstall (undo fails it with the Store link, so `undo --all` exits 1). Power plans that FormatKit created must be gone from `powercfg /list`.
 
 ## 8. App removal and reinstall
 
 1. Restore `clean`, copy `formatkit.exe` to `C:\fk`, and create `cleanup-safe.json` as in scenario 7 with `"level": "safe"` and no `confirmAggressive`.
-2. Confirm Clipchamp is present: `Get-AppxPackage -AllUsers Clipchamp.Clipchamp`.
+2. Confirm Clipchamp is present: `Get-AppxPackage Clipchamp.Clipchamp`. Check the signed-in user, not `-AllUsers`: an unattended install leaves a `defaultuser0` profile that keeps its own copy of every inbox app, and FormatKit (like Settings > Apps) removes the app for the current user and from the provisioned image only.
 3. Run `.\formatkit.exe run --profile cleanup-safe.json` and accept the UAC prompt.
 
-   **Expected:** exit code 0, and `Get-AppxPackage -AllUsers Clipchamp.Clipchamp` returns nothing.
+   **Expected:** exit code 0; `Get-AppxPackage Clipchamp.Clipchamp` returns nothing, and neither does `Get-AppxProvisionedPackage -Online | Where-Object DisplayName -eq Clipchamp.Clipchamp`.
 4. Run `.\formatkit.exe cleanup undo apps.clipchamp` and accept the UAC prompt (the VM needs internet; `winget` must be installed).
 
-   **Expected:** an `apps.clipchamp: reverted` line, exit code 0, and `Get-AppxPackage -AllUsers Clipchamp.Clipchamp` lists the package again. With `winget` missing, the item fails with the "install App Installer from the Store" next action instead.
+   **Expected:** an `apps.clipchamp: reverted` line, exit code 0, and `Get-AppxPackage Clipchamp.Clipchamp` lists the package again (winget installs the current Store version, which may be newer than the inbox one). With `winget` missing, the item fails with the "install App Installer from the Store" next action instead.
 
 ## 9. Diagnosis of a tweaked PC
 
@@ -176,12 +178,14 @@ sc.exe config w32time start= disabled
 
 Run `.\formatkit.exe cleanup check`.
 
-**Expected:** exit code **1**. HPET, the Virtual Drive Enumerator (`ROOT\VDRVROOT`) and the Windows Time service are all listed under "Breaks Windows features:", each with a fix command. Run the three fix commands as printed; run `cleanup check` again. **Expected:** none of the three is listed and the exit code is 0 (the VM has no other findings).
+A Hyper-V Generation 2 VM has no HPET device, so `$hpet` is empty and its `Disable-PnpDevice` line fails; HPET can only be checked on hardware (see the checklist below).
+
+**Expected:** exit code **1**. HPET (hardware only), the Virtual Drive Enumerator (`ROOT\VDRVROOT`) and the Windows Time service are all listed under "Breaks Windows features:", each with a fix command. Run the three fix commands as printed; run `cleanup check` again. **Expected:** none of the three is listed and the exit code is 0 (the VM has no other findings).
 
 Also check, because earlier reviews could not verify these on a real machine:
 
 - **(a) `reg add` service fix.** Disable the Task Scheduler service with the registry (Windows refuses `sc.exe config` for it): `reg add "HKLM\SYSTEM\CurrentControlSet\Services\Schedule" /v Start /t REG_DWORD /d 4 /f`. Run `cleanup check` and confirm the Task Scheduler (`Schedule`) is listed under "Breaks Windows features:" with a `reg add ... /d 2 /f` fix. Run that fix command exactly as printed, then confirm `sc.exe qc Schedule` shows `START_TYPE : 2 AUTO_START`, `cleanup check` no longer lists it, and after a reboot `Get-Service Schedule` is `Running`. Repeat with Base Filtering Engine (`BFE`) if time allows. **Expected:** the service is restored in both cases. Restore `clean` afterwards if anything stays broken.
-- **(b) Default start types.** Use the `START_TYPE` values recorded at the start of this scenario, on the fresh `clean` checkpoint. The fixes in `known-issues.json` set BITS to Manual (`sc.exe config BITS start= demand`) and AppXSvc to `Start` = 2 (`reg add ... /d 2 /f`). If the recorded default differs, correct that fix, and the "Manual" or "Automatic" wording in [cleanup-not-included.md](cleanup-not-included.md). Result: BITS = _pending_, AppXSvc = _pending_.
+- **(b) Default start types.** Use the `START_TYPE` values recorded at the start of this scenario, on the fresh `clean` checkpoint. The fixes in `known-issues.json` set BITS to Manual (`sc.exe config BITS start= demand`) and AppXSvc to `Start` = 2 (`reg add ... /d 2 /f`). If the recorded default differs, correct that fix, and the "Manual" or "Automatic" wording in [cleanup-not-included.md](cleanup-not-included.md). Result (Windows 11 Pro build 26300, 2026-10-28): BITS `Start` = 3 (Manual), AppXSvc `Start` = 2 (Automatic), both matching the fixes; UsoSvc is 2 with `DelayedAutostart` = 1, matching `start= delayed-auto`.
 - **(c) Windows Home.** If a Windows 11 **Home** VM is available, apply a `level: balanced` profile (as scenario 8, with `"level": "balanced"`) and check whether the policy-based privacy items (`privacy.advertising-id`, `privacy.tailored-experiences`, `privacy.diagnostic-data`) take effect there: after applying, open Settings > Privacy & security > General and Diagnostics & feedback and confirm the settings show the new values (or are greyed out as managed) and stay after a reboot. Otherwise note this check as **pending** (no Home VM yet).
 
 ## Hardware-only checklist (cannot be verified in a VM)
@@ -194,4 +198,6 @@ Confirm on real machines and fix the code/docs if wrong:
 - [ ] **Nvidia**: the Microsoft Store NVIDIA App (`msstore XP8CLZL93F5Z4P`) installs and launches.
 - [ ] **AMD** and **Intel**: the GPU driver arrives through Windows Update (or the OEM tool) only.
 - [ ] The published `formatkit.exe` runs on a clean machine without .NET installed, and the SmartScreen prompt behaves as documented.
+- [ ] **Cleanup diagnosis, HPET**: disable the High Precision Event Timer (`ACPI\PNP0103`) in Device Manager, run `cleanup check`, expect it under "Breaks Windows features:" with an `Enable-PnpDevice` fix, run the fix and confirm the finding is gone (scenario 9; Hyper-V Gen 2 VMs have no HPET).
+- [ ] **Cleanup on Windows 11 Home**: apply a `level: balanced` profile and confirm the policy-based privacy items (`privacy.advertising-id`, `privacy.tailored-experiences`, `privacy.diagnostic-data`) take effect in Settings and survive a reboot (scenario 9 (c); no Home VM yet).
 - [ ] **Network fallback** (spare physical machine): back up its NIC driver with `drivers backup-network`, uninstall the NIC device together with its oem driver, set `networkDriverBackup` in the profile, then run. Expect the driver to be reinstalled via `pnputil`, connectivity to return and the run to continue.
