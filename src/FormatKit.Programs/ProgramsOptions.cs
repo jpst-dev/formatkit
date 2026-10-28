@@ -89,7 +89,7 @@ public sealed partial record ProgramsOptions(
                     {
                         errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, importPath, ex.Message));
                     }
-                    catch (IOException ex)
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                     {
                         errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, importPath,
                             Strings.Format("Validation_ImportUnreadable", importFile, ex.Message)));

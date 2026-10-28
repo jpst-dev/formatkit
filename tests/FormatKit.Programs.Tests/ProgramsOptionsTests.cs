@@ -9,7 +9,7 @@ public class ProgramsOptionsTests
 {
     private const string Path = "$.modules.programs";
 
-    private static (ProgramsOptions? Options, IReadOnlyList<ProfileError> Errors) Parse(string json, InMemoryFileSystem? files = null) =>
+    private static (ProgramsOptions? Options, IReadOnlyList<ProfileError> Errors) Parse(string json, FormatKit.Core.SystemAccess.IFileSystem? files = null) =>
         ProgramsOptions.Parse(Json(json), Path, TestCatalog(), files ?? new InMemoryFileSystem());
 
     private static void AssertError(string json, string errorPath, ProfileErrorCode? code = null, InMemoryFileSystem? files = null)
@@ -153,7 +153,7 @@ public class ProgramsOptionsTests
         var files = new InMemoryFileSystem();
         files.Seed(@"C:\w.json", """{ "Sources": [ { "Packages": [ { "PackageIdentifier": "Good.Id" }, { "PackageIdentifier": "bad id" } ], "SourceDetails": { "Name": "winget" } }, { "Packages": [ { "PackageIdentifier": "X.Y" } ], "SourceDetails": { "Name": "custom" } } ] }""");
 
-        var (options, errors) = Parse("""{ "acceptAgreements": true, "importFile": "C:\w.json" }""", files);
+        var (options, errors) = Parse("""{ "acceptAgreements": true, "importFile": "C:\\w.json" }""", files);
 
         Assert.Empty(errors);
         Assert.Equal(["Good.Id"], options!.ImportedPrograms.Select(e => e.Id));
@@ -166,5 +166,28 @@ public class ProgramsOptionsTests
         var files = new InMemoryFileSystem();
         files.Seed(@"C:\bad.json", "not json");
         AssertError("""{ "importFile": "C:\\bad.json" }""", $"{Path}.importFile", ProfileErrorCode.InvalidValue, files);
+    }
+
+    [Fact]
+    public void Unreadable_import_file_is_error()
+    {
+        var (options, errors) = Parse("""{ "importFile": "C:\\locked.json" }""", new DenyingFileSystem());
+
+        Assert.Null(options);
+        var error = Assert.Single(errors);
+        Assert.Equal($"{Path}.importFile", error.Path);
+        Assert.Equal(ProfileErrorCode.InvalidValue, error.Code);
+    }
+
+    private sealed class DenyingFileSystem : FormatKit.Core.SystemAccess.IFileSystem
+    {
+        public bool FileExists(string path) => true;
+        public string ReadAllText(string path) => throw new UnauthorizedAccessException(path);
+        public bool DirectoryExists(string path) => throw new NotSupportedException();
+        public void WriteAllTextAtomic(string path, string contents) => throw new NotSupportedException();
+        public void Delete(string path) => throw new NotSupportedException();
+        public void CreateDirectory(string path) => throw new NotSupportedException();
+        public Stream OpenRead(string path) => throw new NotSupportedException();
+        public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => throw new NotSupportedException();
     }
 }
