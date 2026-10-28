@@ -172,7 +172,7 @@ public class PowerSchemeHandlerTests
         await NewHandler().UndoAsync(merged, ctx, Ct);
 
         Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
-        Assert.Equal([a, b], power.Deleted.Order());
+        Assert.Equal(new[] { a, b }.Order(), power.Deleted.Order());
         Assert.Equal([BuiltInPowerSchemes.Balanced], power.Schemes);
     }
 
