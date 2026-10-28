@@ -104,6 +104,8 @@ public class JournalStoreTests
     [InlineData("{\"schemaVersion\":1}")]
     [InlineData("{\"schemaVersion\":1,\"entries\":[null]}")]
     [InlineData("{\"schemaVersion\":1,\"entries\":[{\"itemId\":\"a\",\"appliedAt\":\"2026-10-27T10:00:00+00:00\"}]}")]
+    [InlineData("{\"schemaVersion\":1,\"entries\":[{\"itemId\":\"a\",\"actions\":[]}]}")]
+    [InlineData("{\"schemaVersion\":1,\"entries\":[{\"itemId\":\"a\",\"appliedAt\":\"2026-10-27T10:00:00+00:00\",\"actions\":[{\"type\":\"registry\",\"target\":\"HKCU\\\\X|N\"}]}]}")]
     public void Wrong_shape_is_Corrupt(string json)
     {
         var fs = new InMemoryFileSystem();

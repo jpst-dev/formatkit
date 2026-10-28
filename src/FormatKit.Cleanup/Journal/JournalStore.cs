@@ -23,18 +23,19 @@ public sealed class JournalStore(IFileSystem files, AppPaths paths)
 
         try
         {
-            var text = files.ReadAllText(Path).TrimStart('﻿');
+            var text = files.ReadAllText(Path).TrimStart('\uFEFF');
             var journal = JsonSerializer.Deserialize<CleanupJournal>(text, Options);
             if (journal is null || journal.Entries is null)
                 return Corrupt("Journal file is missing required fields.");
             if (journal.SchemaVersion != CurrentSchemaVersion)
                 return Corrupt($"Unsupported journal schema version {journal.SchemaVersion}.");
-            if (journal.Entries.Any(e => e is null || e.ItemId is null || e.Actions is null
-                    || e.Actions.Any(a => a is null || a.Type is null || a.Target is null)))
+            if (journal.Entries.Any(e => e is null || e.ItemId is null || e.AppliedAt == default || e.Actions is null
+                    || e.Actions.Any(a => a is null || a.Type is null || a.Target is null || a.Previous.ValueKind == JsonValueKind.Undefined)))
                 return Corrupt("Journal file contains null or incomplete entries.");
             return new JournalLoadResult(JournalLoadStatus.Loaded, journal, null);
         }
-        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException
+                                       or NotSupportedException or InvalidOperationException)
         {
             return Corrupt(ex.Message);
         }
