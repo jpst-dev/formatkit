@@ -143,6 +143,49 @@ public class CleanupUndoTests
     }
 
     [Fact]
+    public async Task Undo_deletes_created_schemes_of_every_unreverted_entry()
+    {
+        var a = Guid.NewGuid();
+        var b = Guid.NewGuid();
+        var power = new FakePowerSchemes { Active = b };
+        power.Schemes.AddRange([a, b]);
+        JournalAction Power(Guid previous, Guid created) => new(PowerSchemeHandler.Type, "power",
+            System.Text.Json.JsonSerializer.SerializeToElement(new { previous = previous.ToString(), created = created.ToString(), source = BuiltInPowerSchemes.Ultimate.ToString() }));
+        var now = DateTimeOffset.Now;
+        _journal.Save(new CleanupJournal(1,
+        [
+            new JournalEntry("performance.ultimate", now, [Power(BuiltInPowerSchemes.Balanced, a)], null),
+            new JournalEntry("performance.ultimate", now.AddMinutes(1), [Power(a, b)], null),
+        ]));
+
+        var outcomes = await new CleanupUndo(NewCatalog(), _paths, _files)
+            .UndoAsync(null, TestServices.Context(TestServices.Create(files: _files, power: power)), Ct);
+
+        Assert.Equal(ItemStatus.Applied, Assert.Single(outcomes).Status);
+        Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
+        Assert.Equal([BuiltInPowerSchemes.Balanced], power.Schemes);
+        Assert.All(_journal.Load().Journal!.Entries, e => Assert.NotNull(e.RevertedAt));
+    }
+
+    [Fact]
+    public async Task Journal_save_failure_keeps_the_outcomes()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(Key, "A", RegistryKind.Dword, "1");
+        registry.Set(Key, "B", RegistryKind.Dword, "1");
+        await Apply(Item("privacy.a", actions: [Dword(Key, "A", 0)]), registry);
+        await Apply(Item("privacy.b", actions: [Dword(Key, "B", 0)]), registry);
+        _files.FailWrites = true;
+
+        var outcomes = await Undo(registry);
+
+        Assert.Equal(2, outcomes.Count);
+        Assert.All(outcomes, o => Assert.Equal(ItemStatus.Applied, o.Status));
+        Assert.Equal("1", registry.Read(Key, "A")!.Data);
+        Assert.Equal("1", registry.Read(Key, "B")!.Data);
+    }
+
+    [Fact]
     public async Task Corrupt_journal_throws()
     {
         _files.Seed(_journal.Path, "{ not json");

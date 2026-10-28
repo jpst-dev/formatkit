@@ -22,15 +22,20 @@ public class FakePowerSchemes : IPowerSchemes
         return Task.FromResult(created);
     }
 
+    /// <summary>Throws on a GUID not in <see cref="Schemes"/>, as powercfg does.</summary>
     public virtual Task SetActiveAsync(Guid scheme, CancellationToken ct)
     {
+        if (!Schemes.Contains(scheme))
+            throw new InvalidOperationException($"powercfg /setactive failed: no scheme {scheme}");
         Active = scheme;
         return Task.CompletedTask;
     }
 
+    /// <summary>Throws on a GUID not in <see cref="Schemes"/>, as powercfg does.</summary>
     public Task DeleteAsync(Guid scheme, CancellationToken ct)
     {
-        Schemes.Remove(scheme);
+        if (!Schemes.Remove(scheme))
+            throw new InvalidOperationException($"powercfg /delete failed: no scheme {scheme}");
         Deleted.Add(scheme);
         return Task.CompletedTask;
     }

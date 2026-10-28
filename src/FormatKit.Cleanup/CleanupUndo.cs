@@ -62,10 +62,11 @@ public sealed class CleanupUndo(CleanupCatalog catalog, AppPaths paths, IFileSys
             .ToList();
 
         // The earliest entry per target holds the state before cleanup touched it; later entries only captured our own changes.
+        // Power records are merged instead, so every scheme any entry created is deleted.
         var targets = indexes
             .SelectMany(i => journal.Entries[i].Actions)
             .GroupBy(a => (a.Type, a.Target))
-            .Select(g => g.First())
+            .Select(g => g.Key.Type == PowerSchemeHandler.Type ? PowerSchemeHandler.MergeForUndo(g.ToList()) : g.First())
             .Reverse()
             .ToList();
 
@@ -89,7 +90,14 @@ public sealed class CleanupUndo(CleanupCatalog catalog, AppPaths paths, IFileSys
         var now = DateTimeOffset.Now;
         foreach (var i in indexes)
             journal.Entries[i] = journal.Entries[i] with { RevertedAt = now };
-        store.Save(journal);
+        try
+        {
+            store.Save(journal);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            ctx.Log.Warning(ex, "Could not mark cleanup item {Item} as reverted in the journal", id);
+        }
 
         ctx.Log.Information("Cleanup item {Item} reverted", id);
         return new ItemOutcome(id, ItemStatus.Applied, Strings.Get("Undo_Reverted"));

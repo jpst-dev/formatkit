@@ -102,6 +102,81 @@ public class PowerSchemeHandlerTests
     }
 
     [Fact]
+    public async Task Undo_succeeds_after_created_scheme_was_deleted_externally()
+    {
+        var power = new FakePowerSchemes();
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var handler = NewHandler();
+        var action = new PowerSchemeAction("ultimate");
+        var recorded = await handler.ApplyAsync(action, await handler.CaptureAsync(action, ctx, Ct), ctx, Ct);
+        var created = power.Active;
+        await power.SetActiveAsync(BuiltInPowerSchemes.Balanced, Ct);
+        await power.DeleteAsync(created, Ct);
+
+        await handler.UndoAsync(recorded, ctx, Ct);
+
+        Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
+        Assert.Equal([created], power.Deleted);
+    }
+
+    [Fact]
+    public async Task Undo_activates_balanced_when_previous_is_gone()
+    {
+        var gone = Guid.NewGuid();
+        var created = Guid.NewGuid();
+        var power = new FakePowerSchemes { Active = created };
+        power.Schemes.Add(created);
+        var sink = new CollectingSink();
+        var ctx = new Core.Steps.StepContext(TestServices.Create(power: power), new Serilog.LoggerConfiguration().WriteTo.Sink(sink).CreateLogger());
+        var recorded = new JournalAction(PowerSchemeHandler.Type, "power",
+            JsonSerializer.SerializeToElement(new { previous = gone.ToString(), created = created.ToString(), source = BuiltInPowerSchemes.Ultimate.ToString() }));
+
+        await NewHandler().UndoAsync(recorded, ctx, Ct);
+
+        Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
+        Assert.Equal([created], power.Deleted);
+        Assert.Contains(sink.Events, e => e.Level == Serilog.Events.LogEventLevel.Warning);
+    }
+
+    [Fact]
+    public async Task Apply_reuses_existing_created_scheme_after_switching_away()
+    {
+        var power = new FakePowerSchemes();
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        var action = new PowerSchemeAction("ultimate");
+        var first = await NewHandler().ApplyAsync(action, await NewHandler().CaptureAsync(action, ctx, Ct), ctx, Ct);
+        var created = Guid.Parse(first.Previous.GetProperty("created").GetString()!);
+        await power.SetActiveAsync(BuiltInPowerSchemes.Balanced, Ct);
+        var handler = NewHandler(created, BuiltInPowerSchemes.Ultimate);
+
+        Assert.False(await handler.IsAppliedAsync(action, ctx, Ct));
+        var second = await handler.ApplyAsync(action, await handler.CaptureAsync(action, ctx, Ct), ctx, Ct);
+
+        Assert.Equal(created, power.Active);
+        Assert.Equal([BuiltInPowerSchemes.Balanced, created], power.Schemes);
+        Assert.Equal(created.ToString(), second.Previous.GetProperty("created").GetString());
+    }
+
+    [Fact]
+    public async Task Undo_deletes_every_created_scheme_in_a_merged_record()
+    {
+        var a = Guid.NewGuid();
+        var b = Guid.NewGuid();
+        var power = new FakePowerSchemes { Active = b };
+        power.Schemes.AddRange([a, b]);
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+        JournalAction Record(Guid previous, Guid created) => new(PowerSchemeHandler.Type, "power",
+            JsonSerializer.SerializeToElement(new { previous = previous.ToString(), created = created.ToString(), source = BuiltInPowerSchemes.Ultimate.ToString() }));
+
+        var merged = PowerSchemeHandler.MergeForUndo([Record(BuiltInPowerSchemes.Balanced, a), Record(BuiltInPowerSchemes.Balanced, b)]);
+        await NewHandler().UndoAsync(merged, ctx, Ct);
+
+        Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
+        Assert.Equal([a, b], power.Deleted.Order());
+        Assert.Equal([BuiltInPowerSchemes.Balanced], power.Schemes);
+    }
+
+    [Fact]
     public async Task Applied_when_active_is_created_scheme()
     {
         var created = Guid.NewGuid();
@@ -130,6 +205,13 @@ public class PowerSchemeHandlerTests
 
         Assert.Single(power.Deleted);
         Assert.Equal([BuiltInPowerSchemes.Balanced], power.Schemes);
+    }
+
+    private sealed class CollectingSink : Serilog.Core.ILogEventSink
+    {
+        public List<Serilog.Events.LogEvent> Events { get; } = [];
+
+        public void Emit(Serilog.Events.LogEvent logEvent) => Events.Add(logEvent);
     }
 
     private sealed class ThrowingPowerSchemes : FakePowerSchemes

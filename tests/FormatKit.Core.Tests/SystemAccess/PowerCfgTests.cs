@@ -85,6 +85,22 @@ public class PowerCfgTests
     }
 
     [Fact]
+    public async Task Nonzero_exit_on_SetActive_throws()
+    {
+        var (cfg, _) = Create(Result(1, stderr: "erro"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cfg.SetActiveAsync(Other, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Nonzero_exit_on_Delete_throws()
+    {
+        var (cfg, _) = Create(Result(1, stderr: "erro"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cfg.DeleteAsync(Other, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task Missing_guid_throws()
     {
         var (cfg, _) = Create(Result(0, "nothing here"));

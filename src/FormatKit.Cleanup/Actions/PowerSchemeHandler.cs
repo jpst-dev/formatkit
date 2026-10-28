@@ -34,12 +34,27 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlyDictionary<Guid, Guid?>> 
         var schemes = await power.ListAsync(ct).ConfigureAwait(false);
 
         Guid? created = null;
+        var duplicated = false;
         var activate = target;
         if (!schemes.Contains(target))
         {
-            created = await power.DuplicateAsync(target, ct).ConfigureAwait(false);
+            // Reuse a scheme an earlier run created from this target, so switching away and re-running never piles up duplicates.
+            created = createdSchemes()
+                .Where(c => c.Value == target && schemes.Contains(c.Key))
+                .Select(c => (Guid?)c.Key)
+                .FirstOrDefault();
+            if (created is null)
+            {
+                created = await power.DuplicateAsync(target, ct).ConfigureAwait(false);
+                duplicated = true;
+                ctx.Log.Debug("Power scheme {Target} is hidden; created {Created}", target, created);
+            }
+            else
+            {
+                ctx.Log.Debug("Power scheme {Target} is hidden; reusing {Created}", target, created);
+            }
+
             activate = created.Value;
-            ctx.Log.Debug("Power scheme {Target} is hidden; created {Created}", target, created);
         }
 
         try
@@ -53,12 +68,12 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlyDictionary<Guid, Guid?>> 
 
             ctx.Log.Debug("Power scheme new active: {Scheme}", active);
         }
-        catch when (created is not null)
+        catch when (duplicated)
         {
             // The journal never learns about the duplicate, so remove it here rather than leak it.
             try
             {
-                await power.DeleteAsync(created.Value, CancellationToken.None).ConfigureAwait(false);
+                await power.DeleteAsync(created!.Value, CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception cleanupError)
             {
@@ -78,16 +93,54 @@ internal sealed class PowerSchemeHandler(Func<IReadOnlyDictionary<Guid, Guid?>> 
         return captured with { Previous = Previous(previous, created, target) };
     }
 
+    /// <summary>Idempotent: activates the previous scheme (Balanced when it no longer exists) and deletes each recorded created scheme that still exists.</summary>
     public async Task UndoAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
     {
+        var power = ctx.Services.Power;
+        var existing = await power.ListAsync(ct).ConfigureAwait(false);
         var previous = Guid.Parse(recorded.Previous.GetProperty("previous").GetString()!);
-        await ctx.Services.Power.SetActiveAsync(previous, ct).ConfigureAwait(false);
-        if (recorded.Previous.TryGetProperty("created", out var created) && created.ValueKind == JsonValueKind.String)
+        var activate = previous;
+        if (!existing.Contains(previous))
         {
-            await ctx.Services.Power.DeleteAsync(Guid.Parse(created.GetString()!), ct).ConfigureAwait(false);
+            ctx.Log.Warning("Power scheme {Previous} no longer exists; activating Balanced instead", previous);
+            activate = BuiltInPowerSchemes.Balanced;
         }
 
-        ctx.Log.Information("Power scheme restored to {Scheme}", previous);
+        await power.SetActiveAsync(activate, ct).ConfigureAwait(false);
+
+        foreach (var created in Created(recorded.Previous).Distinct())
+        {
+            if (created == activate || !existing.Contains(created))
+            {
+                ctx.Log.Debug("Power scheme {Created} is already gone or active; not deleting it", created);
+                continue;
+            }
+
+            await power.DeleteAsync(created, ct).ConfigureAwait(false);
+        }
+
+        ctx.Log.Information("Power scheme restored to {Scheme}", activate);
+    }
+
+    /// <summary>Folds an item's unreverted power records, oldest first, into one: the earliest <c>previous</c> and every <c>created</c> scheme.</summary>
+    internal static JournalAction MergeForUndo(IReadOnlyList<JournalAction> recorded)
+    {
+        var previous = recorded[0].Previous.GetProperty("previous").GetString();
+        var created = recorded.SelectMany(r => Created(r.Previous)).Distinct().Select(g => g.ToString()).ToList();
+        return recorded[0] with { Previous = JsonSerializer.SerializeToElement(new { previous, created }) };
+    }
+
+    /// <summary>The <c>created</c> field: one GUID string in an applied record, an array in a merged one.</summary>
+    private static IEnumerable<Guid> Created(JsonElement previous)
+    {
+        if (!previous.TryGetProperty("created", out var created))
+            return [];
+        return created.ValueKind switch
+        {
+            JsonValueKind.String => [Guid.Parse(created.GetString()!)],
+            JsonValueKind.Array => created.EnumerateArray().Select(e => Guid.Parse(e.GetString()!)).ToList(),
+            _ => [],
+        };
     }
 
     /// <summary>The schemes created by unreverted journal entries, with the scheme each duplicated: the source of the <c>createdSchemes</c> provider.</summary>
