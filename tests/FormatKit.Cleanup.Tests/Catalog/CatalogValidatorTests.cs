@@ -122,6 +122,11 @@ public class CatalogValidatorTests : IDisposable
         Assert.All(ProtectedLists.RemovableApps, package => Assert.False(ProtectedLists.IsNeverRemove(package), package));
 
     [Fact]
+    public void Integer_enum_values_are_rejected() =>
+        Assert.Throws<System.Text.Json.JsonException>(() => CleanupCatalog.Parse(
+            $$"""{ "schemaVersion": 1, "items": [ {{Item().Replace("\"level\": \"safe\"", "\"level\": 2")}} ] }"""));
+
+    [Fact]
     public void Embedded_catalog_is_valid() =>
         Assert.NotNull(CleanupCatalog.LoadEmbedded());
 

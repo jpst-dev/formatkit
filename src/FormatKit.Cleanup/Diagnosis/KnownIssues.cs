@@ -52,7 +52,7 @@ public sealed record KnownIssues(int SchemaVersion, IReadOnlyList<KnownIssue> Is
     private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
         AllowOutOfOrderMetadataProperties = true,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) },
     };
 
     public static KnownIssues LoadEmbedded()

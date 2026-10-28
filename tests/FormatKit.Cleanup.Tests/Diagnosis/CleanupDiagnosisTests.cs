@@ -247,6 +247,11 @@ public class CleanupDiagnosisTests
         Assert.Equal(1, KnownIssues.LoadEmbedded().SchemaVersion);
 
     [Fact]
+    public void Parse_rejects_integer_severity() =>
+        Assert.Throws<System.Text.Json.JsonException>(() => KnownIssues.Parse(
+            """{ "schemaVersion": 1, "issues": [ { "id": "b", "severity": 3, "rule": { "kind": "nonBuiltInPowerScheme" }, "text": {} } ] }"""));
+
+    [Fact]
     public void Parse_reads_polymorphic_rules_and_equals_names()
     {
         var json = """
