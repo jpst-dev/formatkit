@@ -139,8 +139,11 @@ internal static class CleanupCommands
                 return ExitCodes.InvalidInput;
             }
 
-            var unknown = requested.Where(id => context.Cleanup.Find(id) is null).ToList();
-            if (unknown.Count > 0)
+            // Ids dropped from the catalog stay undoable while the journal still records them.
+            var loaded = new JournalStore(context.Env.Services.Files, AppPaths.Default).Load();
+            var journaled = loaded.Journal?.Entries.Select(e => e.ItemId).ToHashSet(StringComparer.Ordinal) ?? [];
+            var unknown = requested.Where(id => context.Cleanup.Find(id) is null && !journaled.Contains(id)).ToList();
+            if (unknown.Count > 0 && loaded.Status != JournalLoadStatus.Corrupt)
             {
                 o.WriteLine(Strings.Format("Undo_UnknownIds", string.Join(", ", unknown)));
                 return ExitCodes.InvalidInput;

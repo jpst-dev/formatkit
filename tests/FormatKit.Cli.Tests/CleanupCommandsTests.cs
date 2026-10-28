@@ -211,6 +211,18 @@ public sealed class CleanupCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task Undo_accepts_an_id_only_the_journal_knows()
+    {
+        new JournalStore(_fs, AppPaths.Default).Save(new CleanupJournal(1,
+            [new JournalEntry("privacy.retired", DateTimeOffset.Now, [], null)]));
+
+        var exit = await Run("cleanup", "undo", "privacy.retired");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("privacy.retired: reverted", _out.ToString());
+    }
+
+    [Fact]
     public async Task Undo_declined_elevation_exits_5()
     {
         _elevation.IsElevated = false;
