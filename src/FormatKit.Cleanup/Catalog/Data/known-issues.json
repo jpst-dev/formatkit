@@ -1,1 +1,1088 @@
-{"schemaVersion":1,"issues":[]}
+{
+  "schemaVersion": 1,
+  "issues": [
+    {
+      "id": "device.vdrvroot",
+      "severity": "breaks",
+      "rule": {
+        "kind": "deviceDisabled",
+        "hardwareId": "ROOT\\VDRVROOT"
+      },
+      "text": {
+        "en": {
+          "title": "Microsoft Virtual Drive Enumerator is disabled",
+          "breaks": "Windows cannot mount ISO and VHD files, and features that use virtual disks fail.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ROOT\\VDRVROOT').InstanceId -Confirm:$false"
+        },
+        "pt-BR": {
+          "title": "O Enumerador de Unidade Virtual Microsoft está desativado",
+          "breaks": "O Windows não consegue montar arquivos ISO e VHD, e recursos que usam discos virtuais falham.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ROOT\\VDRVROOT').InstanceId -Confirm:$false"
+        }
+      }
+    },
+    {
+      "id": "device.umbus",
+      "severity": "breaks",
+      "rule": {
+        "kind": "deviceDisabled",
+        "hardwareId": "ROOT\\UMBUS"
+      },
+      "text": {
+        "en": {
+          "title": "UMBus Root Bus Enumerator is disabled",
+          "breaks": "Devices that use user-mode drivers, such as some phones, printers and media players, may not work.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ROOT\\UMBUS').InstanceId -Confirm:$false"
+        },
+        "pt-BR": {
+          "title": "O Enumerador de Barramento de Raiz UMBus está desativado",
+          "breaks": "Dispositivos que usam drivers em modo de usuário, como alguns celulares, impressoras e players de mídia, podem não funcionar.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ROOT\\UMBUS').InstanceId -Confirm:$false"
+        }
+      }
+    },
+    {
+      "id": "device.ndisvirtualbus",
+      "severity": "breaks",
+      "rule": {
+        "kind": "deviceDisabled",
+        "hardwareId": "ROOT\\NDISVIRTUALBUS"
+      },
+      "text": {
+        "en": {
+          "title": "NDIS Virtual Network Adapter Enumerator is disabled",
+          "breaks": "Virtual network adapters, used by VPNs, Hyper-V, WSL and some network features, may not work.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ROOT\\NDISVIRTUALBUS').InstanceId -Confirm:$false"
+        },
+        "pt-BR": {
+          "title": "O Enumerador de Adaptador de Rede Virtual NDIS está desativado",
+          "breaks": "Adaptadores de rede virtuais, usados por VPNs, Hyper-V, WSL e alguns recursos de rede, podem não funcionar.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ROOT\\NDISVIRTUALBUS').InstanceId -Confirm:$false"
+        }
+      }
+    },
+    {
+      "id": "device.hpet",
+      "severity": "breaks",
+      "rule": {
+        "kind": "deviceDisabled",
+        "hardwareId": "ACPI\\PNP0103"
+      },
+      "text": {
+        "en": {
+          "title": "High precision event timer (HPET) is disabled",
+          "breaks": "Windows and some drivers expect this timer. Disabling it has no documented gain and can cause timing problems.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ACPI\\PNP0103').InstanceId -Confirm:$false"
+        },
+        "pt-BR": {
+          "title": "O timer de eventos de alta precisão (HPET) está desativado",
+          "breaks": "O Windows e alguns drivers contam com este timer. Desativá-lo não tem ganho documentado e pode causar problemas de tempo.",
+          "fix": "Enable-PnpDevice -InstanceId (Get-PnpDevice | Where-Object HardwareID -contains 'ACPI\\PNP0103').InstanceId -Confirm:$false"
+        }
+      }
+    },
+    {
+      "id": "service.w32time",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "W32Time"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Time (W32Time) is disabled",
+          "breaks": "The clock is no longer synchronized, which can break sign-in, HTTPS and updates.",
+          "fix": "sc.exe config W32Time start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Horário do Windows (W32Time) está desativado",
+          "breaks": "O relógio deixa de ser sincronizado, o que pode quebrar login, HTTPS e atualizações.",
+          "fix": "sc.exe config W32Time start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.wuauserv",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "wuauserv"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Update (wuauserv) is disabled",
+          "breaks": "Windows and driver updates, including security fixes, are no longer installed.",
+          "fix": "sc.exe config wuauserv start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Windows Update (wuauserv) está desativado",
+          "breaks": "Atualizações do Windows e de drivers, incluindo correções de segurança, deixam de ser instaladas.",
+          "fix": "sc.exe config wuauserv start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.usosvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "UsoSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Update Orchestrator Service (UsoSvc) is disabled",
+          "breaks": "Windows Update can no longer scan, download or install updates.",
+          "fix": "sc.exe config UsoSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço Orquestrador de Atualizações (UsoSvc) está desativado",
+          "breaks": "O Windows Update não consegue mais procurar, baixar ou instalar atualizações.",
+          "fix": "sc.exe config UsoSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.bits",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "BITS"
+      },
+      "text": {
+        "en": {
+          "title": "Service Background Intelligent Transfer Service (BITS) is disabled",
+          "breaks": "Windows Update, the Microsoft Store and other apps cannot download in the background.",
+          "fix": "sc.exe config BITS start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Transferência Inteligente de Plano de Fundo (BITS) está desativado",
+          "breaks": "O Windows Update, a Microsoft Store e outros apps não conseguem baixar em segundo plano.",
+          "fix": "sc.exe config BITS start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.cryptsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "CryptSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Cryptographic Services (CryptSvc) is disabled",
+          "breaks": "Signature checks fail, so updates, drivers and app installs can fail.",
+          "fix": "sc.exe config CryptSvc start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviços de Criptografia (CryptSvc) está desativado",
+          "breaks": "A verificação de assinaturas falha, então atualizações, drivers e instalação de apps podem falhar.",
+          "fix": "sc.exe config CryptSvc start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.trustedinstaller",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "TrustedInstaller"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Modules Installer (TrustedInstaller) is disabled",
+          "breaks": "Updates and Windows features cannot be installed or removed.",
+          "fix": "sc.exe config TrustedInstaller start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Instalador de Módulos do Windows (TrustedInstaller) está desativado",
+          "breaks": "Atualizações e recursos do Windows não podem ser instalados nem removidos.",
+          "fix": "sc.exe config TrustedInstaller start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.defragsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "defragsvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Optimize drives (defragsvc) is disabled",
+          "breaks": "Drives are no longer optimized, and SSDs no longer get TRIM.",
+          "fix": "sc.exe config defragsvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Otimizar unidades (defragsvc) está desativado",
+          "breaks": "As unidades deixam de ser otimizadas, e os SSDs deixam de receber TRIM.",
+          "fix": "sc.exe config defragsvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.installservice",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "InstallService"
+      },
+      "text": {
+        "en": {
+          "title": "Service Microsoft Store Install Service (InstallService) is disabled",
+          "breaks": "The Microsoft Store and winget cannot install or update Store apps.",
+          "fix": "sc.exe config InstallService start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Instalação da Microsoft Store (InstallService) está desativado",
+          "breaks": "A Microsoft Store e o winget não conseguem instalar nem atualizar apps da Store.",
+          "fix": "sc.exe config InstallService start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.clipsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "ClipSVC"
+      },
+      "text": {
+        "en": {
+          "title": "Service Client License Service (ClipSVC) is disabled",
+          "breaks": "Store apps cannot check their licenses and may not open.",
+          "fix": "sc.exe config ClipSVC start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Licença de Cliente (ClipSVC) está desativado",
+          "breaks": "Apps da Store não conseguem verificar a licença e podem não abrir.",
+          "fix": "sc.exe config ClipSVC start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.appxsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "AppXSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service AppX Deployment Service (AppXSvc) is disabled",
+          "breaks": "Store apps cannot be installed, updated or removed.",
+          "fix": "sc.exe config AppXSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Implantação AppX (AppXSvc) está desativado",
+          "breaks": "Apps da Store não podem ser instalados, atualizados nem removidos.",
+          "fix": "sc.exe config AppXSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.licensemanager",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "LicenseManager"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows License Manager Service (LicenseManager) is disabled",
+          "breaks": "Store apps cannot check their licenses and may not open.",
+          "fix": "sc.exe config LicenseManager start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço Gerenciador de Licenças do Windows (LicenseManager) está desativado",
+          "breaks": "Apps da Store não conseguem verificar a licença e podem não abrir.",
+          "fix": "sc.exe config LicenseManager start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.windefend",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "WinDefend"
+      },
+      "text": {
+        "en": {
+          "title": "Service Microsoft Defender Antivirus Service (WinDefend) is disabled",
+          "breaks": "The PC has no antivirus protection from Microsoft Defender.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WinDefend\" /v Start /t REG_DWORD /d 2 /f"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço Microsoft Defender Antivírus (WinDefend) está desativado",
+          "breaks": "O PC fica sem a proteção antivírus do Microsoft Defender.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WinDefend\" /v Start /t REG_DWORD /d 2 /f"
+        }
+      }
+    },
+    {
+      "id": "service.securityhealthservice",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "SecurityHealthService"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Security Service (SecurityHealthService) is disabled",
+          "breaks": "The Windows Security app cannot show or manage protection status.",
+          "fix": "sc.exe config SecurityHealthService start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Segurança do Windows (SecurityHealthService) está desativado",
+          "breaks": "O app Segurança do Windows não consegue mostrar nem gerenciar o estado da proteção.",
+          "fix": "sc.exe config SecurityHealthService start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.mpssvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "mpssvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Defender Firewall (mpssvc) is disabled",
+          "breaks": "The firewall is off, and apps that add firewall rules can fail to install.",
+          "fix": "sc.exe config mpssvc start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Firewall do Windows Defender (mpssvc) está desativado",
+          "breaks": "O firewall fica desligado, e apps que criam regras de firewall podem falhar na instalação.",
+          "fix": "sc.exe config mpssvc start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.bfe",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "BFE"
+      },
+      "text": {
+        "en": {
+          "title": "Service Base Filtering Engine (BFE) is disabled",
+          "breaks": "The firewall, IPsec and many VPNs stop working.",
+          "fix": "sc.exe config BFE start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Mecanismo de Filtragem Base (BFE) está desativado",
+          "breaks": "O firewall, o IPsec e muitas VPNs param de funcionar.",
+          "fix": "sc.exe config BFE start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.dnscache",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "Dnscache"
+      },
+      "text": {
+        "en": {
+          "title": "Service DNS Client (Dnscache) is disabled",
+          "breaks": "Name resolution gets slower and some network features fail.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Dnscache\" /v Start /t REG_DWORD /d 2 /f"
+        },
+        "pt-BR": {
+          "title": "O serviço Cliente DNS (Dnscache) está desativado",
+          "breaks": "A resolução de nomes fica mais lenta e alguns recursos de rede falham.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Dnscache\" /v Start /t REG_DWORD /d 2 /f"
+        }
+      }
+    },
+    {
+      "id": "service.dhcp",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "Dhcp"
+      },
+      "text": {
+        "en": {
+          "title": "Service DHCP Client (Dhcp) is disabled",
+          "breaks": "The PC cannot get an IP address automatically, so most networks stop working.",
+          "fix": "sc.exe config Dhcp start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Cliente DHCP (Dhcp) está desativado",
+          "breaks": "O PC não consegue obter um endereço IP automaticamente, então a maioria das redes para de funcionar.",
+          "fix": "sc.exe config Dhcp start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.nlasvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "NlaSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Network Location Awareness (NlaSvc) is disabled",
+          "breaks": "Windows cannot tell which network it is on, so firewall profiles and the network icon break.",
+          "fix": "sc.exe config NlaSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Reconhecimento de Local de Rede (NlaSvc) está desativado",
+          "breaks": "O Windows não sabe em qual rede está, então os perfis do firewall e o ícone de rede quebram.",
+          "fix": "sc.exe config NlaSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.dsmsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "DsmSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Device Setup Manager (DsmSvc) is disabled",
+          "breaks": "New devices may not get their drivers and apps installed.",
+          "fix": "sc.exe config DsmSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Gerenciador de Configuração de Dispositivos (DsmSvc) está desativado",
+          "breaks": "Dispositivos novos podem não receber a instalação de drivers e apps.",
+          "fix": "sc.exe config DsmSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.deviceinstall",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "DeviceInstall"
+      },
+      "text": {
+        "en": {
+          "title": "Service Device Install Service (DeviceInstall) is disabled",
+          "breaks": "Windows cannot install drivers for new or changed hardware.",
+          "fix": "sc.exe config DeviceInstall start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Instalação de Dispositivo (DeviceInstall) está desativado",
+          "breaks": "O Windows não consegue instalar drivers para hardware novo ou alterado.",
+          "fix": "sc.exe config DeviceInstall start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.plugplay",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "PlugPlay"
+      },
+      "text": {
+        "en": {
+          "title": "Service Plug and Play (PlugPlay) is disabled",
+          "breaks": "Windows cannot detect or set up hardware changes.",
+          "fix": "sc.exe config PlugPlay start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Plug and Play (PlugPlay) está desativado",
+          "breaks": "O Windows não consegue detectar nem configurar mudanças de hardware.",
+          "fix": "sc.exe config PlugPlay start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.power",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "Power"
+      },
+      "text": {
+        "en": {
+          "title": "Service Power (Power) is disabled",
+          "breaks": "Power plans and power settings stop working.",
+          "fix": "sc.exe config Power start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Energia (Power) está desativado",
+          "breaks": "Os planos e as configurações de energia param de funcionar.",
+          "fix": "sc.exe config Power start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.schedule",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "Schedule"
+      },
+      "text": {
+        "en": {
+          "title": "Service Task Scheduler (Schedule) is disabled",
+          "breaks": "Scheduled tasks, including Windows maintenance and many app updaters, no longer run.",
+          "fix": "sc.exe config Schedule start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Agendador de Tarefas (Schedule) está desativado",
+          "breaks": "Tarefas agendadas, incluindo a manutenção do Windows e muitos atualizadores de apps, deixam de rodar.",
+          "fix": "sc.exe config Schedule start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.eventlog",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "EventLog"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Event Log (EventLog) is disabled",
+          "breaks": "Windows no longer records events, and services that depend on the log fail.",
+          "fix": "sc.exe config EventLog start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Log de Eventos do Windows (EventLog) está desativado",
+          "breaks": "O Windows deixa de registrar eventos, e serviços que dependem do log falham.",
+          "fix": "sc.exe config EventLog start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.xboxgipsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "XboxGipSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Xbox Accessory Management Service (XboxGipSvc) is disabled",
+          "breaks": "Xbox controllers and accessories may not work or update.",
+          "fix": "sc.exe config XboxGipSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Gerenciamento de Acessórios do Xbox (XboxGipSvc) está desativado",
+          "breaks": "Controles e acessórios do Xbox podem não funcionar nem atualizar.",
+          "fix": "sc.exe config XboxGipSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.xblauthmanager",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "XblAuthManager"
+      },
+      "text": {
+        "en": {
+          "title": "Service Xbox Live Auth Manager (XblAuthManager) is disabled",
+          "breaks": "You cannot sign in to Xbox services in games and apps.",
+          "fix": "sc.exe config XblAuthManager start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Gerenciador de Autenticação do Xbox Live (XblAuthManager) está desativado",
+          "breaks": "Você não consegue entrar nos serviços Xbox em jogos e apps.",
+          "fix": "sc.exe config XblAuthManager start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.xblgamesave",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "XblGameSave"
+      },
+      "text": {
+        "en": {
+          "title": "Service Xbox Live Game Save (XblGameSave) is disabled",
+          "breaks": "Game saves are no longer synced to the cloud.",
+          "fix": "sc.exe config XblGameSave start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Salvamento de Jogos do Xbox Live (XblGameSave) está desativado",
+          "breaks": "Os jogos salvos deixam de ser sincronizados com a nuvem.",
+          "fix": "sc.exe config XblGameSave start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.ikeext",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "IKEEXT"
+      },
+      "text": {
+        "en": {
+          "title": "Service IKE and AuthIP IPsec Keying Modules (IKEEXT) is disabled",
+          "breaks": "IKEv2 and L2TP/IPsec VPNs cannot connect.",
+          "fix": "sc.exe config IKEEXT start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Módulos de Criação de Chave IPsec IKE e AuthIP (IKEEXT) está desativado",
+          "breaks": "VPNs IKEv2 e L2TP/IPsec não conseguem conectar.",
+          "fix": "sc.exe config IKEEXT start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.ssdpsrv",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "SSDPSRV"
+      },
+      "text": {
+        "en": {
+          "title": "Service SSDP Discovery (SSDPSRV) is disabled",
+          "breaks": "Network devices such as printers, media servers and TVs are not discovered.",
+          "fix": "sc.exe config SSDPSRV start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Descoberta SSDP (SSDPSRV) está desativado",
+          "breaks": "Dispositivos de rede como impressoras, servidores de mídia e TVs não são encontrados.",
+          "fix": "sc.exe config SSDPSRV start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.stisvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "StiSvc"
+      },
+      "text": {
+        "en": {
+          "title": "Service Windows Image Acquisition (WIA) (StiSvc) is disabled",
+          "breaks": "Scanners and some cameras stop working.",
+          "fix": "sc.exe config StiSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Aquisição de Imagens do Windows (WIA) (StiSvc) está desativado",
+          "breaks": "Scanners e algumas câmeras param de funcionar.",
+          "fix": "sc.exe config StiSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.scardsvr",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "SCardSvr"
+      },
+      "text": {
+        "en": {
+          "title": "Service Smart Card (SCardSvr) is disabled",
+          "breaks": "Smart cards and some security keys cannot be used.",
+          "fix": "sc.exe config SCardSvr start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Cartão Inteligente (SCardSvr) está desativado",
+          "breaks": "Cartões inteligentes e algumas chaves de segurança não podem ser usados.",
+          "fix": "sc.exe config SCardSvr start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.sensorservice",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "SensorService"
+      },
+      "text": {
+        "en": {
+          "title": "Service Sensor Service (SensorService) is disabled",
+          "breaks": "Sensors such as screen rotation and automatic brightness stop working.",
+          "fix": "sc.exe config SensorService start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Sensor (SensorService) está desativado",
+          "breaks": "Sensores como a rotação de tela e o brilho automático param de funcionar.",
+          "fix": "sc.exe config SensorService start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.vmcompute",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "vmcompute"
+      },
+      "text": {
+        "en": {
+          "title": "Service Hyper-V Host Compute Service (vmcompute) is disabled",
+          "breaks": "WSL 2, Windows Sandbox and containers cannot start.",
+          "fix": "sc.exe config vmcompute start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço de Computação de Host do Hyper-V (vmcompute) está desativado",
+          "breaks": "O WSL 2, a Área Restrita do Windows e os contêineres não conseguem iniciar.",
+          "fix": "sc.exe config vmcompute start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.vmms",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "vmms"
+      },
+      "text": {
+        "en": {
+          "title": "Service Hyper-V Virtual Machine Management (vmms) is disabled",
+          "breaks": "Hyper-V virtual machines cannot be managed or started.",
+          "fix": "sc.exe config vmms start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Gerenciamento de Máquina Virtual Hyper-V (vmms) está desativado",
+          "breaks": "Máquinas virtuais Hyper-V não podem ser gerenciadas nem iniciadas.",
+          "fix": "sc.exe config vmms start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.lxssmanager",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "LxssManager"
+      },
+      "text": {
+        "en": {
+          "title": "Service LxssManager (LxssManager) is disabled",
+          "breaks": "WSL distributions cannot start.",
+          "fix": "sc.exe config LxssManager start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço LxssManager (LxssManager) está desativado",
+          "breaks": "As distribuições do WSL não conseguem iniciar.",
+          "fix": "sc.exe config LxssManager start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.wslservice",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "WSLService"
+      },
+      "text": {
+        "en": {
+          "title": "Service WSL Service (WSLService) is disabled",
+          "breaks": "WSL distributions cannot start.",
+          "fix": "sc.exe config WSLService start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Serviço WSL (WSLService) está desativado",
+          "breaks": "As distribuições do WSL não conseguem iniciar.",
+          "fix": "sc.exe config WSLService start= auto"
+        }
+      }
+    },
+    {
+      "id": "policy.windows-update-off",
+      "severity": "breaks",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "name": "NoAutoUpdate",
+        "equals": "1"
+      },
+      "text": {
+        "en": {
+          "title": "Automatic updates are turned off by policy",
+          "breaks": "Windows no longer installs updates on its own, including security fixes.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v NoAutoUpdate /f"
+        },
+        "pt-BR": {
+          "title": "As atualizações automáticas estão desativadas por política",
+          "breaks": "O Windows deixa de instalar atualizações sozinho, incluindo correções de segurança.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v NoAutoUpdate /f"
+        }
+      }
+    },
+    {
+      "id": "policy.defender-off",
+      "severity": "breaks",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender",
+        "name": "DisableAntiSpyware",
+        "equals": "1"
+      },
+      "text": {
+        "en": {
+          "title": "Microsoft Defender Antivirus is turned off by policy",
+          "breaks": "This policy tries to turn off Microsoft Defender. With Tamper Protection on, Windows ignores it, but it is a common sign of a debloat script that changed other things.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\" /v DisableAntiSpyware /f"
+        },
+        "pt-BR": {
+          "title": "O Microsoft Defender Antivírus está desativado por política",
+          "breaks": "Esta política tenta desligar o Microsoft Defender. Com a Proteção contra Adulteração ativa, o Windows a ignora, mas ela é um sinal comum de um script de limpeza que mudou outras coisas.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\" /v DisableAntiSpyware /f"
+        }
+      }
+    },
+    {
+      "id": "security.memory-integrity-off",
+      "severity": "security",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity",
+        "name": "Enabled",
+        "equals": "0"
+      },
+      "text": {
+        "en": {
+          "title": "Memory Integrity is off",
+          "breaks": "Malicious or vulnerable drivers can change the Windows kernel. Turning it back on needs a restart and drivers that support it.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled /t REG_DWORD /d 1 /f"
+        },
+        "pt-BR": {
+          "title": "A Integridade de Memória está desativada",
+          "breaks": "Drivers maliciosos ou vulneráveis podem alterar o núcleo do Windows. Reativar exige reiniciar e drivers compatíveis.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled /t REG_DWORD /d 1 /f"
+        }
+      }
+    },
+    {
+      "id": "security.vbs-off",
+      "severity": "security",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard",
+        "name": "EnableVirtualizationBasedSecurity",
+        "equals": "0"
+      },
+      "text": {
+        "en": {
+          "title": "Virtualization-based security is off",
+          "breaks": "Memory Integrity and other protections that depend on VBS cannot run. Turning it back on needs a restart.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f"
+        },
+        "pt-BR": {
+          "title": "A segurança baseada em virtualização está desativada",
+          "breaks": "A Integridade de Memória e outras proteções que dependem da VBS não conseguem rodar. Reativar exige reiniciar.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.system-responsiveness",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "name": "SystemResponsiveness",
+        "notEquals": "20"
+      },
+      "text": {
+        "en": {
+          "title": "SystemResponsiveness is changed from the default",
+          "breaks": "Background tasks get a different share of CPU while audio, video or games run. No gain is documented by Microsoft.",
+          "fix": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\" /v SystemResponsiveness /t REG_DWORD /d 20 /f"
+        },
+        "pt-BR": {
+          "title": "SystemResponsiveness está diferente do padrão",
+          "breaks": "Tarefas em segundo plano recebem uma parte diferente da CPU enquanto áudio, vídeo ou jogos rodam. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\" /v SystemResponsiveness /t REG_DWORD /d 20 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.priority-separation",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl",
+        "name": "Win32PrioritySeparation",
+        "notEquals": "2"
+      },
+      "text": {
+        "en": {
+          "title": "Win32PrioritySeparation is changed from the default",
+          "breaks": "The CPU is split differently between foreground and background programs. Picking Programs or Background services in Performance Options also changes this value. No gain is documented by Microsoft.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl\" /v Win32PrioritySeparation /t REG_DWORD /d 2 /f"
+        },
+        "pt-BR": {
+          "title": "Win32PrioritySeparation está diferente do padrão",
+          "breaks": "A CPU é dividida de outro jeito entre programas em primeiro e segundo plano. Escolher Programas ou Serviços em segundo plano nas Opções de desempenho também muda este valor. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl\" /v Win32PrioritySeparation /t REG_DWORD /d 2 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.games-task-priority",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "Priority",
+        "notEquals": "2"
+      },
+      "text": {
+        "en": {
+          "title": "The Games multimedia task priority is changed",
+          "breaks": "Threads of games that use this task may take CPU time from other programs. No gain is documented by Microsoft.",
+          "fix": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games\" /v Priority /t REG_DWORD /d 2 /f"
+        },
+        "pt-BR": {
+          "title": "A prioridade da tarefa multimídia Games foi alterada",
+          "breaks": "Threads de jogos que usam esta tarefa podem tirar tempo de CPU de outros programas. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games\" /v Priority /t REG_DWORD /d 2 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.power-throttling-off",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+        "name": "PowerThrottlingOff",
+        "equals": "1"
+      },
+      "text": {
+        "en": {
+          "title": "Power throttling is off",
+          "breaks": "Background apps use more power. On a laptop, battery life gets shorter. No gain is documented by Microsoft.",
+          "fix": "reg delete \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling\" /v PowerThrottlingOff /f"
+        },
+        "pt-BR": {
+          "title": "A limitação de energia está desativada",
+          "breaks": "Apps em segundo plano gastam mais energia. Em notebook, a bateria dura menos. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg delete \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling\" /v PowerThrottlingOff /f"
+        }
+      }
+    },
+    {
+      "id": "contested.disable-paging-executive",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management",
+        "name": "DisablePagingExecutive",
+        "equals": "1"
+      },
+      "text": {
+        "en": {
+          "title": "Kernel paging is disabled (DisablePagingExecutive)",
+          "breaks": "Drivers and system code are kept in RAM, which uses more memory. Microsoft documents it only for temporary diagnosis. No gain is documented by Microsoft.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\" /v DisablePagingExecutive /t REG_DWORD /d 0 /f"
+        },
+        "pt-BR": {
+          "title": "A paginação do núcleo está desativada (DisablePagingExecutive)",
+          "breaks": "Drivers e código do sistema ficam presos na RAM, o que usa mais memória. A Microsoft documenta isso só para diagnóstico temporário. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\" /v DisablePagingExecutive /t REG_DWORD /d 0 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.mouse-data-queue-size",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters",
+        "name": "MouseDataQueueSize",
+        "notEquals": "100"
+      },
+      "text": {
+        "en": {
+          "title": "MouseDataQueueSize is changed from the default",
+          "breaks": "The mouse driver buffers a different number of events. Too small a value can drop mouse input. No gain is documented by Microsoft.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters\" /v MouseDataQueueSize /t REG_DWORD /d 100 /f"
+        },
+        "pt-BR": {
+          "title": "MouseDataQueueSize está diferente do padrão",
+          "breaks": "O driver do mouse guarda uma quantidade diferente de eventos. Um valor pequeno demais pode perder movimentos do mouse. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\mouclass\\Parameters\" /v MouseDataQueueSize /t REG_DWORD /d 100 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.tcp-ack-frequency",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*",
+        "name": "TcpAckFrequency",
+        "equals": "1"
+      },
+      "text": {
+        "en": {
+          "title": "Delayed TCP acknowledgment is off on a network adapter (TcpAckFrequency)",
+          "breaks": "Every TCP packet is acknowledged at once, which adds network traffic. Microsoft advises against changing it without careful study. No gain is documented by Microsoft.",
+          "fix": "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | Remove-ItemProperty -Name TcpAckFrequency -ErrorAction SilentlyContinue"
+        },
+        "pt-BR": {
+          "title": "O reconhecimento TCP atrasado está desativado em um adaptador de rede (TcpAckFrequency)",
+          "breaks": "Cada pacote TCP é reconhecido na hora, o que aumenta o tráfego de rede. A Microsoft não recomenda mudar sem estudo cuidadoso. A Microsoft não documenta nenhum ganho.",
+          "fix": "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | Remove-ItemProperty -Name TcpAckFrequency -ErrorAction SilentlyContinue"
+        }
+      }
+    },
+    {
+      "id": "contested.game-mode-off",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKCU\\Software\\Microsoft\\GameBar",
+        "name": "AutoGameModeEnabled",
+        "equals": "0"
+      },
+      "text": {
+        "en": {
+          "title": "Game Mode is off",
+          "breaks": "Windows does not hold back background work, such as some updates, while you play. No gain is documented by Microsoft.",
+          "fix": "reg add \"HKCU\\Software\\Microsoft\\GameBar\" /v AutoGameModeEnabled /t REG_DWORD /d 1 /f"
+        },
+        "pt-BR": {
+          "title": "O Modo de Jogo está desativado",
+          "breaks": "O Windows não segura tarefas em segundo plano, como algumas atualizações, enquanto você joga. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg add \"HKCU\\Software\\Microsoft\\GameBar\" /v AutoGameModeEnabled /t REG_DWORD /d 1 /f"
+        }
+      }
+    },
+    {
+      "id": "info.non-built-in-power-scheme",
+      "severity": "info",
+      "rule": {
+        "kind": "nonBuiltInPowerScheme"
+      },
+      "text": {
+        "en": {
+          "title": "The active power plan is not a Windows built-in plan",
+          "breaks": "Imported plans can change hidden processor and sleep settings that are hard to review.",
+          "fix": "powercfg /setactive SCHEME_BALANCED"
+        },
+        "pt-BR": {
+          "title": "O plano de energia ativo não é um plano do Windows",
+          "breaks": "Planos importados podem mudar configurações ocultas de processador e suspensão que são difíceis de revisar.",
+          "fix": "powercfg /setactive SCHEME_BALANCED"
+        }
+      }
+    }
+  ]
+}

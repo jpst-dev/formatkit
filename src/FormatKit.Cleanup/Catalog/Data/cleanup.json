@@ -1,1 +1,958 @@
-{"schemaVersion":1,"items":[]}
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "apps.clipchamp",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Clipchamp",
+          "what": "Uninstalls the Clipchamp video editor and stops Windows from installing it for new users.",
+          "breaks": "You can no longer edit videos with Clipchamp. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Clipchamp",
+          "what": "Desinstala o editor de vídeo Clipchamp e impede que o Windows o instale para novos usuários.",
+          "breaks": "Você não consegue mais editar vídeos com o Clipchamp. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Clipchamp.Clipchamp",
+          "storeId": "9P1J8S7CCWWT"
+        }
+      ]
+    },
+    {
+      "id": "apps.solitaire",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Solitaire",
+          "what": "Uninstalls Microsoft Solitaire Collection and stops Windows from installing it for new users.",
+          "breaks": "The Solitaire card games are gone, along with their local progress. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Solitaire",
+          "what": "Desinstala o Microsoft Solitaire Collection e impede que o Windows o instale para novos usuários.",
+          "breaks": "Os jogos de cartas do Solitaire somem, junto com o progresso salvo no PC. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.MicrosoftSolitaireCollection",
+          "storeId": "9WZDNCRFHWD2"
+        }
+      ]
+    },
+    {
+      "id": "apps.news",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove News",
+          "what": "Uninstalls the Microsoft News app and stops Windows from installing it for new users.",
+          "breaks": "The News app is gone. News in the browser and in Widgets keeps working. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Notícias",
+          "what": "Desinstala o app Microsoft Notícias e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app Notícias some. Notícias no navegador e nos Widgets continuam funcionando. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.BingNews",
+          "storeId": "9WZDNCRFHVFW"
+        }
+      ]
+    },
+    {
+      "id": "apps.weather",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Weather",
+          "what": "Uninstalls the MSN Weather app and stops Windows from installing it for new users.",
+          "breaks": "The Weather app is gone. Weather in Widgets keeps working. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Clima",
+          "what": "Desinstala o app Clima (MSN) e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app Clima some. O clima nos Widgets continua funcionando. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.BingWeather",
+          "storeId": "9WZDNCRFJ3Q2"
+        }
+      ]
+    },
+    {
+      "id": "apps.get-help",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Get Help",
+          "what": "Uninstalls the Get Help app and stops Windows from installing it for new users.",
+          "breaks": "The Get Help app is gone, and Windows troubleshooters that open in Get Help no longer start. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Obter Ajuda",
+          "what": "Desinstala o app Obter Ajuda e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app Obter Ajuda some, e as soluções de problemas do Windows que abrem nele deixam de iniciar. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.GetHelp",
+          "storeId": "9PKDZBMV1H3T"
+        }
+      ]
+    },
+    {
+      "id": "apps.feedback-hub",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Feedback Hub",
+          "what": "Uninstalls the Feedback Hub app and stops Windows from installing it for new users.",
+          "breaks": "You can no longer send feedback or bug reports to Microsoft through Feedback Hub. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Hub de Comentários",
+          "what": "Desinstala o app Hub de Comentários e impede que o Windows o instale para novos usuários.",
+          "breaks": "Você não consegue mais enviar comentários ou relatar problemas à Microsoft pelo Hub de Comentários. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.WindowsFeedbackHub",
+          "storeId": "9NBLGGH4R32N"
+        }
+      ]
+    },
+    {
+      "id": "apps.power-automate",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Power Automate",
+          "what": "Uninstalls Power Automate for desktop and stops Windows from installing it for new users.",
+          "breaks": "Desktop flows you made in Power Automate no longer run on this PC. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Power Automate",
+          "what": "Desinstala o Power Automate para desktop e impede que o Windows o instale para novos usuários.",
+          "breaks": "Os fluxos que você criou no Power Automate deixam de rodar neste PC. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.PowerAutomateDesktop",
+          "storeId": "9NFTCH6J7FHV"
+        }
+      ]
+    },
+    {
+      "id": "apps.teams-personal",
+      "category": "apps",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Microsoft Teams",
+          "what": "Uninstalls the Microsoft Teams app and stops Windows from installing it for new users.",
+          "breaks": "Teams is gone. The same app is used for personal, work and school accounts, so this also removes Teams for work or school. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Microsoft Teams",
+          "what": "Desinstala o app Microsoft Teams e impede que o Windows o instale para novos usuários.",
+          "breaks": "O Teams some. O mesmo app é usado para contas pessoais, de trabalho e de escola, então isto também remove o Teams de trabalho ou escola. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "MSTeams",
+          "storeId": "XP8BT8DW290MPQ"
+        }
+      ]
+    },
+    {
+      "id": "apps.xbox",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove the Xbox app",
+          "what": "Uninstalls the Xbox app and stops Windows from installing it for new users.",
+          "breaks": "You can no longer browse, install or launch PC Game Pass games through the Xbox app. Game Bar and Xbox sign-in keep working. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o app Xbox",
+          "what": "Desinstala o app Xbox e impede que o Windows o instale para novos usuários.",
+          "breaks": "Você não consegue mais procurar, instalar ou abrir jogos do PC Game Pass pelo app Xbox. A Game Bar e o login Xbox continuam funcionando. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.GamingApp",
+          "storeId": "9MV0B5HZVK9Z"
+        }
+      ]
+    },
+    {
+      "id": "apps.phone-link",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Phone Link",
+          "what": "Uninstalls the Phone Link app and stops Windows from installing it for new users.",
+          "breaks": "You can no longer see phone notifications, messages or photos on this PC. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o Vincular ao Celular",
+          "what": "Desinstala o app Vincular ao Celular e impede que o Windows o instale para novos usuários.",
+          "breaks": "Você não vê mais notificações, mensagens ou fotos do celular neste PC. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.YourPhone",
+          "storeId": "9NMPJ99VJBWV"
+        }
+      ]
+    },
+    {
+      "id": "apps.todo",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove To Do",
+          "what": "Uninstalls the Microsoft To Do app and stops Windows from installing it for new users.",
+          "breaks": "The To Do app is gone from this PC. Your lists stay in your Microsoft account. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o To Do",
+          "what": "Desinstala o app Microsoft To Do e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app To Do some deste PC. Suas listas continuam na sua conta Microsoft. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.Todos",
+          "storeId": "9NBLGGH5R558"
+        }
+      ]
+    },
+    {
+      "id": "privacy.advertising-id",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off the advertising ID",
+          "what": "Sets the policy that turns off the advertising ID for every user.",
+          "breaks": "Apps can no longer use the ID to personalize ads. Settings shows the option as managed by your organization.",
+          "gain": "Apps cannot follow your app use across apps to target ads."
+        },
+        "pt-BR": {
+          "title": "Desativar o ID de anúncio",
+          "what": "Define a política que desativa o ID de anúncio para todos os usuários.",
+          "breaks": "Os apps não podem mais usar o ID para personalizar anúncios. O app Configurações mostra a opção como gerenciada pela sua organização.",
+          "gain": "Os apps não conseguem acompanhar o seu uso entre apps para direcionar anúncios."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AdvertisingInfo",
+          "name": "DisabledByGroupPolicy",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "privacy.tailored-experiences",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off tailored experiences",
+          "what": "Sets the user policy that stops Windows from using your diagnostic data for personalized tips, ads and recommendations.",
+          "breaks": "Tips and recommendations may be less relevant. Settings shows the option as managed by your organization.",
+          "gain": "Your diagnostic data is not used to personalize what Windows shows you."
+        },
+        "pt-BR": {
+          "title": "Desativar experiências personalizadas",
+          "what": "Define a política de usuário que impede o Windows de usar seus dados de diagnóstico para dicas, anúncios e recomendações personalizadas.",
+          "breaks": "Dicas e recomendações podem ficar menos relevantes. O app Configurações mostra a opção como gerenciada pela sua organização.",
+          "gain": "Seus dados de diagnóstico não são usados para personalizar o que o Windows mostra."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableTailoredExperiencesWithDiagnosticData",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "privacy.activity-history",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off activity history",
+          "what": "Sets the policies that stop Windows from saving your activity history on this PC and sending it to Microsoft.",
+          "breaks": "Features that resume apps or files from your activity history no longer have data. Settings shows the option as managed by your organization.",
+          "gain": "A record of the apps and files you use is not kept or uploaded."
+        },
+        "pt-BR": {
+          "title": "Desativar o histórico de atividades",
+          "what": "Define as políticas que impedem o Windows de salvar o histórico de atividades neste PC e de enviá-lo à Microsoft.",
+          "breaks": "Recursos que retomam apps ou arquivos pelo histórico de atividades ficam sem dados. O app Configurações mostra a opção como gerenciada pela sua organização.",
+          "gain": "Um registro dos apps e arquivos que você usa não é guardado nem enviado."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "PublishUserActivities",
+          "kind": "dword",
+          "value": 0
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "UploadUserActivities",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.inking-typing",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off inking and typing personalization",
+          "what": "Stops Windows from collecting what you type and write by hand to build a personal dictionary.",
+          "breaks": "Handwriting recognition and typing suggestions stop learning your words.",
+          "gain": "What you type and write by hand is not collected for personalization."
+        },
+        "pt-BR": {
+          "title": "Desativar a personalização de escrita à tinta e digitação",
+          "what": "Impede o Windows de coletar o que você digita e escreve à mão para montar um dicionário pessoal.",
+          "breaks": "O reconhecimento de escrita à mão e as sugestões de digitação deixam de aprender suas palavras.",
+          "gain": "O que você digita e escreve à mão não é coletado para personalização."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitInkCollection",
+          "kind": "dword",
+          "value": 1
+        },
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitTextCollection",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "privacy.feedback-frequency",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Never ask for feedback",
+          "what": "Sets the feedback frequency to Never, so Windows stops asking for your opinion.",
+          "breaks": "Nothing known.",
+          "gain": "No more feedback prompts."
+        },
+        "pt-BR": {
+          "title": "Nunca pedir comentários",
+          "what": "Define a frequência de comentários como Nunca, então o Windows para de pedir sua opinião.",
+          "breaks": "Nada conhecido.",
+          "gain": "Sem mais pedidos de comentários."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Siuf\\Rules",
+          "name": "NumberOfSIUFInPeriod",
+          "kind": "dword",
+          "value": 0
+        },
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Siuf\\Rules",
+          "name": "PeriodInNanoSeconds",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.diagnostic-data",
+      "category": "privacy",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Send only required diagnostic data",
+          "what": "Sets the policy that limits diagnostic data to Required, the minimum on Home and Pro.",
+          "breaks": "Windows Insider builds need optional diagnostic data, so you cannot join or stay in the Insider Program. Settings shows the option as managed by your organization.",
+          "gain": "Less data about how you use the PC is sent to Microsoft."
+        },
+        "pt-BR": {
+          "title": "Enviar só os dados de diagnóstico obrigatórios",
+          "what": "Define a política que limita os dados de diagnóstico a Obrigatórios, o mínimo no Home e no Pro.",
+          "breaks": "As versões Windows Insider exigem dados de diagnóstico opcionais, então você não consegue entrar ou continuar no Programa Insider. O app Configurações mostra a opção como gerenciada pela sua organização.",
+          "gain": "Menos dados sobre como você usa o PC são enviados à Microsoft."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "AllowTelemetry",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "privacy.start-web-search",
+      "category": "privacy",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off web results in Start search",
+          "what": "Sets the user policy that stops Start search from showing web suggestions and results.",
+          "breaks": "Searching from Start only finds things on this PC. Search the web in your browser instead.",
+          "gain": "What you type in Start search is not sent to Bing."
+        },
+        "pt-BR": {
+          "title": "Desativar resultados da web na pesquisa do Iniciar",
+          "what": "Define a política de usuário que impede a pesquisa do Iniciar de mostrar sugestões e resultados da web.",
+          "breaks": "A pesquisa do Iniciar só encontra itens deste PC. Pesquise na web pelo navegador.",
+          "gain": "O que você digita na pesquisa do Iniciar não é enviado ao Bing."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "DisableSearchBoxSuggestions",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "privacy.online-speech",
+      "category": "privacy",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off online speech recognition",
+          "what": "Turns off online speech recognition, which sends your voice to Microsoft to turn it into text.",
+          "breaks": "Voice typing and other apps that use Microsoft's online speech recognition stop working.",
+          "gain": "Your voice recordings are not sent to Microsoft."
+        },
+        "pt-BR": {
+          "title": "Desativar o reconhecimento de fala online",
+          "what": "Desativa o reconhecimento de fala online, que envia sua voz à Microsoft para virar texto.",
+          "breaks": "A digitação por voz e outros apps que usam o reconhecimento de fala online da Microsoft deixam de funcionar.",
+          "gain": "Suas gravações de voz não são enviadas à Microsoft."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Speech_OneCore\\Settings\\OnlineSpeechPrivacy",
+          "name": "HasAccepted",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "performance.game-mode",
+      "category": "performance",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn on Game Mode",
+          "what": "Turns on Game Mode, which Windows uses to give games priority while they run.",
+          "breaks": "Nothing known.",
+          "gain": "Windows holds back background work, such as some updates, while you play."
+        },
+        "pt-BR": {
+          "title": "Ativar o Modo de Jogo",
+          "what": "Ativa o Modo de Jogo, que o Windows usa para dar prioridade aos jogos enquanto eles rodam.",
+          "breaks": "Nada conhecido.",
+          "gain": "O Windows segura tarefas em segundo plano, como algumas atualizações, enquanto você joga."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\GameBar",
+          "name": "AutoGameModeEnabled",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "performance.game-bar-recording",
+      "category": "performance",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Game Bar recording",
+          "what": "Sets the policy that turns off Windows game recording and broadcasting.",
+          "breaks": "Game Bar can no longer record clips, record what just happened, or broadcast. Settings shows the option as managed by your organization.",
+          "gain": "No background recording uses CPU, GPU or disk while you play."
+        },
+        "pt-BR": {
+          "title": "Desativar a gravação da Game Bar",
+          "what": "Define a política que desativa a gravação e a transmissão de jogos do Windows.",
+          "breaks": "A Game Bar não consegue mais gravar clipes, gravar o que acabou de acontecer nem transmitir. O app Configurações mostra a opção como gerenciada pela sua organização.",
+          "gain": "Nenhuma gravação em segundo plano usa CPU, GPU ou disco enquanto você joga."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+          "name": "AllowGameDVR",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "performance.high-performance-plan",
+      "category": "performance",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": true,
+      "text": {
+        "en": {
+          "title": "Use the High performance power plan",
+          "what": "Activates the built-in High performance power plan, creating it if Windows hides it.",
+          "breaks": "The PC uses more power and runs warmer. On a laptop, battery life gets shorter.",
+          "gain": "The processor stays at higher speeds instead of slowing down to save power."
+        },
+        "pt-BR": {
+          "title": "Usar o plano de energia Alto desempenho",
+          "what": "Ativa o plano de energia Alto desempenho do Windows, criando-o se o Windows o esconder.",
+          "breaks": "O PC gasta mais energia e esquenta mais. Em notebook, a bateria dura menos.",
+          "gain": "O processador fica em velocidades mais altas em vez de reduzir para economizar energia."
+        }
+      },
+      "actions": [
+        {
+          "type": "powerScheme",
+          "scheme": "highPerformance"
+        }
+      ]
+    },
+    {
+      "id": "performance.pointer-precision",
+      "category": "performance",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Enhance pointer precision",
+          "what": "Turns off mouse acceleration, so the pointer moves the same distance for the same mouse movement at any speed.",
+          "breaks": "The pointer may feel slower. You may want to raise the pointer speed. Takes effect after you sign out and back in.",
+          "gain": "Pointer movement is predictable, which helps aiming in games."
+        },
+        "pt-BR": {
+          "title": "Desativar Aprimorar precisão do ponteiro",
+          "what": "Desativa a aceleração do mouse, então o ponteiro anda a mesma distância para o mesmo movimento em qualquer velocidade.",
+          "breaks": "O ponteiro pode parecer mais lento. Talvez você queira aumentar a velocidade do ponteiro. Vale depois de sair e entrar de novo na conta.",
+          "gain": "O movimento do ponteiro fica previsível, o que ajuda a mirar em jogos."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Control Panel\\Mouse",
+          "name": "MouseSpeed",
+          "kind": "string",
+          "value": "0"
+        },
+        {
+          "type": "registry",
+          "path": "HKCU\\Control Panel\\Mouse",
+          "name": "MouseThreshold1",
+          "kind": "string",
+          "value": "0"
+        },
+        {
+          "type": "registry",
+          "path": "HKCU\\Control Panel\\Mouse",
+          "name": "MouseThreshold2",
+          "kind": "string",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "id": "performance.ultimate-plan",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": true,
+      "text": {
+        "en": {
+          "title": "Use the Ultimate Performance power plan",
+          "what": "Activates the built-in Ultimate Performance power plan, creating it if Windows hides it.",
+          "breaks": "The PC uses the most power and runs warmer. On a laptop, battery life gets much shorter.",
+          "gain": "Removes the small delays the processor has when it changes power states."
+        },
+        "pt-BR": {
+          "title": "Usar o plano de energia Desempenho Máximo",
+          "what": "Ativa o plano de energia Desempenho Máximo do Windows, criando-o se o Windows o esconder.",
+          "breaks": "O PC gasta o máximo de energia e esquenta mais. Em notebook, a bateria dura bem menos.",
+          "gain": "Tira os pequenos atrasos que o processador tem ao mudar de estado de energia."
+        }
+      },
+      "actions": [
+        {
+          "type": "powerScheme",
+          "scheme": "ultimate"
+        }
+      ]
+    },
+    {
+      "id": "performance.memory-integrity-off",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": false,
+      "requiresReboot": true,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Memory Integrity and VBS",
+          "what": "Turns off Memory Integrity (core isolation) and virtualization-based security.",
+          "breaks": "Reduces security: the protection that stops malicious drivers from changing the Windows kernel is gone. Windows Security shows a warning. Needs a restart.",
+          "gain": "Microsoft says games may run faster on some PCs without these features."
+        },
+        "pt-BR": {
+          "title": "Desativar a Integridade de Memória e a VBS",
+          "what": "Desativa a Integridade de Memória (isolamento de núcleo) e a segurança baseada em virtualização.",
+          "breaks": "Reduz a segurança: some a proteção que impede drivers maliciosos de alterar o núcleo do Windows. A Segurança do Windows mostra um aviso. Exige reiniciar.",
+          "gain": "A Microsoft diz que jogos podem rodar mais rápido em alguns PCs sem esses recursos."
+        }
+      },
+      "actions": [
+        {
+          "type": "named",
+          "handler": "memoryIntegrity"
+        }
+      ]
+    },
+    {
+      "id": "performance.system-responsiveness",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Lower the CPU share kept for background tasks",
+          "what": "Sets SystemResponsiveness to 10, so the multimedia scheduler keeps 10% of the CPU for low-priority tasks instead of 20%.",
+          "breaks": "Background tasks can get less CPU time while audio, video or games run.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Reduzir a parte da CPU reservada para tarefas em segundo plano",
+          "what": "Define SystemResponsiveness como 10, então o agendador multimídia reserva 10% da CPU para tarefas de baixa prioridade em vez de 20%.",
+          "breaks": "Tarefas em segundo plano podem receber menos CPU enquanto áudio, vídeo ou jogos rodam.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+          "name": "SystemResponsiveness",
+          "kind": "dword",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": "performance.games-task-priority",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Raise the multimedia priority of the Games task",
+          "what": "Changes the values of the Games task in the multimedia scheduler: GPU Priority 8, Priority 6, Scheduling Category High, SFIO Priority High.",
+          "breaks": "Microsoft documents GPU Priority and SFIO Priority as not used, and Priority as ignored when the category is High. Threads of games that use this task may take CPU time from other programs.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Aumentar a prioridade multimídia da tarefa Games",
+          "what": "Altera os valores da tarefa Games no agendador multimídia: GPU Priority 8, Priority 6, Scheduling Category High, SFIO Priority High.",
+          "breaks": "A Microsoft documenta GPU Priority e SFIO Priority como não usados, e Priority como ignorado quando a categoria é High. Threads de jogos que usam esta tarefa podem tirar tempo de CPU de outros programas.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "GPU Priority",
+          "kind": "dword",
+          "value": 8
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "Priority",
+          "kind": "dword",
+          "value": 6
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "Scheduling Category",
+          "kind": "string",
+          "value": "High"
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "SFIO Priority",
+          "kind": "string",
+          "value": "High"
+        }
+      ]
+    },
+    {
+      "id": "performance.priority-separation",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Change how the CPU is split between foreground and background",
+          "what": "Sets Win32PrioritySeparation to 38 (0x26), the value Windows writes when you pick Programs in Performance Options.",
+          "breaks": "Background programs and services can get less CPU time.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Mudar como a CPU é dividida entre primeiro e segundo plano",
+          "what": "Define Win32PrioritySeparation como 38 (0x26), o valor que o Windows grava ao escolher Programas nas Opções de desempenho.",
+          "breaks": "Programas e serviços em segundo plano podem receber menos CPU.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl",
+          "name": "Win32PrioritySeparation",
+          "kind": "dword",
+          "value": 38
+        }
+      ]
+    },
+    {
+      "id": "performance.power-throttling-off",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off power throttling",
+          "what": "Turns off power throttling, which Windows uses to run background apps on slower, more efficient processor settings.",
+          "breaks": "Background apps use more power. On a laptop, battery life gets shorter.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Desativar a limitação de energia",
+          "what": "Desativa a limitação de energia, que o Windows usa para rodar apps em segundo plano em modos de processador mais lentos e econômicos.",
+          "breaks": "Apps em segundo plano gastam mais energia. Em notebook, a bateria dura menos.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+          "name": "PowerThrottlingOff",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    }
+  ]
+}
