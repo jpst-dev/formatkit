@@ -53,7 +53,7 @@ public class DirectInstaller(IHttpDownloader downloader, IProcessRunner runner, 
             if (!string.Equals(actual, source.Sha256, StringComparison.OrdinalIgnoreCase))
             {
                 if (downloaded)
-                    files.Delete(file);
+                    TryDelete(file);
                 return new DirectResult(DirectStatus.HashMismatch, -1,
                     $"SHA-256 mismatch for '{source.Name}': expected {source.Sha256}, got {actual}.");
             }
@@ -72,16 +72,30 @@ public class DirectInstaller(IHttpDownloader downloader, IProcessRunner runner, 
         {
             case 0:
                 if (downloaded)
-                    files.Delete(file);
+                    TryDelete(file);
                 return new DirectResult(DirectStatus.Installed, 0, "Installed.");
             case 3010:
             case 1641:
                 if (downloaded)
-                    files.Delete(file);
+                    TryDelete(file);
                 return new DirectResult(DirectStatus.RebootRequired, result.ExitCode, "Installed; a reboot is required.");
             default:
                 return new DirectResult(DirectStatus.Failed, result.ExitCode,
                     $"Installer for '{source.Name}' exited with code {result.ExitCode}.");
+        }
+    }
+
+    private void TryDelete(string path)
+    {
+        try
+        {
+            files.Delete(path);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 

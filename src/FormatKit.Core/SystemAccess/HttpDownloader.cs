@@ -2,7 +2,14 @@ namespace FormatKit.Core.SystemAccess;
 
 public sealed class HttpDownloader : IHttpDownloader
 {
-    private static readonly HttpClient Client = new() { Timeout = Timeout.InfiniteTimeSpan };
+    private static readonly HttpClient SharedClient = new() { Timeout = Timeout.InfiniteTimeSpan };
+
+    private readonly HttpClient _client;
+
+    public HttpDownloader() => _client = SharedClient;
+
+    internal HttpDownloader(HttpMessageHandler handler) =>
+        _client = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
 
     public async Task DownloadAsync(Uri url, string destination, TimeSpan timeout, CancellationToken ct)
     {
@@ -14,7 +21,7 @@ public sealed class HttpDownloader : IHttpDownloader
         cts.CancelAfter(timeout);
         try
         {
-            using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token).ConfigureAwait(false);
+            using var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             await using (var source = await response.Content.ReadAsStreamAsync(cts.Token).ConfigureAwait(false))
             await using (var target = new FileStream(part, FileMode.Create, FileAccess.Write, FileShare.None))

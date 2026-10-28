@@ -41,7 +41,15 @@ public sealed class InMemoryFileSystem : IFileSystem
         WriteCount++;
     }
 
-    public void Delete(string path) => _files.Remove(path);
+    /// <summary>When true, <see cref="Delete"/> throws <see cref="IOException"/>.</summary>
+    public bool FailDeletes { get; set; }
+
+    public void Delete(string path)
+    {
+        if (FailDeletes)
+            throw new IOException($"delete refused: {path}");
+        _files.Remove(path);
+    }
 
     public void CreateDirectory(string path) => _directories.Add(path.TrimEnd(Sep));
 

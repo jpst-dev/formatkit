@@ -51,6 +51,7 @@ public class DirectInstallerTests
         Assert.Equal(DownloadedPath(), call.FileName);
         Assert.Equal(["/S", "/D=x"], call.Arguments);
         Assert.Equal(Timeouts.Install, call.Timeout);
+        Assert.Equal(Timeouts.Download, Assert.Single(_http.Calls).Timeout);
         Assert.False(_fs.FileExists(DownloadedPath()));
     }
 
@@ -192,5 +193,27 @@ public class DirectInstallerTests
         await Assert.ThrowsAsync<ArgumentException>(() => new HttpDownloader().DownloadAsync(
             new Uri("http://example.com/setup.exe"), Path.Combine(Path.GetTempPath(), "never.exe"),
             TimeSpan.FromSeconds(5), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Cleanup_delete_failure_keeps_installed_status()
+    {
+        var url = "https://example.com/setup.exe";
+        _runner.Enqueue(ExpectedFile(url), Exit(0));
+        _fs.FailDeletes = true;
+
+        var result = await _installer.InstallAsync(Url(url), CancellationToken.None);
+
+        Assert.Equal(DirectStatus.Installed, result.Status);
+    }
+
+    [Fact]
+    public async Task Cleanup_delete_failure_keeps_hash_mismatch_status()
+    {
+        _fs.FailDeletes = true;
+
+        var result = await _installer.InstallAsync(Url("https://example.com/setup.exe", new string('0', 64)), CancellationToken.None);
+
+        Assert.Equal(DirectStatus.HashMismatch, result.Status);
     }
 }
