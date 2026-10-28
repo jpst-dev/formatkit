@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Tests.Fakes;
 using FormatKit.Programs.Catalog;
@@ -65,6 +66,56 @@ public class ProgramsOptionsTests
         Assert.Equal(["/S"], options.Direct[0].Args);
         Assert.Equal(@"D:\setups\tool.msi", options.Direct[1].Path);
         Assert.Null(options.Direct[1].Sha256);
+    }
+
+    [Fact]
+    public void Relative_import_file_resolves_against_base_directory()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed(@"E:\usb\exports\old-pc.json", ExportSample);
+
+        var (options, errors) = ProgramsOptions.Parse(
+            Json("""{ "acceptAgreements": true, "importFile": "exports\\old-pc.json" }"""), Path, TestCatalog(), files, @"E:\usb");
+
+        Assert.Empty(errors);
+        Assert.Equal(@"E:\usb\exports\old-pc.json", options!.ImportFile);
+        Assert.Equal(["Git.Git", "9NKSQGP7F2NH"], options.ImportedPrograms.Select(e => e.Id));
+    }
+
+    [Fact]
+    public void Relative_import_file_missing_next_to_profile_names_the_resolved_path()
+    {
+        var (options, errors) = ProgramsOptions.Parse(
+            Json("""{ "acceptAgreements": true, "importFile": "old-pc.json" }"""), Path, TestCatalog(), new InMemoryFileSystem(), @"E:\usb");
+
+        Assert.Null(options);
+        var error = Assert.Single(errors);
+        Assert.Equal(ProfileErrorCode.FileNotFound, error.Code);
+        Assert.Contains(@"E:\usb\old-pc.json", error.Message);
+    }
+
+    [Theory]
+    [InlineData(@"tool.exe", @"E:\usb\tool.exe")]
+    [InlineData(@".\setups\tool.exe", @"E:\usb\setups\tool.exe")]
+    [InlineData(@"..\tool.exe", @"E:\tool.exe")]
+    [InlineData(@"D:\setups\tool.exe", @"D:\setups\tool.exe")]
+    [InlineData(@"\\server\share\tool.exe", @"\\server\share\tool.exe")]
+    public void Direct_path_resolves_against_base_directory_and_absolute_is_kept(string written, string expected)
+    {
+        var json = $$"""{ "acceptAgreements": true, "direct": [ { "name": "Tool", "path": {{JsonSerializer.Serialize(written)}} } ] }""";
+
+        var (options, errors) = ProgramsOptions.Parse(Json(json), Path, TestCatalog(), new InMemoryFileSystem(), @"E:\usb");
+
+        Assert.Empty(errors);
+        Assert.Equal(expected, Assert.Single(options!.Direct).Path);
+    }
+
+    [Fact]
+    public void Without_base_directory_paths_are_kept_as_written()
+    {
+        var (options, _) = Parse("""{ "acceptAgreements": true, "direct": [ { "name": "Tool", "path": "tool.exe" } ] }""");
+
+        Assert.Equal("tool.exe", Assert.Single(options!.Direct).Path);
     }
 
     [Fact]

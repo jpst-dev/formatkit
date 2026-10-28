@@ -49,6 +49,7 @@ public sealed class ProfileLoader(IReadOnlyList<IModule> modules)
                 return Fail(Error(ProfileErrorCode.InvalidValue, "", Strings.Format("ProfileError_InvalidValue", "object")));
 
             var errors = new List<ProfileError>();
+            var baseDirectory = BaseDirectoryOf(path);
 
             var schemaVersion = 0;
             if (!root.TryGetProperty("schemaVersion", out var sv))
@@ -85,7 +86,7 @@ public sealed class ProfileLoader(IReadOnlyList<IModule> modules)
 
                     var section = prop.Value.Clone();
                     sections[prop.Name] = section;
-                    errors.AddRange(module.Validate(section, modulePath));
+                    errors.AddRange(module.Validate(section, modulePath, baseDirectory));
                 }
             }
 
@@ -93,8 +94,21 @@ public sealed class ProfileLoader(IReadOnlyList<IModule> modules)
                 return new ProfileLoadResult(null, errors);
 
             var hash = Convert.ToHexStringLower(SHA256.HashData(bytes));
-            var profile = new Profile(schemaVersion, name!, sections);
+            var profile = new Profile(schemaVersion, name!, sections, baseDirectory);
             return new ProfileLoadResult(new LoadedProfile(profile, path, hash), []);
+        }
+    }
+
+    /// <summary>The profile file's full directory, or null when <paramref name="path"/> is not a usable file path.</summary>
+    private static string? BaseDirectoryOf(string path)
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(path) ? null : Path.GetDirectoryName(Path.GetFullPath(path));
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
         }
     }
 

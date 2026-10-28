@@ -6,11 +6,15 @@ public sealed class FakeUserContextRunner : IUserContextRunner
 {
     public List<ProcessSpec> Calls { get; } = [];
 
+    /// <summary>The token passed with each call, in the same order as <see cref="Calls"/>.</summary>
+    public List<CancellationToken> Tokens { get; } = [];
+
     public ProcessResult Result { get; set; } = new(0, string.Empty, string.Empty, TimeSpan.Zero, false);
 
     public Task<ProcessResult> RunAsync(ProcessSpec spec, CancellationToken ct)
     {
         Calls.Add(spec);
+        Tokens.Add(ct);
         return Task.FromResult(Result);
     }
 }

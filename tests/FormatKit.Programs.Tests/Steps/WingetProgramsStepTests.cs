@@ -234,6 +234,86 @@ public class WingetProgramsStepTests : IDisposable
     }
 
     [Fact]
+    public async Task Per_item_winget_calls_get_a_token_that_ctrl_c_cannot_cancel()
+    {
+        using var cts = new CancellationTokenSource();
+        var (runner, ctx, user, _) = Setup();
+        runner.Enqueue("winget.exe", Ok);      // --version
+        runner.Enqueue("winget.exe", Ok);      // list A: installed
+        runner.Enqueue("winget.exe", Ok);      // upgrade A
+        runner.Enqueue("winget.exe", Exit(1)); // list B: not installed
+        runner.Enqueue("winget.exe", Ok);      // install B
+
+        await Step(true, Program("A.A"), Program("B.B"), Program("U.U", InstallContext.User)).ExecuteAsync(ctx, cts.Token);
+
+        var perItem = runner.Calls.Select((c, i) => (c, i)).Where(x => x.c.Arguments[0] is "list" or "install" or "upgrade").ToList();
+        Assert.Equal(4, perItem.Count);
+        Assert.All(perItem, x => Assert.False(runner.Tokens[x.i].CanBeCanceled));
+        Assert.NotEmpty(user.Tokens);
+        Assert.All(user.Tokens, t => Assert.False(t.CanBeCanceled));
+    }
+
+    [Fact]
+    public async Task Ctrl_c_during_an_install_lets_it_finish_then_stops_before_the_next()
+    {
+        using var cts = new CancellationTokenSource();
+        var (runner, ctx, _, _) = Setup();
+        runner.Enqueue("winget.exe", Ok);      // --version
+        runner.Enqueue("winget.exe", Exit(1)); // list A
+        runner.Enqueue("winget.exe", Ok);      // install A
+        runner.OnRun = spec =>
+        {
+            if (spec.Arguments[0] == "install")
+                cts.Cancel();
+        };
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => Step(false, Program("A.A"), Program("B.B")).ExecuteAsync(ctx, cts.Token));
+
+        Assert.Single(runner.Calls, c => c.Arguments[0] == "install");
+        Assert.DoesNotContain(runner.Calls, c => c.Arguments.Contains("B.B"));
+    }
+
+    [Fact]
+    public async Task User_item_install_passes_no_upgrade()
+    {
+        var (runner, ctx, user, _) = Setup();
+        runner.Enqueue("winget.exe", Ok);
+
+        await Step(false, Program("U.U", InstallContext.User)).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.Contains("--no-upgrade", Assert.Single(user.Calls).Arguments);
+    }
+
+    [Fact]
+    public async Task User_item_already_installed_without_upgrade_is_reported_and_not_upgraded()
+    {
+        var runner = new FakeProcessRunner();
+        var user = new SequenceRunner(unchecked((int)0x8A150061));
+        var ctx = TestServices.Context(TestServices.Create(processes: runner, userContext: user));
+        runner.Enqueue("winget.exe", Ok);
+
+        var result = await Step(false, Program("U.U", InstallContext.User)).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Contains("already installed", result.Messages[0]);
+        Assert.Equal("install", Assert.Single(user.Calls).Arguments[0]);
+    }
+
+    [Fact]
+    public async Task User_item_without_signed_in_user_says_failed()
+    {
+        var (runner, ctx, _, session) = Setup();
+        session.HasInteractiveUser = false;
+        runner.Enqueue("winget.exe", Ok);
+
+        var result = await Step(false, Program("U.U", InstallContext.User)).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
+
+        Assert.Equal("U.U: failed: no user is signed in", result.Messages[0]);
+        Assert.Equal("Sign in to Windows and run again.", result.NextAction);
+    }
+
+    [Fact]
     public async Task User_item_with_upgrade_and_not_installed_installs_once()
     {
         var (runner, ctx, user, _) = Setup();

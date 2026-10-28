@@ -37,6 +37,24 @@ public class ProgramsModuleTests
     }
 
     [Fact]
+    public void Relative_paths_resolve_against_the_base_directory()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed(@"E:\usb\old-pc.json", ExportSample);
+        var json = """
+            { "enabled": true, "acceptAgreements": true, "importFile": "old-pc.json",
+              "direct": [ { "name": "Tool", "path": "setups\\tool.exe" }, { "name": "Abs", "path": "D:\\abs.exe" } ] }
+            """;
+
+        Assert.Empty(Module(files).Validate(Json(json), "modules.programs", @"E:\usb"));
+        var steps = Module(files).CreateSteps(Json(json), @"E:\usb");
+
+        var direct = Assert.IsType<DirectProgramsStep>(steps[^1]);
+        Assert.Equal([@"E:\usb\setups\tool.exe", @"D:\abs.exe"], direct.Entries.Select(e => e.Path));
+        Assert.Contains(steps.OfType<WingetProgramsStep>().SelectMany(s => s.Programs), p => p.Package.Id == "Git.Git");
+    }
+
+    [Fact]
     public void Validate_returns_option_errors()
     {
         var errors = Module().Validate(Json("""{ "enabled": true, "catalog": ["nope.nope"], "acceptAgreements": true }"""), "$.modules.programs");

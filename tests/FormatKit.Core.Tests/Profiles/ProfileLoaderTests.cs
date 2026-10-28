@@ -38,6 +38,15 @@ public class ProfileLoaderTests : IDisposable
     }
 
     [Fact]
+    public void Profile_directory_is_passed_to_modules_and_kept_on_the_profile()
+    {
+        var result = Loader().Load(Write(Valid));
+
+        Assert.Equal(Path.GetFullPath(_dir), Assert.Single(_fake.BaseDirectories));
+        Assert.Equal(Path.GetFullPath(_dir), result.Value!.Profile.BaseDirectory);
+    }
+
+    [Fact]
     public void Missing_file_reports_FileNotFound()
     {
         var result = Loader().Load(Path.Combine(_dir, "nope.json"));

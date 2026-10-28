@@ -54,7 +54,14 @@ internal sealed class DirectProgramsStep(IReadOnlyList<DirectEntry> entries, App
                 else
                 {
                     var source = new DirectSource(entry.Name, entry.Url is null ? null : new Uri(entry.Url), entry.Path, entry.Sha256, entry.Args);
+                    // The run's token may cancel the download only; DirectInstaller never lets it kill the installer.
                     var result = await ctx.Services.Direct.InstallAsync(source, ct).ConfigureAwait(false);
+                    if (result.Status is not (DirectStatus.Installed or DirectStatus.RebootRequired))
+                    {
+                        ctx.Log.Warning("Direct installer {Name}: {Status}, exit code {ExitCode}: {Message}",
+                            entry.Name, result.Status, result.ExitCode, result.Message);
+                    }
+
                     switch (result.Status)
                     {
                         case DirectStatus.Installed:
@@ -73,6 +80,10 @@ internal sealed class DirectProgramsStep(IReadOnlyList<DirectEntry> entries, App
                         case DirectStatus.DownloadFailed:
                             anyFailed = true;
                             text = Strings.Get("Item_Failed_Download");
+                            break;
+                        case DirectStatus.Failed when result.TimedOut:
+                            anyFailed = true;
+                            text = Strings.Get("Item_Failed_Timeout");
                             break;
                         default:
                             anyFailed = true;

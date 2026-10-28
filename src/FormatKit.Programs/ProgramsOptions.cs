@@ -35,9 +35,13 @@ public sealed partial record ProgramsOptions(
     [GeneratedRegex(@"\A[0-9A-Fa-f]{64}\z")]
     private static partial Regex Sha256Pattern();
 
-    /// <summary>Parses and validates the section; <c>Options</c> is null whenever <c>Errors</c> is not empty.</summary>
+    /// <summary>
+    /// Parses and validates the section; <c>Options</c> is null whenever <c>Errors</c> is not empty.
+    /// A relative <c>importFile</c> or direct <c>path</c> resolves against <paramref name="baseDirectory"/> (the profile
+    /// file's directory) when it is given, so it still works from a resumed run whose current directory differs.
+    /// </summary>
     public static (ProgramsOptions? Options, IReadOnlyList<ProfileError> Errors) Parse(
-        JsonElement section, string path, ProgramCatalog catalog, IFileSystem files)
+        JsonElement section, string path, ProgramCatalog catalog, IFileSystem files, string? baseDirectory = null)
     {
         if (section.ValueKind != JsonValueKind.Object)
             return (null, [Invalid(path, "object")]);
@@ -60,7 +64,7 @@ public sealed partial record ProgramsOptions(
         var upgrade = ReadBool(section, "upgrade", path, errors);
         var catalogIds = ReadCatalog(section, path, catalog, errors);
         var winget = ReadWinget(section, path, errors);
-        var direct = ReadDirect(section, path, errors);
+        var direct = ReadDirect(section, path, errors, baseDirectory);
 
         string? importFile = null;
         IReadOnlyList<WingetEntry> imported = [];
@@ -74,7 +78,7 @@ public sealed partial record ProgramsOptions(
             }
             else
             {
-                importFile = importEl.GetString()!;
+                importFile = Resolve(importEl.GetString()!, baseDirectory);
                 if (!files.FileExists(importFile))
                 {
                     errors.Add(new ProfileError(ProfileErrorCode.FileNotFound, importPath,
@@ -222,7 +226,22 @@ public sealed partial record ProgramsOptions(
         }
     }
 
-    private static List<DirectEntry> ReadDirect(JsonElement section, string path, List<ProfileError> errors)
+    /// <summary>Resolves a relative path against <paramref name="baseDirectory"/>; absolute paths are kept as written.</summary>
+    internal static string Resolve(string file, string? baseDirectory)
+    {
+        if (baseDirectory is null || System.IO.Path.IsPathFullyQualified(file))
+            return file;
+        try
+        {
+            return System.IO.Path.GetFullPath(file, baseDirectory);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return file;
+        }
+    }
+
+    private static List<DirectEntry> ReadDirect(JsonElement section, string path, List<ProfileError> errors, string? baseDirectory)
     {
         var entries = new List<DirectEntry>();
         if (!section.TryGetProperty("direct", out var list))
@@ -302,7 +321,7 @@ public sealed partial record ProgramsOptions(
             }
 
             if (errors.Count == before)
-                entries.Add(new DirectEntry(name!, url, filePath, sha, args));
+                entries.Add(new DirectEntry(name!, url, filePath is null ? null : Resolve(filePath, baseDirectory), sha, args));
         }
 
         return entries;

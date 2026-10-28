@@ -43,7 +43,7 @@
   <data name="Item_Failed_Timeout" xml:space="preserve"><value>falhou: tempo esgotado</value></data>
   <data name="Item_Failed_HashMismatch" xml:space="preserve"><value>falhou: hash SHA-256 n&#227;o confere</value></data>
   <data name="Item_Failed_Download" xml:space="preserve"><value>falhou: erro no download</value></data>
-  <data name="Item_Failed_NoUser" xml:space="preserve"><value>ignorado: nenhum usu&#225;rio conectado</value></data>
+  <data name="Item_Failed_NoUser" xml:space="preserve"><value>falhou: nenhum usu&#225;rio conectado</value></data>
   <data name="NextAction_WingetMissing" xml:space="preserve"><value>Instale ou repare o Instalador de Aplicativo (winget) e execute novamente.</value></data>
   <data name="NextAction_SeeLog" xml:space="preserve"><value>Veja o log para os programas que falharam e execute novamente.</value></data>
   <data name="NextAction_SignIn" xml:space="preserve"><value>Entre no Windows e execute novamente.</value></data>

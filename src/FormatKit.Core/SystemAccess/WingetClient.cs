@@ -78,8 +78,12 @@ public partial class WingetClient(IProcessRunner runner)
         };
     }
 
+    /// <summary>
+    /// Install arguments. <c>--no-upgrade</c> stops winget (1.6 and later) from silently upgrading a package that is
+    /// already installed; winget then exits with PACKAGE_ALREADY_INSTALLED, which maps to AlreadyInstalled.
+    /// </summary>
     public static IReadOnlyList<string> InstallArguments(WingetPackageRef package) =>
-        Build("install", package, SilentFlags, withScope: true);
+        Build("install", package, [.. SilentFlags, "--no-upgrade"], withScope: true);
 
     public static IReadOnlyList<string> UpgradeArguments(WingetPackageRef package) =>
         Build("upgrade", package, SilentFlags, withScope: true);
@@ -98,7 +102,8 @@ public partial class WingetClient(IProcessRunner runner)
 
     public async Task<bool> IsInstalledAsync(WingetPackageRef package, CancellationToken ct)
     {
-        var args = Build("list", package, ["--accept-source-agreements", "--disable-interactivity"]);
+        // winget list has no --version option (and Scope is install-only), so neither is passed.
+        var args = Build("list", package with { Version = null }, ["--accept-source-agreements", "--disable-interactivity"]);
         try
         {
             var result = await runner.RunAsync(new ProcessSpec("winget.exe", args, Timeouts.Query), ct)

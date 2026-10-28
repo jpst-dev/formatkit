@@ -8,6 +8,7 @@ public interface IFileSystem
     void WriteAllTextAtomic(string path, string contents);
     void Delete(string path);
     void CreateDirectory(string path);
+    /// <summary>Opens for reading; while open, others may read the file but not write, replace or delete it.</summary>
     Stream OpenRead(string path);
     IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive);
 }

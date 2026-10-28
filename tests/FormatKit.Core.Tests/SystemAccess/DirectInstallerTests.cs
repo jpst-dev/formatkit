@@ -25,7 +25,7 @@ public class DirectInstallerTests
     private static ProcessResult Exit(int code, bool timedOut = false) => new(code, "", "", TimeSpan.Zero, timedOut);
 
     private static DirectSource Url(string url, string? sha = null, params string[] args) =>
-        new("App", new Uri(url), null, sha, args);
+        new("App", new Uri(url), null, sha ?? ContentHash, args);
 
     private string DownloadedPath() => Assert.Single(_http.Calls).Destination;
 
@@ -177,7 +177,110 @@ public class DirectInstallerTests
         var result = await _installer.InstallAsync(Url(url), CancellationToken.None);
 
         Assert.Equal(DirectStatus.Failed, result.Status);
+        Assert.True(result.TimedOut);
+        Assert.Contains("timed out", result.Message);
         Assert.True(_fs.FileExists(DownloadedPath()));
+    }
+
+    [Fact]
+    public async Task Url_without_sha256_throws_and_downloads_nothing()
+    {
+        var source = new DirectSource("App", new Uri("https://example.com/setup.exe"), null, null, []);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _installer.InstallAsync(source, CancellationToken.None));
+
+        Assert.Empty(_http.Calls);
+        Assert.Empty(_runner.Calls);
+    }
+
+    [Fact]
+    public async Task Downloaded_file_is_held_open_from_hash_until_installer_exits()
+    {
+        var url = "https://example.com/setup.exe";
+        var file = ExpectedFile(url);
+        var handlesWhileRunning = -1;
+        _runner.OnRun = _ => handlesWhileRunning = _fs.OpenHandles(file);
+        _runner.Enqueue(file, Exit(0));
+
+        var result = await _installer.InstallAsync(Url(url), CancellationToken.None);
+
+        Assert.Equal(DirectStatus.Installed, result.Status);
+        Assert.Equal(1, handlesWhileRunning);
+        Assert.Equal(["open:" + file, "close:" + file], _fs.Events);
+        Assert.Equal(0, _fs.OpenHandles(file));
+        Assert.False(_fs.FileExists(file)); // deleted after the handle closed
+    }
+
+    [Fact]
+    public async Task Msi_is_held_open_while_msiexec_runs()
+    {
+        var url = "https://example.com/app.msi";
+        var handlesWhileRunning = -1;
+        _runner.OnRun = _ => handlesWhileRunning = _fs.OpenHandles(ExpectedFile(url));
+        _runner.Enqueue("msiexec.exe", Exit(0));
+
+        await _installer.InstallAsync(Url(url), CancellationToken.None);
+
+        Assert.Equal(1, handlesWhileRunning);
+        Assert.Equal(0, _fs.OpenHandles(ExpectedFile(url)));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Local_path_is_held_open_while_installer_runs(bool withHash)
+    {
+        var path = @"C:\Setup\tool.exe";
+        _fs.Seed(path, Content);
+        var handlesWhileRunning = -1;
+        _runner.OnRun = _ => handlesWhileRunning = _fs.OpenHandles(path);
+        _runner.Enqueue(path, Exit(0));
+
+        var result = await _installer.InstallAsync(
+            new DirectSource("Tool", null, path, withHash ? ContentHash : null, []), CancellationToken.None);
+
+        Assert.Equal(DirectStatus.Installed, result.Status);
+        Assert.Equal(1, handlesWhileRunning);
+        Assert.Equal(["open:" + path, "close:" + path], _fs.Events);
+    }
+
+    [Fact]
+    public async Task Hash_mismatch_closes_the_file_before_deleting_it()
+    {
+        var result = await _installer.InstallAsync(Url("https://example.com/setup.exe", new string('0', 64)), CancellationToken.None);
+
+        Assert.Equal(DirectStatus.HashMismatch, result.Status);
+        Assert.Equal(0, _fs.OpenHandles(DownloadedPath()));
+        Assert.False(_fs.FileExists(DownloadedPath()));
+        Assert.Contains(ContentHash, result.Message);
+        Assert.Contains(new string('0', 64), result.Message);
+    }
+
+    [Fact]
+    public async Task Download_gets_callers_token_but_installer_gets_one_that_cannot_be_cancelled()
+    {
+        using var cts = new CancellationTokenSource();
+        var url = "https://example.com/setup.exe";
+        _runner.OnRun = _ => cts.Cancel(); // Ctrl+C while the installer runs
+        _runner.Enqueue(ExpectedFile(url), Exit(0));
+
+        var result = await _installer.InstallAsync(Url(url), cts.Token);
+
+        Assert.Equal(DirectStatus.Installed, result.Status);
+        Assert.Equal(cts.Token, _http.Token);
+        Assert.False(Assert.Single(_runner.Tokens).CanBeCanceled);
+    }
+
+    [Fact]
+    public async Task Failed_exit_code_message_has_decimal_and_hex()
+    {
+        var url = "https://example.com/setup.exe";
+        _runner.Enqueue(ExpectedFile(url), Exit(1603));
+
+        var result = await _installer.InstallAsync(Url(url), CancellationToken.None);
+
+        Assert.Contains("1603", result.Message);
+        Assert.Contains("0x00000643", result.Message);
     }
 
     [Fact]

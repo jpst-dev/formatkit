@@ -20,15 +20,21 @@ public sealed class ProgramsModule(ProgramCatalog catalog, AppPaths paths, IFile
         && section.TryGetProperty("enabled", out var enabled)
         && enabled.ValueKind == JsonValueKind.True;
 
-    public IReadOnlyList<ProfileError> Validate(JsonElement section, string path) =>
-        ProgramsOptions.Parse(section, path, catalog, files ?? new FileSystem()).Errors;
+    public IReadOnlyList<ProfileError> Validate(JsonElement section, string path) => Validate(section, path, null);
 
-    public IReadOnlyList<IStep> CreateSteps(JsonElement section)
+    /// <param name="baseDirectory">The profile file's directory; relative importFile and direct paths resolve against it.</param>
+    public IReadOnlyList<ProfileError> Validate(JsonElement section, string path, string? baseDirectory) =>
+        ProgramsOptions.Parse(section, path, catalog, files ?? new FileSystem(), baseDirectory).Errors;
+
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section) => CreateSteps(section, null);
+
+    /// <param name="baseDirectory">The profile file's directory; relative importFile and direct paths resolve against it.</param>
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section, string? baseDirectory)
     {
         if (!IsEnabled(section))
             return [];
 
-        var (options, _) = ProgramsOptions.Parse(section, "programs", catalog, files ?? new FileSystem());
+        var (options, _) = ProgramsOptions.Parse(section, "programs", catalog, files ?? new FileSystem(), baseDirectory);
         if (options is null)
             return [];
 

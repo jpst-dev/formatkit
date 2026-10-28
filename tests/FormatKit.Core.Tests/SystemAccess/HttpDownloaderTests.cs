@@ -79,6 +79,55 @@ public class HttpDownloaderTests : IDisposable
     }
 
     [Fact]
+    public async Task Stale_part_and_destination_are_deleted_and_never_reused()
+    {
+        File.WriteAllBytes(Dest + ".part", [9, 9, 9, 9, 9]);
+        File.WriteAllBytes(Dest, [8, 8, 8, 8, 8, 8]);
+        var downloader = new HttpDownloader(new FakeHandler(_ => new ByteArrayContent([1, 2, 3])));
+
+        await downloader.DownloadAsync(Url, Dest, TimeSpan.FromSeconds(30), CancellationToken.None);
+
+        Assert.Equal([1, 2, 3], File.ReadAllBytes(Dest));
+        Assert.False(File.Exists(Dest + ".part"));
+    }
+
+    [Fact]
+    public async Task Stale_part_that_cannot_be_deleted_fails_the_download()
+    {
+        var part = Dest + ".part";
+        File.WriteAllBytes(part, [9]);
+        var downloader = new HttpDownloader(new FakeHandler(_ => new ByteArrayContent([1, 2, 3])));
+
+        // Someone else holds the stale file open without delete sharing: FormatKit must not write into it.
+        using (new FileStream(part, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        {
+            await Assert.ThrowsAsync<IOException>(
+                () => downloader.DownloadAsync(Url, Dest, TimeSpan.FromSeconds(30), CancellationToken.None));
+        }
+
+        Assert.Equal([9], File.ReadAllBytes(part));
+        Assert.False(File.Exists(Dest));
+    }
+
+    [Fact]
+    public void Real_OpenRead_lets_readers_in_but_blocks_writers_and_deletes()
+    {
+        var file = Path.Combine(_dir, "held.exe");
+        File.WriteAllBytes(file, [1]);
+
+        using (new FileSystem().OpenRead(file))
+        {
+            // Like the image loader and msiexec: read access, sharing read (and delete).
+            using (new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete)) { }
+            Assert.Throws<IOException>(() => new FileStream(file, FileMode.Open, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete).Dispose());
+            Assert.ThrowsAny<Exception>(() => File.Delete(file));
+            Assert.ThrowsAny<Exception>(() => File.Move(file, file + ".moved"));
+        }
+
+        File.Delete(file);
+    }
+
+    [Fact]
     public async Task Stream_failure_mid_copy_leaves_no_files_and_propagates()
     {
         var downloader = new HttpDownloader(new FakeHandler(_ => new StreamContent(new ThrowingStream())));

@@ -18,7 +18,7 @@ public class WingetClientTests
 
         var call = Assert.Single(runner.Calls);
         Assert.Equal(
-            ["install", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"],
+            ["install", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--no-upgrade"],
             call.Arguments);
         Assert.Equal(Timeouts.Install, call.Timeout);
     }
@@ -95,7 +95,7 @@ public class WingetClientTests
         await new WingetClient(runner).InstallAsync("XP8CLZL93F5Z4P", TestContext.Current.CancellationToken, "msstore");
 
         Assert.Equal(
-            ["install", "--id", "XP8CLZL93F5Z4P", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--source", "msstore"],
+            ["install", "--id", "XP8CLZL93F5Z4P", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--no-upgrade", "--source", "msstore"],
             runner.Calls[0].Arguments);
     }
 
@@ -311,7 +311,7 @@ public class WingetClientTests
     public void InstallArguments_are_exact()
     {
         Assert.Equal(
-            ["install", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--source", "winget", "--version", "2.0"],
+            ["install", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--no-upgrade", "--source", "winget", "--version", "2.0"],
             WingetClient.InstallArguments(new WingetPackageRef("Git.Git", "winget", "2.0")));
     }
 
@@ -343,6 +343,44 @@ public class WingetClientTests
         await new WingetClient(runner).IsInstalledAsync(new WingetPackageRef("Git.Git", Scope: "machine"), TestContext.Current.CancellationToken);
 
         Assert.DoesNotContain("--scope", runner.Calls[0].Arguments);
+    }
+
+    [Fact]
+    public async Task Version_is_not_passed_to_list()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("winget.exe", Result(0));
+
+        var installed = await new WingetClient(runner).IsInstalledAsync(
+            new WingetPackageRef("Python.Python.3.12", "winget", "3.12.7", "machine"), TestContext.Current.CancellationToken);
+
+        Assert.True(installed);
+        Assert.Equal(
+            ["list", "--id", "Python.Python.3.12", "--exact", "--accept-source-agreements", "--disable-interactivity", "--source", "winget"],
+            runner.Calls[0].Arguments);
+    }
+
+    [Fact]
+    public void Pinned_package_arguments_for_list_install_and_upgrade()
+    {
+        var package = new WingetPackageRef("Python.Python.3.12", null, "3.12.7");
+
+        Assert.Equal(["--no-upgrade", "--version", "3.12.7"], WingetClient.InstallArguments(package).TakeLast(3));
+        Assert.Equal(["--disable-interactivity", "--version", "3.12.7"], WingetClient.UpgradeArguments(package).TakeLast(3));
+        Assert.DoesNotContain("--no-upgrade", WingetClient.UpgradeArguments(package));
+    }
+
+    [Fact]
+    public async Task Install_no_upgrade_already_installed_code_is_already_installed()
+    {
+        // With --no-upgrade, winget exits with PACKAGE_ALREADY_INSTALLED (0x8A150061) for an installed package.
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("winget.exe", Result(unchecked((int)0x8A150061)));
+
+        var result = await new WingetClient(runner).InstallAsync(new WingetPackageRef("Git.Git"), TestContext.Current.CancellationToken);
+
+        Assert.Contains("--no-upgrade", runner.Calls[0].Arguments);
+        Assert.Equal(WingetStatus.AlreadyInstalled, result.Status);
     }
 
     [Theory]

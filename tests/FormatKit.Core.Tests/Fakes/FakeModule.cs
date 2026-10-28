@@ -23,4 +23,19 @@ public sealed class FakeModule(string name) : IModule
         && e.ValueKind == JsonValueKind.True;
 
     public IReadOnlyList<IStep> CreateSteps(JsonElement section) => Steps;
+
+    /// <summary>The base directories passed to the directory-aware overloads, in call order.</summary>
+    public List<string?> BaseDirectories { get; } = [];
+
+    public IReadOnlyList<ProfileError> Validate(JsonElement section, string path, string? baseDirectory)
+    {
+        BaseDirectories.Add(baseDirectory);
+        return Validate(section, path);
+    }
+
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section, string? baseDirectory)
+    {
+        BaseDirectories.Add(baseDirectory);
+        return CreateSteps(section);
+    }
 }

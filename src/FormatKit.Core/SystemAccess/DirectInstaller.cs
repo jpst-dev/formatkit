@@ -5,18 +5,25 @@ namespace FormatKit.Core.SystemAccess;
 
 public enum DirectStatus { Installed, RebootRequired, HashMismatch, DownloadFailed, Failed }
 
-public sealed record DirectResult(DirectStatus Status, int ExitCode, string Message);
+/// <summary><paramref name="TimedOut"/> is true when the installer ran past its timeout (status stays Failed).</summary>
+public sealed record DirectResult(DirectStatus Status, int ExitCode, string Message, bool TimedOut = false);
 
 public sealed record DirectSource(string Name, Uri? Url, string? LocalPath, string? Sha256, IReadOnlyList<string> Args);
 
 public class DirectInstaller(IHttpDownloader downloader, IProcessRunner runner, IFileSystem files, AppPaths paths)
 {
+    /// <summary>
+    /// Downloads (cancellable with <paramref name="ct"/>), verifies and runs one installer. Once the installer starts
+    /// it is never killed by <paramref name="ct"/>: only its own timeout ends it (spec 6).
+    /// </summary>
     public async Task<DirectResult> InstallAsync(DirectSource source, CancellationToken ct)
     {
         string file;
         bool downloaded;
         if (source.Url is not null)
         {
+            if (source.Sha256 is null)
+                throw new ArgumentException($"'{source.Name}' is downloaded from a URL but has no SHA-256.", nameof(source));
             file = Path.Combine(paths.DownloadsDirectory, UrlHash(source.Url) + Path.GetExtension(source.Url.AbsolutePath));
             downloaded = true;
         }
@@ -47,26 +54,37 @@ public class DirectInstaller(IHttpDownloader downloader, IProcessRunner runner, 
             }
         }
 
-        if (source.Sha256 is not null)
+        ProcessResult result;
+
+        // The file stays open (read access, read sharing only) from the hash check until the installer exits, so
+        // nobody can replace or delete it in between; the installer itself only needs to read it.
+        await using (var hold = files.OpenRead(file))
         {
-            var actual = ComputeSha256(file);
-            if (!string.Equals(actual, source.Sha256, StringComparison.OrdinalIgnoreCase))
+            if (source.Sha256 is not null)
             {
-                if (downloaded)
-                    TryDelete(file);
-                return new DirectResult(DirectStatus.HashMismatch, -1,
-                    $"SHA-256 mismatch for '{source.Name}': expected {source.Sha256}, got {actual}.");
+                var actual = Convert.ToHexString(await SHA256.HashDataAsync(hold, ct).ConfigureAwait(false));
+                if (!string.Equals(actual, source.Sha256, StringComparison.OrdinalIgnoreCase))
+                {
+                    await hold.DisposeAsync().ConfigureAwait(false);
+                    if (downloaded)
+                        TryDelete(file);
+                    return new DirectResult(DirectStatus.HashMismatch, -1,
+                        $"SHA-256 mismatch for '{source.Name}': expected {source.Sha256}, got {actual}.");
+                }
             }
+
+            var spec = extension == ".msi"
+                ? new ProcessSpec("msiexec.exe", ["/i", file, "/qn", "/norestart"], Timeouts.Install)
+                : new ProcessSpec(file, source.Args, Timeouts.Install);
+
+            result = await runner.RunAsync(spec, CancellationToken.None).ConfigureAwait(false);
         }
 
-        var spec = extension == ".msi"
-            ? new ProcessSpec("msiexec.exe", ["/i", file, "/qn", "/norestart"], Timeouts.Install)
-            : new ProcessSpec(file, source.Args, Timeouts.Install);
-
-        var result = await runner.RunAsync(spec, ct).ConfigureAwait(false);
-
         if (result.TimedOut)
-            return new DirectResult(DirectStatus.Failed, result.ExitCode, $"Installer for '{source.Name}' timed out.");
+        {
+            return new DirectResult(DirectStatus.Failed, result.ExitCode,
+                $"Installer for '{source.Name}' timed out after {Timeouts.Install}.", TimedOut: true);
+        }
 
         switch (result.ExitCode)
         {
@@ -81,7 +99,7 @@ public class DirectInstaller(IHttpDownloader downloader, IProcessRunner runner, 
                 return new DirectResult(DirectStatus.RebootRequired, result.ExitCode, "Installed; a reboot is required.");
             default:
                 return new DirectResult(DirectStatus.Failed, result.ExitCode,
-                    $"Installer for '{source.Name}' exited with code {result.ExitCode}.");
+                    $"Installer for '{source.Name}' exited with code {result.ExitCode} (0x{result.ExitCode:X8}).");
         }
     }
 
@@ -97,12 +115,6 @@ public class DirectInstaller(IHttpDownloader downloader, IProcessRunner runner, 
         catch (UnauthorizedAccessException)
         {
         }
-    }
-
-    private string ComputeSha256(string path)
-    {
-        using var stream = files.OpenRead(path);
-        return Convert.ToHexString(SHA256.HashData(stream));
     }
 
     private static string UrlHash(Uri url) =>

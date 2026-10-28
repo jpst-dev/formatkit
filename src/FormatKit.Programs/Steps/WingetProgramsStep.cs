@@ -65,7 +65,7 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
             string text;
             try
             {
-                var outcome = await InstallOneAsync(program, ctx, ct).ConfigureAwait(false);
+                var outcome = await InstallOneAsync(program, ctx).ConfigureAwait(false);
                 text = outcome.Text;
                 anyFailed |= outcome.Failed;
                 reboot |= outcome.Reboot;
@@ -109,8 +109,13 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
         return await ctx.Services.Winget.IsAvailableAsync(ct).ConfigureAwait(false);
     }
 
-    private async Task<Outcome> InstallOneAsync(SelectedProgram program, StepContext ctx, CancellationToken ct)
+    /// <summary>
+    /// Handles one item. Its winget calls get <see cref="CancellationToken.None"/>, not the run's token: Ctrl+C must
+    /// never kill a running installer or the user-context runner (spec 6), so it takes effect between items only.
+    /// </summary>
+    private async Task<Outcome> InstallOneAsync(SelectedProgram program, StepContext ctx)
     {
+        var none = CancellationToken.None;
         var package = Ref(program);
         var user = program.Package.Context == InstallContext.User;
 
@@ -119,33 +124,35 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
 
         // A per-user package is invisible to this process, so those items always go to the user's session;
         // winget answers "already installed" itself.
-        var installed = !user && await ctx.Services.Winget.IsInstalledAsync(package, ct).ConfigureAwait(false);
+        var installed = !user && await ctx.Services.Winget.IsInstalledAsync(package, none).ConfigureAwait(false);
         if (installed && !upgrade)
             return new Outcome(Strings.Get("Item_AlreadyInstalled"));
 
         WingetResult result;
         if (user)
         {
-            // Install first: winget answers "already installed" itself, and only then does an upgrade make sense.
-            result = await RunAsUserAsync(WingetClient.InstallArguments(package), upgrade: false, ctx, ct).ConfigureAwait(false);
+            // Install first (with --no-upgrade): winget answers "already installed" itself, and only then does an
+            // upgrade make sense.
+            result = await RunAsUserAsync(WingetClient.InstallArguments(package), upgrade: false, ctx).ConfigureAwait(false);
             if (upgrade && result.Status == WingetStatus.AlreadyInstalled)
-                result = await RunAsUserAsync(WingetClient.UpgradeArguments(package), upgrade: true, ctx, ct).ConfigureAwait(false);
+                result = await RunAsUserAsync(WingetClient.UpgradeArguments(package), upgrade: true, ctx).ConfigureAwait(false);
         }
         else if (installed)
         {
-            result = await ctx.Services.Winget.UpgradeAsync(package, ct).ConfigureAwait(false);
+            result = await ctx.Services.Winget.UpgradeAsync(package, none).ConfigureAwait(false);
         }
         else
         {
-            result = await ctx.Services.Winget.InstallAsync(package, ct).ConfigureAwait(false);
+            result = await ctx.Services.Winget.InstallAsync(package, none).ConfigureAwait(false);
         }
 
         return Describe(result);
     }
 
-    private static async Task<WingetResult> RunAsUserAsync(IReadOnlyList<string> args, bool upgrade, StepContext ctx, CancellationToken ct)
+    private static async Task<WingetResult> RunAsUserAsync(IReadOnlyList<string> args, bool upgrade, StepContext ctx)
     {
-        var run = await ctx.Services.UserContext.RunAsync(new ProcessSpec("winget.exe", args, Timeouts.Install), ct).ConfigureAwait(false);
+        var run = await ctx.Services.UserContext.RunAsync(new ProcessSpec("winget.exe", args, Timeouts.Install), CancellationToken.None)
+            .ConfigureAwait(false);
         return new WingetResult(
             WingetClient.MapExitCode(run.ExitCode, upgrade, run.TimedOut), run.ExitCode, run.StdOut + run.StdErr, run.TimedOut);
     }
