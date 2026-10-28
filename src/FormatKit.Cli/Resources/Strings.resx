@@ -79,4 +79,34 @@
   <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>The profile recorded for the interrupted run could not be used. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
   <data name="Run_ResumeTaskRemoved" xml:space="preserve"><value>The automatic resume was removed.</value></data>
   <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Automatic resume could not be scheduled. After rebooting, run `formatkit run --resume`.</value></data>
+  <data name="Cmd_Cleanup" xml:space="preserve"><value>Cleanup commands.</value></data>
+  <data name="Cmd_CleanupList" xml:space="preserve"><value>List the cleanup catalog.</value></data>
+  <data name="Cmd_CleanupCheck" xml:space="preserve"><value>Check for known problems left by tweaks and list applied cleanup items (read-only).</value></data>
+  <data name="Cmd_CleanupUndo" xml:space="preserve"><value>Revert cleanup items recorded in the journal.</value></data>
+  <data name="Opt_CleanupLevel" xml:space="preserve"><value>Show items up to this level (safe, balanced or aggressive).</value></data>
+  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Show only this category (apps, privacy or performance).</value></data>
+  <data name="Opt_UndoAll" xml:space="preserve"><value>Revert every applied cleanup item.</value></data>
+  <data name="Arg_UndoIds" xml:space="preserve"><value>Ids of the cleanup items to revert.</value></data>
+  <data name="Marker_Contested" xml:space="preserve"><value>contested</value></data>
+  <data name="List_What" xml:space="preserve"><value>What: {0}</value></data>
+  <data name="List_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
+  <data name="List_Gain" xml:space="preserve"><value>Gain: {0}</value></data>
+  <data name="Check_Group_Breaks" xml:space="preserve"><value>Breaks Windows features:</value></data>
+  <data name="Check_Group_Security" xml:space="preserve"><value>Security risks:</value></data>
+  <data name="Check_Group_Contested" xml:space="preserve"><value>Contested tweaks:</value></data>
+  <data name="Check_Group_Info" xml:space="preserve"><value>For your information:</value></data>
+  <data name="Check_NoFindings" xml:space="preserve"><value>No known problems found.</value></data>
+  <data name="Check_Finding" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
+  <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
+  <data name="Check_Applied" xml:space="preserve"><value>Applied cleanup items (revert with: formatkit cleanup undo &lt;id&gt;):</value></data>
+  <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
+  <data name="Undo_UsageBoth" xml:space="preserve"><value>Use either item ids or --all, not both.</value></data>
+  <data name="Undo_UsageNeither" xml:space="preserve"><value>Specify the item ids to revert, or --all.</value></data>
+  <data name="Undo_UnknownIds" xml:space="preserve"><value>Unknown cleanup item(s): {0}. Run 'formatkit cleanup list' to see the catalog.</value></data>
+  <data name="Undo_JournalCorrupt" xml:space="preserve"><value>The cleanup journal at {0} is unreadable ({1}); nothing was reverted.</value></data>
+  <data name="Undo_NothingToDo" xml:space="preserve"><value>There is nothing to revert.</value></data>
+  <data name="Undo_Line_Reverted" xml:space="preserve"><value>{0}: reverted</value></data>
+  <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: failed ({1})</value></data>
+  <data name="Undo_Line_Skipped" xml:space="preserve"><value>{0}: skipped ({1})</value></data>
 </root>

@@ -1,6 +1,9 @@
 using System.CommandLine;
 using FormatKit.Cli.Commands;
 using FormatKit.Cli.Localization;
+using FormatKit.Cleanup;
+using FormatKit.Cleanup.Catalog;
+using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Core;
 using FormatKit.Core.Profiles;
 using FormatKit.Drivers;
@@ -16,6 +19,8 @@ public sealed class CliApp
     private readonly CliEnvironment _env;
     private readonly IReadOnlyList<IModule> _modules;
     private readonly VendorCatalog _catalog;
+    private readonly CleanupCatalog _cleanup;
+    private readonly KnownIssues _issues;
 
     public CliApp(CliEnvironment env)
         : this(env, VendorCatalog.LoadEmbedded(), null)
@@ -23,12 +28,23 @@ public sealed class CliApp
     }
 
     /// <summary>Test seam: lets tests plan with fake modules.</summary>
-    internal CliApp(CliEnvironment env, VendorCatalog catalog, IReadOnlyList<IModule>? modules)
+    internal CliApp(
+        CliEnvironment env, VendorCatalog catalog, IReadOnlyList<IModule>? modules,
+        CleanupCatalog? cleanup = null, KnownIssues? issues = null)
     {
         _env = env;
         _catalog = catalog;
-        _modules = modules ?? [new DriversModule(catalog, env.NetworkRetryDelay)];
+        _cleanup = cleanup ?? CleanupCatalog.LoadEmbedded();
+        _issues = issues ?? KnownIssues.LoadEmbedded();
+        _modules = modules ??
+        [
+            new DriversModule(catalog, env.NetworkRetryDelay),
+            new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files),
+        ];
     }
+
+    /// <summary>The modules <see cref="RunAsync"/> plans with; exposed so tests can check their order.</summary>
+    internal IReadOnlyList<IModule> Modules => _modules;
 
     /// <summary>Test seam: waits for the user to close an elevated child window. Null uses the console.</summary>
     internal Func<Task>? WaitForClose { get; set; }
@@ -59,10 +75,11 @@ public sealed class CliApp
         var elevatedChild = new Option<bool>(ElevatedChildFlag) { Hidden = true, Recursive = true };
         var waitOnExit = new Option<bool>(WaitOnExitFlag) { Hidden = true, Recursive = true };
         var root = new RootCommand(Strings.Get("Cmd_Root")) { Options = { verbose, elevatedChild, waitOnExit } };
-        var context = new CommandContext(_env, _modules, _catalog, RelaunchArgs(args));
+        var context = new CommandContext(_env, _modules, _catalog, _cleanup, _issues, RelaunchArgs(args));
 
         root.Subcommands.Add(HardwareCommand.Create(context));
         root.Subcommands.Add(DriversCommands.Create(context));
+        root.Subcommands.Add(CleanupCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
 
         var parse = root.Parse(args);
@@ -147,6 +164,8 @@ internal sealed record CommandContext(
     CliEnvironment Env,
     IReadOnlyList<IModule> Modules,
     VendorCatalog Catalog,
+    CleanupCatalog Cleanup,
+    KnownIssues Issues,
     string[] RelaunchArgs)
 {
     public TextWriter Out => Env.Out;

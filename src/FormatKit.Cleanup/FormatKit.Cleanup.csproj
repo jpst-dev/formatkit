@@ -5,6 +5,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="FormatKit.Cleanup.Tests" />
     <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+    <InternalsVisibleTo Include="formatkit" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Catalog\Data\cleanup.json" LogicalName="FormatKit.Cleanup.Catalog.Data.cleanup.json" />

@@ -13,6 +13,9 @@ internal sealed class CleanupCategoryStep(
     IReadOnlySet<string> includedIds,
     ItemApplier applier) : IStep
 {
+    /// <summary>The items this step applies, for the dry-run listing.</summary>
+    public IReadOnlyList<CleanupItem> Items => items;
+
     public string Id => $"cleanup.{category.ToString().ToLowerInvariant()}";
 
     public string Title => Strings.Get($"Step_Title_{category}");

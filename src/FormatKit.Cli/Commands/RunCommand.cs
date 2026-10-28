@@ -1,4 +1,5 @@
 using System.CommandLine;
+using FormatKit.Cleanup.Steps;
 using FormatKit.Cli.Localization;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Running;
@@ -102,6 +103,11 @@ internal static class RunFlow
             {
                 var admin = step.RequiresAdmin ? $" [{Strings.Get("Plan_Admin")}]" : "";
                 o.WriteLine($"  {step.Id}  {step.Title}{admin}");
+                if (step is CleanupCategoryStep cleanup)
+                {
+                    foreach (var item in cleanup.Items)
+                        o.WriteLine($"    {item.Id}  {item.LocalizedText().Title}{CleanupCommands.Markers(item)}");
+                }
             }
 
             return ExitCodes.Ok;
