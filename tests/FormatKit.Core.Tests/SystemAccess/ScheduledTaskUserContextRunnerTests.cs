@@ -48,6 +48,43 @@ public class ScheduledTaskUserContextRunnerTests
     }
 
     [Fact]
+    public void Script_converts_unsigned_result_to_int32()
+    {
+        var script = ScheduledTaskUserContextRunner.BuildScript(new ProcessSpec("a.exe", [], TimeSpan.FromMinutes(1)));
+        Assert.Contains("[BitConverter]::ToInt32([BitConverter]::GetBytes([uint32]$info.LastTaskResult),0)", script);
+        Assert.Contains("Stop-ScheduledTask", script);
+        Assert.Contains("-AllowStartIfOnBatteries", script);
+    }
+
+    [Theory]
+    [InlineData("C:\\Program Files\\X", "\"C:\\Program Files\\X\"")]
+    [InlineData("a\"b", "\"a\\\"b\"")]
+    [InlineData("C:\\My Dir\\", "\"C:\\My Dir\\\\\"")]
+    [InlineData("plain", "plain")]
+    public void QuoteArgument_follows_windows_rules(string input, string expected)
+    {
+        Assert.Equal(expected, ScheduledTaskUserContextRunner.QuoteArgument(input));
+    }
+
+    [Fact]
+    public void Quote_doubles_all_single_quote_characters()
+    {
+        Assert.Equal(
+            "'a''b\u2018\u2018\u2019\u2019\u201A\u201A\u201B\u201B'",
+            ScheduledTaskUserContextRunner.Quote("a'b\u2018\u2019\u201A\u201B"));
+    }
+
+    [Fact]
+    public async Task Outer_timeout_returns_timed_out()
+    {
+        var fake = new FakeProcessRunner();
+        fake.Enqueue("powershell.exe", new ProcessResult(-1, "", "", TimeSpan.Zero, true));
+        var result = await new ScheduledTaskUserContextRunner(fake)
+            .RunAsync(new ProcessSpec("a.exe", [], TimeSpan.FromSeconds(1)), CancellationToken.None);
+        Assert.True(result.TimedOut);
+    }
+
+    [Fact]
     public async Task Script_quotes_arguments()
     {
         var (_, fake) = await Run("0", "it's");

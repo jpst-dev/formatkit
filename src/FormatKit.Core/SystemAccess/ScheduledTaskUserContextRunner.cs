@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace FormatKit.Core.SystemAccess;
 
@@ -16,6 +17,11 @@ public sealed class ScheduledTaskUserContextRunner(IProcessRunner runner) : IUse
             new ProcessSpec("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], spec.Timeout + OuterSlack),
             ct).ConfigureAwait(false);
         stopwatch.Stop();
+
+        if (result.TimedOut)
+        {
+            return new ProcessResult(-1, string.Empty, string.Empty, stopwatch.Elapsed, TimedOut: true);
+        }
 
         var last = result.StdOut
             .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
@@ -44,25 +50,69 @@ public sealed class ScheduledTaskUserContextRunner(IProcessRunner runner) : IUse
             "; ",
             $"$a=New-ScheduledTaskAction -Execute {Quote(spec.FileName)} -Argument {Quote(arguments)}",
             "$p=New-ScheduledTaskPrincipal -UserId (Get-CimInstance Win32_ComputerSystem).UserName -LogonType Interactive -RunLevel Limited",
-            "Register-ScheduledTask -TaskName $n -Action $a -Principal $p | Out-Null",
+            "$s=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0",
+            "Register-ScheduledTask -TaskName $n -Action $a -Principal $p -Settings $s | Out-Null",
             "Start-ScheduledTask -TaskName $n",
             "$sw=[Diagnostics.Stopwatch]::StartNew()",
-            "$timedOut=$false",
-            $"while((Get-ScheduledTask -TaskName $n).State -eq 'Running'){{ if($sw.Elapsed.TotalSeconds -ge {timeoutSeconds}){{ $timedOut=$true; break }}; Start-Sleep -Seconds 2 }}",
-            "if($timedOut){ 'TIMEOUT' } else { [string][int](Get-ScheduledTaskInfo -TaskName $n).LastTaskResult }");
+            "$timedOut=$false; $seen=$false",
+            // 267011 = never run yet, 267009 = running: until the task was seen Running or has a real result, keep polling.
+            $"while($true){{ $st=(Get-ScheduledTask -TaskName $n).State; $r=(Get-ScheduledTaskInfo -TaskName $n).LastTaskResult; if($st -eq 'Running'){{ $seen=$true }} elseif($seen -or ($r -ne 267011 -and $r -ne 267009)){{ break }}; if($sw.Elapsed.TotalSeconds -ge {timeoutSeconds}){{ $timedOut=$true; break }}; Start-Sleep -Seconds 2 }}",
+            "if($timedOut){ 'TIMEOUT' } else { $info=Get-ScheduledTaskInfo -TaskName $n; [string][BitConverter]::ToInt32([BitConverter]::GetBytes([uint32]$info.LastTaskResult),0) }");
         return string.Join(
             "; ",
             "$ErrorActionPreference='Stop'",
             $"$n={Quote(taskName)}",
             "try{ " + body + " }",
-            "finally{ Unregister-ScheduledTask -TaskName $n -Confirm:$false -ErrorAction SilentlyContinue }");
+            "finally{ Stop-ScheduledTask -TaskName $n -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName $n -Confirm:$false -ErrorAction SilentlyContinue }");
     }
 
-    // Windows command-line quoting for the task's Argument string.
-    private static string QuoteArgument(string argument) =>
-        argument.Length > 0 && argument.IndexOfAny([' ', '\t', '"']) < 0
-            ? argument
-            : "\"" + argument.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+    // Standard Windows command-line quoting (CommandLineToArgvW rules).
+    internal static string QuoteArgument(string argument)
+    {
+        if (argument.Length > 0 && argument.IndexOfAny([' ', '\t', '"']) < 0)
+        {
+            return argument;
+        }
 
-    private static string Quote(string value) => "'" + value.Replace("'", "''") + "'";
+        var sb = new StringBuilder("\"");
+        for (var i = 0; i < argument.Length; i++)
+        {
+            var backslashes = 0;
+            while (i < argument.Length && argument[i] == '\\')
+            {
+                backslashes++;
+                i++;
+            }
+
+            if (i == argument.Length)
+            {
+                sb.Append('\\', backslashes * 2);
+            }
+            else if (argument[i] == '"')
+            {
+                sb.Append('\\', backslashes * 2 + 1).Append('"');
+            }
+            else
+            {
+                sb.Append('\\', backslashes).Append(argument[i]);
+            }
+        }
+
+        return sb.Append('"').ToString();
+    }
+
+    internal static string Quote(string value)
+    {
+        var sb = new StringBuilder("'");
+        foreach (var c in value)
+        {
+            sb.Append(c);
+            if (c is '\'' or '‘' or '’' or '‚' or '‛')
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.Append('\'').ToString();
+    }
 }
