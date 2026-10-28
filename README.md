@@ -132,7 +132,7 @@ formatkit cleanup undo apps.clipchamp
 formatkit cleanup undo --all
 ```
 
-`cleanup check` exits with code 1 when it finds something under "breaks" or "security", and 0 otherwise. Some popular tweaks are deliberately left out; see [docs/cleanup-not-included.md](docs/cleanup-not-included.md) for why and how `cleanup check` reports each one.
+`cleanup check` exits with code 1 when it finds something under "Breaks Windows features" or "Security risks", and 0 otherwise. Some popular tweaks are deliberately left out; see [docs/cleanup-not-included.md](docs/cleanup-not-included.md) for why and how `cleanup check` reports each one.
 
 ## Building
 

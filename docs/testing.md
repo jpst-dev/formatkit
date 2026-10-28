@@ -129,7 +129,7 @@ The cleanup levels are described in the README; the tweaks FormatKit refuses to 
 5. Run `.\formatkit.exe cleanup check`.
 
    **Expected:** exit code **1**. Memory Integrity (and VBS) are listed under "Security risks:" (the "reduces security" group), the contested values (for example `SystemResponsiveness`, `Win32PrioritySeparation`) are listed under "Contested tweaks:", and the items just applied appear under "Applied cleanup items".
-6. Run `.\formatkit.exe cleanup undo --all` and accept the UAC prompt.
+6. Run `.\formatkit.exe cleanup undo --all` and accept the UAC prompt. The VM needs internet and `winget` installed, because undo reinstalls the removed apps from the Microsoft Store (see scenario 8).
 
    **Expected:** one "reverted" line per item, exit code **0**.
 7. Reboot the VM, then export again:
@@ -162,7 +162,9 @@ The cleanup levels are described in the README; the tweaks FormatKit refuses to 
 
 ## 9. Diagnosis of a tweaked PC
 
-Restore `clean`. In an elevated PowerShell in the VM, mimic what a "gaming tweaks" script does:
+Restore `clean`. Before changing anything, record the default start types for check (b) below: run `sc.exe qc BITS` and `sc.exe qc AppXSvc` and write down each `START_TYPE`.
+
+In an elevated PowerShell in the VM, mimic what a "gaming tweaks" script does:
 
 ```powershell
 $hpet = Get-PnpDevice | Where-Object HardwareID -contains 'ACPI\PNP0103'
@@ -179,7 +181,7 @@ Run `.\formatkit.exe cleanup check`.
 Also check, because earlier reviews could not verify these on a real machine:
 
 - **(a) `reg add` service fix.** Disable the Task Scheduler service with the registry (Windows refuses `sc.exe config` for it): `reg add "HKLM\SYSTEM\CurrentControlSet\Services\Schedule" /v Start /t REG_DWORD /d 4 /f`. Run `cleanup check` and confirm the Task Scheduler (`Schedule`) is listed under "Breaks Windows features:" with a `reg add ... /d 2 /f` fix. Run that fix command exactly as printed, then confirm `sc.exe qc Schedule` shows `START_TYPE : 2 AUTO_START`, `cleanup check` no longer lists it, and after a reboot `Get-Service Schedule` is `Running`. Repeat with Base Filtering Engine (`BFE`) if time allows. **Expected:** the service is restored in both cases. Restore `clean` afterwards if anything stays broken.
-- **(b) Default start types.** On the untouched `clean` checkpoint, before changing anything, record `sc.exe qc BITS` and `sc.exe qc AppXSvc` (`START_TYPE`). The fixes in `known-issues.json` set BITS to Manual (`sc.exe config BITS start= demand`) and AppXSvc to `Start` = 2 (`reg add ... /d 2 /f`). If the recorded default differs, correct that fix, and the "Manual" or "Automatic" wording in [cleanup-not-included.md](cleanup-not-included.md). Result: BITS = _pending_, AppXSvc = _pending_.
+- **(b) Default start types.** Use the `START_TYPE` values recorded at the start of this scenario, on the fresh `clean` checkpoint. The fixes in `known-issues.json` set BITS to Manual (`sc.exe config BITS start= demand`) and AppXSvc to `Start` = 2 (`reg add ... /d 2 /f`). If the recorded default differs, correct that fix, and the "Manual" or "Automatic" wording in [cleanup-not-included.md](cleanup-not-included.md). Result: BITS = _pending_, AppXSvc = _pending_.
 - **(c) Windows Home.** If a Windows 11 **Home** VM is available, apply a `level: balanced` profile (as scenario 8, with `"level": "balanced"`) and check whether the policy-based privacy items (`privacy.advertising-id`, `privacy.tailored-experiences`, `privacy.diagnostic-data`) take effect there: after applying, open Settings > Privacy & security > General and Diagnostics & feedback and confirm the settings show the new values (or are greyed out as managed) and stay after a reboot. Otherwise note this check as **pending** (no Home VM yet).
 
 ## Hardware-only checklist (cannot be verified in a VM)

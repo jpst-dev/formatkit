@@ -24,7 +24,7 @@ HPET device or overriding the platform clock has no gain documented by Microsoft
 it can make timers and some drivers behave badly.
 
 **How `cleanup check` reports it:** a disabled HPET device (hardware id `ACPI\PNP0103`)
-is listed under **Breaks something**. `cleanup check` does **not** detect the
+is listed under **Breaks Windows features**. `cleanup check` does **not** detect the
 `useplatformclock` boot setting, because reading the boot configuration needs administrator rights and parsing
 `bcdedit` output. Check it yourself in an elevated PowerShell:
 
@@ -51,7 +51,7 @@ by features you may use later:
 - High precision event timer (`ACPI\PNP0103`): see the HPET section above.
 
 **How `cleanup check` reports it:** each of these devices, when disabled, is listed
-under **Breaks something**, matched by hardware id so it works in any display
+under **Breaks Windows features**, matched by hardware id so it works in any display
 language.
 
 ## Disabling services
@@ -65,7 +65,7 @@ networking, Xbox sign-in, WSL and Hyper-V. FormatKit's catalog never disables an
 the services on its protected list.
 
 **How `cleanup check` reports it:** every protected service that is disabled is listed
-under **Breaks something**, with a fix that turns it back on:
+under **Breaks Windows features**, with a fix that turns it back on:
 
 - Services that Windows 11 starts at boot are set to Automatic (Update Orchestrator
   to Automatic, delayed start).
@@ -92,7 +92,7 @@ under **Breaks something**, with a fix that turns it back on:
 such as kernel stack tracing, and warns that it raises memory use. No speed gain is
 documented.
 
-**How `cleanup check` reports it:** listed under **Contested** when the value is 1.
+**How `cleanup check` reports it:** listed under **Contested tweaks** when the value is 1.
 
 ## Nagle and delayed ACK (`TcpAckFrequency`, `TCPNoDelay`)
 
@@ -108,7 +108,7 @@ over UDP, which this setting does not touch. Microsoft does not document a
 connections in code.
 
 **How `cleanup check` reports it:** `TcpAckFrequency` = 1 on any adapter is listed
-under **Contested**. `cleanup check` does **not** detect `TCPNoDelay`, because Microsoft
+under **Contested tweaks**. `cleanup check` does **not** detect `TCPNoDelay`, because Microsoft
 does not document it for Windows.
 
 ## `MouseDataQueueSize` and `KeyboardDataQueueSize`
@@ -122,7 +122,7 @@ is too small, input can be dropped. The default is 100.
 
 **How `cleanup check` reports it:** a `MouseDataQueueSize` other than 100 under
 `HKLM\SYSTEM\CurrentControlSet\Services\mouclass\Parameters` is listed under
-**Contested**. `cleanup check` does **not** detect `KeyboardDataQueueSize`: Microsoft
+**Contested tweaks**. `cleanup check` does **not** detect `KeyboardDataQueueSize`: Microsoft
 documents it only
 under the PS/2 driver key (`i8042prt\Parameters`), not under the `kbdclass` key that
 guides change, so FormatKit cannot say where Windows reads it.
@@ -174,7 +174,7 @@ and stops interruptions.
 **What actually happens:** the PC stops getting security fixes, or loses its
 antivirus. Scripts often do this with policies that are hard to find later.
 
-**How `cleanup check` reports it:** listed under **Breaks something**:
+**How `cleanup check` reports it:** listed under **Breaks Windows features**:
 
 - `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` `NoAutoUpdate` = 1
   (automatic updates off by policy).
