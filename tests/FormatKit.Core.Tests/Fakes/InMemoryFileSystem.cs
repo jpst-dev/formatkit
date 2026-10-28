@@ -45,6 +45,9 @@ public sealed class InMemoryFileSystem : IFileSystem
 
     public void CreateDirectory(string path) => _directories.Add(path.TrimEnd(Sep));
 
+    public Stream OpenRead(string path) =>
+        _files.TryGetValue(path, out var text) ? new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text)) : throw new FileNotFoundException(path);
+
     public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive)
     {
         var prefix = dir.TrimEnd(Sep) + Path.DirectorySeparatorChar;

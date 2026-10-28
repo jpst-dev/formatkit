@@ -213,6 +213,7 @@ public class ItemApplierTests
         public string ReadAllText(string path) => inner.ReadAllText(path);
         public void Delete(string path) => inner.Delete(path);
         public void CreateDirectory(string path) => inner.CreateDirectory(path);
+        public Stream OpenRead(string path) => inner.OpenRead(path);
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => inner.EnumerateFiles(dir, pattern, recursive);
 
         public void WriteAllTextAtomic(string path, string contents)

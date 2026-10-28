@@ -19,6 +19,8 @@ public sealed class FileSystem : IFileSystem
 
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
+    public Stream OpenRead(string path) => File.OpenRead(path);
+
     public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) =>
         Directory.EnumerateFiles(dir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 }
