@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Management;
+using FormatKit.Cleanup;
+using FormatKit.Cleanup.Catalog;
 using FormatKit.Cli.Tests.Fakes;
 using FormatKit.Core;
 using FormatKit.Core.Hardware;
@@ -93,18 +95,20 @@ public sealed class CliAppTests : IDisposable
         return path;
     }
 
-    private static string ExampleProfilePath()
+    private static string ExampleProfilePath() => ProfilePath("example.json");
+
+    private static string ProfilePath(string fileName)
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null)
         {
-            var candidate = Path.Combine(dir.FullName, "profiles", "example.json");
+            var candidate = Path.Combine(dir.FullName, "profiles", fileName);
             if (File.Exists(candidate))
                 return candidate;
             dir = dir.Parent;
         }
 
-        throw new FileNotFoundException("profiles/example.json not found above " + AppContext.BaseDirectory);
+        throw new FileNotFoundException("profiles/" + fileName + " not found above " + AppContext.BaseDirectory);
     }
 
     [Fact]
@@ -542,6 +546,20 @@ public sealed class CliAppTests : IDisposable
         var loader = new ProfileLoader([new DriversModule(VendorCatalog.LoadEmbedded(), TimeSpan.Zero)]);
 
         var result = loader.Load(ExampleProfilePath());
+
+        Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
+    }
+
+    [Fact]
+    public void Cleanup_balanced_profile_is_valid()
+    {
+        var loader = new ProfileLoader(
+        [
+            new DriversModule(VendorCatalog.LoadEmbedded(), TimeSpan.Zero),
+            new CleanupModule(CleanupCatalog.LoadEmbedded(), _paths, _fs),
+        ]);
+
+        var result = loader.Load(ProfilePath("cleanup-balanced.json"));
 
         Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
     }

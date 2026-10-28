@@ -8,14 +8,15 @@ A clean install beats a cloned or "migrated" one. FormatKit does not restore an 
 
 ## Status
 
-Current release: **core + drivers only**.
+Current release: **core + drivers + cleanup**.
 
 Implemented:
 
 - Core engine: profiles, step planning, elevation, reboot handling and resume, run report.
 - Drivers module: Windows Update drivers, OEM tool (Dell, HP, Lenovo), GPU driver, leftover-device report, network driver backup.
+- Cleanup module: removes preinstalled apps and applies privacy and performance tweaks by level, with undo and a diagnosis of tweaks that break Windows.
 
-Planned (not available yet): system cleanup, apps and dev environment, installation media, preparation checklist, WPF UI.
+Planned (not available yet): apps and dev environment, installation media, preparation checklist, WPF UI.
 
 ## **WARNING: this tool changes your system**
 
@@ -37,6 +38,9 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit drivers backup-network --output <dir>` | Exports the working network drivers to a folder (do this before formatting). |
 | `formatkit run --profile <file> [--dry-run]` | Runs a profile; with `--dry-run` prints the plan without changing anything. |
 | `formatkit run --resume` | Resumes an interrupted run (used automatically after a reboot). |
+| `formatkit cleanup list [--level <l>] [--category <c>]` | Lists the cleanup catalog (`--verbose` adds what each item does, what it breaks and the gain). |
+| `formatkit cleanup check` | Diagnoses tweaks that already break or weaken this PC. Changes nothing, needs no elevation. |
+| `formatkit cleanup undo <ids...> \| --all` | Reverts items FormatKit applied (asks for elevation). |
 | `--verbose` (global) | Shows detailed logging. |
 
 Output language follows the Windows UI language (English and Brazilian Portuguese).
@@ -91,6 +95,45 @@ formatkit run --profile profiles\example.json --dry-run
 formatkit run --profile profiles\example.json
 ```
 
+## Cleanup
+
+The `cleanup` module removes preinstalled apps and applies privacy and performance tweaks. Every item has a level, and every change is recorded in a journal so it can be undone.
+
+| Level | What it holds |
+| --- | --- |
+| `safe` | Removes the bundled apps almost nobody uses (Clipchamp, Solitaire, News, Weather, Feedback Hub, Power Automate), turns off advertising ID, tailored experiences, activity history and similar, and turns Game Mode on. |
+| `balanced` | Everything in `safe`, plus more apps (Teams personal, Get Help, Xbox app, Phone Link, To Do), minimal diagnostic data, no web search in Start, online speech recognition off, the High performance power plan and pointer precision off. |
+| `aggressive` | Everything in `balanced`, plus the Ultimate Performance power plan, Memory Integrity and VBS off (reduces security) and the contested tweaks. |
+
+Levels are cumulative: `safe` is inside `balanced`, which is inside `aggressive`. Run `formatkit cleanup list --verbose` to see every item with what it does and what it can break. Items marked contested have no gain that Microsoft documents; they are always `aggressive`. Power plan items are skipped on laptops unless you list them in `include`.
+
+Profile section:
+
+```json
+"cleanup": {
+  "enabled": true,
+  "level": "balanced",
+  "include": ["performance.memory-integrity-off"],
+  "exclude": ["apps.xbox"],
+  "confirmAggressive": true
+}
+```
+
+- `level` is required when `enabled` is true.
+- `include` and `exclude` take item ids from `cleanup list`. The selection is every item at or below `level`, plus `include`, minus `exclude`. An unknown id, or an id in both lists, is a profile error.
+- `confirmAggressive` must be `true` when the selection contains any `aggressive` item (including one added through `include`). Without it the profile is rejected and the message names those items.
+
+A ready profile is in `profiles/cleanup-balanced.json`. Preview it with `formatkit run --profile profiles\cleanup-balanced.json --dry-run`.
+
+```powershell
+formatkit cleanup list --level balanced
+formatkit cleanup check
+formatkit cleanup undo apps.clipchamp
+formatkit cleanup undo --all
+```
+
+`cleanup check` exits with code 1 when it finds something under "breaks" or "security", and 0 otherwise. Some popular tweaks are deliberately left out; see [docs/cleanup-not-included.md](docs/cleanup-not-included.md) for why and how `cleanup check` reports each one.
+
 ## Building
 
 ```powershell
@@ -107,6 +150,6 @@ Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes an
 
 ## Resumo em português
 
-O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: apenas núcleo e drivers (limpeza, apps, mídia de instalação, checklist e interface WPF são planejados).
+O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers e limpeza do sistema (apps, mídia de instalação, checklist e interface WPF são planejados).
 
 **Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. Códigos de saída: veja a tabela acima. Licença MIT.

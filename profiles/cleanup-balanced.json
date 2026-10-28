@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "name": "Cleanup balanced",
+  "modules": {
+    "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] },
+    "cleanup": { "enabled": true, "level": "balanced" }
+  }
+}
