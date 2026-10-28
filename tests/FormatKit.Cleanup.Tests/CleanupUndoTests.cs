@@ -186,6 +186,25 @@ public class CleanupUndoTests
     }
 
     [Fact]
+    public async Task Damaged_power_record_fails_its_item_and_undo_continues()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(Key, "A", RegistryKind.Dword, "1");
+        await Apply(Item("privacy.a", actions: [Dword(Key, "A", 0)]), registry);
+        var journal = _journal.Load().Journal!;
+        var damaged = System.Text.Json.JsonSerializer.SerializeToElement(new { created = "not-a-guid" });
+        journal.Entries.Add(new JournalEntry("performance.ultimate", DateTimeOffset.Now.AddMinutes(1),
+            [new JournalAction(PowerSchemeHandler.Type, "power", damaged)], null));
+        _journal.Save(journal);
+
+        var outcomes = await Undo(registry);
+
+        Assert.Equal(ItemStatus.Failed, outcomes.Single(o => o.ItemId == "performance.ultimate").Status);
+        Assert.Equal(ItemStatus.Applied, outcomes.Single(o => o.ItemId == "privacy.a").Status);
+        Assert.Equal("1", registry.Read(Key, "A")!.Data);
+    }
+
+    [Fact]
     public async Task Item_applied_by_another_user_is_skipped_and_left_unreverted()
     {
         const string UserKey = @"HKCU\Software\Test";
@@ -202,7 +221,7 @@ public class CleanupUndoTests
 
         var outcome = Assert.Single(outcomes);
         Assert.Equal(ItemStatus.Skipped, outcome.Status);
-        Assert.Equal(Localization.Strings.Get("Skip_OtherUser"), outcome.Message);
+        Assert.Equal(Localization.Strings.Get("Undo_OtherUser"), outcome.Message);
         Assert.Equal("0", registry.Read(UserKey, "A")!.Data);
         Assert.Null(Assert.Single(_journal.Load().Journal!.Entries).RevertedAt);
     }

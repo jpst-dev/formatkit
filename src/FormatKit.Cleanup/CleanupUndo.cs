@@ -53,7 +53,7 @@ public sealed class CleanupUndo(CleanupCatalog catalog, AppPaths paths, IFileSys
             if (journal.Entries.Any(e => e.ItemId == id && e.RevertedAt is null && !e.CanBeUndoneBy(currentSid)))
             {
                 ctx.Log.Warning("Cleanup item {Item} was applied by another user; not undoing it", id);
-                outcomes.Add(new ItemOutcome(id, ItemStatus.Skipped, Strings.Get("Skip_OtherUser")));
+                outcomes.Add(new ItemOutcome(id, ItemStatus.Skipped, Strings.Get("Undo_OtherUser")));
                 continue;
             }
 
@@ -75,20 +75,21 @@ public sealed class CleanupUndo(CleanupCatalog catalog, AppPaths paths, IFileSys
         var targets = indexes
             .SelectMany(i => journal.Entries[i].Actions)
             .GroupBy(a => (a.Type, a.Target))
-            .Select(g => g.Key.Type == PowerSchemeHandler.Type ? PowerSchemeHandler.MergeForUndo(g.ToList()) : g.First())
             .Reverse()
             .ToList();
 
         var failures = new List<string>();
-        foreach (var action in targets)
+        foreach (var group in targets)
         {
             try
             {
+                // Merged inside the try so a damaged power record fails this target, not the whole undo run.
+                var action = group.Key.Type == PowerSchemeHandler.Type ? PowerSchemeHandler.MergeForUndo(group.ToList()) : group.First();
                 await handlers.For(action).UndoAsync(action, ctx, ct).ConfigureAwait(false);
             }
             catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
-                ctx.Log.Warning(ex, "Could not undo {Type} {Target} of cleanup item {Item}", action.Type, action.Target, id);
+                ctx.Log.Warning(ex, "Could not undo {Type} {Target} of cleanup item {Item}", group.Key.Type, group.Key.Target, id);
                 failures.Add(ex.Message);
             }
         }

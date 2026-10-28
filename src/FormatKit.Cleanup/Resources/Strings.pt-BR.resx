@@ -17,6 +17,7 @@
   <data name="Skip_NotPresent" xml:space="preserve"><value>ignorado: não existe neste sistema</value></data>
   <data name="Skip_Battery" xml:space="preserve"><value>ignorado: esta máquina tem bateria (adicione o item a &quot;include&quot; para aplicá-lo mesmo assim)</value></data>
   <data name="Skip_OtherUser" xml:space="preserve"><value>ignorado: o FormatKit está elevado com um usuário diferente do que está conectado, então as configurações por usuário iriam para a conta errada</value></data>
+  <data name="Undo_OtherUser" xml:space="preserve"><value>ignorado: outro usuário do Windows aplicou este item, então as configurações dele só podem ser desfeitas na conta dele</value></data>
   <data name="NextAction_SeeLog" xml:space="preserve"><value>Alguns itens de limpeza falharam e foram revertidos. Veja o motivo no log, corrija-o e execute novamente.</value></data>
   <data name="NextAction_JournalCorrupt" xml:space="preserve"><value>O diário de limpeza {0} está corrompido. Inspecione ou mova o arquivo do diário e execute novamente.</value></data>
   <data name="Validation_MissingField" xml:space="preserve"><value>O campo obrigatório &apos;{0}&apos; está ausente.</value></data>

@@ -17,6 +17,7 @@
   <data name="Skip_NotPresent" xml:space="preserve"><value>skipped: not present on this system</value></data>
   <data name="Skip_Battery" xml:space="preserve"><value>skipped: this machine has a battery (add the item to &quot;include&quot; to apply it anyway)</value></data>
   <data name="Skip_OtherUser" xml:space="preserve"><value>skipped: FormatKit is elevated as a different user than the one signed in, so per-user settings would go to the wrong account</value></data>
+  <data name="Undo_OtherUser" xml:space="preserve"><value>skipped: another Windows user applied this item, so their per-user settings can only be undone from their account</value></data>
   <data name="NextAction_SeeLog" xml:space="preserve"><value>Some cleanup items failed and were rolled back. See the log for the reason, fix it and run again.</value></data>
   <data name="NextAction_JournalCorrupt" xml:space="preserve"><value>The cleanup journal {0} is corrupt. Inspect or move the journal file, then run again.</value></data>
   <data name="Validation_MissingField" xml:space="preserve"><value>Required field &apos;{0}&apos; is missing.</value></data>
