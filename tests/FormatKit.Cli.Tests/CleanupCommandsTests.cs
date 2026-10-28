@@ -166,6 +166,31 @@ public sealed class CleanupCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task Check_marks_items_another_user_must_undo()
+    {
+        SeedOtherUserEntry();
+
+        await Run("cleanup", "check");
+
+        Assert.Contains("  privacy.theirs (undo as the user who applied it)", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Check_marks_items_another_user_must_undo_in_Portuguese()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("pt-BR");
+        SeedOtherUserEntry();
+
+        await Run("cleanup", "check");
+
+        Assert.Contains("  privacy.theirs (reverta com o usuário que o aplicou)", _out.ToString());
+    }
+
+    private void SeedOtherUserEntry() =>
+        new JournalStore(_fs, AppPaths.Default).Save(new CleanupJournal(1,
+            [new JournalEntry("privacy.theirs", DateTimeOffset.Now, [], null, "S-1-5-21-9-9-9-1002")]));
+
+    [Fact]
     public async Task Undo_requires_ids_or_all()
     {
         Assert.Equal(ExitCodes.InvalidInput, await Run("cleanup", "undo"));

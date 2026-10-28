@@ -116,6 +116,20 @@ public class JournalStoreTests
     }
 
     [Fact]
+    public void Entry_without_user_sid_loads()
+    {
+        var fs = new InMemoryFileSystem();
+        fs.Seed(Paths.CleanupJournalFile, """
+            {"schemaVersion":1,"entries":[{"itemId":"a","appliedAt":"2026-10-27T10:00:00+00:00","actions":[],"revertedAt":null}]}
+            """);
+
+        var result = new JournalStore(fs, Paths).Load();
+
+        Assert.Equal(JournalLoadStatus.Loaded, result.Status);
+        Assert.Null(Assert.Single(result.Journal!.Entries).UserSid);
+    }
+
+    [Fact]
     public void Bom_prefixed_file_loads()
     {
         var fs = new InMemoryFileSystem();

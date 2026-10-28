@@ -8,6 +8,7 @@ namespace FormatKit.Cleanup.Diagnosis;
 /// <summary>One matched issue. <paramref name="Detail"/> is the device name, the expanded registry path, or the scheme GUID.</summary>
 public sealed record Finding(KnownIssue Issue, string Detail);
 
+/// <param name="CanUndo">False when another user applied the item's per-user settings, so only that user can undo it (R15).</param>
 public sealed record AppliedItem(string ItemId, bool CanUndo);
 
 /// <param name="NotChecked">Rules whose evaluation threw; each is logged (R16).</param>
@@ -46,13 +47,13 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
             .ToList();
 
         var load = new JournalStore(services.Files, paths).Load();
+        var currentSid = services.UserSession.CurrentUserSid;
         var applied = load.Journal is null
             ? []
             : load.Journal.Entries
                 .Where(e => e.RevertedAt is null)
-                .Select(e => e.ItemId)
-                .Distinct(StringComparer.Ordinal)
-                .Select(id => new AppliedItem(id, true))
+                .GroupBy(e => e.ItemId, StringComparer.Ordinal)
+                .Select(g => new AppliedItem(g.Key, g.All(e => e.CanBeUndoneBy(currentSid))))
                 .ToList();
 
         return new DiagnosisReport(

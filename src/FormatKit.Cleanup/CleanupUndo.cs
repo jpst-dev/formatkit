@@ -48,6 +48,15 @@ public sealed class CleanupUndo(CleanupCatalog catalog, AppPaths paths, IFileSys
                 continue;
             }
 
+            // HKCU values would land in whoever runs undo, so another user's entries stay for that user (R15).
+            var currentSid = ctx.Services.UserSession.CurrentUserSid;
+            if (journal.Entries.Any(e => e.ItemId == id && e.RevertedAt is null && !e.CanBeUndoneBy(currentSid)))
+            {
+                ctx.Log.Warning("Cleanup item {Item} was applied by another user; not undoing it", id);
+                outcomes.Add(new ItemOutcome(id, ItemStatus.Skipped, Strings.Get("Skip_OtherUser")));
+                continue;
+            }
+
             outcomes.Add(await UndoItemAsync(id, journal, store, handlers, ctx, ct).ConfigureAwait(false));
         }
 

@@ -59,7 +59,9 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
                 var captured = await handler.CaptureAsync(action, ctx, ct).ConfigureAwait(false);
                 if (entryIndex < 0)
                 {
-                    current.Entries.Add(new JournalEntry(item.Id, DateTimeOffset.Now, [], null));
+                    // HKCU values belong to the process user, which the step has already checked is the console user.
+                    var userSid = item.Actions.Any(IsPerUser) ? ctx.Services.UserSession.CurrentUserSid : null;
+                    current.Entries.Add(new JournalEntry(item.Id, DateTimeOffset.Now, [], null, userSid));
                     entryIndex = current.Entries.Count - 1;
                 }
 
@@ -112,6 +114,9 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
             return new ItemOutcome(item.Id, ItemStatus.Failed, Strings.Format("Status_Failed", ex.Message));
         }
     }
+
+    private static bool IsPerUser(CleanupAction action) =>
+        action is RegistryAction registry && registry.Path.StartsWith(@"HKCU\", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Undoes this attempt's actions, newest first (the failing one included). Best effort: an undo failure is logged, not thrown. Returns whether every undo succeeded.</summary>
     private async Task<bool> RollBackAsync(CleanupItem item, List<JournalAction> applied, StepContext ctx)

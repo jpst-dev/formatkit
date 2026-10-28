@@ -186,6 +186,28 @@ public class CleanupUndoTests
     }
 
     [Fact]
+    public async Task Item_applied_by_another_user_is_skipped_and_left_unreverted()
+    {
+        const string UserKey = @"HKCU\Software\Test";
+        var registry = new FakeRegistry();
+        registry.Set(UserKey, "A", RegistryKind.Dword, "1");
+        var applier = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        await new ItemApplier(new ActionHandlers(() => new Dictionary<Guid, Guid?>()), _journal).ApplyAsync(
+            Item("privacy.user", actions: [Dword(UserKey, "A", 0)]),
+            TestServices.Context(TestServices.Create(files: _files, registry: registry, session: applier)), Ct);
+        var other = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1002" };
+
+        var outcomes = await new CleanupUndo(NewCatalog(), _paths, _files)
+            .UndoAsync(null, TestServices.Context(TestServices.Create(files: _files, registry: registry, session: other)), Ct);
+
+        var outcome = Assert.Single(outcomes);
+        Assert.Equal(ItemStatus.Skipped, outcome.Status);
+        Assert.Equal(Localization.Strings.Get("Skip_OtherUser"), outcome.Message);
+        Assert.Equal("0", registry.Read(UserKey, "A")!.Data);
+        Assert.Null(Assert.Single(_journal.Load().Journal!.Entries).RevertedAt);
+    }
+
+    [Fact]
     public async Task Corrupt_journal_throws()
     {
         _files.Seed(_journal.Path, "{ not json");

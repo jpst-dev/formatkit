@@ -38,6 +38,21 @@ public class ItemApplierTests
     }
 
     [Fact]
+    public async Task Hkcu_item_records_the_user_sid_and_hklm_item_does_not()
+    {
+        var registry = new FakeRegistry();
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("privacy.user", actions: [Dword(Key, "A", 0), Dword(@"HKCU\Software\Test", "B", 0)]), ctx, Ct);
+        await NewApplier().ApplyAsync(Item("privacy.machine", actions: [Dword(Key, "C", 0)]), ctx, Ct);
+
+        var entries = _journal.Load().Journal!.Entries;
+        Assert.Equal("S-1-5-21-1-2-3-1001", entries.Single(e => e.ItemId == "privacy.user").UserSid);
+        Assert.Null(entries.Single(e => e.ItemId == "privacy.machine").UserSid);
+    }
+
+    [Fact]
     public async Task Applies_only_unapplied_actions_and_journals_them()
     {
         var registry = new FakeRegistry();

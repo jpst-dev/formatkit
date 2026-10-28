@@ -193,6 +193,24 @@ public class CleanupDiagnosisTests
     }
 
     [Fact]
+    public async Task Item_applied_by_another_user_cannot_be_undone_here()
+    {
+        var now = DateTimeOffset.UtcNow;
+        new JournalStore(_files, _paths).Save(new CleanupJournal(1,
+        [
+            new JournalEntry("privacy.mine", now, [], null, new FakeUserSession().CurrentUserSid),
+            new JournalEntry("privacy.theirs", now, [], null, "S-1-5-21-9-9-9-1002"),
+            new JournalEntry("privacy.machine", now, [], null),
+        ]));
+
+        var report = await Run(Rules());
+
+        Assert.Equal(
+            [("privacy.mine", true), ("privacy.theirs", false), ("privacy.machine", true)],
+            report.Applied.Select(a => (a.ItemId, a.CanUndo)));
+    }
+
+    [Fact]
     public async Task Corrupt_journal_reports_error_and_still_diagnoses()
     {
         _files.Seed(_paths.CleanupJournalFile, "{ not json");

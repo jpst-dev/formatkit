@@ -105,7 +105,7 @@ internal static class CleanupCommands
         {
             o.WriteLine(Strings.Get("Check_Applied"));
             foreach (var applied in report.Applied)
-                o.WriteLine("  " + applied.ItemId);
+                o.WriteLine("  " + applied.ItemId + (applied.CanUndo ? "" : " " + Strings.Get("Check_UndoOtherUser")));
         }
 
         if (report.JournalError is not null)

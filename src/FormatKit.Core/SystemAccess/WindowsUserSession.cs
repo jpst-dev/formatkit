@@ -31,6 +31,15 @@ public sealed class WindowsUserSession : IUserSession
         }
     }
 
+    public string? CurrentUserSid
+    {
+        get
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            return identity.User?.Value;
+        }
+    }
+
     private static string? Query(uint sessionId, int infoClass)
     {
         if (!WTSQuerySessionInformation(IntPtr.Zero, sessionId, infoClass, out var buffer, out _))
