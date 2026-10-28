@@ -5,4 +5,21 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Catalog_Invalid" xml:space="preserve"><value>O cat&#225;logo de programas &#233; inv&#225;lido.</value></data>
+  <data name="Validation_MissingField" xml:space="preserve"><value>O campo obrigat&#243;rio &apos;{0}&apos; est&#225; ausente.</value></data>
+  <data name="Validation_InvalidValue" xml:space="preserve"><value>Valor inv&#225;lido: esperado {0}.</value></data>
+  <data name="Validation_UnknownProperty" xml:space="preserve"><value>Propriedade desconhecida &apos;{0}&apos; no m&#243;dulo de programas.</value></data>
+  <data name="Validation_UnknownProgram" xml:space="preserve"><value>programa de cat&#225;logo desconhecido &quot;{0}&quot;</value></data>
+  <data name="Validation_UnsafeValue" xml:space="preserve"><value>Valor inseguro &quot;{0}&quot;: s&#243; s&#227;o permitidos letras, d&#237;gitos e . _ + - , e n&#227;o pode come&#231;ar com -.</value></data>
+  <data name="Validation_AcceptAgreements" xml:space="preserve"><value>H&#225; programas selecionados, ent&#227;o &quot;acceptAgreements&quot; deve ser true.</value></data>
+  <data name="Validation_ImportMissing" xml:space="preserve"><value>O arquivo de importa&#231;&#227;o {0} n&#227;o existe.</value></data>
+  <data name="Validation_ImportUnreadable" xml:space="preserve"><value>N&#227;o foi poss&#237;vel ler o arquivo de importa&#231;&#227;o {0}: {1}</value></data>
+  <data name="Validation_UrlOrPath" xml:space="preserve"><value>Informe exatamente um entre &quot;url&quot; e &quot;path&quot;.</value></data>
+  <data name="Validation_HttpsRequired" xml:space="preserve"><value>A url deve ser um endere&#231;o https.</value></data>
+  <data name="Validation_Sha256" xml:space="preserve"><value>O sha256 deve ter 64 caracteres hexadecimais.</value></data>
+  <data name="Validation_Extension" xml:space="preserve"><value>Apenas instaladores .exe e .msi s&#227;o suportados.</value></data>
+  <data name="Validation_MsiArgs" xml:space="preserve"><value>&quot;args&quot; n&#227;o &#233; suportado para instaladores .msi.</value></data>
+  <data name="Import_InvalidJson" xml:space="preserve"><value>O arquivo de exporta&#231;&#227;o do winget n&#227;o &#233; um JSON v&#225;lido: {0}</value></data>
+  <data name="Import_NoSources" xml:space="preserve"><value>O arquivo de exporta&#231;&#227;o do winget n&#227;o tem a lista &quot;Sources&quot;.</value></data>
+  <data name="Import_SkippedSource" xml:space="preserve"><value>Origem &quot;{0}&quot; da exporta&#231;&#227;o do winget ignorada: apenas winget e msstore s&#227;o suportados.</value></data>
+  <data name="Import_SkippedId" xml:space="preserve"><value>Pacote &quot;{0}&quot; da exporta&#231;&#227;o do winget ignorado: id inseguro.</value></data>
 </root>
