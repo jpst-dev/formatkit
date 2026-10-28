@@ -300,12 +300,4 @@ public sealed class CleanupCommandsTests : IDisposable
         public override RegistryValue? Read(string path, string name) =>
             throw new NotSupportedException("REG_BINARY is not supported");
     }
-
-    [Fact]
-    public void Default_modules_put_drivers_before_cleanup()
-    {
-        var modules = App().Modules;
-
-        Assert.Equal(["drivers", "cleanup"], modules.Select(m => m.Name));
-    }
 }

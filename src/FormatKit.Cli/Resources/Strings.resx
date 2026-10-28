@@ -111,4 +111,20 @@
   <data name="Undo_Line_Reverted" xml:space="preserve"><value>{0}: reverted</value></data>
   <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="Undo_Line_Skipped" xml:space="preserve"><value>{0}: skipped ({1})</value></data>
+  <data name="Cmd_Programs" xml:space="preserve"><value>Program commands.</value></data>
+  <data name="Cmd_ProgramsList" xml:space="preserve"><value>List the program catalog.</value></data>
+  <data name="Cmd_ProgramsSearch" xml:space="preserve"><value>Search winget for a program (winget's own output).</value></data>
+  <data name="Cmd_ProgramsExport" xml:space="preserve"><value>Export the installed programs to a winget import file.</value></data>
+  <data name="Opt_ProgramsCategory" xml:space="preserve"><value>Show only this category (browsers, communication, games, media, utilities, productivity or development).</value></data>
+  <data name="Arg_ProgramsTerm" xml:space="preserve"><value>Text to search for.</value></data>
+  <data name="Arg_ProgramsFile" xml:space="preserve"><value>File that receives the exported programs.</value></data>
+  <data name="Marker_User" xml:space="preserve"><value>user</value></data>
+  <data name="Programs_Winget" xml:space="preserve"><value>winget: {0} ({1})</value></data>
+  <data name="Programs_InvalidCategory" xml:space="preserve"><value>Unknown category '{0}'. Valid values: {1}.</value></data>
+  <data name="Programs_SearchEmpty" xml:space="preserve"><value>Give a search term.</value></data>
+  <data name="Programs_WingetMissing" xml:space="preserve"><value>winget was not found. Install or repair App Installer (winget), then run again.</value></data>
+  <data name="Programs_ExportBadPath" xml:space="preserve"><value>'{0}' is not a valid file path.</value></data>
+  <data name="Programs_ExportFailed" xml:space="preserve"><value>winget could not export the programs (exit code {0}).</value></data>
+  <data name="Programs_ExportDone" xml:space="preserve"><value>Exported the installed programs to {0}</value></data>
+  <data name="Programs_ExportUsage" xml:space="preserve"><value>To install them on a fresh Windows, add this to the profile's modules:</value></data>
 </root>
