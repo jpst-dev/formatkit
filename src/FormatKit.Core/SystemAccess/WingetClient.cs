@@ -42,7 +42,7 @@ public partial class WingetClient(IProcessRunner runner)
     private static readonly string[] SilentFlags =
         ["--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"];
 
-    [GeneratedRegex("^[A-Za-z0-9._+-]+$")]
+    [GeneratedRegex(@"\A[A-Za-z0-9._+-]+\z")]
     private static partial Regex SafeValue();
 
     public static string Validate(string value, string what)
@@ -128,7 +128,7 @@ public partial class WingetClient(IProcessRunner runner)
         runner.RunAsync(
             new ProcessSpec(
                 "winget.exe",
-                ["search", term, "--accept-source-agreements", "--disable-interactivity"],
+                ["search", "--query", term, "--accept-source-agreements", "--disable-interactivity"],
                 Timeouts.Query),
             ct);
 

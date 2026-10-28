@@ -127,6 +127,8 @@ public class WingetClientTests
     [InlineData(-1978335174, false, WingetStatus.BlockedByPolicy)]
     [InlineData(-1978335205, false, WingetStatus.BlockedByPolicy)]
     [InlineData(-1978334961, false, WingetStatus.BlockedByPolicy)]
+    [InlineData(-1978335098, false, WingetStatus.NoNetwork)]
+    [InlineData(-1978335204, false, WingetStatus.BlockedByPolicy)]
     [InlineData(12345, false, WingetStatus.Failed)]
     [InlineData(0, true, WingetStatus.Upgraded)]
     [InlineData(-1978335189, true, WingetStatus.UpToDate)]
@@ -210,6 +212,8 @@ public class WingetClientTests
     [InlineData("a b")]
     [InlineData("x;y")]
     [InlineData("--force")]
+    [InlineData("Git.Git\n")]
+    [InlineData("Git.Git\r\n")]
     public async Task Unsafe_id_throws(string id)
     {
         var runner = new FakeProcessRunner();
@@ -281,7 +285,7 @@ public class WingetClientTests
 
         Assert.Equal("Name Id\nGit Git.Git", result.StdOut);
         Assert.Equal(
-            ["search", "git hub", "--accept-source-agreements", "--disable-interactivity"],
+            ["search", "--query", "git hub", "--accept-source-agreements", "--disable-interactivity"],
             runner.Calls[0].Arguments);
         Assert.Equal(Timeouts.Query, runner.Calls[0].Timeout);
     }
@@ -301,5 +305,21 @@ public class WingetClientTests
         Assert.True(installed);
         Assert.Equal(["--source", "winget"], runner.Calls[0].Arguments.TakeLast(2));
         Assert.Equal(["--source", "winget"], runner.Calls[1].Arguments.TakeLast(2));
+    }
+
+    [Fact]
+    public void InstallArguments_are_exact()
+    {
+        Assert.Equal(
+            ["install", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--source", "winget", "--version", "2.0"],
+            WingetClient.InstallArguments(new WingetPackageRef("Git.Git", "winget", "2.0")));
+    }
+
+    [Fact]
+    public void UpgradeArguments_are_exact()
+    {
+        Assert.Equal(
+            ["upgrade", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"],
+            WingetClient.UpgradeArguments(new WingetPackageRef("Git.Git")));
     }
 }
