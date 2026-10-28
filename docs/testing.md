@@ -207,7 +207,7 @@ The VM needs internet and `winget` (App Installer). The signed-in user is the lo
          "catalog": ["browsers.firefox", "communication.slack", "productivity.notion"],
          "winget": [
            { "id": "Notepad++.Notepad++" },
-           { "id": "9NBLGGH4NNS1", "source": "msstore" },
+           { "id": "9NKSQGP7F2NH", "source": "msstore" },
            { "id": "Spotify.Spotify", "context": "user" }
          ],
          "direct": [
@@ -224,11 +224,11 @@ The VM needs internet and `winget` (App Installer). The signed-in user is the lo
    **Expected:** exit code **0** (or 1 if the Store is unreachable; the report then names the failed item and the others still install). Firefox, Notepad++ and the direct installer's program appear in Settings > Apps. A reboot, if an installer asks for one, goes through the normal countdown and resume (scenario 4).
 5. In a **non-elevated** PowerShell as the signed-in user, run `winget list --id Spotify.Spotify`.
 
-   **Expected:** Spotify is listed. It was installed with `context: user` (a temporary scheduled task as the signed-in user), so it must not exist only under the administrator account. Also run `winget list --id SlackTechnologies.Slack` and `winget list --id Notion.Notion`: both are installed machine-wide and must be available for the signed-in user, not only for the administrator session.
+   **Expected:** Spotify is listed. It was installed with `context: user` (a temporary scheduled task as the signed-in user), so it must not exist only under the administrator account. Also run `winget list --id SlackTechnologies.Slack` and `winget list --id Notion.Notion`: the catalog installs both per user (their machine-wide installer is an MSIX, which winget cannot install device-wide), so both must be listed for the signed-in user.
 6. Run the same command again.
 
    **Expected:** exit code 0 and nothing is downloaded or run a second time. Steps whose programs are all installed (and the direct step, from `%ProgramData%\FormatKit\programs-direct.json`) are skipped with "Nothing to do: already in place.". `Spotify.Spotify` is a free `winget` entry, so it is in the `programs.other` step (with Notepad++ and the Store app), not in a category step. The `programs.other` step may still run: the elevated check of a per-user package only sees it when the elevated user is the signed-in user (here they are the same account, so it is usually skipped too). If it runs, every item in it reports "already installed" and nothing is installed again.
-7. Sign-in failure. Restore `clean`. In the VM console sign out (Start > sign out, or `logoff` in a console session), so nobody is signed in. From the host, run FormatKit through PowerShell Direct, using the VM credentials kept outside the repo (as in the other scenarios; do not write them in a file of the repo), with `C:\fk\formatkit.exe` and a `programs-signout.json` already copied into the VM beforehand, holding `browsers.firefox` in `catalog` and one `{ "id": "Spotify.Spotify", "context": "user" }` in `winget`:
+7. Sign-in failure. Restore `clean`. While still signed in, let winget set up its package source once (for example `.\formatkit.exe programs search notepad`): with nobody signed in, winget cannot set up its source on an account that never used it, and every winget item then fails with "no network or source unavailable" (winget code 0x8A15000F). Then sign out of the VM console (Start > sign out, or `logoff <session id>`, where the session id is the `SessionId` of `explorer.exe`), so nobody is signed in. From the host, run FormatKit through PowerShell Direct, using the VM credentials kept outside the repo (as in the other scenarios; do not write them in a file of the repo), with `C:\fk\formatkit.exe` and a `programs-signout.json` already copied into the VM beforehand, holding `browsers.firefox` in `catalog` and one `{ "id": "Spotify.Spotify", "context": "user" }` in `winget`:
 
    ```powershell
    $cred = Get-Credential   # the VM admin account

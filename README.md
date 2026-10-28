@@ -162,7 +162,7 @@ Profile section:
   "winget": [
     { "id": "Notepad++.Notepad++" },
     { "id": "Python.Python.3.12", "version": "3.12.7" },
-    { "id": "9NBLGGH4NNS1", "source": "msstore" },
+    { "id": "9NKSQGP7F2NH", "source": "msstore" },
     { "id": "Some.UserApp", "context": "user" }
   ],
   "importFile": "C:\\backup\\old-pc-programs.json",
@@ -176,7 +176,7 @@ Profile section:
 - `acceptAgreements` must be `true` when the section has any item. It means you accept the winget and Microsoft Store agreements for those packages; FormatKit passes the accept flags to winget on your behalf. Without it the profile is rejected.
 - `upgrade`: when `true`, a program that is already installed is upgraded; when `false` (the default) it is left alone. A step whose programs are all installed is skipped with "Nothing to do: already in place."; a program that is checked inside a step that still runs is reported as "already installed".
 - `version` pins a winget package to that exact version. It must match `[A-Za-z0-9._+-]+`, like ids and sources.
-- `context: user` runs the install as the signed-in Windows user (not elevated) through a temporary scheduled task, for apps that install per user (the catalog marks Discord, Telegram, Zoom, Spotify, Playnite and JetBrains Toolbox this way). Catalog entries also carry a winget `scope` so winget picks the right installer; free winget ids and imported ones use winget's default. If nobody is signed in, the item fails ("failed: no user is signed in") and the next action is "Sign in to Windows and run again."
+- `context: user` runs the install as the signed-in Windows user (not elevated) through a temporary scheduled task, for apps that install per user (the catalog marks Discord, Telegram, Zoom, Slack, Spotify, Playnite, Notion and JetBrains Toolbox this way). Catalog entries also carry a winget `scope` so winget picks the right installer; free winget ids and imported ones use winget's default. If nobody is signed in, the item fails ("failed: no user is signed in") and the next action is "Sign in to Windows and run again."
 - A relative `importFile` or direct `path` is relative to the folder of the profile file, not to the current directory, so `"importFile": "old-pc.json"` next to the profile on a USB stick still works after a reboot resumes the run. Absolute paths are used as written.
 - Unknown properties in the section, unknown catalog ids and an `importFile` that is missing or not a `winget export` JSON are profile errors (exit code 2).
 - One failed program does not stop the others; the run ends with exit code 1 and the report lists what failed.

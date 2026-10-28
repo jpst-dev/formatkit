@@ -58,18 +58,19 @@ public class EmbeddedCatalogTests
 
     // Discord, Zoom and Spotify per the spec; Playnite and JetBrains Toolbox because winget offers only a user-scope installer;
     // Telegram because its only machine-scope option is a portable zip, its installer is per-user.
+    // Slack and Notion because their machine-scope installer is an MSIX, which winget cannot install device-wide.
     private static readonly string[] PerUser =
     [
-        "communication.discord", "communication.telegram", "communication.zoom", "media.spotify", "games.playnite",
-        "development.jetbrains-toolbox",
+        "communication.discord", "communication.telegram", "communication.zoom", "communication.slack", "media.spotify",
+        "games.playnite", "productivity.notion", "development.jetbrains-toolbox",
     ];
 
     // Machine-context entries whose winget manifests offer both a machine and a user installer.
     private static readonly string[] MachineScope =
     [
-        "browsers.brave", "browsers.opera-gx", "browsers.vivaldi", "communication.slack", "media.obs-studio",
+        "browsers.brave", "browsers.opera-gx", "browsers.vivaldi", "media.obs-studio",
         "utilities.powertoys", "utilities.everything", "utilities.sharex", "utilities.bitwarden",
-        "productivity.notion", "productivity.obsidian", "development.vscode", "development.git", "development.python",
+        "productivity.obsidian", "development.vscode", "development.git", "development.python",
     ];
 
     private static readonly string[] ExcludedKinds = ["cleaner", "driver", "booster", "antivirus"];

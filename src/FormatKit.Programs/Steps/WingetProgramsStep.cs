@@ -149,9 +149,13 @@ internal sealed class WingetProgramsStep(string id, string title, IReadOnlyList<
         return Describe(result);
     }
 
+    // A scheduled task does not resolve the winget app execution alias by name (it fails with 0x80070002);
+    // the task scheduler expands %LOCALAPPDATA% for the task's user when the task starts.
+    internal const string UserWingetPath = @"%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe";
+
     private static async Task<WingetResult> RunAsUserAsync(IReadOnlyList<string> args, bool upgrade, StepContext ctx)
     {
-        var run = await ctx.Services.UserContext.RunAsync(new ProcessSpec("winget.exe", args, Timeouts.Install), CancellationToken.None)
+        var run = await ctx.Services.UserContext.RunAsync(new ProcessSpec(UserWingetPath, args, Timeouts.Install), CancellationToken.None)
             .ConfigureAwait(false);
         return new WingetResult(
             WingetClient.MapExitCode(run.ExitCode, upgrade, run.TimedOut), run.ExitCode, run.StdOut + run.StdErr, run.TimedOut);

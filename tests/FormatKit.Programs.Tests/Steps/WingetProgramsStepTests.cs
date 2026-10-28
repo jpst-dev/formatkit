@@ -139,7 +139,7 @@ public class WingetProgramsStepTests : IDisposable
 
         Assert.Equal(StepOutcome.Succeeded, result.Outcome);
         var call = Assert.Single(user.Calls);
-        Assert.Equal("winget.exe", call.FileName);
+        Assert.Equal(@"%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe", call.FileName);
         Assert.Equal("install", call.Arguments[0]);
         Assert.Single(runner.Calls); // only --version ran as the service
     }

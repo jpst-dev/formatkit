@@ -29,7 +29,7 @@
     { "id": "communication.zoom", "category": "communication", "wingetId": "Zoom.Zoom.EXE", "source": "winget", "context": "user", "scope": "user",
       "text": { "en": { "name": "Zoom Workplace", "description": "Video meetings and calls." },
                 "pt-BR": { "name": "Zoom Workplace", "description": "Reuniões e chamadas por vídeo." } } },
-    { "id": "communication.slack", "category": "communication", "wingetId": "SlackTechnologies.Slack", "source": "winget", "scope": "machine",
+    { "id": "communication.slack", "category": "communication", "wingetId": "SlackTechnologies.Slack", "source": "winget", "context": "user", "scope": "user",
       "text": { "en": { "name": "Slack", "description": "Team chat and collaboration." },
                 "pt-BR": { "name": "Slack", "description": "Chat e colaboração para equipes." } } },
 
@@ -108,7 +108,7 @@
     { "id": "productivity.acrobat-reader", "category": "productivity", "wingetId": "Adobe.Acrobat.Reader.64-bit", "source": "winget",
       "text": { "en": { "name": "Adobe Acrobat Reader", "description": "Adobe's PDF reader." },
                 "pt-BR": { "name": "Adobe Acrobat Reader", "description": "Leitor de PDF da Adobe." } } },
-    { "id": "productivity.notion", "category": "productivity", "wingetId": "Notion.Notion", "source": "winget", "scope": "machine",
+    { "id": "productivity.notion", "category": "productivity", "wingetId": "Notion.Notion", "source": "winget", "context": "user", "scope": "user",
       "text": { "en": { "name": "Notion", "description": "Notes, documents and team workspace." },
                 "pt-BR": { "name": "Notion", "description": "Notas, documentos e espaço de trabalho em equipe." } } },
     { "id": "productivity.obsidian", "category": "productivity", "wingetId": "Obsidian.Obsidian", "source": "winget", "scope": "machine",
