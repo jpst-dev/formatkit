@@ -17,7 +17,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Clipchamp",
+          "title": "Remover o app Clipchamp",
           "what": "Desinstala o editor de vídeo Clipchamp e impede que o Windows o instale para novos usuários.",
           "breaks": "Você não consegue mais editar vídeos com o Clipchamp. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -43,13 +43,13 @@
         "en": {
           "title": "Remove Solitaire",
           "what": "Uninstalls Microsoft Solitaire Collection and stops Windows from installing it for new users.",
-          "breaks": "The Solitaire card games are gone, along with their local progress. Undo reinstalls it from the Microsoft Store.",
+          "breaks": "The Solitaire card games are gone, along with their local progress. Undo opens its Store page so you can reinstall it.",
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Solitaire",
+          "title": "Remover o app Solitaire",
           "what": "Desinstala o Microsoft Solitaire Collection e impede que o Windows o instale para novos usuários.",
-          "breaks": "Os jogos de cartas do Solitaire somem, junto com o progresso salvo no PC. Desfazer reinstala o app pela Microsoft Store.",
+          "breaks": "Os jogos de cartas do Solitaire somem, junto com o progresso salvo no PC. Desfazer abre a página do app na Store para você reinstalá-lo.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
         }
       },
@@ -77,7 +77,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Notícias",
+          "title": "Remover o app Notícias",
           "what": "Desinstala o app Microsoft Notícias e impede que o Windows o instale para novos usuários.",
           "breaks": "O app Notícias some. Notícias no navegador e nos Widgets continuam funcionando. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -107,7 +107,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Clima",
+          "title": "Remover o app Clima",
           "what": "Desinstala o app Clima (MSN) e impede que o Windows o instale para novos usuários.",
           "breaks": "O app Clima some. O clima nos Widgets continua funcionando. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -124,7 +124,7 @@
     {
       "id": "apps.get-help",
       "category": "apps",
-      "level": "safe",
+      "level": "balanced",
       "contested": false,
       "requiresReboot": false,
       "scope": "machine",
@@ -137,7 +137,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Obter Ajuda",
+          "title": "Remover o app Obter Ajuda",
           "what": "Desinstala o app Obter Ajuda e impede que o Windows o instale para novos usuários.",
           "breaks": "O app Obter Ajuda some, e as soluções de problemas do Windows que abrem nele deixam de iniciar. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -167,7 +167,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Hub de Comentários",
+          "title": "Remover o app Hub de Comentários",
           "what": "Desinstala o app Hub de Comentários e impede que o Windows o instale para novos usuários.",
           "breaks": "Você não consegue mais enviar comentários ou relatar problemas à Microsoft pelo Hub de Comentários. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -197,7 +197,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Power Automate",
+          "title": "Remover o app Power Automate",
           "what": "Desinstala o Power Automate para desktop e impede que o Windows o instale para novos usuários.",
           "breaks": "Os fluxos que você criou no Power Automate deixam de rodar neste PC. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -212,9 +212,9 @@
       ]
     },
     {
-      "id": "apps.teams-personal",
+      "id": "apps.teams",
       "category": "apps",
-      "level": "safe",
+      "level": "balanced",
       "contested": false,
       "requiresReboot": false,
       "scope": "machine",
@@ -223,13 +223,13 @@
         "en": {
           "title": "Remove Microsoft Teams",
           "what": "Uninstalls the Microsoft Teams app and stops Windows from installing it for new users.",
-          "breaks": "Teams is gone. The same app is used for personal, work and school accounts, so this also removes Teams for work or school. Undo reinstalls it from the Microsoft Store.",
+          "breaks": "Teams is gone. This also removes Teams for work or school, because the same app is used for personal, work and school accounts. Undo reinstalls it from the Microsoft Store.",
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Microsoft Teams",
+          "title": "Remover o app Microsoft Teams",
           "what": "Desinstala o app Microsoft Teams e impede que o Windows o instale para novos usuários.",
-          "breaks": "O Teams some. O mesmo app é usado para contas pessoais, de trabalho e de escola, então isto também remove o Teams de trabalho ou escola. Desfazer reinstala o app pela Microsoft Store.",
+          "breaks": "O Teams some. Isto também remove o Teams de trabalho ou escola, porque o mesmo app é usado para contas pessoais, de trabalho e de escola. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
         }
       },
@@ -287,7 +287,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o Vincular ao Celular",
+          "title": "Remover o app Vincular ao Celular",
           "what": "Desinstala o app Vincular ao Celular e impede que o Windows o instale para novos usuários.",
           "breaks": "Você não vê mais notificações, mensagens ou fotos do celular neste PC. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -317,7 +317,7 @@
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o To Do",
+          "title": "Remover o app To Do",
           "what": "Desinstala o app Microsoft To Do e impede que o Windows o instale para novos usuários.",
           "breaks": "O app To Do some deste PC. Suas listas continuam na sua conta Microsoft. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
@@ -528,8 +528,8 @@
           "gain": "Less data about how you use the PC is sent to Microsoft."
         },
         "pt-BR": {
-          "title": "Enviar só os dados de diagnóstico obrigatórios",
-          "what": "Define a política que limita os dados de diagnóstico a Obrigatórios, o mínimo no Home e no Pro.",
+          "title": "Enviar só os dados de diagnóstico necessários",
+          "what": "Define a política que limita os dados de diagnóstico a Dados de diagnóstico necessários, o mínimo no Home e no Pro.",
           "breaks": "As versões Windows Insider exigem dados de diagnóstico opcionais, então você não consegue entrar ou continuar no Programa Insider. O app Configurações mostra a opção como gerenciada pela sua organização.",
           "gain": "Menos dados sobre como você usa o PC são enviados à Microsoft."
         }
@@ -556,13 +556,13 @@
         "en": {
           "title": "Turn off web results in Start search",
           "what": "Sets the user policy that stops Start search from showing web suggestions and results.",
-          "breaks": "Searching from Start only finds things on this PC. Search the web in your browser instead.",
+          "breaks": "Searching from Start only finds things on this PC, and File Explorer search no longer shows suggestions. Search the web in your browser instead.",
           "gain": "What you type in Start search is not sent to Bing."
         },
         "pt-BR": {
           "title": "Desativar resultados da web na pesquisa do Iniciar",
           "what": "Define a política de usuário que impede a pesquisa do Iniciar de mostrar sugestões e resultados da web.",
-          "breaks": "A pesquisa do Iniciar só encontra itens deste PC. Pesquise na web pelo navegador.",
+          "breaks": "A pesquisa do Iniciar só encontra itens deste PC, e a pesquisa do Explorador de Arquivos deixa de mostrar sugestões. Pesquise na web pelo navegador.",
           "gain": "O que você digita na pesquisa do Iniciar não é enviado ao Bing."
         }
       },
@@ -641,38 +641,6 @@
       ]
     },
     {
-      "id": "performance.game-bar-recording",
-      "category": "performance",
-      "level": "safe",
-      "contested": false,
-      "requiresReboot": false,
-      "scope": "machine",
-      "laptopSensitive": false,
-      "text": {
-        "en": {
-          "title": "Turn off Game Bar recording",
-          "what": "Sets the policy that turns off Windows game recording and broadcasting.",
-          "breaks": "Game Bar can no longer record clips, record what just happened, or broadcast. Settings shows the option as managed by your organization.",
-          "gain": "No background recording uses CPU, GPU or disk while you play."
-        },
-        "pt-BR": {
-          "title": "Desativar a gravação da Game Bar",
-          "what": "Define a política que desativa a gravação e a transmissão de jogos do Windows.",
-          "breaks": "A Game Bar não consegue mais gravar clipes, gravar o que acabou de acontecer nem transmitir. O app Configurações mostra a opção como gerenciada pela sua organização.",
-          "gain": "Nenhuma gravação em segundo plano usa CPU, GPU ou disco enquanto você joga."
-        }
-      },
-      "actions": [
-        {
-          "type": "registry",
-          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
-          "name": "AllowGameDVR",
-          "kind": "dword",
-          "value": 0
-        }
-      ]
-    },
-    {
       "id": "performance.high-performance-plan",
       "category": "performance",
       "level": "balanced",
@@ -719,7 +687,7 @@
         "pt-BR": {
           "title": "Desativar Aprimorar precisão do ponteiro",
           "what": "Desativa a aceleração do mouse, então o ponteiro anda a mesma distância para o mesmo movimento em qualquer velocidade.",
-          "breaks": "O ponteiro pode parecer mais lento. Talvez você queira aumentar a velocidade do ponteiro. Vale depois de sair e entrar de novo na conta.",
+          "breaks": "O ponteiro pode parecer mais lento. Talvez você queira aumentar a velocidade do ponteiro. Passa a valer depois de sair e entrar de novo na conta.",
           "gain": "O movimento do ponteiro fica previsível, o que ajuda a mirar em jogos."
         }
       },
@@ -902,13 +870,13 @@
         "en": {
           "title": "Change how the CPU is split between foreground and background",
           "what": "Sets Win32PrioritySeparation to 38 (0x26), the value Windows writes when you pick Programs in Performance Options.",
-          "breaks": "Background programs and services can get less CPU time.",
+          "breaks": "On client Windows, 38 (0x26) behaves like the default Programs setting, so in practice little or nothing changes.",
           "gain": "No gain is documented by Microsoft."
         },
         "pt-BR": {
           "title": "Mudar como a CPU é dividida entre primeiro e segundo plano",
           "what": "Define Win32PrioritySeparation como 38 (0x26), o valor que o Windows grava ao escolher Programas nas Opções de desempenho.",
-          "breaks": "Programas e serviços em segundo plano podem receber menos CPU.",
+          "breaks": "No Windows para clientes, 38 (0x26) se comporta como a configuração padrão Programas, então na prática pouco ou nada muda.",
           "gain": "A Microsoft não documenta nenhum ganho."
         }
       },

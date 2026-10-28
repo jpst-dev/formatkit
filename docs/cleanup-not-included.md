@@ -6,7 +6,12 @@ documents. This page explains why, and how `formatkit cleanup check` reports eac
 one if a script or guide already applied it.
 
 `cleanup check` reads the machine and changes nothing. Each finding comes with a
-command that puts the default back. Run the command in an elevated terminal.
+fix, usually a command. Run fix commands in an elevated PowerShell (Run as
+administrator).
+
+Some tweaks below are **not detected** by `cleanup check`. Each section says so
+plainly and explains why: usually Microsoft does not document the value, so
+FormatKit cannot say where Windows reads it or what the default is.
 
 ## Disabling HPET or using `bcdedit /set useplatformclock`
 
@@ -19,9 +24,9 @@ HPET device or overriding the platform clock has no gain documented by Microsoft
 it can make timers and some drivers behave badly.
 
 **How `cleanup check` reports it:** a disabled HPET device (hardware id `ACPI\PNP0103`)
-is listed under **Breaks something**. The `useplatformclock` boot setting is **not**
-checked, because reading the boot configuration needs administrator rights and parsing
-`bcdedit` output. Check it yourself in an elevated terminal:
+is listed under **Breaks something**. `cleanup check` does **not** detect the
+`useplatformclock` boot setting, because reading the boot configuration needs administrator rights and parsing
+`bcdedit` output. Check it yourself in an elevated PowerShell:
 
 ```
 bcdedit /enum {current}
@@ -60,10 +65,22 @@ networking, Xbox sign-in, WSL and Hyper-V. FormatKit's catalog never disables an
 the services on its protected list.
 
 **How `cleanup check` reports it:** every protected service that is disabled is listed
-under **Breaks something**, with a command that sets it back to its Windows default
-(`sc.exe config`, or `reg add` for the DNS Client and Defender services, which
-`sc.exe` cannot change). The OpenSSH Authentication Agent (`ssh-agent`) is not checked,
-because Windows ships it disabled.
+under **Breaks something**, with a fix that turns it back on:
+
+- Services that Windows 11 starts at boot are set to Automatic (Update Orchestrator
+  to Automatic, delayed start).
+- The others are set to Manual, so Windows starts them when needed.
+- Most fixes use `sc.exe config`. Windows refuses `sc.exe` for some services, even
+  for administrators (DNS Client, Defender, firewall, Base Filtering Engine, Task
+  Scheduler, Client License, AppX Deployment), so their fix uses `reg add` on the
+  service's `Start` value instead.
+- No administrator command can turn the Windows Security service
+  (`SecurityHealthService`) back on, because Windows protects its settings. The fix
+  points to an in-place repair: Settings > System > Recovery > Fix problems using
+  Windows Update.
+
+`cleanup check` does **not** detect a disabled OpenSSH Authentication Agent
+(`ssh-agent`), because Windows ships it disabled.
 
 ## `DisablePagingExecutive`
 
@@ -91,7 +108,8 @@ over UDP, which this setting does not touch. Microsoft does not document a
 connections in code.
 
 **How `cleanup check` reports it:** `TcpAckFrequency` = 1 on any adapter is listed
-under **Contested**. `TCPNoDelay` is not checked, since Windows does not document it.
+under **Contested**. `cleanup check` does **not** detect `TCPNoDelay`, because Microsoft
+does not document it for Windows.
 
 ## `MouseDataQueueSize` and `KeyboardDataQueueSize`
 
@@ -104,7 +122,8 @@ is too small, input can be dropped. The default is 100.
 
 **How `cleanup check` reports it:** a `MouseDataQueueSize` other than 100 under
 `HKLM\SYSTEM\CurrentControlSet\Services\mouclass\Parameters` is listed under
-**Contested**. `KeyboardDataQueueSize` is not checked: Microsoft documents it only
+**Contested**. `cleanup check` does **not** detect `KeyboardDataQueueSize`: Microsoft
+documents it only
 under the PS/2 driver key (`i8042prt\Parameters`), not under the `kbdclass` key that
 guides change, so FormatKit cannot say where Windows reads it.
 
@@ -120,8 +139,8 @@ Microsoft also notes that a higher resolution can reduce overall performance and
 the processor from saving power. The registry value itself is not documented by
 Microsoft.
 
-**How `cleanup check` reports it:** not checked, because Microsoft does not document
-the value.
+**How `cleanup check` reports it:** it does **not** detect it, because Microsoft does
+not document the value.
 
 ## Registry cleaners
 
@@ -132,8 +151,8 @@ faster and more stable.
 cleaners can delete entries that apps or Windows still need. Microsoft does not
 support registry cleaners.
 
-**How `cleanup check` reports it:** a registry cleaner leaves no single value to
-detect, so nothing is reported.
+**How `cleanup check` reports it:** it does **not** detect registry cleaners, because a
+cleaner leaves no single value to look for.
 
 ## Turning off Virtual Machine Platform
 
@@ -144,8 +163,8 @@ improves gaming performance.
 but WSL 2, Windows Sandbox, Hyper-V and Android apps need it. FormatKit's later
 features also need it, so the cleanup catalog does not turn it off.
 
-**How `cleanup check` reports it:** not checked, because it is an optional feature,
-not a registry value. Check it in **Turn Windows features on or off**.
+**How `cleanup check` reports it:** it does **not** detect it, because it is an optional
+feature, not a registry value, and `cleanup check` has no rule for optional features. Check it in **Turn Windows features on or off**.
 
 ## Disabling Windows Update or Microsoft Defender
 
@@ -163,3 +182,21 @@ antivirus. Scripts often do this with policies that are hard to find later.
   (Defender off by policy; current Windows ignores it while Tamper Protection is on).
 - The Windows Update, Update Orchestrator, Defender, Security and firewall services
   when disabled (see "Disabling services").
+
+## Tweaks left out because Microsoft does not document them
+
+These were planned for the catalog but dropped, because Microsoft documentation
+could not confirm where Windows stores them or what they do. FormatKit does not
+apply them, and `cleanup check` does **not** detect them, for the same reason.
+
+- **Suggestions and ads in Start, the lock screen and Settings, tips notifications,
+  and silently installed suggested apps** (`ContentDeliveryManager` values such as
+  `SubscribedContent-338388Enabled` and `SilentInstalledAppsEnabled`). The documented
+  policies for these work only on Enterprise and Education. Turn them off in Settings
+  instead.
+- **Hardware-accelerated GPU scheduling** (`HwSchMode`). Microsoft documents only the
+  switch in Settings > System > Display > Graphics.
+- **Network throttling** (`NetworkThrottlingIndex`). The only Microsoft article was
+  retired.
+- **Game Bar background recording** (`AppCaptureEnabled`, `GameDVR_Enabled`). Turn it
+  off in Settings > Gaming > Captures.

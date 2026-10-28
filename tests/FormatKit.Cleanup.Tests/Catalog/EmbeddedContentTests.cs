@@ -10,8 +10,8 @@ public class EmbeddedContentTests
     private static readonly string[] SpecItemIds =
     [
         "apps.clipchamp", "apps.solitaire", "apps.news", "apps.weather", "apps.get-help", "apps.tips",
-        "apps.feedback-hub", "apps.power-automate", "apps.teams-personal",
-        "apps.xbox", "apps.phone-link", "apps.todo",
+        "apps.feedback-hub", "apps.power-automate",
+        "apps.teams", "apps.xbox", "apps.phone-link", "apps.todo",
         "privacy.advertising-id", "privacy.tailored-experiences", "privacy.start-suggestions",
         "privacy.lock-screen-tips", "privacy.settings-suggestions", "privacy.tips-notifications",
         "privacy.silent-app-installs", "privacy.activity-history", "privacy.inking-typing",
@@ -34,7 +34,14 @@ public class EmbeddedContentTests
         "apps.tips",
         "privacy.start-suggestions", "privacy.lock-screen-tips", "privacy.settings-suggestions",
         "privacy.tips-notifications", "privacy.silent-app-installs",
-        "performance.gpu-scheduling", "performance.network-throttling",
+        "performance.gpu-scheduling", "performance.network-throttling", "performance.game-bar-recording",
+    ];
+
+    /// <summary>The contested items of spec 7.3 that survived verification.</summary>
+    private static readonly string[] ContestedItemIds =
+    [
+        "performance.system-responsiveness", "performance.games-task-priority",
+        "performance.priority-separation", "performance.power-throttling-off",
     ];
 
     /// <summary>Protected services whose Windows default is already Disabled, so a rule would always fire.</summary>
@@ -73,6 +80,23 @@ public class EmbeddedContentTests
         Assert.All(
             CleanupCatalog.LoadEmbedded().Items.Where(i => i.Contested),
             item => Assert.Equal(CleanupLevel.Aggressive, item.Level));
+
+    [Fact]
+    public void Contested_items_are_exactly_the_expected_ones() =>
+        Assert.Equal(
+            ContestedItemIds.Order(StringComparer.Ordinal),
+            CleanupCatalog.LoadEmbedded().Items.Where(i => i.Contested).Select(i => i.Id).Order(StringComparer.Ordinal));
+
+    [Fact]
+    public void Every_contested_item_has_a_registry_value_rule()
+    {
+        var rules = KnownIssues.LoadEmbedded().Issues.Select(i => i.Rule).OfType<RegistryValueRule>().ToList();
+
+        Assert.All(CleanupCatalog.LoadEmbedded().Items.Where(i => i.Contested), item => Assert.Contains(rules, rule =>
+            item.Actions.OfType<RegistryAction>().Any(action =>
+                string.Equals(action.Path, rule.Path, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(action.Name, rule.Name, StringComparison.OrdinalIgnoreCase))));
+    }
 
     [Fact]
     public void Known_issues_are_valid() =>

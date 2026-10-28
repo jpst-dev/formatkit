@@ -90,13 +90,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Time (W32Time) is disabled",
-          "breaks": "The clock is no longer synchronized, which can break sign-in, HTTPS and updates.",
+          "title": "The Windows Time service (W32Time) is disabled",
+          "breaks": "The clock is no longer synchronized, which can break sign-in, HTTPS and updates. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config W32Time start= demand"
         },
         "pt-BR": {
           "title": "O serviço Horário do Windows (W32Time) está desativado",
-          "breaks": "O relógio deixa de ser sincronizado, o que pode quebrar login, HTTPS e atualizações.",
+          "breaks": "O relógio deixa de ser sincronizado, o que pode quebrar login, HTTPS e atualizações. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config W32Time start= demand"
         }
       }
@@ -110,13 +110,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Update (wuauserv) is disabled",
-          "breaks": "Windows and driver updates, including security fixes, are no longer installed.",
+          "title": "The Windows Update service (wuauserv) is disabled",
+          "breaks": "Windows and driver updates, including security fixes, are no longer installed. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config wuauserv start= demand"
         },
         "pt-BR": {
           "title": "O serviço Windows Update (wuauserv) está desativado",
-          "breaks": "Atualizações do Windows e de drivers, incluindo correções de segurança, deixam de ser instaladas.",
+          "breaks": "Atualizações do Windows e de drivers, incluindo correções de segurança, deixam de ser instaladas. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config wuauserv start= demand"
         }
       }
@@ -130,14 +130,14 @@
       },
       "text": {
         "en": {
-          "title": "Service Update Orchestrator Service (UsoSvc) is disabled",
+          "title": "The Update Orchestrator service (UsoSvc) is disabled",
           "breaks": "Windows Update can no longer scan, download or install updates.",
-          "fix": "sc.exe config UsoSvc start= demand"
+          "fix": "sc.exe config UsoSvc start= delayed-auto"
         },
         "pt-BR": {
-          "title": "O serviço Serviço Orquestrador de Atualizações (UsoSvc) está desativado",
+          "title": "O serviço Orquestrador de Atualizações (UsoSvc) está desativado",
           "breaks": "O Windows Update não consegue mais procurar, baixar ou instalar atualizações.",
-          "fix": "sc.exe config UsoSvc start= demand"
+          "fix": "sc.exe config UsoSvc start= delayed-auto"
         }
       }
     },
@@ -150,13 +150,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Background Intelligent Transfer Service (BITS) is disabled",
-          "breaks": "Windows Update, the Microsoft Store and other apps cannot download in the background.",
+          "title": "The Background Intelligent Transfer service (BITS) is disabled",
+          "breaks": "Windows Update, the Microsoft Store and other apps cannot download in the background. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config BITS start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Transferência Inteligente de Plano de Fundo (BITS) está desativado",
-          "breaks": "O Windows Update, a Microsoft Store e outros apps não conseguem baixar em segundo plano.",
+          "title": "O serviço de Transferência Inteligente de Plano de Fundo (BITS) está desativado",
+          "breaks": "O Windows Update, a Microsoft Store e outros apps não conseguem baixar em segundo plano. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config BITS start= demand"
         }
       }
@@ -170,12 +170,12 @@
       },
       "text": {
         "en": {
-          "title": "Service Cryptographic Services (CryptSvc) is disabled",
+          "title": "Cryptographic Services (CryptSvc) are disabled",
           "breaks": "Signature checks fail, so updates, drivers and app installs can fail.",
           "fix": "sc.exe config CryptSvc start= auto"
         },
         "pt-BR": {
-          "title": "O serviço Serviços de Criptografia (CryptSvc) está desativado",
+          "title": "Os Serviços de Criptografia (CryptSvc) estão desativados",
           "breaks": "A verificação de assinaturas falha, então atualizações, drivers e instalação de apps podem falhar.",
           "fix": "sc.exe config CryptSvc start= auto"
         }
@@ -190,13 +190,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Modules Installer (TrustedInstaller) is disabled",
-          "breaks": "Updates and Windows features cannot be installed or removed.",
+          "title": "The Windows Modules Installer service (TrustedInstaller) is disabled",
+          "breaks": "Updates and Windows features cannot be installed or removed. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config TrustedInstaller start= demand"
         },
         "pt-BR": {
           "title": "O serviço Instalador de Módulos do Windows (TrustedInstaller) está desativado",
-          "breaks": "Atualizações e recursos do Windows não podem ser instalados nem removidos.",
+          "breaks": "Atualizações e recursos do Windows não podem ser instalados nem removidos. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config TrustedInstaller start= demand"
         }
       }
@@ -210,13 +210,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Optimize drives (defragsvc) is disabled",
-          "breaks": "Drives are no longer optimized, and SSDs no longer get TRIM.",
+          "title": "The Optimize drives service (defragsvc) is disabled",
+          "breaks": "Drives are no longer optimized, and SSDs no longer get TRIM. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config defragsvc start= demand"
         },
         "pt-BR": {
           "title": "O serviço Otimizar unidades (defragsvc) está desativado",
-          "breaks": "As unidades deixam de ser otimizadas, e os SSDs deixam de receber TRIM.",
+          "breaks": "As unidades deixam de ser otimizadas, e os SSDs deixam de receber TRIM. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config defragsvc start= demand"
         }
       }
@@ -230,13 +230,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Microsoft Store Install Service (InstallService) is disabled",
-          "breaks": "The Microsoft Store and winget cannot install or update Store apps.",
+          "title": "The Microsoft Store Install service (InstallService) is disabled",
+          "breaks": "The Microsoft Store and winget cannot install or update Store apps. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config InstallService start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Instalação da Microsoft Store (InstallService) está desativado",
-          "breaks": "A Microsoft Store e o winget não conseguem instalar nem atualizar apps da Store.",
+          "title": "O serviço de Instalação da Microsoft Store (InstallService) está desativado",
+          "breaks": "A Microsoft Store e o winget não conseguem instalar nem atualizar apps da Store. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config InstallService start= demand"
         }
       }
@@ -250,14 +250,14 @@
       },
       "text": {
         "en": {
-          "title": "Service Client License Service (ClipSVC) is disabled",
-          "breaks": "Store apps cannot check their licenses and may not open.",
-          "fix": "sc.exe config ClipSVC start= demand"
+          "title": "The Client License service (ClipSVC) is disabled",
+          "breaks": "Store apps cannot check their licenses and may not open. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\ClipSVC\" /v Start /t REG_DWORD /d 3 /f"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Licença de Cliente (ClipSVC) está desativado",
-          "breaks": "Apps da Store não conseguem verificar a licença e podem não abrir.",
-          "fix": "sc.exe config ClipSVC start= demand"
+          "title": "O serviço de Licença de Cliente (ClipSVC) está desativado",
+          "breaks": "Apps da Store não conseguem verificar a licença e podem não abrir. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\ClipSVC\" /v Start /t REG_DWORD /d 3 /f"
         }
       }
     },
@@ -270,14 +270,14 @@
       },
       "text": {
         "en": {
-          "title": "Service AppX Deployment Service (AppXSvc) is disabled",
+          "title": "The AppX Deployment service (AppXSvc) is disabled",
           "breaks": "Store apps cannot be installed, updated or removed.",
-          "fix": "sc.exe config AppXSvc start= demand"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\AppXSvc\" /v Start /t REG_DWORD /d 2 /f"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Implantação AppX (AppXSvc) está desativado",
+          "title": "O serviço de Implantação AppX (AppXSvc) está desativado",
           "breaks": "Apps da Store não podem ser instalados, atualizados nem removidos.",
-          "fix": "sc.exe config AppXSvc start= demand"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\AppXSvc\" /v Start /t REG_DWORD /d 2 /f"
         }
       }
     },
@@ -290,13 +290,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows License Manager Service (LicenseManager) is disabled",
-          "breaks": "Store apps cannot check their licenses and may not open.",
+          "title": "The Windows License Manager service (LicenseManager) is disabled",
+          "breaks": "Store apps cannot check their licenses and may not open. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config LicenseManager start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço Gerenciador de Licenças do Windows (LicenseManager) está desativado",
-          "breaks": "Apps da Store não conseguem verificar a licença e podem não abrir.",
+          "title": "O serviço Gerenciador de Licenças do Windows (LicenseManager) está desativado",
+          "breaks": "Apps da Store não conseguem verificar a licença e podem não abrir. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config LicenseManager start= demand"
         }
       }
@@ -310,12 +310,12 @@
       },
       "text": {
         "en": {
-          "title": "Service Microsoft Defender Antivirus Service (WinDefend) is disabled",
+          "title": "The Microsoft Defender Antivirus service (WinDefend) is disabled",
           "breaks": "The PC has no antivirus protection from Microsoft Defender.",
           "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WinDefend\" /v Start /t REG_DWORD /d 2 /f"
         },
         "pt-BR": {
-          "title": "O serviço Serviço Microsoft Defender Antivírus (WinDefend) está desativado",
+          "title": "O serviço Microsoft Defender Antivírus (WinDefend) está desativado",
           "breaks": "O PC fica sem a proteção antivírus do Microsoft Defender.",
           "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WinDefend\" /v Start /t REG_DWORD /d 2 /f"
         }
@@ -330,14 +330,14 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Security Service (SecurityHealthService) is disabled",
+          "title": "The Windows Security service (SecurityHealthService) is disabled",
           "breaks": "The Windows Security app cannot show or manage protection status.",
-          "fix": "sc.exe config SecurityHealthService start= demand"
+          "fix": "No administrator command can restore this service, because Windows protects its settings. Repair Windows in place: Settings > System > Recovery > Fix problems using Windows Update (open it with: Start-Process ms-settings:recovery)."
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Segurança do Windows (SecurityHealthService) está desativado",
+          "title": "O serviço de Segurança do Windows (SecurityHealthService) está desativado",
           "breaks": "O app Segurança do Windows não consegue mostrar nem gerenciar o estado da proteção.",
-          "fix": "sc.exe config SecurityHealthService start= demand"
+          "fix": "Nenhum comando de administrador consegue restaurar este serviço, porque o Windows protege as configurações dele. Repare o Windows sem apagar seus arquivos: Configurações > Sistema > Recuperação > Corrigir problemas usando o Windows Update (abra com: Start-Process ms-settings:recovery)."
         }
       }
     },
@@ -350,14 +350,14 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Defender Firewall (mpssvc) is disabled",
+          "title": "The Windows Defender Firewall service (mpssvc) is disabled",
           "breaks": "The firewall is off, and apps that add firewall rules can fail to install.",
-          "fix": "sc.exe config mpssvc start= auto"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\mpssvc\" /v Start /t REG_DWORD /d 2 /f"
         },
         "pt-BR": {
           "title": "O serviço Firewall do Windows Defender (mpssvc) está desativado",
           "breaks": "O firewall fica desligado, e apps que criam regras de firewall podem falhar na instalação.",
-          "fix": "sc.exe config mpssvc start= auto"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\mpssvc\" /v Start /t REG_DWORD /d 2 /f"
         }
       }
     },
@@ -370,14 +370,14 @@
       },
       "text": {
         "en": {
-          "title": "Service Base Filtering Engine (BFE) is disabled",
+          "title": "The Base Filtering Engine service (BFE) is disabled",
           "breaks": "The firewall, IPsec and many VPNs stop working.",
-          "fix": "sc.exe config BFE start= auto"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\BFE\" /v Start /t REG_DWORD /d 2 /f"
         },
         "pt-BR": {
           "title": "O serviço Mecanismo de Filtragem Base (BFE) está desativado",
           "breaks": "O firewall, o IPsec e muitas VPNs param de funcionar.",
-          "fix": "sc.exe config BFE start= auto"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\BFE\" /v Start /t REG_DWORD /d 2 /f"
         }
       }
     },
@@ -390,7 +390,7 @@
       },
       "text": {
         "en": {
-          "title": "Service DNS Client (Dnscache) is disabled",
+          "title": "The DNS Client service (Dnscache) is disabled",
           "breaks": "Name resolution gets slower and some network features fail.",
           "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Dnscache\" /v Start /t REG_DWORD /d 2 /f"
         },
@@ -410,7 +410,7 @@
       },
       "text": {
         "en": {
-          "title": "Service DHCP Client (Dhcp) is disabled",
+          "title": "The DHCP Client service (Dhcp) is disabled",
           "breaks": "The PC cannot get an IP address automatically, so most networks stop working.",
           "fix": "sc.exe config Dhcp start= auto"
         },
@@ -430,13 +430,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Network Location Awareness (NlaSvc) is disabled",
-          "breaks": "Windows cannot tell which network it is on, so firewall profiles and the network icon break.",
+          "title": "The Network Location Awareness service (NlaSvc) is disabled",
+          "breaks": "Windows cannot tell which network it is on, so firewall profiles and the network icon break. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config NlaSvc start= demand"
         },
         "pt-BR": {
           "title": "O serviço Reconhecimento de Local de Rede (NlaSvc) está desativado",
-          "breaks": "O Windows não sabe em qual rede está, então os perfis do firewall e o ícone de rede quebram.",
+          "breaks": "O Windows não sabe em qual rede está, então os perfis do firewall e o ícone de rede quebram. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config NlaSvc start= demand"
         }
       }
@@ -450,13 +450,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Device Setup Manager (DsmSvc) is disabled",
-          "breaks": "New devices may not get their drivers and apps installed.",
+          "title": "The Device Setup Manager service (DsmSvc) is disabled",
+          "breaks": "New devices may not get their drivers and apps installed. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config DsmSvc start= demand"
         },
         "pt-BR": {
           "title": "O serviço Gerenciador de Configuração de Dispositivos (DsmSvc) está desativado",
-          "breaks": "Dispositivos novos podem não receber a instalação de drivers e apps.",
+          "breaks": "Dispositivos novos podem não receber a instalação de drivers e apps. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config DsmSvc start= demand"
         }
       }
@@ -470,13 +470,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Device Install Service (DeviceInstall) is disabled",
-          "breaks": "Windows cannot install drivers for new or changed hardware.",
+          "title": "The Device Install service (DeviceInstall) is disabled",
+          "breaks": "Windows cannot install drivers for new or changed hardware. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config DeviceInstall start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Instalação de Dispositivo (DeviceInstall) está desativado",
-          "breaks": "O Windows não consegue instalar drivers para hardware novo ou alterado.",
+          "title": "O serviço de Instalação de Dispositivo (DeviceInstall) está desativado",
+          "breaks": "O Windows não consegue instalar drivers para hardware novo ou alterado. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config DeviceInstall start= demand"
         }
       }
@@ -490,13 +490,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Plug and Play (PlugPlay) is disabled",
-          "breaks": "Windows cannot detect or set up hardware changes.",
+          "title": "The Plug and Play service (PlugPlay) is disabled",
+          "breaks": "Windows cannot detect or set up hardware changes. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config PlugPlay start= demand"
         },
         "pt-BR": {
           "title": "O serviço Plug and Play (PlugPlay) está desativado",
-          "breaks": "O Windows não consegue detectar nem configurar mudanças de hardware.",
+          "breaks": "O Windows não consegue detectar nem configurar mudanças de hardware. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config PlugPlay start= demand"
         }
       }
@@ -510,7 +510,7 @@
       },
       "text": {
         "en": {
-          "title": "Service Power (Power) is disabled",
+          "title": "The Power service (Power) is disabled",
           "breaks": "Power plans and power settings stop working.",
           "fix": "sc.exe config Power start= auto"
         },
@@ -530,14 +530,14 @@
       },
       "text": {
         "en": {
-          "title": "Service Task Scheduler (Schedule) is disabled",
+          "title": "The Task Scheduler service (Schedule) is disabled",
           "breaks": "Scheduled tasks, including Windows maintenance and many app updaters, no longer run.",
-          "fix": "sc.exe config Schedule start= auto"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Schedule\" /v Start /t REG_DWORD /d 2 /f"
         },
         "pt-BR": {
           "title": "O serviço Agendador de Tarefas (Schedule) está desativado",
           "breaks": "Tarefas agendadas, incluindo a manutenção do Windows e muitos atualizadores de apps, deixam de rodar.",
-          "fix": "sc.exe config Schedule start= auto"
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Schedule\" /v Start /t REG_DWORD /d 2 /f"
         }
       }
     },
@@ -550,7 +550,7 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Event Log (EventLog) is disabled",
+          "title": "The Windows Event Log service (EventLog) is disabled",
           "breaks": "Windows no longer records events, and services that depend on the log fail.",
           "fix": "sc.exe config EventLog start= auto"
         },
@@ -570,13 +570,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Xbox Accessory Management Service (XboxGipSvc) is disabled",
-          "breaks": "Xbox controllers and accessories may not work or update.",
+          "title": "The Xbox Accessory Management service (XboxGipSvc) is disabled",
+          "breaks": "Xbox controllers and accessories may not work or update. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config XboxGipSvc start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Gerenciamento de Acessórios do Xbox (XboxGipSvc) está desativado",
-          "breaks": "Controles e acessórios do Xbox podem não funcionar nem atualizar.",
+          "title": "O serviço de Gerenciamento de Acessórios do Xbox (XboxGipSvc) está desativado",
+          "breaks": "Controles e acessórios do Xbox podem não funcionar nem atualizar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config XboxGipSvc start= demand"
         }
       }
@@ -590,13 +590,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Xbox Live Auth Manager (XblAuthManager) is disabled",
-          "breaks": "You cannot sign in to Xbox services in games and apps.",
+          "title": "The Xbox Live Auth Manager service (XblAuthManager) is disabled",
+          "breaks": "You cannot sign in to Xbox services in games and apps. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config XblAuthManager start= demand"
         },
         "pt-BR": {
           "title": "O serviço Gerenciador de Autenticação do Xbox Live (XblAuthManager) está desativado",
-          "breaks": "Você não consegue entrar nos serviços Xbox em jogos e apps.",
+          "breaks": "Você não consegue entrar nos serviços Xbox em jogos e apps. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config XblAuthManager start= demand"
         }
       }
@@ -610,13 +610,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Xbox Live Game Save (XblGameSave) is disabled",
-          "breaks": "Game saves are no longer synced to the cloud.",
+          "title": "The Xbox Live Game Save service (XblGameSave) is disabled",
+          "breaks": "Game saves are no longer synced to the cloud. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config XblGameSave start= demand"
         },
         "pt-BR": {
           "title": "O serviço Salvamento de Jogos do Xbox Live (XblGameSave) está desativado",
-          "breaks": "Os jogos salvos deixam de ser sincronizados com a nuvem.",
+          "breaks": "Os jogos salvos deixam de ser sincronizados com a nuvem. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config XblGameSave start= demand"
         }
       }
@@ -630,13 +630,13 @@
       },
       "text": {
         "en": {
-          "title": "Service IKE and AuthIP IPsec Keying Modules (IKEEXT) is disabled",
-          "breaks": "IKEv2 and L2TP/IPsec VPNs cannot connect.",
+          "title": "The IKE and AuthIP IPsec Keying Modules service (IKEEXT) is disabled",
+          "breaks": "IKEv2 and L2TP/IPsec VPNs cannot connect. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config IKEEXT start= demand"
         },
         "pt-BR": {
           "title": "O serviço Módulos de Criação de Chave IPsec IKE e AuthIP (IKEEXT) está desativado",
-          "breaks": "VPNs IKEv2 e L2TP/IPsec não conseguem conectar.",
+          "breaks": "VPNs IKEv2 e L2TP/IPsec não conseguem conectar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config IKEEXT start= demand"
         }
       }
@@ -650,13 +650,13 @@
       },
       "text": {
         "en": {
-          "title": "Service SSDP Discovery (SSDPSRV) is disabled",
-          "breaks": "Network devices such as printers, media servers and TVs are not discovered.",
+          "title": "The SSDP Discovery service (SSDPSRV) is disabled",
+          "breaks": "Network devices such as printers, media servers and TVs are not discovered. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config SSDPSRV start= demand"
         },
         "pt-BR": {
           "title": "O serviço Descoberta SSDP (SSDPSRV) está desativado",
-          "breaks": "Dispositivos de rede como impressoras, servidores de mídia e TVs não são encontrados.",
+          "breaks": "Dispositivos de rede como impressoras, servidores de mídia e TVs não são encontrados. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config SSDPSRV start= demand"
         }
       }
@@ -670,13 +670,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Windows Image Acquisition (WIA) (StiSvc) is disabled",
-          "breaks": "Scanners and some cameras stop working.",
+          "title": "The Windows Image Acquisition (WIA) service (StiSvc) is disabled",
+          "breaks": "Scanners and some cameras stop working. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config StiSvc start= demand"
         },
         "pt-BR": {
           "title": "O serviço Aquisição de Imagens do Windows (WIA) (StiSvc) está desativado",
-          "breaks": "Scanners e algumas câmeras param de funcionar.",
+          "breaks": "Scanners e algumas câmeras param de funcionar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config StiSvc start= demand"
         }
       }
@@ -690,13 +690,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Smart Card (SCardSvr) is disabled",
-          "breaks": "Smart cards and some security keys cannot be used.",
+          "title": "The Smart Card service (SCardSvr) is disabled",
+          "breaks": "Smart cards and some security keys cannot be used. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config SCardSvr start= demand"
         },
         "pt-BR": {
           "title": "O serviço Cartão Inteligente (SCardSvr) está desativado",
-          "breaks": "Cartões inteligentes e algumas chaves de segurança não podem ser usados.",
+          "breaks": "Cartões inteligentes e algumas chaves de segurança não podem ser usados. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config SCardSvr start= demand"
         }
       }
@@ -710,13 +710,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Sensor Service (SensorService) is disabled",
-          "breaks": "Sensors such as screen rotation and automatic brightness stop working.",
+          "title": "The Sensor service (SensorService) is disabled",
+          "breaks": "Sensors such as screen rotation and automatic brightness stop working. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config SensorService start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Sensor (SensorService) está desativado",
-          "breaks": "Sensores como a rotação de tela e o brilho automático param de funcionar.",
+          "title": "O serviço de Sensor (SensorService) está desativado",
+          "breaks": "Sensores como a rotação de tela e o brilho automático param de funcionar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config SensorService start= demand"
         }
       }
@@ -730,13 +730,13 @@
       },
       "text": {
         "en": {
-          "title": "Service Hyper-V Host Compute Service (vmcompute) is disabled",
-          "breaks": "WSL 2, Windows Sandbox and containers cannot start.",
+          "title": "The Hyper-V Host Compute service (vmcompute) is disabled",
+          "breaks": "WSL 2, Windows Sandbox and containers cannot start. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config vmcompute start= demand"
         },
         "pt-BR": {
-          "title": "O serviço Serviço de Computação de Host do Hyper-V (vmcompute) está desativado",
-          "breaks": "O WSL 2, a Área Restrita do Windows e os contêineres não conseguem iniciar.",
+          "title": "O serviço de Computação de Host do Hyper-V (vmcompute) está desativado",
+          "breaks": "O WSL 2, a Área Restrita do Windows e os contêineres não conseguem iniciar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config vmcompute start= demand"
         }
       }
@@ -750,7 +750,7 @@
       },
       "text": {
         "en": {
-          "title": "Service Hyper-V Virtual Machine Management (vmms) is disabled",
+          "title": "The Hyper-V Virtual Machine Management service (vmms) is disabled",
           "breaks": "Hyper-V virtual machines cannot be managed or started.",
           "fix": "sc.exe config vmms start= auto"
         },
@@ -770,13 +770,13 @@
       },
       "text": {
         "en": {
-          "title": "Service LxssManager (LxssManager) is disabled",
-          "breaks": "WSL distributions cannot start.",
+          "title": "The LxssManager service (LxssManager) is disabled",
+          "breaks": "WSL distributions cannot start. The fix sets it to Manual, and Windows starts it when needed.",
           "fix": "sc.exe config LxssManager start= demand"
         },
         "pt-BR": {
           "title": "O serviço LxssManager (LxssManager) está desativado",
-          "breaks": "As distribuições do WSL não conseguem iniciar.",
+          "breaks": "As distribuições do WSL não conseguem iniciar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
           "fix": "sc.exe config LxssManager start= demand"
         }
       }
@@ -790,12 +790,12 @@
       },
       "text": {
         "en": {
-          "title": "Service WSL Service (WSLService) is disabled",
+          "title": "The WSL service (WSLService) is disabled",
           "breaks": "WSL distributions cannot start.",
           "fix": "sc.exe config WSLService start= auto"
         },
         "pt-BR": {
-          "title": "O serviço Serviço WSL (WSLService) está desativado",
+          "title": "O serviço WSL (WSLService) está desativado",
           "breaks": "As distribuições do WSL não conseguem iniciar.",
           "fix": "sc.exe config WSLService start= auto"
         }
@@ -858,12 +858,12 @@
         "en": {
           "title": "Memory Integrity is off",
           "breaks": "Malicious or vulnerable drivers can change the Windows kernel. Turning it back on needs a restart and drivers that support it.",
-          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled /t REG_DWORD /d 1 /f"
+          "fix": "Turn it on in Windows Security > Device security > Core isolation details > Memory integrity, which checks your drivers first. Only as a last resort, in an elevated PowerShell: reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled /t REG_DWORD /d 1 /f then restart. Warning: this skips the driver check, and an incompatible driver can stop Windows from starting."
         },
         "pt-BR": {
           "title": "A Integridade de Memória está desativada",
           "breaks": "Drivers maliciosos ou vulneráveis podem alterar o núcleo do Windows. Reativar exige reiniciar e drivers compatíveis.",
-          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled /t REG_DWORD /d 1 /f"
+          "fix": "Ative em Segurança do Windows > Segurança do dispositivo > Detalhes do isolamento de núcleo > Integridade de memória, que verifica seus drivers antes. Só como último recurso, no PowerShell como administrador: reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled /t REG_DWORD /d 1 /f e reinicie. Atenção: isto pula a verificação de drivers, e um driver incompatível pode impedir o Windows de iniciar."
         }
       }
     },
@@ -880,12 +880,12 @@
         "en": {
           "title": "Virtualization-based security is off",
           "breaks": "Memory Integrity and other protections that depend on VBS cannot run. Turning it back on needs a restart.",
-          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f"
+          "fix": "Turn on Memory integrity in Windows Security > Device security > Core isolation details, which checks your drivers first. Windows turns VBS on with it. Only as a last resort, in an elevated PowerShell: reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f then restart. Warning: this skips the driver check, and an incompatible driver can stop Windows from starting."
         },
         "pt-BR": {
           "title": "A segurança baseada em virtualização está desativada",
           "breaks": "A Integridade de Memória e outras proteções que dependem da VBS não conseguem rodar. Reativar exige reiniciar.",
-          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f"
+          "fix": "Ative a Integridade de memória em Segurança do Windows > Segurança do dispositivo > Detalhes do isolamento de núcleo, que verifica seus drivers antes. O Windows ativa a VBS junto. Só como último recurso, no PowerShell como administrador: reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f e reinicie. Atenção: isto pula a verificação de drivers, e um driver incompatível pode impedir o Windows de iniciar."
         }
       }
     },
