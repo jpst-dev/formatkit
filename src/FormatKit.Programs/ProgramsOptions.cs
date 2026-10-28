@@ -19,8 +19,15 @@ public sealed partial record ProgramsOptions(
     IReadOnlyList<WingetEntry> Winget,
     string? ImportFile,
     IReadOnlyList<DirectEntry> Direct,
-    IReadOnlyList<WingetEntry>? Imported = null)
+    IReadOnlyList<WingetEntry>? Imported = null,
+    IReadOnlyList<string>? ImportWarnings = null)
 {
+    /// <summary>Non-null view of <see cref="Imported"/>.</summary>
+    public IReadOnlyList<WingetEntry> ImportedPrograms => Imported ?? [];
+
+    /// <summary>Non-null view of <see cref="ImportWarnings"/>: entries skipped while reading the import file.</summary>
+    public IReadOnlyList<string> Warnings => ImportWarnings ?? [];
+
     private static readonly string[] KnownProperties =
         ["enabled", "acceptAgreements", "upgrade", "catalog", "winget", "importFile", "direct"];
 
@@ -56,6 +63,7 @@ public sealed partial record ProgramsOptions(
 
         string? importFile = null;
         IReadOnlyList<WingetEntry> imported = [];
+        var warnings = new List<string>();
         if (section.TryGetProperty("importFile", out var importEl))
         {
             var importPath = $"{path}.importFile";
@@ -75,7 +83,7 @@ public sealed partial record ProgramsOptions(
                 {
                     try
                     {
-                        imported = WingetImportFile.Read(files.ReadAllText(importFile), _ => { });
+                        imported = WingetImportFile.Read(files.ReadAllText(importFile), warnings.Add);
                     }
                     catch (InvalidDataException ex)
                     {
@@ -96,7 +104,7 @@ public sealed partial record ProgramsOptions(
         if (errors.Count > 0)
             return (null, errors);
 
-        return (new ProgramsOptions(accept, upgrade, catalogIds, winget, importFile, direct, imported), errors);
+        return (new ProgramsOptions(accept, upgrade, catalogIds, winget, importFile, direct, imported, warnings), errors);
     }
 
     private static bool ReadBool(JsonElement section, string name, string path, List<ProfileError> errors)

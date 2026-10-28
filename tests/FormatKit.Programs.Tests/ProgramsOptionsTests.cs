@@ -148,6 +148,19 @@ public class ProgramsOptionsTests
         AssertError("""{ "importFile": "C:\\nope.json" }""", $"{Path}.importFile", ProfileErrorCode.FileNotFound);
 
     [Fact]
+    public void Import_file_skips_are_reported_as_warnings_not_errors()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed(@"C:\w.json", """{ "Sources": [ { "Packages": [ { "PackageIdentifier": "Good.Id" }, { "PackageIdentifier": "bad id" } ], "SourceDetails": { "Name": "winget" } }, { "Packages": [ { "PackageIdentifier": "X.Y" } ], "SourceDetails": { "Name": "custom" } } ] }""");
+
+        var (options, errors) = Parse("""{ "acceptAgreements": true, "importFile": "C:\w.json" }""", files);
+
+        Assert.Empty(errors);
+        Assert.Equal(["Good.Id"], options!.ImportedPrograms.Select(e => e.Id));
+        Assert.Equal(2, options.Warnings.Count);
+    }
+
+    [Fact]
     public void Malformed_import_file_is_error()
     {
         var files = new InMemoryFileSystem();
