@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "name": "Programs example",
+  "modules": {
+    "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] },
+    "programs": {
+      "enabled": true,
+      "acceptAgreements": true,
+      "upgrade": false,
+      "catalog": ["browsers.firefox", "utilities.7zip", "development.vscode"],
+      "winget": [
+        { "id": "Notepad++.Notepad++" }
+      ]
+    }
+  }
+}

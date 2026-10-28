@@ -11,6 +11,8 @@ using FormatKit.Core.Steps;
 using FormatKit.Core.Tests.Fakes;
 using FormatKit.Drivers;
 using FormatKit.Drivers.Catalog;
+using FormatKit.Programs;
+using FormatKit.Programs.Catalog;
 
 namespace FormatKit.Cli.Tests;
 
@@ -560,6 +562,20 @@ public sealed class CliAppTests : IDisposable
         ]);
 
         var result = loader.Load(ProfilePath("cleanup-balanced.json"));
+
+        Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
+    }
+
+    [Fact]
+    public void Programs_example_profile_is_valid()
+    {
+        var loader = new ProfileLoader(
+        [
+            new DriversModule(VendorCatalog.LoadEmbedded(), TimeSpan.Zero),
+            new ProgramsModule(ProgramCatalog.LoadEmbedded(), _paths, _fs),
+        ]);
+
+        var result = loader.Load(ProfilePath("programs-example.json"));
 
         Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
     }
