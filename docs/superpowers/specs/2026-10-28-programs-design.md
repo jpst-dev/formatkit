@@ -127,7 +127,10 @@ Validation (errors carry the JSON path, like the other modules):
 
 **User context:** items with `context: user` run the same winget command
 through `UserContextRunner` as the signed-in user. If nobody is signed in, the
-item is deferred to the resume run at logon instead of failing.
+item fails with the next action "sign in and run again". The engine never
+re-runs a finished step, and FormatKit always runs inside a signed-in session
+(CLI or the resume task at logon). This replaces an earlier "defer to logon"
+idea; see plan ruling P1.
 
 **Winget missing:** before the first winget item, the step checks `winget
 --version`. If missing, it tries the documented registration
@@ -148,8 +151,10 @@ Installer from the Microsoft Store"; direct items still run.
 **Reboots:** a "reboot required" item does not stop the step; the step reports
 `RebootRequired` at the end and the engine reboots as for drivers.
 
-**Resume and cancellation:** completed items are recorded in the run state and
-skipped on resume; pending and failed items run again. Ctrl+C stops after the
+**Resume and cancellation:** a step interrupted by a crash runs again on
+resume. Winget items already installed report "already installed". Direct
+items are recorded after success in `%ProgramData%\FormatKit\programs-direct.json`
+(key `name|sha256`, or `name|path`) and skipped when recorded (plan ruling P2). Ctrl+C stops after the
 current item; a running installer is never killed.
 
 **Exit code:** any failed item → step "completed with failures" → run exit 1,
@@ -197,7 +202,7 @@ None of them needs elevation.
 ## 9. Report and logs
 
 Each program is a line in the step details: installed, already installed, up
-to date, upgraded, installed (reboot required), deferred to logon, or failed
+to date, upgraded, installed (reboot required), or failed
 with the reason. The log has the full winget or installer output.
 
 ## 10. Testing
@@ -212,7 +217,7 @@ with the reason. The log has the full winget or installer output.
   - Profile validation: `acceptAgreements`, https and hash rules, unsafe ids,
     unknown catalog ids, `importFile` parsing and duplicates.
   - `UserContextRunner` with fake scheduled tasks and user session: success,
-    failure code, nobody signed in → deferred.
+    failure code; nobody signed in → failed with "sign in and run again".
   - Steps: failures do not stop other items; resume skips completed items.
 - **Catalog:** schema valid, unique ids, both languages present, dropped ids
   listed in the test.
