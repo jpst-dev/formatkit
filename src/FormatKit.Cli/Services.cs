@@ -46,7 +46,9 @@ public static class Services
             new PowerCfg(processes),
             new PowerShellAppxPackages(processes),
             new PowerShellOptionalFeatures(processes),
-            new WindowsUserSession());
+            new WindowsUserSession(),
+            new DirectInstaller(new HttpDownloader(), processes, files, paths),
+            new ScheduledTaskUserContextRunner(processes));
 
         return new CliEnvironment(
             services,

@@ -17,12 +17,15 @@ public static class TestServices
         FakePowerSchemes? power = null,
         FakeAppxPackages? appx = null,
         FakeOptionalFeatures? features = null,
-        FakeUserSession? session = null)
+        FakeUserSession? session = null,
+        DirectInstaller? direct = null,
+        IUserContextRunner? userContext = null)
     {
         processes ??= new FakeProcessRunner();
+        files ??= new InMemoryFileSystem();
         return new ServiceSet(
             processes,
-            files ?? new InMemoryFileSystem(),
+            files,
             hardware ?? new FakeHardwareInfo(FakeHardwareInfo.Sample()),
             wu ?? new FakeWindowsUpdateClient(),
             network ?? new FakeNetworkProbe(true),
@@ -33,7 +36,9 @@ public static class TestServices
             power ?? new FakePowerSchemes(),
             appx ?? new FakeAppxPackages(),
             features ?? new FakeOptionalFeatures(),
-            session ?? new FakeUserSession());
+            session ?? new FakeUserSession(),
+            direct ?? new DirectInstaller(new FakeHttpDownloader(files), processes, files, new AppPaths(@"C:\FormatKitTest")),
+            userContext ?? new FakeUserContextRunner());
     }
 
     public static StepContext Context(ServiceSet services) =>

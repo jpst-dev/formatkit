@@ -17,4 +17,6 @@ public sealed record ServiceSet(
     IPowerSchemes Power,
     IAppxPackages Appx,
     IOptionalFeatures Features,
-    IUserSession UserSession);
+    IUserSession UserSession,
+    DirectInstaller Direct,
+    IUserContextRunner UserContext);
