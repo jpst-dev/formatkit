@@ -22,4 +22,29 @@
   <data name="Import_NoSources" xml:space="preserve"><value>The winget export file has no &quot;Sources&quot; list.</value></data>
   <data name="Import_SkippedSource" xml:space="preserve"><value>Skipped winget export source &quot;{0}&quot;: only winget and msstore are supported.</value></data>
   <data name="Import_SkippedId" xml:space="preserve"><value>Skipped winget export package &quot;{0}&quot;: unsafe id.</value></data>
+  <data name="Step_Title_Browsers" xml:space="preserve"><value>Programs: browsers</value></data>
+  <data name="Step_Title_Communication" xml:space="preserve"><value>Programs: communication</value></data>
+  <data name="Step_Title_Games" xml:space="preserve"><value>Programs: games</value></data>
+  <data name="Step_Title_Media" xml:space="preserve"><value>Programs: media</value></data>
+  <data name="Step_Title_Utilities" xml:space="preserve"><value>Programs: utilities</value></data>
+  <data name="Step_Title_Productivity" xml:space="preserve"><value>Programs: productivity</value></data>
+  <data name="Step_Title_Development" xml:space="preserve"><value>Programs: development</value></data>
+  <data name="Step_Title_Other" xml:space="preserve"><value>Programs: other</value></data>
+  <data name="Step_Title_Direct" xml:space="preserve"><value>Programs: direct installers</value></data>
+  <data name="Item_Installed" xml:space="preserve"><value>installed</value></data>
+  <data name="Item_AlreadyInstalled" xml:space="preserve"><value>already installed</value></data>
+  <data name="Item_UpToDate" xml:space="preserve"><value>already up to date</value></data>
+  <data name="Item_Upgraded" xml:space="preserve"><value>upgraded</value></data>
+  <data name="Item_RebootRequired" xml:space="preserve"><value>installed, a reboot is required</value></data>
+  <data name="Item_Failed_NotFound" xml:space="preserve"><value>failed: package not found</value></data>
+  <data name="Item_Failed_NoNetwork" xml:space="preserve"><value>failed: no network or source unavailable</value></data>
+  <data name="Item_Failed_Policy" xml:space="preserve"><value>failed: blocked by policy</value></data>
+  <data name="Item_Failed_Code" xml:space="preserve"><value>failed (exit code {0})</value></data>
+  <data name="Item_Failed_Timeout" xml:space="preserve"><value>failed: timed out</value></data>
+  <data name="Item_Failed_HashMismatch" xml:space="preserve"><value>failed: SHA-256 hash mismatch</value></data>
+  <data name="Item_Failed_Download" xml:space="preserve"><value>failed: download failed</value></data>
+  <data name="Item_Failed_NoUser" xml:space="preserve"><value>skipped: no user is signed in</value></data>
+  <data name="NextAction_WingetMissing" xml:space="preserve"><value>Install or repair App Installer (winget), then run again.</value></data>
+  <data name="NextAction_SeeLog" xml:space="preserve"><value>See the log for the failed programs, then run again.</value></data>
+  <data name="NextAction_SignIn" xml:space="preserve"><value>Sign in to Windows and run again.</value></data>
 </root>

@@ -22,4 +22,29 @@
   <data name="Import_NoSources" xml:space="preserve"><value>O arquivo de exporta&#231;&#227;o do winget n&#227;o tem a lista &quot;Sources&quot;.</value></data>
   <data name="Import_SkippedSource" xml:space="preserve"><value>Origem &quot;{0}&quot; da exporta&#231;&#227;o do winget ignorada: apenas winget e msstore s&#227;o suportados.</value></data>
   <data name="Import_SkippedId" xml:space="preserve"><value>Pacote &quot;{0}&quot; da exporta&#231;&#227;o do winget ignorado: id inseguro.</value></data>
+  <data name="Step_Title_Browsers" xml:space="preserve"><value>Programas: navegadores</value></data>
+  <data name="Step_Title_Communication" xml:space="preserve"><value>Programas: comunica&#231;&#227;o</value></data>
+  <data name="Step_Title_Games" xml:space="preserve"><value>Programas: jogos</value></data>
+  <data name="Step_Title_Media" xml:space="preserve"><value>Programas: m&#237;dia</value></data>
+  <data name="Step_Title_Utilities" xml:space="preserve"><value>Programas: utilit&#225;rios</value></data>
+  <data name="Step_Title_Productivity" xml:space="preserve"><value>Programas: produtividade</value></data>
+  <data name="Step_Title_Development" xml:space="preserve"><value>Programas: desenvolvimento</value></data>
+  <data name="Step_Title_Other" xml:space="preserve"><value>Programas: outros</value></data>
+  <data name="Step_Title_Direct" xml:space="preserve"><value>Programas: instaladores diretos</value></data>
+  <data name="Item_Installed" xml:space="preserve"><value>instalado</value></data>
+  <data name="Item_AlreadyInstalled" xml:space="preserve"><value>j&#225; instalado</value></data>
+  <data name="Item_UpToDate" xml:space="preserve"><value>j&#225; est&#225; atualizado</value></data>
+  <data name="Item_Upgraded" xml:space="preserve"><value>atualizado</value></data>
+  <data name="Item_RebootRequired" xml:space="preserve"><value>instalado, requer reinicializa&#231;&#227;o</value></data>
+  <data name="Item_Failed_NotFound" xml:space="preserve"><value>falhou: pacote n&#227;o encontrado</value></data>
+  <data name="Item_Failed_NoNetwork" xml:space="preserve"><value>falhou: sem rede ou fonte indispon&#237;vel</value></data>
+  <data name="Item_Failed_Policy" xml:space="preserve"><value>falhou: bloqueado por pol&#237;tica</value></data>
+  <data name="Item_Failed_Code" xml:space="preserve"><value>falhou (c&#243;digo de sa&#237;da {0})</value></data>
+  <data name="Item_Failed_Timeout" xml:space="preserve"><value>falhou: tempo esgotado</value></data>
+  <data name="Item_Failed_HashMismatch" xml:space="preserve"><value>falhou: hash SHA-256 n&#227;o confere</value></data>
+  <data name="Item_Failed_Download" xml:space="preserve"><value>falhou: erro no download</value></data>
+  <data name="Item_Failed_NoUser" xml:space="preserve"><value>ignorado: nenhum usu&#225;rio conectado</value></data>
+  <data name="NextAction_WingetMissing" xml:space="preserve"><value>Instale ou repare o Instalador de Aplicativo (winget) e execute novamente.</value></data>
+  <data name="NextAction_SeeLog" xml:space="preserve"><value>Veja o log para os programas que falharam e execute novamente.</value></data>
+  <data name="NextAction_SignIn" xml:space="preserve"><value>Entre no Windows e execute novamente.</value></data>
 </root>
