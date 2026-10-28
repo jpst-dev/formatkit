@@ -218,17 +218,26 @@ The VM needs internet and `winget` (App Installer). The signed-in user is the lo
    }
    ```
 
-   Run `.\formatkit.exe run --profile programs-mixed.json --dry-run`. **Expected:** the plan lists every program with its source; nothing is installed.
+   Run `.\formatkit.exe run --profile programs-mixed.json --dry-run`. **Expected:** the plan lists every program with its key and name (a `[user]` marker for the per-user ones); nothing is installed.
 4. Run `.\formatkit.exe run --profile programs-mixed.json` and accept the UAC prompt.
 
    **Expected:** exit code **0** (or 1 if the Store is unreachable; the report then names the failed item and the others still install). Firefox, Notepad++ and the direct installer's program appear in Settings > Apps. A reboot, if an installer asks for one, goes through the normal countdown and resume (scenario 4).
 5. In a **non-elevated** PowerShell as the signed-in user, run `winget list --id Spotify.Spotify`.
 
-   **Expected:** Spotify is listed. It was installed with `context: user` (a temporary scheduled task as the signed-in user), so it must not exist only under the administrator account. Also run `winget list --id SlackTechnologies.Slack` and `winget list --id Notion.Notion`: both are machine-scope MSIX packages and must be available for the signed-in user, not just provisioned.
+   **Expected:** Spotify is listed. It was installed with `context: user` (a temporary scheduled task as the signed-in user), so it must not exist only under the administrator account. Also run `winget list --id SlackTechnologies.Slack` and `winget list --id Notion.Notion`: both are installed machine-wide and must be available for the signed-in user, not only for the administrator session.
 6. Run the same command again.
 
-   **Expected:** exit code 0 and every program reports "already installed"; nothing is downloaded or run a second time (the direct item is skipped from `%ProgramData%\FormatKit\programs-direct.json`).
-7. With nobody signed in the `context: user` item cannot run. Optional: sign out, start the run from a resumed scheduled task, and check that the Spotify item fails with "sign in and run again" while the others still finish.
+   **Expected:** exit code 0 and nothing is downloaded or run a second time. Steps whose programs are all installed (and the direct step, from `%ProgramData%\FormatKit\programs-direct.json`) are skipped with "Nothing to do: already in place.". The media step still runs because the elevated check cannot see Spotify (installed per user), and reports Spotify as "already installed".
+7. Sign-in failure. Restore `clean`. In the VM console sign out (Start > sign out, or `logoff` in a console session), so nobody is signed in. From the host, run FormatKit through PowerShell Direct, using the VM credentials kept outside the repo (as in the other scenarios; do not write them in a file of the repo), with `C:\fk\formatkit.exe` and a `programs-signout.json` already copied into the VM beforehand, holding `browsers.firefox` in `catalog` and one `{ "id": "Spotify.Spotify", "context": "user" }` in `winget`:
+
+   ```powershell
+   $cred = Get-Credential   # the VM admin account
+   Invoke-Command -VMName <vm-name> -Credential $cred -ScriptBlock {
+       & C:\fk\formatkit.exe run --profile C:\fk\programs-signout.json
+   }
+   ```
+
+   **Expected:** the Spotify item fails with "Sign in to Windows and run again." as its next action, Firefox installs normally, and the exit code is **1**. Sign in again and run once more: Spotify installs and the run ends with 0.
 
 ## 11. Programs: wrong hash on a direct installer
 
@@ -254,7 +263,7 @@ The VM needs internet and `winget` (App Installer). The signed-in user is the lo
    Replace the url with a real, small installer download you trust.
 3. Run `.\formatkit.exe run --profile programs-badhash.json` and accept the UAC prompt.
 
-   **Expected:** the item fails with a hash mismatch message, exit code **1**. `Get-ChildItem C:\ProgramData\FormatKit\downloads` shows no installer file (a wrong hash deletes the download). Nothing ran: `Get-Process` shows no process of that installer (check while the run is going on and afterwards), and the program is not in Settings > Apps or in `Get-Package`. `%ProgramData%\FormatKit\programs-direct.json` has no entry for the item.
+   **Expected:** the item fails with a hash mismatch message, exit code **1**. `Get-ChildItem C:\ProgramData\FormatKit\downloads` shows no installer file (a wrong hash deletes the downloaded file; a local `path` file would never be deleted). Nothing ran: `Get-Process` shows no process of that installer (check while the run is going on and afterwards), and the program is not in Settings > Apps or in `Get-Package`. `%ProgramData%\FormatKit\programs-direct.json` has no entry for the item.
 4. Change `url` to `http://...`. **Expected:** the profile is rejected before anything runs, exit code **2**, with the JSON path of the error. Remove the `sha256` from a `url` item: same result.
 
 ## 12. Programs: export on one VM, import on another
@@ -281,7 +290,7 @@ The VM needs internet and `winget` (App Installer). The signed-in user is the lo
 
    Run `.\formatkit.exe run --profile programs-import.json --dry-run`. **Expected:** the plan lists the exported packages. Then run it for real and accept the UAC prompt.
 
-   **Expected:** the packages are installed (`winget list`); packages winget cannot find again are reported as failed items without stopping the others. A second run reports everything as "already installed". A missing file, or one that is not a `winget export` JSON, gives exit code 2.
+   **Expected:** the packages are installed (`winget list`); packages winget cannot find again are reported as failed items without stopping the others. A second run skips the fully installed steps with "Nothing to do: already in place." (items winget cannot reinstall fail again). A missing file, or one that is not a `winget export` JSON, gives exit code 2.
 4. Run `.\formatkit.exe programs search notepad`. **Expected:** winget's own result list is printed as is, exit code 0; a term nothing matches exits with 1.
 
 ## Hardware-only checklist (cannot be verified in a VM)

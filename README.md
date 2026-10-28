@@ -15,7 +15,6 @@ Implemented:
 - Core engine: profiles, step planning, elevation, reboot handling and resume, run report.
 - Drivers module: Windows Update drivers, OEM tool (Dell, HP, Lenovo), GPU driver, leftover-device report, network driver backup.
 - Cleanup module: removes preinstalled apps and applies privacy and performance tweaks by level, with undo and a diagnosis of tweaks that break Windows.
-
 - Programs module: installs your apps from a built-in catalog, free winget ids, a `winget export` file and direct installers with a mandatory hash check.
 
 Planned (not available yet): dev environment, installation media, preparation checklist, WPF UI.
@@ -175,7 +174,7 @@ Profile section:
 ```
 
 - `acceptAgreements` must be `true` when the section has any item. It means you accept the winget and Microsoft Store agreements for those packages; FormatKit passes the accept flags to winget on your behalf. Without it the profile is rejected.
-- `upgrade`: when `true`, a program that is already installed is upgraded; when `false` (the default) it is skipped with "already installed".
+- `upgrade`: when `true`, a program that is already installed is upgraded; when `false` (the default) it is left alone. A step whose programs are all installed is skipped with "Nothing to do: already in place."; a program that is checked inside a step that still runs is reported as "already installed".
 - `version` pins a winget package to that exact version. It must match `[A-Za-z0-9._+-]+`, like ids and sources.
 - `context: user` runs the install as the signed-in Windows user (not elevated) through a temporary scheduled task, for apps that install per user (the catalog marks Discord, Telegram, Zoom, Spotify, Playnite and JetBrains Toolbox this way). Catalog entries also carry a winget `scope` so winget picks the right installer; free winget ids and imported ones use winget's default. If nobody is signed in, the item fails with "sign in and run again".
 - Unknown properties in the section, unknown catalog ids and an `importFile` that is missing or not a `winget export` JSON are profile errors (exit code 2).
@@ -183,7 +182,7 @@ Profile section:
 
 ### Direct installers
 
-A `direct` item is downloaded to `%ProgramData%\FormatKit\downloads` and its SHA-256 is checked **before anything runs**. The hash is mandatory for a `url`, because an https download only proves where the file came from, not that it is the file you meant: a hijacked mirror or a replaced release would otherwise run as administrator. A wrong hash fails the item, deletes the file and runs nothing. A `path` may carry a `sha256` too and is checked the same way.
+A `direct` item is downloaded to `%ProgramData%\FormatKit\downloads` and its SHA-256 is checked **before anything runs**. The hash is mandatory for a `url`, because an https download only proves where the file came from, not that it is the file you meant: a hijacked mirror or a replaced release would otherwise run as administrator. A wrong hash fails the item and runs nothing; a downloaded (`url`) file is deleted, a local `path` file is never deleted. A `path` may carry a `sha256` too and is checked the same way.
 
 `.msi` files run as `msiexec /i ... /qn /norestart` and ignore `args` (setting `args` on a `.msi` is an error). `.exe` files run with your `args`, passed as an argument list, never through a shell. Exit code 3010 or 1641 means a reboot is needed, and FormatKit handles it like any other step. Finished direct items are recorded in `%ProgramData%\FormatKit\programs-direct.json`, so a resumed run skips them. Other extensions are errors.
 
