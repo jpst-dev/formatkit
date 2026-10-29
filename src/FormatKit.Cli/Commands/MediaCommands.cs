@@ -148,7 +148,7 @@ internal static class MediaCommands
         catch (DiskChangedException ex)
         {
             // The exception text is English; the user sees the localized message.
-            context.Env.Log.Warning(ex, "Disk {Number} changed before the erase", number);
+            context.Env.Log.Information(ex, "Disk {Number} changed before the erase", number);
             o.WriteLine(Strings.Format("Media_UsbDiskChanged", number));
             return ExitCodes.InvalidInput;
         }
@@ -160,7 +160,7 @@ internal static class MediaCommands
         catch (Exception ex)
         {
             // The erase may have started: the stick must be treated as incomplete. The text stays in the log only.
-            context.Env.Log.Error(ex, "Erasing disk {Number} failed", number);
+            context.Env.Log.Information(ex, "Erasing disk {Number} failed", number);
             o.WriteLine(Strings.Format("Media_UsbIncomplete", Strings.Get("Media_UsbEraseFailed")));
             return ExitCodes.CompletedWithFailures;
         }
@@ -172,7 +172,7 @@ internal static class MediaCommands
         }
         catch (MediaWriteException ex)
         {
-            context.Env.Log.Error(ex, "Writing the media to the USB stick {Root} failed", root);
+            context.Env.Log.Information(ex, "Writing the media to the USB stick {Root} failed", root);
             o.WriteLine(Strings.Format("Media_UsbIncomplete", ex.Message));
             return ExitCodes.CompletedWithFailures;
         }
@@ -265,7 +265,7 @@ internal static class MediaCommands
         }
         catch (MediaWriteException ex)
         {
-            context.Env.Log.Error(ex, "Writing the media to {Output} failed", output);
+            context.Env.Log.Information(ex, "Writing the media to {Output} failed", output);
             o.WriteLine(Strings.Format("Media_BuildIncomplete", output, ex.Message));
             return ExitCodes.CompletedWithFailures;
         }

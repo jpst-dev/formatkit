@@ -294,6 +294,7 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Contains("is incomplete", _out.ToString());
         Assert.Contains("dism failed", _out.ToString());
         Assert.Contains("Delete the folder", _out.ToString());
+        AssertNothingLoggedToTheConsole();
         Assert.Equal([Iso], _disk.Dismounted);
     }
 
@@ -551,6 +552,7 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Equal(ExitCodes.InvalidInput, exit);
         Assert.Contains("Nothing was erased", _out.ToString());
         Assert.DoesNotContain("no longer connected", _out.ToString());
+        AssertNothingLoggedToTheConsole();
         Assert.Empty(_disks.Prepared);
     }
 
@@ -568,6 +570,7 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Contains("Run the command again", _out.ToString());
         Assert.Contains("dism failed", _out.ToString());
         Assert.Single(_disks.Prepared);
+        AssertNothingLoggedToTheConsole();
         Assert.Equal([Iso], _disk.Dismounted);
     }
 
@@ -610,6 +613,7 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Contains("is incomplete", _out.ToString());
         Assert.Contains("Run the command again", _out.ToString());
         Assert.DoesNotContain("diskpart exploded", _out.ToString());
+        AssertNothingLoggedToTheConsole();
         Assert.Empty(_disks.Prepared);
         Assert.Equal([Iso], _disk.Dismounted);
     }
@@ -714,4 +718,9 @@ public sealed class MediaCommandsTests : IDisposable
 
         public void Emit(Serilog.Events.LogEvent logEvent) => Events.Add(logEvent);
     }
+
+    // The console sink shows Warning and above (LogSetup): a handled failure that already printed a
+    // localized message must log below that level, or its English text appears on screen too.
+    private void AssertNothingLoggedToTheConsole() =>
+        Assert.DoesNotContain(_log.Events, e => e.Level >= Serilog.Events.LogEventLevel.Warning);
 }
