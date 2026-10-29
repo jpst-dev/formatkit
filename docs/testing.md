@@ -525,7 +525,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
    .\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check; "exit=$LASTEXITCODE"'
    ```
 
-**Expected:** exit code **0** and the last line `Safe to format.`. There is no Blocker. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: usually the user folders (empty or not on the Windows drive; a folder on `C:` that holds files is an Attention item). No Git, WSL or key item appears. Nothing in the output holds a product key.
+**Expected:** exit code **0** and the last line `No blockers. Review the N items marked Attention before formatting.` (N is the number of Attention items listed). There is no Blocker. Group headings end with `:` and the items are indented below them. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: usually the user folders (empty or not on the Windows drive; a folder on `C:` that holds files is an Attention item). No Git, WSL or key item appears. Nothing in the output holds a product key.
 
 ## 18. Prepare: Git repositories with unpushed work
 
@@ -556,8 +556,9 @@ Record what the scenarios find in the "Found while running" section of the [prep
    **Expected:** exit code **1**, last line `2 items block formatting.`. Under Blocker (group Developer), one item per repository: `Repository ...\app-a has work that exists only on this PC` with `Branch app-a has 1 commit not pushed.`, and `Repository ...\app-b ...` with `1 uncommitted change.`, both with the action "Commit and push, or copy the folder ... to an external drive.". The text `remote.git` appears nowhere in the output or the log (`--verbose` prints the log): FormatKit never prints a remote URL.
 4. Commit and push both: in `app-b` run `git -c user.name=Test -c user.email=t@example.com commit -am third`, then `git push` in both repositories. Run the check again.
 
-   **Expected:** exit code **0**, `2 repositories, all pushed` under Ok, `Safe to format.`.
+   **Expected:** exit code **0**, `2 repositories, all pushed` under Ok (its detail says that files ignored by Git, such as `.env`, are not in the remote), and the last line starts with `No blockers.` (the program list and network driver items are still Attention).
 5. A repository with no remote at all is a Blocker too: `git init` a third folder in `Documents` with one commit and no `origin`. **Expected:** exit code **1** and the item says `The repository has no remote.`.
+6. Nested repositories are inspected too: `git init` the folder `Documents\app-a\vendor\lib`, commit one file there with no `origin`, and run the check. **Expected:** a separate Blocker for `...\app-a\vendor\lib` with `The repository has no remote.` (app-a also reports the new folder as an uncommitted change). The same holds for a repository at the root of the user profile (`git init $env:USERPROFILE`): the repositories below it are still listed.
 
 ## 19. Prepare: profile inputs on C: and off C:
 

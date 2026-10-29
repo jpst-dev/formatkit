@@ -160,9 +160,11 @@
   <data name="Browsers_Title" xml:space="preserve"><value>Os dados do navegador {0} serão apagados</value></data>
   <data name="Browsers_Detail" xml:space="preserve"><value>Favoritos, senhas salvas e extensões ficam em {0}.</value></data>
   <data name="Browsers_Action" xml:space="preserve"><value>Ative a sincronização ou exporte os favoritos e as senhas.</value></data>
-  <data name="Summary_Safe" xml:space="preserve"><value>Seguro formatar.</value></data>
+  <data name="Summary_Safe" xml:space="preserve"><value>É seguro formatar.</value></data>
   <data name="Summary_Blocked_One" xml:space="preserve"><value>1 item impede a formatação.</value></data>
   <data name="Summary_Blocked_Many" xml:space="preserve"><value>{0} itens impedem a formatação.</value></data>
+  <data name="Summary_Review_One" xml:space="preserve"><value>Nenhum bloqueio. Revise o item marcado como Atenção antes de formatar.</value></data>
+  <data name="Summary_Review_Many" xml:space="preserve"><value>Nenhum bloqueio. Revise os {0} itens marcados como Atenção antes de formatar.</value></data>
   <data name="Markdown_Title" xml:space="preserve"><value>Checklist de preparação do FormatKit — {0}</value></data>
   <data name="Markdown_Date" xml:space="preserve"><value>Data: {0}</value></data>
 </root>

@@ -46,6 +46,12 @@ wrapped); Wi-Fi passwords; game saves; app licenses such as Office or Adobe
 (no reliable detection); OneDrive's real sync state; printers; the post-run
 report (it already exists in the core); installation media (sub-project 5).
 
+**Limits (final review I3):** the check only looks at the user folders, the
+repositories under the user profile and on lost VHDX volumes, the other items
+of section 6 and the profile inputs. Other data on the Windows drive (for
+example `C:\src`, or a folder directly in the user profile) is not inspected;
+the README tells the user to check it themselves.
+
 ## 3. Decisions
 
 | # | Decision | Reason |
@@ -139,14 +145,24 @@ formatkit prepare check [--profile <file>] [--output <file.md>]
 
 - **Console:** items grouped by status (Blocker, Attention, Not checked, Ok);
   inside a status, by group (Security and licenses, Personal data, Developer,
-  Apps and FormatKit), then by check id. Each item prints its title, then its
-  detail and action indented. Successful items of the same check are collapsed
-  into one line where section 6 says so. The last line is a summary: "Safe to
-  format." or "N items block formatting.".
+  Apps and FormatKit), then by check id. The group heading is indented two
+  spaces and ends with ":"; each item prints its title four spaces in, then its
+  detail and action six spaces in (final review M1: groups read like items at
+  the same indent). Successful items of the same check are collapsed into one
+  line where section 6 says so. The last line is a summary: "N items block
+  formatting." when there is a `Blocker`; otherwise "No blockers. Review the N
+  items marked Attention before formatting." (singular: "Review the item
+  marked Attention") when there is an `Attention` item; "Safe to format." only
+  when there is neither (final review I4: "Safe to format." under items that
+  say files will be erased invited the loss). pt-BR: "Nenhum bloqueio. Revise
+  os N itens marcados como Atenção antes de formatar." and "É seguro
+  formatar.". The Markdown file ends with the same summary. Exit codes do not
+  change.
 - **`--output <file.md>`:** the same content as Markdown in the UI language,
   with a heading per status, `- [ ]` before every `Blocker` and `Attention`
   item and a plain bullet for the others, plus the date and computer name at
-  the top. When the output path is lost in the format (D8), the console prints
+  the top. A backslash before ASCII punctuation or at the end of a line is
+  doubled, so paths such as `C:\Users\joao\.ssh` render unchanged. When the output path is lost in the format (D8), the console prints
   a warning that the file will be erased; the file is written anyway. An
   existing file is overwritten.
 - **Exit codes:** 0 no `Blocker`; 1 at least one `Blocker`; 2 invalid
@@ -204,7 +220,9 @@ when `--profile` is given.
 - Folders the scan cannot read are skipped and counted in the item's detail
   ("N folders could not be read").
 - `--output` failure: the report has already been printed; the error is shown
-  and the exit code is 2.
+  and the exit code is 2. That covers I/O and access errors and an invalid
+  path (`ArgumentException`, `NotSupportedException`, `SecurityException`),
+  including the check of whether the path is on the Windows drive.
 - Ctrl+C exits with 130. The folder and repository scans check the cancellation token as they walk, so a large scan stops promptly.
 - The log has every external command, its exit code and output. No command
   that prints a remote URL is ever run (`git remote` lists names only;

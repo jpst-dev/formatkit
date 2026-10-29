@@ -64,15 +64,26 @@ public sealed class PrepareCommandsTests : IDisposable
         new("fake.check", PrepareGroup.Data, status, "Some title", "Some detail");
 
     [Fact]
-    public async Task No_blocker_exits_0_and_prints_the_safe_summary()
+    public async Task No_blocker_exits_0_and_the_summary_names_the_attention_items()
     {
         _check.Items = [Item(PrepareStatus.Attention)];
 
         var exit = await Run();
 
         Assert.Equal(ExitCodes.Ok, exit);
-        Assert.EndsWith("Safe to format.", _out.ToString().TrimEnd());
+        Assert.EndsWith("No blockers. Review the item marked Attention before formatting.", _out.ToString().TrimEnd());
         Assert.Contains("Some title", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Nothing_to_do_exits_0_and_prints_the_safe_summary()
+    {
+        _check.Items = [Item(PrepareStatus.Ok)];
+
+        var exit = await Run();
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.EndsWith("Safe to format.", _out.ToString().TrimEnd());
     }
 
     [Fact]
@@ -221,7 +232,7 @@ public sealed class PrepareCommandsTests : IDisposable
 
         await Run();
 
-        Assert.Contains("Seguro formatar.", _out.ToString());
+        Assert.Contains("É seguro formatar.", _out.ToString());
     }
 
     private sealed class RecordingCheck : IPrepareCheck

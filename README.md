@@ -342,26 +342,28 @@ Example output (abridged):
 
 ```text
 Blocker
-  Developer
-  Repository C:\Users\joao\Documents\app has work that exists only on this PC
-    1 uncommitted change. Branch main has 2 commits not pushed.
-    Commit and push, or copy the folder C:\Users\joao\Documents\app to an external drive.
+  Developer:
+    Repository C:\Users\joao\Documents\app has work that exists only on this PC
+      1 uncommitted change. Branch main has 2 commits not pushed.
+      Commit and push, or copy the folder C:\Users\joao\Documents\app to an external drive.
 
 Attention
-  Security and licenses
-  D: is encrypted with BitLocker
-    Without the recovery key, D: does not open after the reinstall.
-    Save the recovery key of D: (aka.ms/myrecoverykey, or run manage-bde -protectors -get D: in an administrator terminal) and keep it off this PC.
-  Apps and FormatKit
-  The list of installed programs has not been exported
-    Run formatkit programs export E:\programs.json and keep the file off the Windows drive.
+  Security and licenses:
+    D: is encrypted with BitLocker
+      Without the recovery key, D: does not open after the reinstall.
+      Save the recovery key of D: (aka.ms/myrecoverykey, or run manage-bde -protectors -get D: in an administrator terminal) and keep it off this PC.
+  Apps and FormatKit:
+    The list of installed programs has not been exported
+      Run formatkit programs export E:\programs.json and keep the file off the Windows drive.
 
 Ok
-  Security and licenses
-  Windows is activated with the key in the firmware
+  Security and licenses:
+    Windows is activated with the key in the firmware
 
 1 item blocks formatting.
 ```
+
+The last line sums up the run: `N items block formatting.` when there is a Blocker; otherwise `No blockers. Review the N items marked Attention before formatting.` when there are Attention items; and `Safe to format.` only when there is neither.
 
 | Status | Meaning |
 | --- | --- |
@@ -370,7 +372,9 @@ Ok
 | Not checked | The check could not run (for example it needs an administrator terminal, or Git is missing). The item gives the command to check by hand. |
 | Ok | Nothing to do. |
 
-"Lost" means the path is on the Windows drive (`%SystemDrive%`) or on a volume whose virtual disk (VHDX) file is on the Windows drive, such as a Dev Drive at `C:\DevDrive\dev.vhdx` mounted as `D:`. UNC paths are never lost. A Blocker is reported only for loss FormatKit can prove; what only you can confirm (a saved recovery key, for example) is an Attention item, so "Safe to format." means no provable loss, not that every Attention item is done.
+"Lost" means the path is on the Windows drive (`%SystemDrive%`) or on a volume whose virtual disk (VHDX) file is on the Windows drive, such as a Dev Drive at `C:\DevDrive\dev.vhdx` mounted as `D:`. UNC paths are never lost; `\\?\C:\...` counts as `C:`. A `subst` drive or a junction that points into the Windows drive is not resolved, so check those yourself. If Windows cannot list the volumes, the BitLocker, volume and Dev Drive checks report Not checked, and a path on another drive is reported Not checked instead of Ok (it could be on a virtual disk stored on the Windows drive). A Blocker is reported only for loss FormatKit can prove; what only you can confirm (a saved recovery key, for example) is an Attention item, which is why the summary asks you to review them.
+
+The check only looks at the user folders (Desktop, Documents, Pictures, Videos, Music, Downloads), the Git repositories under your user profile and on lost virtual disks (including repositories nested in other repositories, submodules and worktrees), the other items listed below, and the files the profile needs. Other data on the Windows drive, such as a `C:\src` folder or a folder directly in your user profile, is not inspected: check it yourself. Files ignored by Git (such as `.env`) are not in the remote even when everything is pushed.
 
 The checks, by group:
 

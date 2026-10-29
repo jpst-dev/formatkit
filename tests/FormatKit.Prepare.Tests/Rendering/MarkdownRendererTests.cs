@@ -79,6 +79,8 @@ public class MarkdownRendererTests
         ]), "en-US");
 
         Assert.Equal("Safe to format.", safe[^2]);
+        Assert.Equal("No blockers. Review the item marked Attention before formatting.",
+            Render(new PrepareReport([Item(PrepareStatus.Attention, PrepareGroup.Data, "A")]), "en-US")[^2]);
         Assert.Equal("2 items block formatting.", two[^2]);
     }
 
@@ -117,8 +119,26 @@ public class MarkdownRendererTests
 
         var lines = Render(report, "en-US");
 
-        Assert.Contains(@"  # E:\- x\y", lines);
+        Assert.Contains(@"  # E:\\- x\y", lines);
         Assert.Contains("  line1", lines);
         Assert.Contains("  line2", lines);
+    }
+
+    [Fact]
+    public void A_backslash_before_punctuation_or_at_the_end_is_doubled_so_the_path_renders_unchanged()
+    {
+        // CommonMark reads \. \_ \[ as escapes and a trailing \ as a line break; the path must survive rendering.
+        var report = new PrepareReport(
+        [
+            Item(PrepareStatus.Attention, PrepareGroup.Developer, @"C:\Users\joao\.ssh", @"C:\Users\joao\_work\[x]", @"Copy C:\"),
+            Item(PrepareStatus.Ok, PrepareGroup.Data, @"\\srv\share\-x"),
+        ]);
+
+        var lines = Render(report, "en-US");
+
+        Assert.Contains(@"- [ ] C:\Users\joao\\.ssh", lines);
+        Assert.Contains(@"  C:\Users\joao\\_work\\[x]", lines);
+        Assert.Contains(@"  Copy C:\\", lines);
+        Assert.Contains(@"- \\\srv\share\\-x", lines);
     }
 }
