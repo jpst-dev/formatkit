@@ -79,6 +79,9 @@ internal sealed class SshStep(SshOptions options, DevEnvironment env) : IStep
             args.AddRange(["-b", "4096"]);
         args.AddRange(["-C", options.Comment, "-f", keyFile]);
 
+        // A clean Windows has no %USERPROFILE%\.ssh, and ssh-keygen does not create it (seen in the VM).
+        ctx.Services.Files.CreateDirectory(Path.GetDirectoryName(keyFile)!);
+
         var exit = await ctx.Services.Console.RunAttachedAsync(new ProcessSpec(keygen, args, Timeouts.Install), ct).ConfigureAwait(false);
         if (exit == 0)
             return new DevItem("key", DevItemOutcome.Done);

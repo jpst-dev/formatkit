@@ -86,6 +86,18 @@ public class SshStepTests
     }
 
     [Fact]
+    public async Task Ssh_creates_the_ssh_folder_before_keygen()
+    {
+        var rig = new Rig(key: false);
+        rig.GitConfig(0, KnownTools.WindowsSsh);
+
+        await Run(rig);
+
+        Assert.True(rig.Files.DirectoryExists(@"C:\Users\Joao\.ssh"));
+        Assert.Single(rig.Console.Attached);
+    }
+
+    [Fact]
     public async Task Ssh_existing_key_kept()
     {
         var rig = new Rig();
