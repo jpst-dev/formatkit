@@ -1,0 +1,45 @@
+using System.Text.Json;
+using FormatKit.Core.Profiles;
+using FormatKit.Core.Steps;
+using FormatKit.Core.SystemAccess;
+
+namespace FormatKit.Dev;
+
+/// <param name="time">Stamps backups; used by the steps.</param>
+/// <param name="env">The machine facts; the real ones unless a test supplies others.</param>
+/// <param name="files">The file system for the steps; the real one unless a test supplies another.</param>
+public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFileSystem? files = null) : IModule
+{
+    // Handed to the steps as they are added.
+    internal TimeProvider Time => time;
+    internal IFileSystem? Files => files;
+
+    public string Name => "dev";
+
+    public bool IsEnabled(JsonElement section) =>
+        section.ValueKind == JsonValueKind.Object
+        && section.TryGetProperty("enabled", out var enabled)
+        && enabled.ValueKind == JsonValueKind.True;
+
+    public IReadOnlyList<ProfileError> Validate(JsonElement section, string path) => Validate(section, path, null);
+
+    /// <param name="baseDirectory">The profile file's directory; a relative dotfiles <c>path</c> resolves against it.</param>
+    public IReadOnlyList<ProfileError> Validate(JsonElement section, string path, string? baseDirectory) =>
+        DevOptions.Parse(section, path, baseDirectory, env ?? DevEnvironment.Current()).Errors;
+
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section) => CreateSteps(section, null);
+
+    /// <param name="baseDirectory">The profile file's directory; a relative dotfiles <c>path</c> resolves against it.</param>
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section, string? baseDirectory)
+    {
+        if (!IsEnabled(section))
+            return [];
+
+        var (options, _) = DevOptions.Parse(section, "dev", baseDirectory, env ?? DevEnvironment.Current());
+        if (options is null)
+            return [];
+
+        // The steps (WSL, Git, SSH, dotfiles, shell, Dev Drive) are added by the tasks that implement them.
+        return [];
+    }
+}

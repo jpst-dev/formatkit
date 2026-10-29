@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Step_Title_Wsl" xml:space="preserve"><value>Dev: WSL</value></data>
+  <data name="Step_Title_Git" xml:space="preserve"><value>Dev: Git</value></data>
+  <data name="Step_Title_Ssh" xml:space="preserve"><value>Dev: SSH key</value></data>
+  <data name="Step_Title_Dotfiles" xml:space="preserve"><value>Dev: dotfiles</value></data>
+  <data name="Step_Title_Shell" xml:space="preserve"><value>Dev: terminal</value></data>
+  <data name="Step_Title_DevDrive" xml:space="preserve"><value>Dev: Dev Drive</value></data>
+  <data name="Outcome_Done" xml:space="preserve"><value>done</value></data>
+  <data name="Outcome_AlreadyInOrder" xml:space="preserve"><value>already in order</value></data>
+  <data name="Outcome_Pending" xml:space="preserve"><value>pending</value></data>
+  <data name="Outcome_NotApplicable" xml:space="preserve"><value>not applicable</value></data>
+  <data name="Outcome_Failed" xml:space="preserve"><value>failed</value></data>
+  <data name="Next_RunWslUser" xml:space="preserve"><value>Run `formatkit dev wsl-user` when you are at the PC.</value></data>
+  <data name="Next_RunSshKey" xml:space="preserve"><value>Run `formatkit dev ssh-key` when you are at the PC.</value></data>
+  <data name="Next_AddGit" xml:space="preserve"><value>Add `development.git` to the programs section.</value></data>
+  <data name="Next_AddOhMyPosh" xml:space="preserve"><value>Add `development.oh-my-posh` to the programs section.</value></data>
+  <data name="Next_EnableVirtualization" xml:space="preserve"><value>Enable virtualization in the BIOS/UEFI and run again.</value></data>
+  <data name="Next_WrongAccount" xml:space="preserve"><value>Run FormatKit from the account that will use WSL.</value></data>
+  <data name="Next_OtherCloneTo" xml:space="preserve"><value>Choose another `cloneTo` folder.</value></data>
+  <data name="Next_OtherVhdx" xml:space="preserve"><value>Choose another Dev Drive path.</value></data>
+  <data name="Next_UpdateWindows" xml:space="preserve"><value>Update Windows and run again.</value></data>
+  <data name="Next_SeeLog" xml:space="preserve"><value>See the log for details.</value></data>
+  <data name="Next_CheckNetwork" xml:space="preserve"><value>Check the internet connection and run again.</value></data>
+  <data name="Validation_MissingField" xml:space="preserve"><value>Required field &apos;{0}&apos; is missing.</value></data>
+  <data name="Validation_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
+  <data name="Validation_UnknownProperty" xml:space="preserve"><value>Unknown property &apos;{0}&apos; in the dev module.</value></data>
+  <data name="Validation_Pattern" xml:space="preserve"><value>Invalid value: it must match {0}.</value></data>
+  <data name="Validation_RootUser" xml:space="preserve"><value>The WSL user cannot be root.</value></data>
+  <data name="Validation_Processors" xml:space="preserve"><value>Invalid value: processors must be an integer from 1 to {0}.</value></data>
+  <data name="Validation_GitNeedsKey" xml:space="preserve"><value>Set at least one of name, email, defaultBranch, editor or autocrlf.</value></data>
+  <data name="Validation_ControlCharacters" xml:space="preserve"><value>The value cannot contain control characters.</value></data>
+  <data name="Validation_EmailAt" xml:space="preserve"><value>The email must contain @.</value></data>
+  <data name="Validation_RepoOrPath" xml:space="preserve"><value>Set exactly one of &quot;repo&quot; and &quot;path&quot;.</value></data>
+  <data name="Validation_RepoScheme" xml:space="preserve"><value>The repo must be an https:// address or git@host:path.</value></data>
+  <data name="Validation_FromRelative" xml:space="preserve"><value>The source must be a relative path without &quot;..&quot;.</value></data>
+  <data name="Validation_ToInsideProfile" xml:space="preserve"><value>The destination must be an absolute path inside {0}.</value></data>
+  <data name="Validation_NeedsFile" xml:space="preserve"><value>Set at least one file.</value></data>
+  <data name="Validation_ShellWslNeedsWsl" xml:space="preserve"><value>shell.wsl requires the wsl subsection.</value></data>
+  <data name="Validation_OhMyZshNeedsZsh" xml:space="preserve"><value>ohMyZsh requires zsh to be true.</value></data>
+  <data name="Validation_Plugin" xml:space="preserve"><value>A plugin must be an Oh My Zsh plugin name (letters, digits, . _ -); the only external plugins allowed are {0}.</value></data>
+  <data name="Validation_VhdxPath" xml:space="preserve"><value>The path must be absolute, start with a drive letter and end in .vhdx.</value></data>
+  <data name="Validation_SizeMin" xml:space="preserve"><value>sizeGB must be at least 50.</value></data>
+  <data name="Validation_Letter" xml:space="preserve"><value>The letter must be a single letter other than C.</value></data>
+</root>
