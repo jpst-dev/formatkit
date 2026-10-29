@@ -148,6 +148,33 @@ public class DevOptionsTests
     [Fact]
     public void Git_default_branch_pattern() => AssertError(Git(""" "defaultBranch": "ma in" """), "modules.dev.git.defaultBranch");
 
+    [Theory]
+    [InlineData("name")]
+    [InlineData("editor")]
+    [InlineData("defaultBranch")]
+    public void Git_leading_dash_rejected(string key) => AssertError(Git($$""" "{{key}}": "-x" """), $"modules.dev.git.{key}");
+
+    [Fact]
+    public void Ssh_comment_default_is_made_to_fit_the_pattern()
+    {
+        var env = Env() with { UserName = "João Silva", ComputerName = "NEW PC" };
+
+        var (options, errors) = DevOptions.Parse(Json(Ssh("")), Path, null, env);
+
+        Assert.Empty(errors);
+        Assert.Equal("jo-o-silva@new-pc", options!.Ssh!.Comment);
+    }
+
+    [Fact]
+    public void Ssh_comment_default_is_truncated_to_100()
+    {
+        var env = Env() with { UserName = new string('a', 150) };
+
+        var (options, _) = DevOptions.Parse(Json(Ssh("")), Path, null, env);
+
+        Assert.Equal(100, options!.Ssh!.Comment.Length);
+    }
+
     [Fact]
     public void Ssh_keytype_values() => AssertError(Ssh(""" "keyType": "dsa" """), "modules.dev.ssh.keyType");
 

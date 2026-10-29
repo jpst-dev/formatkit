@@ -34,6 +34,7 @@
   <data name="Validation_Processors" xml:space="preserve"><value>Valor inválido: processors deve ser um inteiro de 1 a {0}.</value></data>
   <data name="Validation_GitNeedsKey" xml:space="preserve"><value>Informe ao menos um entre name, email, defaultBranch, editor e autocrlf.</value></data>
   <data name="Validation_ControlCharacters" xml:space="preserve"><value>O valor não pode conter caracteres de controle.</value></data>
+  <data name="Validation_LeadingDash" xml:space="preserve"><value>O valor não pode começar com hífen.</value></data>
   <data name="Validation_EmailAt" xml:space="preserve"><value>O email deve conter @.</value></data>
   <data name="Validation_RepoOrPath" xml:space="preserve"><value>Informe exatamente um entre &quot;repo&quot; e &quot;path&quot;.</value></data>
   <data name="Validation_RepoScheme" xml:space="preserve"><value>O repo deve ser um endereço https:// ou git@host:caminho.</value></data>

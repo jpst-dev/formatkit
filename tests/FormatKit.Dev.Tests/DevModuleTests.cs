@@ -42,6 +42,16 @@ public class DevModuleTests
     }
 
     [Fact]
+    public void Steps_follow_the_spec_order_when_their_options_are_present()
+    {
+        var steps = Module().CreateSteps(Json("""
+            { "enabled": true, "ssh": {}, "git": { "name": "Joao" }, "wsl": { "user": "joao" } }
+            """));
+
+        Assert.Equal(["dev.wsl", "dev.git", "dev.ssh"], steps.Select(s => s.Id));
+    }
+
+    [Fact]
     public void Empty_or_disabled_section_creates_no_steps()
     {
         Assert.Empty(Module().CreateSteps(Json("""{ "enabled": true }""")));

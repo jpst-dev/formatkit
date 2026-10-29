@@ -41,9 +41,13 @@ public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFi
 
         List<IStep> steps = [];
 
-        // The Git, SSH, dotfiles, shell and Dev Drive steps are added by the tasks that implement them.
+        // The dotfiles, shell and Dev Drive steps are added by the tasks that implement them.
         if (options.Wsl is not null)
             steps.Add(new WslStep(options.Wsl, env ?? DevEnvironment.Current(), time));
+        if (options.Git is not null)
+            steps.Add(new GitStep(options.Git));
+        if (options.Ssh is not null)
+            steps.Add(new SshStep(options.Ssh, env ?? DevEnvironment.Current()));
 
         return steps;
     }

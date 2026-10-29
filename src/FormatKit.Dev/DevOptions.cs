@@ -137,12 +137,12 @@ public sealed partial record DevOptions(
         if (!known.Any(k => el.TryGetProperty(k, out _)))
             errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, p, Strings.Get("Validation_GitNeedsKey")));
 
-        var name = ReadNoControl(el, "name", p, errors);
+        var name = RejectLeadingDash(ReadNoControl(el, "name", p, errors), $"{p}.name", errors);
         var email = ReadNoControl(el, "email", p, errors);
         if (email is not null && !email.Contains('@'))
             errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.email", Strings.Get("Validation_EmailAt")));
-        var branch = ReadMatching(el, "defaultBranch", p, BranchPattern(), errors);
-        var editor = ReadNoControl(el, "editor", p, errors);
+        var branch = RejectLeadingDash(ReadMatching(el, "defaultBranch", p, BranchPattern(), errors), $"{p}.defaultBranch", errors);
+        var editor = RejectLeadingDash(ReadNoControl(el, "editor", p, errors), $"{p}.editor", errors);
 
         var autoCrlf = ReadString(el, "autocrlf", p, errors);
         if (autoCrlf is not null && autoCrlf is not ("true" or "false" or "input"))
@@ -164,10 +164,17 @@ public sealed partial record DevOptions(
         if (keyType is not ("ed25519" or "rsa"))
             errors.Add(Invalid($"{p}.keyType", "ed25519 | rsa"));
 
-        var comment = ReadMatching(el, "comment", p, CommentPattern(), errors)
-            ?? $"{env.UserName}@{env.ComputerName}".ToLowerInvariant();
+        var comment = ReadMatching(el, "comment", p, CommentPattern(), errors) ?? DefaultComment(env);
 
         return new SshOptions(keyType, comment);
+    }
+
+    /// <summary><c>user@computer</c> reduced to the comment pattern: other characters become '-', lowercase, at most 100.</summary>
+    private static string DefaultComment(DevEnvironment env)
+    {
+        var raw = $"{env.UserName}@{env.ComputerName}".ToLowerInvariant();
+        var safe = string.Concat(raw.Select(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '_' or '@' or '+' or '-' ? c : '-'));
+        return safe.Length > 100 ? safe[..100] : safe;
     }
 
     private static DotfilesOptions? ReadDotfiles(
@@ -456,6 +463,15 @@ public sealed partial record DevOptions(
         if (value is null || !value.Any(char.IsControl))
             return value;
         errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.{name}", Strings.Get("Validation_ControlCharacters")));
+        return null;
+    }
+
+    /// <summary>A value starting with '-' would be taken by git as an option.</summary>
+    private static string? RejectLeadingDash(string? value, string path, List<ProfileError> errors)
+    {
+        if (value is null || !value.StartsWith('-'))
+            return value;
+        errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, path, Strings.Get("Validation_LeadingDash")));
         return null;
     }
 
