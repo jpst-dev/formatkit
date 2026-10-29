@@ -488,3 +488,55 @@ Decisions taken without the user, for review:
   is the image's `DefaultLanguageIndex` (not its first language), and inputs
   are numbered in the order the distinct existing inputs are found (not
   "profile order").
+
+## Found while running
+
+Host runs on 2026-10-29, with `Windows11_Client_x64_pt-br_26300_9457.iso`
+(build 26300, pt-BR, six editions: Home, Home Single Language, Education,
+Pro, Pro Education, Pro for Workstations).
+
+- Scenario 26 (host): an edition the ISO lacks (the message lists the six
+  editions), `language: en-US` on the pt-BR ISO, a missing `importFile`, an
+  unknown `setup.foo`, a file that is not an ISO and a non-empty `--output`
+  each exit 2 and write nothing; the ISO is dismounted afterwards. Not run
+  here: a Windows 10 or ARM64 ISO (none on the host), a full drive, declining
+  UAC (the host shell was already elevated) and Ctrl+C during the copy.
+- **Fixed:** `Split-WindowsImage` failed with access denied (0x80070005) on
+  every build: the cmdlet opens the source image for writing, which the
+  read-only mounted ISO refuses (it worked on a writable copy). The split now
+  runs `dism.exe /English /Split-Image`, which reads the source read-only;
+  only its exit code is used. Pinned by `Split_RunsDismSplitImage`.
+- **Fixed:** a handled write failure printed the English log line "Writing
+  the media to ... failed" above the localized message, because it was
+  logged at Error and the console shows Warning and above. Handled media
+  failures now log at Information, as `prepare` does. Pinned by
+  `AssertNothingLoggedToTheConsole` in four failure tests.
+- After the fixes, `media build` into `.vm\media\plain`, `.vm\media\profile`
+  and `.vm\media\space test` (a path with a space) exits 0 in about 30 s
+  each. `install.wim` (7.4 GB) becomes `install.swm` (3800 MB) and
+  `install2.swm` (3640 MB) and is not left behind; `efi\microsoft\boot\
+  efisys_noprompt.bin` and `efi\boot\bootx64.efi` are there. With the profile,
+  `sources\$OEM$\$1\FormatKit` holds `formatkit.exe`, `profile.json`,
+  `inputs\1-netdrivers\fake.inf` and `inputs\2-winget.json`, and the copied
+  profile points at `inputs\1-netdrivers` and `inputs\2-winget.json`.
+- The answer files hold no password or product key. Language pt-BR comes from
+  the host, keyboard `0416:00000416` matches the host's first `Preload`
+  entry (R5), and the time zone is `E. South America Standard Time`.
+  `FirstLogonCommands` appears only in the profile build.
+- Minor, left as is: the copy prints 10 % and then jumps to 100 % after the
+  split, because the image is copied as one step; the inner English text of
+  a split failure ("Splitting the Windows image failed (exit 1)") still
+  appears inside the localized "incomplete" message.
+- **Risk for scenario 27:** on this host `Get-Disk` and `Get-Partition` return
+  nothing while `Get-PhysicalDisk` and `Win32_DiskDrive` see the NVMe disk
+  (a stale storage provider cache; `Update-HostStorageCache` usually refreshes
+  it). `media usb` lists disks with `Get-Disk`, so on such a PC it would say
+  no USB disk was found. Not changed here: the refresh changes host state and
+  was not run in away mode. If scenario 27 shows it, run
+  `Update-HostStorageCache` first, and consider calling it in the list script.
+- Pending, need the user: scenarios 23-25 in the `FormatKit-Media` VM
+  (`tools\vm\New-MediaVm.ps1 -MediaFolder .vm\media\plain` and `profile`),
+  which confirm section 6's three items (the offline local account screen,
+  the `$OEM$` copy, the first logon token), and scenario 27 on a real stick,
+  which confirms R7 (what counts as removable). `New-MediaVm.ps1` itself has
+  not run yet.
