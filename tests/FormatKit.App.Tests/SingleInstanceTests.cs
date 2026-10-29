@@ -28,4 +28,12 @@ public class SingleInstanceTests
 
         Assert.True(raised.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
     }
+
+    [Fact]
+    public void SignalExisting_NoOwner_DoesNothing()
+    {
+        var exception = Record.Exception(() => SingleInstance.SignalExisting(UniqueName()));
+
+        Assert.Null(exception);
+    }
 }

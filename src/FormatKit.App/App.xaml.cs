@@ -36,6 +36,8 @@ public partial class App : Application
         _instance = SingleInstance.TryAcquire(InstanceName);
         if (_instance is null)
         {
+            // Lets the first process take the foreground, which this one does not own.
+            NativeMethods.AllowSetForegroundWindow(NativeMethods.AsfwAny);
             SingleInstance.SignalExisting(InstanceName);
             Shutdown(0);
             return;

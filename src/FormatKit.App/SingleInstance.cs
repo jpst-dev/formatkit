@@ -25,14 +25,17 @@ public sealed class SingleInstance : IDisposable
     /// <summary>Returns the owner, or null when another instance already owns <paramref name="name"/>.</summary>
     public static SingleInstance? TryAcquire(string name)
     {
+        // The event exists before the mutex is taken, so a second start can always signal an owner.
+        var activate = new EventWaitHandle(false, EventResetMode.AutoReset, ActivateName(name));
         var mutex = new Mutex(initiallyOwned: true, name, out var createdNew);
         if (!createdNew)
         {
             mutex.Dispose();
+            activate.Dispose();
             return null;
         }
 
-        return new SingleInstance(mutex, new EventWaitHandle(false, EventResetMode.AutoReset, ActivateName(name)));
+        return new SingleInstance(mutex, activate);
     }
 
     /// <summary>Asks the instance that owns <paramref name="name"/> to come to the front, if there is one.</summary>

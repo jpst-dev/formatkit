@@ -16,6 +16,9 @@ public partial class MainWindow : Window
     {
         if (WindowState == WindowState.Minimized)
             WindowState = WindowState.Normal;
+        // The Topmost toggle makes Windows raise the window even when it is behind others.
+        Topmost = true;
+        Topmost = false;
         Activate();
     }
 }
