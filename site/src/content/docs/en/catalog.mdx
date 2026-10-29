@@ -7,6 +7,8 @@ import CatalogIndex from '../../../components/CatalogIndex.astro';
 
 Each item has a **level**: *Safe* is fine for everyone, *Balanced* is for when you do not use the feature, and *Aggressive* is only for people who understand the trade-off. A **contested** item is a tweak experts disagree about. A **laptop-sensitive** item may cost battery or sleep on laptops. Some items **need a reboot**.
 
+Items in the Developer category are never selected by a level: they are applied only if you list them in `include` in your profile, and some of them reduce protections.
+
 Open an item to see what it does, what may break and the command to undo it.
 
 <CatalogIndex />

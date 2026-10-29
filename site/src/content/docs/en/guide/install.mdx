@@ -15,7 +15,7 @@ import { Steps, Aside } from '@astrojs/starlight/components';
 
 4. **Wait for the installation.** The computer restarts a few times. Unplug the stick when the installer asks for the first restart, so the PC does not boot from it again.
 
-5. **Do the initial setup.** Region, keyboard, account and network. If Windows does not recognize your network card yet, carry on anyway: FormatKit uses the network driver backup you made.
+5. **Do the initial setup.** Region, keyboard, account and network. Windows 11 Home setup needs a network connection at this step. The network driver backup is used only if your profile sets `networkDriverBackup`; without it, a run that finds the machine offline stops with exit code 3.
 
 6. **Reach the desktop** and sign in with your user. That is the first logon.
 
