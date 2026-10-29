@@ -25,3 +25,8 @@ export function t(locale: SiteLocale, key: string): string {
   warn('string.missing', key);
   return key;
 }
+
+/** The locale's UI strings with `en` filling the gaps, for `labelFor`. */
+export function labelsFor(locale: SiteLocale): Record<string, string> {
+  return { ...strings.en, ...strings[locale] };
+}

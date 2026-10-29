@@ -28,6 +28,8 @@ export default defineConfig({
             { slug: 'guide/after' },
           ],
         },
+        { label: 'Safety & undo', translations: { 'pt-BR': 'Segurança e desfazer' }, slug: 'safety' },
+        { label: 'Recommendations', translations: { 'pt-BR': 'Recomendações' }, slug: 'recommendations' },
         { label: 'FAQ', translations: { 'pt-BR': 'Perguntas frequentes' }, slug: 'faq' },
         { label: 'Changelog', translations: { 'pt-BR': 'Novidades' }, slug: 'changelog' },
       ],

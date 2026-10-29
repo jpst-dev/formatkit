@@ -22,3 +22,8 @@ test('labelFor uses the label when present, without warning', () => {
   expect(labelFor('level', 'safe', { 'level.safe': 'Seguro' })).toBe('Seguro');
   expect(readWarnings()).toEqual([]);
 });
+
+test("labelFor handles the programCategory kind", () => {
+  expect(labelFor("programCategory", "browsers", { "programCategory.browsers": "Navegadores" })).toBe("Navegadores");
+  expect(labelFor("programCategory", "newThing", {})).toBe("New Thing");
+});

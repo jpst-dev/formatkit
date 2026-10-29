@@ -1,0 +1,50 @@
+---
+import type { Program } from '../loaders/programs';
+import { labelFor } from '../lib/labels';
+import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+
+interface Props {
+  programs?: Program[];
+  locale?: SiteLocale;
+}
+
+const props = Astro.props;
+let programs = props.programs;
+if (!programs) {
+  const { getCollection } = await import('astro:content');
+  programs = (await getCollection('programs')).map((e) => e.data as Program);
+}
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+
+const categories = [...new Set(programs.map((p) => p.category))];
+const groups = categories.map((category) => ({
+  category,
+  label: labelFor('programCategory', category, labels),
+  items: programs!
+    .filter((p) => p.category === category)
+    .map((p) => ({ id: p.id, source: p.source, ...pickText(p.text, locale) })),
+}));
+const sourceLabel = (s: string) => labels[`programs.source.${s}`] ?? s;
+---
+
+{
+  groups.length === 0 ? (
+    <p>{t(locale, 'programs.none')}</p>
+  ) : (
+    groups.map((g) => (
+      <section class="fk-programs">
+        <h3>{g.label}</h3>
+        <ul>
+          {g.items.map((p) => (
+            <li>
+              <strong>{p.name}</strong>
+              {p.description && <> — {p.description}</>} <small>({t(locale, 'programs.source')}: {sourceLabel(p.source)})</small>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  )
+}

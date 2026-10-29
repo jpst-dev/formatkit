@@ -1,0 +1,48 @@
+---
+title: Safety & undo
+description: What FormatKit never does, how to undo the cleanup and how to diagnose tweaks that break Windows.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import KnownIssues from '../../../components/KnownIssues.astro';
+
+<Aside type="caution" title="This tool changes your system">
+  FormatKit installs drivers and software, runs vendor tools, needs administrator rights and **can reboot the computer**. **Try it in a virtual machine first** and use `--dry-run` before a real run. You use it at your own risk.
+</Aside>
+
+## What FormatKit never does
+
+The cleanup only touches what is in its catalog, and the catalog has guards:
+
+- **Protected services.** No action changes the start type of a protected service, such as Windows Update, Windows Defender, the Firewall, BITS, DNS, DHCP, Plug and Play, the Task Scheduler and the Event Log, nor the WSL and Hyper-V services.
+- **It only removes apps from an allowlist.** The Microsoft Store, App Installer, Edge, Windows Security, Photos, Calculator, Notepad, Windows Terminal, Paint and the runtime libraries (VCLibs, UI.Xaml, .NET) are never removed.
+- **Contested items are `aggressive` only.** They are popular tweaks with no gain that Microsoft documents, and they are always kept apart and labelled "contested".
+- **Items that reduce security** (Memory Integrity and VBS off) are `aggressive` only too, and the profile needs `confirmAggressive: true`.
+- **Nothing happens unrecorded.** Every cleanup change is written to a journal before it is applied.
+
+### What the program catalog never installs
+
+The catalog only lists official packages with a reliable silent install. It leaves out optimizers and "cleaners", driver updaters, third-party antivirus (Windows Defender is enough), installers that bundle adware and anything that needs a crack. See what is in the catalog on the [Recommendations](/formatkit/en/recommendations/) page.
+
+## Undo
+
+Every item the cleanup applies is recorded in the journal `C:\ProgramData\FormatKit\cleanup-journal.json`, with the previous state of each target. Undo restores the original state: if an item was applied twice and undone once, the result is back to what it was before the first apply.
+
+```powershell
+formatkit cleanup undo apps.clipchamp
+formatkit cleanup undo --all
+```
+
+The first reverts the items you name (the `id` comes from `formatkit cleanup list`); the second reverts everything FormatKit applied. The command asks for administrator rights. If the journal is corrupt, the command prints the file path and reverts nothing.
+
+## Diagnose your PC
+
+`formatkit cleanup check` looks for tweaks that already break or weaken this PC, including ones FormatKit did not make. It **changes nothing and needs no elevation**. It exits with code 1 when it finds something under "Breaks Windows features" or "Security risks", and 0 otherwise.
+
+```powershell
+formatkit cleanup check
+```
+
+For each finding it prints the title, what breaks and the fix. Below is every problem it detects, generated from the program catalog.
+
+<KnownIssues />

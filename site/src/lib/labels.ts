@@ -17,7 +17,7 @@ function titleCase(value: string): string {
     .join(' ');
 }
 
-export function labelFor(kind: 'category' | 'level', value: string, labels: Record<string, string>): string {
+export function labelFor(kind: 'category' | 'level' | 'programCategory', value: string, labels: Record<string, string>): string {
   const label = labels[`${kind}.${value}`];
   if (label !== undefined) return label;
   warn(`${kind}.unknown`, value);
