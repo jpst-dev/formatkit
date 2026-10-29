@@ -22,6 +22,14 @@ public sealed class DevModule(TimeProvider time, DevEnvironment? env = null) : I
     public IReadOnlyList<ProfileError> Validate(JsonElement section, string path, string? baseDirectory) =>
         DevOptions.Parse(section, path, baseDirectory, env ?? DevEnvironment.Current()).Errors;
 
+    public IReadOnlyList<ExternalInput> ExternalInputs(JsonElement section, string? baseDirectory)
+    {
+        var (options, _) = DevOptions.Parse(section, "dev", baseDirectory, env ?? DevEnvironment.Current());
+        return options?.Dotfiles?.LocalPath is { } local
+            ? [new ExternalInput("modules.dev.dotfiles.path", local, ExternalInputKind.Folder)]
+            : [];
+    }
+
     public IReadOnlyList<IStep> CreateSteps(JsonElement section) => CreateSteps(section, null);
 
     /// <param name="baseDirectory">The profile file's directory; a relative dotfiles <c>path</c> resolves against it.</param>

@@ -47,6 +47,12 @@ public sealed class DriversModule(VendorCatalog catalog, TimeSpan networkRetryDe
         return errors;
     }
 
+    /// <remarks>The run uses <c>networkDriverBackup</c> as written, so a relative path resolves against the current directory.</remarks>
+    public IReadOnlyList<ExternalInput> ExternalInputs(JsonElement section, string? baseDirectory) =>
+        DriversOptions.From(section).NetworkDriverBackup is { Length: > 0 } backup
+            ? [new ExternalInput("modules.drivers.networkDriverBackup", Path.GetFullPath(backup), ExternalInputKind.Folder)]
+            : [];
+
     public IReadOnlyList<IStep> CreateSteps(JsonElement section)
     {
         var options = DriversOptions.From(section);

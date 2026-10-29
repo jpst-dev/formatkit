@@ -26,6 +26,24 @@ public sealed class ProgramsModule(ProgramCatalog catalog, AppPaths paths, IFile
     public IReadOnlyList<ProfileError> Validate(JsonElement section, string path, string? baseDirectory) =>
         ProgramsOptions.Parse(section, path, catalog, files ?? new FileSystem(), baseDirectory).Errors;
 
+    public IReadOnlyList<ExternalInput> ExternalInputs(JsonElement section, string? baseDirectory)
+    {
+        var (options, _) = ProgramsOptions.Parse(section, "programs", catalog, files ?? new FileSystem(), baseDirectory);
+        if (options is null)
+            return [];
+
+        var inputs = new List<ExternalInput>();
+        if (options.ImportFile is not null)
+            inputs.Add(new ExternalInput("modules.programs.importFile", options.ImportFile, ExternalInputKind.File));
+        for (var i = 0; i < options.Direct.Count; i++)
+        {
+            if (options.Direct[i].Path is { } path)
+                inputs.Add(new ExternalInput($"modules.programs.direct[{i}].path", path, ExternalInputKind.File));
+        }
+
+        return inputs;
+    }
+
     public IReadOnlyList<IStep> CreateSteps(JsonElement section) => CreateSteps(section, null);
 
     /// <param name="baseDirectory">The profile file's directory; relative importFile and direct paths resolve against it.</param>

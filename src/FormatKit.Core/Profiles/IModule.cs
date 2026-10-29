@@ -15,4 +15,7 @@ public interface IModule
 
     /// <summary>Creates the steps with the profile file's directory, against which a module resolves relative paths.</summary>
     IReadOnlyList<IStep> CreateSteps(JsonElement section, string? baseDirectory) => CreateSteps(section);
+
+    /// <summary>The files and folders outside the machine's own state that the section reads, for an enabled, valid section.</summary>
+    IReadOnlyList<ExternalInput> ExternalInputs(JsonElement section, string? baseDirectory) => [];
 }

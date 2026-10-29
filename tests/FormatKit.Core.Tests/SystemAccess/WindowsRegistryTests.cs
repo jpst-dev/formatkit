@@ -16,6 +16,14 @@ public sealed class WindowsRegistryTests : IDisposable
     }
 
     [Fact]
+    public void User_shell_folders_personal_reads_as_expand_string()
+    {
+        var value = _registry.Read(@"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", "Personal");
+
+        Assert.Equal(RegistryKind.ExpandString, value?.Kind);
+    }
+
+    [Fact]
     public void Dword_above_int_max_round_trips()
     {
         _registry.Write(_root, "v", new RegistryValue(RegistryKind.Dword, "4294967295"));
