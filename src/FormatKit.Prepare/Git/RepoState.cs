@@ -10,7 +10,8 @@ public sealed record RepoState(
     IReadOnlyList<BranchAhead> Ahead,
     IReadOnlyList<string> NoUpstream,
     int Stashes,
-    bool HasRemote)
+    bool HasRemote,
+    bool DetachedUnpushed = false)
 {
-    public bool IsSafe => Uncommitted == 0 && Ahead.Count == 0 && NoUpstream.Count == 0 && Stashes == 0 && HasRemote;
+    public bool IsSafe => Uncommitted == 0 && Ahead.Count == 0 && NoUpstream.Count == 0 && Stashes == 0 && HasRemote && !DetachedUnpushed;
 }

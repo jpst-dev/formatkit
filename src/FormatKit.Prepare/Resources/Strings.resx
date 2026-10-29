@@ -95,4 +95,9 @@
   <data name="GitRepos_Failed_Action" xml:space="preserve"><value>Check the folder {0} by hand: commit and push, or copy it to an external drive.</value></data>
   <data name="GitRepos_Dubious_Detail" xml:space="preserve"><value>Git refuses to open it because the folder belongs to another user (dubious ownership).</value></data>
   <data name="GitRepos_Dubious_Action" xml:space="preserve"><value>If you trust it, run: git config --global --add safe.directory "{0}" and run this command again, or check the folder by hand.</value></data>
+  <data name="GitRepos_Detached" xml:space="preserve"><value>HEAD is detached with commits that are on no pushed branch.</value></data>
+  <data name="GitRepos_Unreadable_One" xml:space="preserve"><value>1 folder could not be read.</value></data>
+  <data name="GitRepos_Unreadable_Many" xml:space="preserve"><value>{0} folders could not be read.</value></data>
+  <data name="GitRepos_Unreadable_Title" xml:space="preserve"><value>Some folders were not searched for Git repositories</value></data>
+  <data name="GitRepos_Unreadable_Action" xml:space="preserve"><value>Check those folders by hand for repositories: commit and push, or copy them to an external drive.</value></data>
 </root>

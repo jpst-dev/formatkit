@@ -55,6 +55,14 @@ public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files
         var stash = await GitAsync(repo, ["stash", "list"], ct);
         var remote = await GitAsync(repo, ["remote"], ct);
 
+        // A detached HEAD is not covered by the branch list: its commits are safe only if some remote-tracking branch contains them.
+        var detachedUnpushed = false;
+        if (Lines(status).Any(l => l == "# branch.head (detached)"))
+        {
+            var contains = await GitAsync(repo, ["for-each-ref", "--contains", "HEAD", "--format=%(refname)", "refs/remotes"], ct);
+            detachedUnpushed = !Lines(contains).Any();
+        }
+
         var uncommitted = Lines(status).Count(l => l.StartsWith("1 ") || l.StartsWith("2 ") || l.StartsWith("u ") || l.StartsWith("? "));
         var ahead = new List<BranchAhead>();
         var noUpstream = new List<string>();
@@ -70,7 +78,7 @@ public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files
                 ahead.Add(new BranchAhead(name, commits));
         }
 
-        return new RepoState(repo, uncommitted, ahead, noUpstream, Lines(stash).Count(), Lines(remote).Any());
+        return new RepoState(repo, uncommitted, ahead, noUpstream, Lines(stash).Count(), Lines(remote).Any(), detachedUnpushed);
     }
 
     private static IEnumerable<string> Lines(string text) =>

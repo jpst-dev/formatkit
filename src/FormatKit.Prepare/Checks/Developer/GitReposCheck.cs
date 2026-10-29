@@ -30,7 +30,14 @@ public sealed class GitReposCheck : IPrepareCheck
         if (unreadable > 0)
             context.Log.Debug("{Count} folders could not be listed while looking for repositories", unreadable);
         if (repos.Count == 0)
-            return [];
+            return unreadable == 0 ? [] : [BlindSpot(unreadable)];
+
+        var items = await InspectAllAsync(context, repos, ct);
+        return unreadable == 0 ? items : [.. items.Select(i => i with { Detail = $"{i.Detail} {Unreadable(unreadable)}".Trim() })];
+    }
+
+    private async Task<List<PrepareItem>> InspectAllAsync(PrepareContext context, List<string> repos, CancellationToken ct)
+    {
 
         var git = context.Services.Tools.Find("git.exe", [context.Env.Expand(@"%ProgramFiles%\Git\cmd\git.exe")]);
         if (git is null)
@@ -39,7 +46,7 @@ public sealed class GitReposCheck : IPrepareCheck
         var inspector = new GitRepoInspector(context.Services.Processes, context.Services.Files, git);
         var items = new List<PrepareItem>();
         var clean = 0;
-        foreach (var repo in repos)
+        foreach (var (repo, index) in repos.Select((r, i) => (r, i)))
         {
             ct.ThrowIfCancellationRequested();
             try
@@ -52,7 +59,8 @@ public sealed class GitReposCheck : IPrepareCheck
             }
             catch (FileNotFoundException)
             {
-                return [GitMissing(repos)];
+                items.Add(GitMissing(repos.Skip(index).ToList()));
+                break;
             }
             catch (GitInspectionException ex)
             {
@@ -83,6 +91,8 @@ public sealed class GitReposCheck : IPrepareCheck
             parts.Add(state.NoUpstream.Count == 1
                 ? Strings.Format("GitRepos_NoUpstream_One", state.NoUpstream[0])
                 : Strings.Format("GitRepos_NoUpstream_Many", string.Join(", ", state.NoUpstream)));
+        if (state.DetachedUnpushed)
+            parts.Add(Strings.Get("GitRepos_Detached"));
         if (state.Stashes > 0)
             parts.Add(Count("GitRepos_Stash", state.Stashes));
         if (!state.HasRemote)
@@ -93,6 +103,13 @@ public sealed class GitReposCheck : IPrepareCheck
             string.Join(" ", parts),
             Strings.Format("GitRepos_Unsafe_Action", state.Path));
     }
+
+    private PrepareItem BlindSpot(int unreadable) =>
+        new(Id, Group, PrepareStatus.NotChecked,
+            Strings.Get("GitRepos_Unreadable_Title"), Unreadable(unreadable), Strings.Get("GitRepos_Unreadable_Action"));
+
+    private static string Unreadable(int count) =>
+        count == 1 ? Strings.Get("GitRepos_Unreadable_One") : Strings.Format("GitRepos_Unreadable_Many", count);
 
     private static string Count(string prefix, int count) =>
         count == 1 ? Strings.Get(prefix + "_One") : Strings.Format(prefix + "_Many", count);

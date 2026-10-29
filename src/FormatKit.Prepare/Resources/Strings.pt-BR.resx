@@ -85,7 +85,7 @@
   <data name="GitRepos_NoRemote" xml:space="preserve"><value>O repositório não tem remote.</value></data>
   <data name="GitRepos_Ok_Title_One" xml:space="preserve"><value>{0} repositório, tudo enviado</value></data>
   <data name="GitRepos_Ok_Title_Many" xml:space="preserve"><value>{0} repositórios, tudo enviado</value></data>
-  <data name="GitRepos_Ok_Detail" xml:space="preserve"><value>Sem alterações sem commit, commits não enviados, stashes nem branches sem upstream.</value></data>
+  <data name="GitRepos_Ok_Detail" xml:space="preserve"><value>Nenhuma alteração sem commit, commit não enviado, stash ou branch sem upstream.</value></data>
   <data name="GitRepos_NoGit_Title" xml:space="preserve"><value>Repositórios Git não verificados</value></data>
   <data name="GitRepos_NoGit_Detail_One" xml:space="preserve"><value>O Git não foi encontrado, então o repositório {0} não pôde ser inspecionado.</value></data>
   <data name="GitRepos_NoGit_Detail_Many" xml:space="preserve"><value>O Git não foi encontrado, então estes repositórios não puderam ser inspecionados: {0}</value></data>
@@ -95,4 +95,9 @@
   <data name="GitRepos_Failed_Action" xml:space="preserve"><value>Confira a pasta {0} manualmente: faça commit e push, ou copie para um disco externo.</value></data>
   <data name="GitRepos_Dubious_Detail" xml:space="preserve"><value>O Git se recusa a abri-lo porque a pasta pertence a outro usuário (dubious ownership).</value></data>
   <data name="GitRepos_Dubious_Action" xml:space="preserve"><value>Se você confia nele, rode: git config --global --add safe.directory "{0}" e execute este comando de novo, ou confira a pasta manualmente.</value></data>
+  <data name="GitRepos_Detached" xml:space="preserve"><value>O HEAD está desanexado, com commits que não estão em nenhuma branch enviada.</value></data>
+  <data name="GitRepos_Unreadable_One" xml:space="preserve"><value>1 pasta não pôde ser lida.</value></data>
+  <data name="GitRepos_Unreadable_Many" xml:space="preserve"><value>{0} pastas não puderam ser lidas.</value></data>
+  <data name="GitRepos_Unreadable_Title" xml:space="preserve"><value>Algumas pastas não foram examinadas em busca de repositórios Git</value></data>
+  <data name="GitRepos_Unreadable_Action" xml:space="preserve"><value>Confira essas pastas manualmente em busca de repositórios: faça commit e push, ou copie para um disco externo.</value></data>
 </root>

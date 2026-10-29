@@ -239,4 +239,92 @@ public class GitReposCheckTests : IDisposable
         Assert.NotEmpty(items);
         Assert.All(items, i => Assert.DoesNotContain("secret-token", i.Title + i.Detail + i.Action));
     }
+
+    [Fact]
+    public async Task Unreadable_folders_are_counted_in_the_details()
+    {
+        var files = new InMemoryFileSystem();
+        Repo(files, @"C:\Users\joao\src\a");
+        files.SeedDirectory(@"C:\Users\joao\locked1");
+        files.SeedDirectory(@"C:\Users\joao\locked2");
+        files.MarkUnreadable(@"C:\Users\joao\locked1");
+        files.MarkUnreadable(@"C:\Users\joao\locked2");
+        var runner = new FakeProcessRunner();
+        Clean(runner);
+
+        var item = Assert.Single(await RunAsync(files, runner));
+
+        Assert.Equal(PrepareStatus.Ok, item.Status);
+        Assert.Contains("2 folders could not be read.", item.Detail);
+    }
+
+    [Fact]
+    public async Task One_unreadable_folder_uses_the_singular()
+    {
+        var files = new InMemoryFileSystem();
+        Repo(files, @"C:\Users\joao\src\a");
+        files.SeedDirectory(@"C:\Users\joao\locked");
+        files.MarkUnreadable(@"C:\Users\joao\locked");
+        var runner = new FakeProcessRunner();
+        Queue(runner, status: "? a.txt\n");
+
+        var item = Assert.Single(await RunAsync(files, runner));
+
+        Assert.Equal(PrepareStatus.Blocker, item.Status);
+        Assert.Contains("1 folder could not be read.", item.Detail);
+    }
+
+    [Fact]
+    public async Task Unreadable_folders_with_no_repositories_found_are_not_checked()
+    {
+        var files = new InMemoryFileSystem();
+        files.SeedDirectory(@"C:\Users\joao\locked");
+        files.MarkUnreadable(@"C:\Users\joao\locked");
+
+        var item = Assert.Single(await RunAsync(files, new FakeProcessRunner(), gitInstalled: false));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains("1 folder could not be read.", item.Detail);
+        Assert.Equal("dev.git-repos", item.CheckId);
+    }
+
+    [Fact]
+    public async Task A_detached_head_with_unpushed_commits_is_a_blocker()
+    {
+        var files = new InMemoryFileSystem();
+        Repo(files, @"C:\Users\joao\src\a");
+        var runner = new FakeProcessRunner();
+        Queue(runner, status: "# branch.head (detached)\n");
+        runner.Enqueue(Git, Ok(""));
+
+        var item = Assert.Single(await RunAsync(files, runner));
+
+        Assert.Equal(PrepareStatus.Blocker, item.Status);
+        Assert.Contains("HEAD is detached", item.Detail);
+    }
+
+    [Fact]
+    public async Task A_vanished_git_keeps_earlier_items_and_lists_the_remaining_repositories()
+    {
+        var files = new InMemoryFileSystem();
+        Repo(files, @"C:\Users\joao\src\a");
+        Repo(files, @"C:\Users\joao\src\b");
+        Repo(files, @"C:\Users\joao\src\c");
+        var runner = new FakeProcessRunner();
+        Queue(runner, status: "? a.txt\n");
+        runner.OnRun = spec =>
+        {
+            if (spec.Arguments[1].EndsWith(@"\b", StringComparison.Ordinal))
+                runner.ThrowNotFound(Git);
+        };
+
+        var items = await RunAsync(files, runner);
+
+        var blocker = Assert.Single(items, i => i.Status == PrepareStatus.Blocker);
+        Assert.Contains(@"src\a", blocker.Title);
+        var missing = Assert.Single(items, i => i.Status == PrepareStatus.NotChecked);
+        Assert.DoesNotContain(@"src\a", missing.Detail);
+        Assert.Contains(@"src\b", missing.Detail);
+        Assert.Contains(@"src\c", missing.Detail);
+    }
 }

@@ -173,4 +173,59 @@ public class GitRepoInspectorTests
 
         Assert.False(ex.IsDubiousOwnership);
     }
+
+    [Fact]
+    public async Task Detached_head_with_commits_on_no_remote_branch_is_unsafe()
+    {
+        var runner = new FakeProcessRunner();
+        Enqueue(runner, status: "# branch.oid abc\n# branch.head (detached)\n", refs: "main\torigin/main\t\n");
+        runner.Enqueue(Git, Ok(""));
+
+        var state = await new GitRepoInspector(runner, new InMemoryFileSystem(), Git).InspectAsync(Repo, CancellationToken.None);
+
+        Assert.True(state.DetachedUnpushed);
+        Assert.False(state.IsSafe);
+        Assert.Equal(5, runner.Calls.Count);
+        var call = runner.Calls[4];
+        Assert.Equal(["-C", Repo, "for-each-ref", "--contains", "HEAD", "--format=%(refname)", "refs/remotes"], call.Arguments);
+        Assert.Equal("C", call.Environment!["LC_ALL"]);
+        Assert.Equal(FormatKit.Core.Timeouts.Query, call.Timeout);
+    }
+
+    [Fact]
+    public async Task Detached_head_contained_in_a_remote_branch_is_safe()
+    {
+        var runner = new FakeProcessRunner();
+        Enqueue(runner, status: "# branch.head (detached)\n", refs: "main\torigin/main\t\n");
+        runner.Enqueue(Git, Ok("refs/remotes/origin/main\n"));
+
+        var state = await new GitRepoInspector(runner, new InMemoryFileSystem(), Git).InspectAsync(Repo, CancellationToken.None);
+
+        Assert.False(state.DetachedUnpushed);
+        Assert.True(state.IsSafe);
+    }
+
+    [Fact]
+    public async Task A_branch_head_does_not_run_the_detached_query()
+    {
+        var runner = new FakeProcessRunner();
+        Enqueue(runner, status: "# branch.head main\n", refs: "main\torigin/main\t\n");
+
+        await new GitRepoInspector(runner, new InMemoryFileSystem(), Git).InspectAsync(Repo, CancellationToken.None);
+
+        Assert.Equal(4, runner.Calls.Count);
+    }
+
+    [Fact]
+    public async Task Unborn_branch_has_no_remote_and_does_not_crash()
+    {
+        var runner = new FakeProcessRunner();
+        Enqueue(runner, status: "# branch.oid (initial)\n# branch.head main\n", refs: "", stash: "", remote: "");
+
+        var state = await new GitRepoInspector(runner, new InMemoryFileSystem(), Git).InspectAsync(Repo, CancellationToken.None);
+
+        Assert.False(state.HasRemote);
+        Assert.False(state.IsSafe);
+        Assert.Empty(state.NoUpstream);
+    }
 }
