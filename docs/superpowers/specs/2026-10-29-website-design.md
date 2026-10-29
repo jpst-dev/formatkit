@@ -282,14 +282,14 @@ Each phase is a pull request and can be deployed on its own.
   `generate_release_notes: true`.
 - `site.yml`: on push and pull request with `paths` `site/**`,
   `src/FormatKit.Cleanup/Catalog/Data/**`,
-  `src/FormatKit.Programs/Catalog/Data/**`, `.github/workflows/site.yml`,
-  `.github/workflows/pages.yml`; runs check and build without deploying.
+  `src/FormatKit.Programs/Catalog/Data/**`, `README.md`,
+  `.github/workflows/site.yml`, `.github/workflows/pages.yml`; runs check and build without deploying.
 - One-time manual step for the user: repository Settings → Pages → Source
   "GitHub Actions". Also Settings → Environments → github-pages → Deployment
   branches and tags → add a tag rule `v*` (so tagged releases may deploy). The
   plan stops for it.
 - Custom domain later: set `site` and `base` in `astro.config.mjs`, add
-  `site/public/CNAME`, configure DNS. Nothing else depends on the URL.
+  `site/public/CNAME`, configure DNS. The MDX pages and the home hero actions hard-code `/formatkit`, so those links must be updated too; the links validator flags any that are missed.
 
 ## 11. Testing and checks
 
@@ -332,4 +332,10 @@ items have ids.
 
 ## Found while building
 
-(Empty; record what implementation finds here.)
+- Developer items are all `level: safe`, but they are opt-in: a level never
+  selects them and they must be listed in `include`. They get a `when.developer`
+  sentence instead of the level sentence, and the catalog page says so.
+- `README.md` belongs in `site.yml`'s `paths` because `check:dist` reads it
+  (it compares the commands on the site against the README table).
+- The GitHub `github-pages` environment needs a `v*` tag rule, or release
+  deploys from a tag are rejected.
