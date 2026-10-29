@@ -32,7 +32,8 @@ public sealed partial record DevOptions(
     WslOptions? Wsl, GitOptions? Git, SshOptions? Ssh, DotfilesOptions? Dotfiles, ShellOptions? Shell, DevDriveOptions? DevDrive)
 {
     private static readonly string[] Distros = ["Ubuntu", "Ubuntu-24.04", "Ubuntu-22.04", "Debian"];
-    private static readonly string[] ExternalPlugins = ["zsh-autosuggestions", "zsh-syntax-highlighting"];
+    /// <summary>The only plugins cloned from GitHub; every other plugin name is one Oh My Zsh ships with.</summary>
+    internal static readonly string[] ExternalPlugins = ["zsh-autosuggestions", "zsh-syntax-highlighting"];
     private static readonly string[] Fonts = ["Meslo", "CascadiaCode", "FiraCode", "JetBrainsMono", "Hack"];
     private static readonly string[] CacheNames = ["npm", "nuget", "pip", "cargo"];
 
@@ -289,7 +290,7 @@ public sealed partial record DevOptions(
             if (ohMyZsh && !zsh)
                 errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{wp}.ohMyZsh", Strings.Get("Validation_OhMyZshNeedsZsh")));
 
-            var theme = ReadMatching(w, "theme", wp, ThemePattern(), errors) ?? "robbyrussell";
+            var theme = RejectReservedName(ReadMatching(w, "theme", wp, ThemePattern(), errors), $"{wp}.theme", errors) ?? "robbyrussell";
 
             var plugins = new List<string>();
             if (!w.TryGetProperty("plugins", out var list))
@@ -312,7 +313,11 @@ public sealed partial record DevOptions(
                         errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, ip,
                             Strings.Format("Validation_Plugin", string.Join(", ", ExternalPlugins))));
                     else
-                        plugins.Add(item.GetString()!);
+                    {
+                        var plugin = RejectReservedName(item.GetString()!, ip, errors);
+                        if (plugin is not null && !plugins.Contains(plugin, StringComparer.Ordinal))
+                            plugins.Add(plugin);
+                    }
                 }
             }
 
@@ -324,7 +329,7 @@ public sealed partial record DevOptions(
         {
             CheckProperties(win, winp, ["ohMyPosh", "theme", "font"], errors);
             var ohMyPosh = ReadBool(win, "ohMyPosh", winp, errors);
-            var theme = ReadMatching(win, "theme", winp, ThemePattern(), errors) ?? "paradox";
+            var theme = RejectReservedName(ReadMatching(win, "theme", winp, ThemePattern(), errors), $"{winp}.theme", errors) ?? "paradox";
 
             var font = ReadString(win, "font", winp, errors) ?? "Meslo";
             if (!Fonts.Contains(font, StringComparer.Ordinal))
@@ -498,6 +503,20 @@ public sealed partial record DevOptions(
         if (value is null || !value.Any(char.IsControl))
             return value;
         errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.{name}", Strings.Get("Validation_ControlCharacters")));
+        return null;
+    }
+
+    /// <summary>A theme or plugin name that starts with '-' or is '.' or '..' would be taken as an option or a path by the commands it reaches.</summary>
+    private static string? RejectReservedName(string? value, string path, List<ProfileError> errors)
+    {
+        if (value is null)
+            return null;
+        if (value.StartsWith('-'))
+            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, path, Strings.Get("Validation_LeadingDash")));
+        else if (value is "." or "..")
+            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, path, Strings.Get("Validation_ReservedName")));
+        else
+            return value;
         return null;
     }
 

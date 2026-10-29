@@ -301,6 +301,25 @@ public class DevOptionsTests
     }
 
     [Theory]
+    [InlineData("-x")]
+    [InlineData("--help")]
+    [InlineData(".")]
+    [InlineData("..")]
+    public void Shell_theme_and_plugin_reject_option_like_and_dot_names(string name)
+    {
+        AssertError(ShellWsl($$""" "theme": "{{name}}" """), "modules.dev.shell.wsl.theme");
+        AssertError(ShellWindows($$""" "theme": "{{name}}" """), "modules.dev.shell.windows.theme");
+        AssertError(ShellWsl($$""" "plugins": ["git", "{{name}}"] """), "modules.dev.shell.wsl.plugins[1]");
+    }
+
+    [Fact]
+    public void Shell_plugins_are_deduplicated_keeping_first_order()
+    {
+        var options = Valid(ShellWsl(""" "plugins": ["git", "zsh-autosuggestions", "git", "z", "zsh-autosuggestions"] """));
+
+        Assert.Equal(["git", "zsh-autosuggestions", "z"], options.Shell!.Wsl!.Plugins);
+    }
+    [Theory]
     [InlineData("Comic Sans")]
     [InlineData("meslo")]
     [InlineData("Iosevka")]
