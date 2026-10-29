@@ -9,6 +9,7 @@ namespace FormatKit.Core.SystemAccess;
 /// without elevation). Secure Boot uses Confirm-SecureBootUEFI, which throws on legacy BIOS or without elevation; then
 /// the UEFISecureBootEnabled registry value is used, and null when neither answers. The TPM is read from Win32_Tpm only
 /// when the process is elevated; its SpecVersion ("2.0, 0, 1.38") starts with the major version.
+/// Tpm is "" when the query succeeded and found no TPM (absent), and null when not elevated or when the query threw.
 /// </summary>
 public sealed class PowerShellWindowsReadiness(IProcessRunner processes) : IWindowsReadiness
 {
@@ -22,7 +23,7 @@ public sealed class PowerShellWindowsReadiness(IProcessRunner processes) : IWind
         "$tpm = $null; " +
         "$elevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator); " +
         "if ($elevated) { try { $t = Get-CimInstance -Namespace 'root/cimv2/Security/MicrosoftTpm' -ClassName Win32_Tpm; " +
-        "if ($t) { $tpm = [string]@($t)[0].SpecVersion } } catch { $tpm = $null } }; " +
+        "if ($t) { $tpm = [string]@($t)[0].SpecVersion } else { $tpm = '' } } catch { $tpm = $null } }; " +
         "[pscustomobject]@{ Build = $build; Ram = $ram; Firmware = $fw; SecureBoot = $sb; Tpm = $tpm } | ConvertTo-Json -Compress";
 
     public async Task<ReadinessInfo> ReadAsync(CancellationToken ct)
@@ -52,7 +53,8 @@ public sealed class PowerShellWindowsReadiness(IProcessRunner processes) : IWind
                     ? string.Equals(f.GetString(), "UEFI", StringComparison.OrdinalIgnoreCase)
                     : null,
                 Flag(e, "SecureBoot"),
-                TpmMajor(e));
+                TpmMajor(e),
+                e.TryGetProperty("Tpm", out var tp) && tp.ValueKind == JsonValueKind.String && string.IsNullOrWhiteSpace(tp.GetString()));
         }
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException or FormatException)
         {
@@ -74,7 +76,7 @@ public sealed class PowerShellWindowsReadiness(IProcessRunner processes) : IWind
         {
             JsonValueKind.True => true,
             JsonValueKind.False => false,
-            JsonValueKind.Number => p.GetInt32() != 0,
+            JsonValueKind.Number => p.TryGetInt32(out var n) ? n != 0 : null,
             _ => null,
         };
     }

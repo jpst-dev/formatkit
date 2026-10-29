@@ -89,9 +89,9 @@ public class Windows11RequirementsCheckTests : IDisposable
     }
 
     [Fact]
-    public async Task Missing_tpm_when_elevated_needs_attention()
+    public async Task Absent_tpm_when_elevated_needs_attention()
     {
-        var item = Assert.Single(await RunAsync(Ready with { TpmMajorVersion = null }));
+        var item = Assert.Single(await RunAsync(Ready with { TpmMajorVersion = null, TpmAbsent = true }));
         Assert.Equal(PrepareStatus.Attention, item.Status);
         Assert.Contains("TPM", item.Title);
     }
@@ -122,5 +122,75 @@ public class Windows11RequirementsCheckTests : IDisposable
         var item = Assert.Single(await RunAsync(new ReadinessInfo(19045, null, null, null, 2)));
         Assert.Equal(PrepareStatus.NotChecked, item.Status);
         Assert.Contains("PC Health Check", item.Action);
+    }
+
+    [Fact]
+    public async Task Unreadable_tpm_when_elevated_is_not_checked_not_missing()
+    {
+        var item = Assert.Single(await RunAsync(Ready with { TpmMajorVersion = null }, elevated: true));
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.DoesNotContain("No TPM", item.Title);
+        Assert.Contains("tpm.msc", item.Action);
+        Assert.Contains("PC Health Check", item.Action);
+        Assert.DoesNotContain("administrator", item.Detail);
+    }
+
+    [Fact]
+    public async Task Ram_limit_is_inclusive_at_3_5_gib()
+    {
+        var limit = 3584L << 20;
+        Assert.Equal(PrepareStatus.Ok, Assert.Single(await RunAsync(Ready with { RamBytes = limit })).Status);
+        var below = Assert.Single(await RunAsync(Ready with { RamBytes = limit - 1 }));
+        Assert.Equal(PrepareStatus.Attention, below.Status);
+        Assert.Contains("RAM", below.Title);
+    }
+
+    public static TheoryData<ReadinessInfo> FailingCases => new()
+    {
+        Ready with { RamBytes = 2L << 30 },
+        Ready with { Uefi = false },
+        Ready with { SecureBoot = false },
+        Ready with { TpmMajorVersion = 1 },
+        Ready with { TpmMajorVersion = null, TpmAbsent = true },
+    };
+
+    [Theory]
+    [MemberData(nameof(FailingCases))]
+    public async Task Every_attention_says_windows_11_will_not_install_and_media_does_not_bypass(ReadinessInfo info)
+    {
+        var item = Assert.Single(await RunAsync(info));
+        Assert.Equal(PrepareStatus.Attention, item.Status);
+        Assert.Contains("Windows 11 will not install on this PC as it is", item.Detail);
+        Assert.Contains("does not bypass the requirements", item.Detail);
+        Assert.Contains("processor", item.Action);
+    }
+
+    [Fact]
+    public async Task Met_names_the_processor_in_detail_and_action_in_english()
+    {
+        var item = Assert.Single(await RunAsync(Ready));
+        Assert.Contains("processor", item.Detail);
+        Assert.Contains("FormatKit does not check the processor", item.Action);
+        Assert.Contains("PC Health Check", item.Action);
+    }
+
+    [Fact]
+    public async Task Met_names_the_processor_in_detail_and_action_in_portuguese()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("pt-BR");
+        var item = Assert.Single(await RunAsync(Ready));
+        Assert.Contains("processador", item.Detail);
+        Assert.Contains("processador", item.Action);
+        Assert.Contains("Verificação de Integridade do PC", item.Action);
+    }
+
+    [Fact]
+    public async Task Unknown_values_are_named()
+    {
+        var item = Assert.Single(await RunAsync(new ReadinessInfo(19045, null, true, null, 2)));
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains("memory", item.Detail);
+        Assert.Contains("Secure Boot", item.Detail);
+        Assert.DoesNotContain("firmware type", item.Detail);
     }
 }

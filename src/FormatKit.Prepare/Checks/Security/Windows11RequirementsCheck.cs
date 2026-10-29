@@ -15,7 +15,8 @@ public sealed class Windows11RequirementsCheck : IPrepareCheck
 
     /// <summary>
     /// Windows 11 asks for 4 GB. Win32_ComputerSystem reports the memory Windows can use, a little below what is installed
-    /// (a 4 GB PC reads about 3.8 GiB), so the limit is 3.5 GiB to avoid warning about a 4 GB machine.
+    /// (a 4 GB PC reads about 3.8 GiB), so the limit is 3.5 GiB to avoid warning about a 4 GB machine. The comparison is
+    /// strict: exactly 3.5 GiB passes, one byte less needs attention.
     /// </summary>
     private const long MinimumRamBytes = 3584L * 1024 * 1024;
 
@@ -34,47 +35,73 @@ public sealed class Windows11RequirementsCheck : IPrepareCheck
         var items = new List<PrepareItem>();
         if (info.RamBytes is { } ram && ram < MinimumRamBytes)
         {
-            items.Add(Item(PrepareStatus.Attention, "Win11_Ram"));
+            items.Add(Attention("Win11_Ram"));
         }
 
         if (info.Uefi == false)
         {
-            items.Add(Item(PrepareStatus.Attention, "Win11_Uefi"));
+            items.Add(Attention("Win11_Uefi"));
         }
         else if (info.Uefi == true && info.SecureBoot == false)
         {
-            items.Add(Item(PrepareStatus.Attention, "Win11_SecureBoot"));
+            items.Add(Attention("Win11_SecureBoot"));
         }
 
         if (info.TpmMajorVersion is { } tpm)
         {
             if (tpm < 2)
             {
-                items.Add(Item(PrepareStatus.Attention, "Win11_Tpm"));
+                items.Add(Attention("Win11_Tpm"));
             }
         }
-        else if (context.IsElevated)
+        else if (info.TpmAbsent)
         {
-            items.Add(Item(PrepareStatus.Attention, "Win11_TpmNone"));
+            items.Add(Attention("Win11_TpmNone"));
         }
         else
         {
-            items.Add(Item(PrepareStatus.NotChecked, "Win11_TpmNotElevated"));
+            // Not elevated, the query failed or the version did not parse: never claim there is no TPM.
+            items.Add(Item(PrepareStatus.NotChecked, context.IsElevated ? "Win11_TpmUnreadable" : "Win11_TpmNotElevated"));
         }
 
-        if (info.RamBytes is null || info.Uefi is null || (info.Uefi == true && info.SecureBoot is null))
+        var unknown = new List<string>();
+        if (info.RamBytes is null)
         {
-            items.Add(Item(PrepareStatus.NotChecked, "Win11_Unknown"));
+            unknown.Add(Strings.Get("Win11_Name_Ram"));
+        }
+
+        if (info.Uefi is null)
+        {
+            unknown.Add(Strings.Get("Win11_Name_Firmware"));
+        }
+        else if (info.Uefi == true && info.SecureBoot is null)
+        {
+            unknown.Add(Strings.Get("Win11_Name_SecureBoot"));
+        }
+
+        if (unknown.Count > 0)
+        {
+            items.Add(new PrepareItem(Id, Group, PrepareStatus.NotChecked, Strings.Get("Win11_Unknown_Title"),
+                Strings.Format("Win11_Unknown_Detail", string.Join(", ", unknown)), WithProcessor("Win11_Unknown_Action")));
         }
 
         if (items.Count == 0)
         {
-            items.Add(Item(PrepareStatus.Ok, "Win11_Met"));
+            // The Met texts name the processor themselves: FormatKit keeps no CPU list.
+            items.Add(new PrepareItem(Id, Group, PrepareStatus.Ok, Strings.Get("Win11_Met_Title"), Strings.Get("Win11_Met_Detail"),
+                Strings.Get("Win11_Met_Action")));
         }
 
         return items;
     }
 
+    // Spec section 9: every Windows 10 result points at the PC Health Check app for the processor.
+    private static string WithProcessor(string actionKey) => Strings.Get(actionKey) + " " + Strings.Get("Win11_Processor");
+
+    private PrepareItem Attention(string prefix) =>
+        new(Id, Group, PrepareStatus.Attention, Strings.Get(prefix + "_Title"),
+            Strings.Get(prefix + "_Detail") + " " + Strings.Get("Win11_Consequence"), WithProcessor(prefix + "_Action"));
+
     private PrepareItem Item(PrepareStatus status, string prefix) =>
-        new(Id, Group, status, Strings.Get(prefix + "_Title"), Strings.Get(prefix + "_Detail"), Strings.Get(prefix + "_Action"));
+        new(Id, Group, status, Strings.Get(prefix + "_Title"), Strings.Get(prefix + "_Detail"), WithProcessor(prefix + "_Action"));
 }
