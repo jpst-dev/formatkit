@@ -629,6 +629,70 @@ Record what the scenarios find in the "Found while running" section of the [prep
    **Expected:** the console prints `Warning: C:\fk\c.md is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.` and the file is written anyway. Then run it with `--output Z:\nope\c.md` (a drive that does not exist): the report is printed first, then `Could not write ...`, and the exit code is **2**.
 4. Switch the VM display language to Brazilian Portuguese (skip if it already is, as the test VM made from a Portuguese ISO) and repeat step 2. **Expected:** the console and the Markdown file are in Portuguese.
 
+## Installation media scenarios (23-27)
+
+These scenarios check `formatkit media build` and `formatkit media usb` (spec: [installation media](superpowers/specs/2026-10-29-installation-media-design.md), section 11). Scenarios 23-26 use a separate disposable VM, `FormatKit-Media`, so the regular test VM and its `clean` checkpoint stay untouched. **Scenario 27 uses your own spare USB stick on the host: you run it, nobody else. Claude never runs `media usb`.**
+
+You need the Windows 11 x64 ISO and, for scenario 24, the profile inputs. Build the executable and the media from an elevated PowerShell on the host (`media build` mounts the ISO read-only and writes only under `.vm\media\`):
+
+```powershell
+dotnet publish src/FormatKit.Cli -c Release -o artifacts
+artifacts\formatkit.exe media build --iso C:\path\to\Win11.iso --output .vm\media\out
+.\tools\vm\New-MediaVm.ps1 -MediaFolder .vm\media\out -Replace
+```
+
+`New-MediaVm.ps1` packs the folder into `.vm\media\media.iso` (UEFI boot image without the "Press any key" prompt), creates the Generation 2 VM `FormatKit-Media` (Secure Boot, vTPM, 4 GB RAM, 64 GB disk, Default Switch) with that ISO first in the boot order, and **does not start it**. It refuses the name `FormatKit-Test`. Start the VM yourself (`vmconnect localhost FormatKit-Media`, then Start) and watch Setup. For each new scenario build the media again into an empty folder (delete `.vm\media\out` first, or use another `--output`) and run the script with `-Replace`.
+
+Record what the scenarios find in the "Found while running" section of the installation media spec; spec section 6 lists three details to confirm (the local account screen on current Windows 11, `$OEM$` copying, the first logon token).
+
+## 23. Media: no profile
+
+1. Build as above, without `--profile`. **Expected:** the command prints the phases (copying the Windows files, splitting `install.wim` when it is larger than 4 GiB, writing autounattend.xml), a percentage every 10 %, `The installation media is ready in ...` and the reminder to run `formatkit prepare check`; exit code **0**.
+2. Create the VM, start it and watch Setup.
+
+**Expected:** Setup starts without a language screen (the language, keyboard and time zone come from the host or the `setup` section). The only manual screens are **disk selection**, the **local account** (name and password, typed by you in the VM console) and, because a VM has no firmware key, the **edition** screen. No license terms or privacy screens. After the first logon: `Test-Path C:\FormatKit` is **False** (no profile was bundled) and nothing starts by itself.
+
+## 24. Media: profile with `importFile` and `networkDriverBackup`
+
+1. On the host make a profile outside `.vm\media\` with a `programs.importFile` (`formatkit programs export`) and a `drivers.networkDriverBackup` folder (a folder with an `.inf`), using relative paths, plus `"setup": { "account": "local" }`. Build with `--profile`.
+
+   **Expected:** exit code **0**; `.vm\media\out\sources\$OEM$\$1\FormatKit` holds `formatkit.exe`, `profile.json` and `inputs\1-...`, `inputs\2-...`; in the copied `profile.json` the two paths read `inputs\1-...` and `inputs\2-...`. A path used twice in the profile is copied once.
+2. Create the VM, start it, finish Setup (disk, local account, edition) and sign in.
+
+**Expected:** `Test-Path C:\FormatKit\formatkit.exe` is **True**. A visible console opens at the first logon with `Starting the profile '...' in 60 s (press Esc to cancel)...` counting down; press **Esc** in one run (**Expected:** `Automatic start cancelled.`, the command to run later, and the window closes after Enter; nothing ran) and let it run in another (restore or reinstall). The run starts after the countdown, reads `C:\FormatKit\inputs\`, asks for UAC if the first logon token is not elevated (record which happened), and writes logs and the report under `%ProgramData%\FormatKit\logs`. It resumes after reboots as scenario 4 does. `C:\FormatKit` stays afterwards.
+
+## 25. Media: `account: "microsoft"`
+
+Build with a profile whose `setup.account` is `"microsoft"` and install in the VM.
+
+**Expected:** the online account screens of OOBE show (the sign-in with a Microsoft account is not completed); with `"local"` (scenarios 23 and 24) they do not. Record whether the local account screen appears offline on this build (spec section 6, item 1); if it does not, the fallback is the `BypassNRO` value.
+
+## 26. Media: invalid input, nothing written
+
+Run each on an empty `--output` and check the exit code (`$LASTEXITCODE`) and that the folder stays empty:
+
+- `setup.edition` that the ISO does not have (for example `Windows 11 Education` on a consumer ISO): exit **2**, a message that names the editions in the image.
+- `setup.language` the ISO does not have (an English ISO with `pt-BR`): exit **2**.
+- A profile with a missing input (a `programs.importFile` that does not exist) and, separately, an unknown field `setup.foo`: exit **2**.
+- A non-empty `--output`, a Windows 10 or ARM64 ISO, a folder that is not an ISO: exit **2**.
+- `--output` on a drive without enough free space: exit **2** with the needed and free sizes.
+- Decline the UAC prompt: exit **5**. Ctrl+C during the copy: exit **130**, the ISO is dismounted (`Get-DiskImage -ImagePath <iso>` shows `Attached : False`) and the folder is partial: delete it before the next try.
+
+## 27. Media: `media usb` on your own USB stick
+
+Run this one yourself, on the host, in an elevated PowerShell. **Use a spare stick with nothing you need: the chosen disk is erased.** Copy the ISO and the profile (and its inputs) to the host's internal drive first. Then report the output to Claude, who checks it against this list.
+
+1. **Listing.** `artifacts\formatkit.exe media usb --iso C:\path\to\Win11.iso --profile C:\path\to\my-profile.json`, with the stick plugged in and no `--disk`.
+
+   **Expected:** exit code **2**, the USB disks with number, model, size, `(USB, removable)`, drive letters and labels, and `Can be used.` for your stick. The boot and system disk are not listed. Nothing is erased. If your stick is listed as `not removable`, or shows up under hidden hard disks, record the exact model: the removable test (spec R7) needs a fix.
+2. **Hidden external hard disk.** Plug in an external USB hard disk, run step 1 again.
+
+   **Expected:** it is not listed; the line `1 external hard disk(s) are hidden. Use --allow-hard-disk to include them.` appears. With `--allow-hard-disk` it is listed (as not removable), still without erasing anything.
+3. **Refusals.** Put a copy of the ISO or the profile on the stick and run with its number (`--disk <n>`). **Expected:** `Disk <n> cannot be used: it holds files the media needs (...)`, exit **2**, nothing erased. Also try the number of your system disk and a number that does not exist: both exit **2**.
+4. **Wrong typed number.** Run with `--disk <n>` for your stick. **Expected:** the disk line with `EVERYTHING on it will be erased.`, its volumes, and the prompt `Type the disk number (<n>) to erase it and write the media. Anything else cancels:`. Type a different number, or just Enter: `Cancelled. Nothing was erased.`, exit **2**, and the stick's files are still there.
+5. **Success.** Run again and type the right number. **Expected:** the phases and percentages, then `The USB stick is ready. Boot the PC to format from it.`, exit **0**. In Explorer the stick is `FORMATKIT`, FAT32, about 32 GiB at most (the rest of a larger stick is unallocated), and `Get-Disk <n> | Get-Partition` shows one active partition with the MBR style. `sources` holds `install.swm` parts when the image was split. Record the size shown by `Get-Partition` against the stick's size (spec: partition is the disk size minus 1 MiB, up to 32 GiB).
+6. **Boot.** Boot a UEFI PC (a spare one if possible; Secure Boot on) from the stick, choose the one-time boot menu entry. **Expected:** Windows Setup starts; the screens are the ones of scenario 23 and, with a profile, the first logon behaves as in scenario 24. Stop at the disk screen if the PC holds data you want to keep: this scenario does not need to install.
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:
@@ -641,4 +705,5 @@ Confirm on real machines and fix the code/docs if wrong:
 - [ ] The published `formatkit.exe` runs on a clean machine without .NET installed, and the SmartScreen prompt behaves as documented.
 - [ ] **Cleanup diagnosis, HPET**: disable the High Precision Event Timer (`ACPI\PNP0103`) in Device Manager, run `cleanup check`, expect it under "Breaks Windows features:" with an `Enable-PnpDevice` fix, run the fix and confirm the finding is gone (scenario 9; Hyper-V Gen 2 VMs have no HPET).
 - [ ] **Cleanup on Windows 11 Home**: apply a `level: balanced` profile and confirm the policy-based privacy items (`privacy.advertising-id`, `privacy.tailored-experiences`, `privacy.diagnostic-data`) take effect in Settings and survive a reboot (scenario 9 (c); no Home VM yet).
+- [ ] **USB stick** (scenario 27): `media usb` recognises a real removable stick, hides an external hard disk and boots a real PC.
 - [ ] **Network fallback** (spare physical machine): back up its NIC driver with `drivers backup-network`, uninstall the NIC device together with its oem driver, set `networkDriverBackup` in the profile, then run. Expect the driver to be reinstalled via `pnputil`, connectivity to return and the run to continue.

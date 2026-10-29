@@ -3,5 +3,15 @@
   "name": "Example",
   "modules": {
     "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] }
+  },
+  // Used only by "formatkit media build" and "formatkit media usb"; "run" ignores it.
+  "setup": {
+    // "local" asks for a local account in Setup; "microsoft" keeps the online account screens. No password goes here.
+    "account": "local"
+    // "edition": "Windows 11 Pro",      // an edition in the ISO; omit to use the firmware key or Setup's edition screen
+    // "computerName": "PC-JOAO",        // 1-15 letters, digits or '-'
+    // "language": "pt-BR",              // must be a language of the ISO; default: your Windows language if the ISO has it
+    // "keyboard": "0416:00010416",      // default: this PC's keyboard
+    // "timeZone": "E. South America Standard Time"  // default: this PC's time zone
   }
 }

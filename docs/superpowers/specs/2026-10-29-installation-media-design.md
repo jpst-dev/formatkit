@@ -165,7 +165,7 @@ formatkit media usb   --iso <win11.iso> [--profile <file>] [--disk <n>] [--allow
   so, mentioning `--allow-hard-disk` when an external hard disk was hidden.
 - Exit codes: 0 done; 1 failed while writing; 2 invalid arguments, ISO, profile
   or `setup`, a missing input, not enough space, an ineligible disk, or a
-  refused confirmation; 130 Ctrl+C.
+  refused confirmation; 5 UAC declined; 130 Ctrl+C.
 - Output language follows the Windows UI language (English and Brazilian
   Portuguese).
 
@@ -236,7 +236,7 @@ Optional, at the top level next to `modules`:
 | `account` | `local` or `microsoft`. | `local` |
 | `edition` | An image name in the ISO and in `GenericKeys`. | none: firmware key or Setup's edition screen |
 | `computerName` | 1-15 characters, letters, digits and `-`, not only digits. | none: Windows generates one |
-| `language` | A culture name; must be a language of the image. | the current UI language if the image has it, else the image's first language |
+| `language` | A culture name; must be a language of the image. | the current UI language if the image has it, else the image's default language (`DefaultLanguageIndex`) |
 | `keyboard` | An input locale (`0416:00010416`) or a culture name. | the current PC's first keyboard layout |
 | `timeZone` | A Windows time zone id (`TimeZoneInfo.FindSystemTimeZoneById`). | the current PC's time zone |
 
@@ -321,7 +321,9 @@ its fallback:
   otherwise it is copied. `install.esd` above that size cannot be split and is
   an error before anything is written (D8).
 - `ProfileBundle` copies each `ExternalInput` (from Programs, Drivers and Dev,
-  the same list `prepare check` uses) once, numbered in profile order, and
+  the same list `prepare check` uses) once, numbered in the order the distinct
+  existing inputs are found (module order; a path used twice keeps its first
+  number), and
   rewrites its JSON path in the copy to `inputs\<n>-<name>`, relative to
   `profile.json`. Modules already resolve relative paths against the profile's
   folder, so `run` needs no change. The rest of the profile, including
@@ -332,10 +334,10 @@ its fallback:
 
 `formatkit run --profile <file> --countdown <seconds>`:
 
-- Before planning, prints `FormatKit will set up this PC with the profile "My
-  PC" in 60 s. Press any key to cancel.` and counts down, as the reboot
-  countdown in `ConsoleRebooter` does.
-- A key cancels: it prints the command to run later
+- Before planning, prints `Starting the profile 'My PC' in 60 s (press Esc to
+  cancel)...` and counts down, as the reboot countdown in `ConsoleRebooter`
+  does (R3, see "Decided in away mode").
+- Esc cancels: it prints the command to run later
   (`C:\FormatKit\formatkit.exe run --profile C:\FormatKit\profile.json`), waits
   for Enter and exits 0. Cancelling is not an error.
 - Otherwise the run proceeds unchanged: elevation, reboots and resume through
@@ -438,3 +440,51 @@ Decisions taken without the user, for review:
   `--resume` or `--dry-run`. Reason: both follow existing conventions (module
   sections reject unknown fields; the countdown only makes sense for a new
   run).
+- R1: a relative `drivers.networkDriverBackup` resolves against the profile
+  folder, like Programs and Dev. Reason: section 7 relies on every module
+  resolving relative paths against the profile folder, and the current
+  directory differs in the elevated child and after a resume.
+- R2: `IWindowsReadiness` is a fourth new service (section 2 lists three). It
+  reads RAM, firmware type, Secure Boot, TPM version and the build for
+  `security.windows11-requirements`, which no existing service could read.
+- R3: Esc, not any key, cancels the `run --countdown` countdown (section 8
+  said "any key"). Reason: like the reboot countdown, and a stray key while
+  the desktop loads for the first time must not cancel the run.
+- The stick's partition is `min(disk size - 1 MiB, 32 GiB)`, not
+  `min(disk size, 32 GB)` (sections 4.1, D8). Reason: a partition as large as
+  the whole disk cannot fit after the MBR and alignment; 32 GiB is the cap.
+  Scenario 27 confirms it on a real stick.
+- `MediaWriteException` (exit 1) is thrown for every failure while writing the
+  media; `MediaException` (exit 2) only for failures found before writing.
+  Reason: section 5 gives exit 1 for "failed while writing" and exit 2 for
+  invalid input, and the CLI needs the type to tell them apart.
+- A profile input folder that cannot be read makes the bundle invalid (exit 2,
+  nothing written) instead of being copied incompletely. Reparse points
+  (symlinks, junctions) inside input folders are skipped, because following
+  them risks loops and duplicates.
+- `media usb` without `--disk` hides external hard disks and only prints how
+  many are hidden (and `--allow-hard-disk`); it lists them only with the flag
+  (section 5, D9).
+- A failure or Ctrl+C while the stick is being erased or written reports an
+  incomplete stick and says to run the command again (section 5.2). The same
+  holds when listing the disks again fails at the re-check, even if nothing
+  was erased yet: simpler than telling the two apart, at the cost of a
+  slightly pessimistic message.
+- The RAM threshold of `security.windows11-requirements` is 3.5 GiB, not 4 GB
+  (section 9), because `Win32_ComputerSystem.TotalPhysicalMemory` reads below
+  the installed memory (a 4 GB PC reads about 3.8 GiB). Summing
+  `Win32_PhysicalMemory` was rejected as more code for a rare case; an
+  occasional RAM warning on a 4 GB machine with a large reserve for the
+  integrated GPU is accepted.
+- The same item tells a missing TPM from an unreadable one: "no TPM" is
+  reported only when the elevated query succeeds and finds none; a TPM that
+  cannot be read (not elevated, the query failed) is Not checked with
+  `tpm.msc`. Every Windows 10 result also points at the PC Health Check app
+  for the processor, since FormatKit keeps no CPU list.
+- The countdown is skipped when there is no console (`--countdown 0` skips it
+  too), and the run proceeds. Reason: an unattended start must not wait for a
+  key nobody can press.
+- Section 5.3 and section 7 wording now match the code: the default language
+  is the image's `DefaultLanguageIndex` (not its first language), and inputs
+  are numbered in the order the distinct existing inputs are found (not
+  "profile order").
