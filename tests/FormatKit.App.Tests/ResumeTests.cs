@@ -67,6 +67,22 @@ public sealed class ResumeTests
     }
 
     [Fact]
+    public async Task MainResume_OpensRunProfileAndResumes()
+    {
+        // A resume signalled to the open window by the resume task after a reboot.
+        SeedState();
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+        var (main, _, run) = Create();
+        main.Navigate(Page.About);
+
+        await main.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.Equal(Page.RunProfile, main.Current);
+        Assert.Equal([["run", "--resume"]], _launcher.Jobs);
+        Assert.Equal(RunPhase.Result, run.Phase);
+    }
+
+    [Fact]
     public async Task HomeResume_NotElevated_UsesRunas()
     {
         SeedState();
