@@ -311,6 +311,8 @@ Worker → window:
 | `rebootCountdown` | seconds |
 | `finished` | the `RunSummary` (status, step reports, report directory, error) |
 | `failed` | a localized message (worker error before or outside the engine) |
+| `consoleOpened`, `consoleClosed` | a step opened, then closed, a console window for the user to type in (section 6.5) |
+| `consoleLine` | text: a line the step writes for the user (public data only) |
 | `disks`, `mediaProgress`, `mediaFinished` | media phase only |
 
 Window → worker:
@@ -355,8 +357,10 @@ the attached process (`passwd`, `ssh-keygen`, `ssh-add`, the dotfiles `git
 clone` that may prompt) in a **new console window** with the same arguments,
 environment and timeout handling as `WindowsInteractiveConsole`, and waits for
 it. `CanPrompt` is true when a user is signed in at the console. `WriteLine`
-goes to the run log and, as a step message, to the window. The window shows
-"Type in the window that opened" while it waits. The values typed never pass
+goes to the run log and, as a step message (`consoleLine`), to the window.
+The window shows "Type in the console window that opened" on the running step
+between `consoleOpened` and `consoleClosed`. The process arguments are not
+sent. The values typed never pass
 through FormatKit, as today.
 
 ## 7. Error handling
@@ -488,4 +492,27 @@ await review:
 
 ## Found while running
 
-(Filled after the VM scenarios.)
+Fixed before the remaining VM scenarios. I1-I5 come from the final review;
+V1-V3 from VM scenario 1 and V4 from VM scenario 2 (2026-10-29, Brazilian
+Portuguese UI, 1024x768).
+
+- **I1 (single instance):** the elevated resume window created the mutex and
+  activation event with an admin-only DACL; both now grant only the user, and
+  access denied counts as another instance.
+- **I2 (startup failure):** a startup or XAML failure left a hidden process
+  holding the mutex; it now logs, shows the error and exits with 1.
+- **I3 (frozen window):** page queries ran on the UI thread; they now run on
+  the thread pool and apply on the UI thread.
+- **I4 (console hint):** the running step now says "Type in the console
+  window that opened" and shows the step's lines (`consoleOpened`,
+  `consoleLine`, `consoleClosed`, section 6.2).
+- **I5 (Resume):** the result page now has the Resume button its stop text
+  names.
+- **V1 (accessibility):** list items were read as their record's `ToString`;
+  every list over records names its items, and the About link has a name.
+- **V2 (Home text):** "prepare the installation media" removed until the
+  media phase.
+- **V3 (window size):** the window opened cut off on 1024x768; it now opens
+  centered, clamped to the work area.
+- **V4 (admin badge):** the plan badge read "admin"; it now uses the CLI's
+  dry-run word ("administrator" / "administrador").
