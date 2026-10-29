@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Security;
 using FormatKit.Cli.Localization;
 using FormatKit.Core.Profiles;
 using FormatKit.Prepare;
@@ -96,15 +97,16 @@ internal static class PrepareCommands
         CommandContext context, WindowsVolume windows, string path, PrepareReport report, string computerName)
     {
         var o = context.Out;
-        if (windows.IsLost(path))
-            o.WriteLine(Strings.Format("Prepare_OutputOnWindows", path));
-
         try
         {
+            // IsLost resolves the path, so an invalid one fails here and is reported like a failed write (exit 2).
+            if (windows.IsLost(path))
+                o.WriteLine(Strings.Format("Prepare_OutputOnWindows", path));
             context.Env.Services.Files.WriteAllTextAtomic(
                 path, MarkdownRenderer.Render(report, computerName, TimeProvider.System.GetLocalNow()));
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException
+                                       or ArgumentException or SecurityException)
         {
             context.Env.Log.Warning(ex, "Could not write the checklist to {Path}", path);
             o.WriteLine(Strings.Format("Prepare_OutputFailed", path, ex.Message));

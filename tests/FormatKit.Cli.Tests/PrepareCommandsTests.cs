@@ -214,6 +214,53 @@ public sealed class PrepareCommandsTests : IDisposable
     }
 
     [Theory]
+    [InlineData("argument")]
+    [InlineData("notSupported")]
+    [InlineData("security")]
+    public async Task An_invalid_output_path_prints_the_report_and_exits_2(string error)
+    {
+        _check.Items = [Item(PrepareStatus.Blocker)];
+        _fs.SeedDirectory(@"E:\");
+        _fs.AtomicWriteError = error switch
+        {
+            "argument" => new ArgumentException("bad path"),
+            "notSupported" => new NotSupportedException("bad format"),
+            _ => new System.Security.SecurityException("denied"),
+        };
+
+        var exit = await Run("--output", @"E:\c.md");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Some title", _out.ToString());
+        Assert.Contains("Could not write", _out.ToString());
+    }
+
+    [Fact]
+    public async Task An_output_path_that_cannot_be_resolved_exits_2_not_1()
+    {
+        // A NUL makes Path.GetFullPath throw while checking whether the file is on the Windows drive.
+        _check.Items = [Item(PrepareStatus.Attention)];
+
+        var exit = await Run("--output", "E:\\c\u0000.md");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Some title", _out.ToString());
+        Assert.Contains("Could not write", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Ctrl_c_exits_130_and_says_cancelled()
+    {
+        _check.Throw = new OperationCanceledException();
+
+        var exit = await Run();
+
+        Assert.Equal(ExitCodes.Cancelled, exit);
+        Assert.Equal(130, exit);
+        Assert.Contains("Cancelled.", _out.ToString());
+    }
+
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task Never_relaunches_elevated(bool elevated)
@@ -242,11 +289,14 @@ public sealed class PrepareCommandsTests : IDisposable
         public IReadOnlyList<PrepareItem> Items { get; set; } = [];
         public int Calls { get; private set; }
         public PrepareContext? Context { get; private set; }
+        public Exception? Throw { get; set; }
 
         public Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct)
         {
             Calls++;
             Context = context;
+            if (Throw is not null)
+                throw Throw;
             return Task.FromResult(Items);
         }
     }

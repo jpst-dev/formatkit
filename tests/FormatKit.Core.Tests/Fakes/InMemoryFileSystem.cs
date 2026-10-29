@@ -14,6 +14,9 @@ public sealed class InMemoryFileSystem : IFileSystem
     /// <summary>When true, every write throws <see cref="IOException"/>.</summary>
     public bool FailWrites { get; set; }
 
+    /// <summary>When set, <see cref="WriteAllTextAtomic"/> throws it.</summary>
+    public Exception? AtomicWriteError { get; set; }
+
     public IReadOnlyDictionary<string, string> Files => _files;
 
     /// <summary>Seeds file content directly without counting as a write.</summary>
@@ -89,6 +92,8 @@ public sealed class InMemoryFileSystem : IFileSystem
 
     public void WriteAllTextAtomic(string path, string contents)
     {
+        if (AtomicWriteError is not null)
+            throw AtomicWriteError;
         if (FailWrites)
             throw new IOException($"write refused: {path}");
         var dir = Path.GetDirectoryName(path);
