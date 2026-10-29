@@ -257,7 +257,7 @@ Validation errors carry the JSON path and fail the profile (exit code 2) before 
 - `git`: at least one key. `defaultBranch` matches `^[A-Za-z0-9._/-]+$`; `autocrlf` is `true`, `false` or `input`; `email` contains `@`.
 - `ssh.keyType`: `ed25519` (default) or `rsa` (4096 bits). `comment` defaults to `<user>@<computer name>`.
 - `dotfiles`: exactly one of `repo` (`https://...` or `git@host:path`, no credentials in the address) or `path` (a folder; a relative path is relative to the profile file). `files[].from` is relative with no `..`; `files[].to` must resolve inside your user profile. At least one file.
-- `shell.wsl` requires `wsl`; `ohMyZsh` requires `zsh`. Plugins are Oh My Zsh's own plugin names plus the two external ones, `zsh-autosuggestions` and `zsh-syntax-highlighting`. `shell.windows.font` is a Nerd Font name for `oh-my-posh font install` (default `Meslo`).
+- `shell.wsl` requires `wsl`; `ohMyZsh` requires `zsh`. Plugins are Oh My Zsh's own plugin names plus the two external ones, `zsh-autosuggestions` and `zsh-syntax-highlighting`. `shell.windows.font` is one of `Meslo` (default), `CascadiaCode`, `FiraCode`, `JetBrainsMono` or `Hack`; theme and plugin names cannot start with `-` or be `.`/`..`, and repeated plugins are listed once.
 - `devDrive.path` is absolute, ends in `.vhdx` and is on a local fixed drive; `sizeGB` is at least 50; `letter` is not `C`; `caches` items are `npm`, `nuget`, `pip` or `cargo`.
 
 ### Suggested shell setup
@@ -294,7 +294,7 @@ Dotfiles are copied, never linked. A target that differs is first renamed to `<t
 
 ### Dev Drive
 
-`devDrive` creates a dynamic VHDX formatted as a Dev Drive (ReFS) and assigns it the letter. It never resizes partitions, and it needs Windows 11 build 22621.2338 or newer (older builds report "not applicable"). Windows does not re-attach the VHDX after a reboot, so FormatKit registers a SYSTEM scheduled task, `FormatKit-DevDrive`, that mounts it at startup with the same letter. For each cache it creates `<letter>:\packages\<name>` and sets the user variable (`npm_config_cache`, `NUGET_PACKAGES`, `PIP_CACHE_DIR`, `CARGO_HOME`) unless it already points elsewhere; existing cache contents are not moved.
+`devDrive` creates a dynamic VHDX formatted as a Dev Drive (ReFS) and assigns it the letter. It never resizes partitions, and it needs Windows 11 build 22621.2338 or newer (older builds report "not applicable"). Windows does not re-attach the VHDX after a reboot, so FormatKit registers a SYSTEM scheduled task, `FormatKit-DevDrive`, that mounts it at startup with the same letter. The path must not contain invalid characters or be a bare file in a drive root (`C:\.vhdx`). For each cache it creates `<letter>:\packages\<name>` and sets the user variable (`npm_config_cache`, `NUGET_PACKAGES`, `PIP_CACHE_DIR`, `CARGO_HOME`) unless it already points elsewhere; existing cache contents are not moved.
 
 ### Developer settings (cleanup category)
 
@@ -321,7 +321,7 @@ formatkit dev wsl-user --profile profiles\dev-example.json
 formatkit dev ssh-key --profile profiles\dev-example.json
 ```
 
-Both read the profile's `dev.wsl` or `dev.ssh` section. Without `--profile` they use `Ubuntu` with your Windows user name in lowercase (exit code 2 if that is not a valid Linux user name) and `ed25519`. They need a console where you can type (exit code 2 otherwise). Exit code 0 means every item is done or already in order, 1 that an item failed or is pending, 2 an invalid profile. Only `dev ssh-key` asks for elevation, to set ssh-agent to Automatic.
+Both read the profile's `dev.wsl` or `dev.ssh` section. Without `--profile` they use `Ubuntu` with your Windows user name in lowercase (exit code 2 if that is not a valid Linux user name) and `ed25519`. They need a console where you can type (exit code 2 otherwise). Exit code 0 means every item is done, already in order or not applicable, 1 that an item failed or is pending, 2 an invalid profile. `dev ssh-key` relaunches elevated (like `run`) because it sets ssh-agent to Automatic.
 
 ## Building
 
