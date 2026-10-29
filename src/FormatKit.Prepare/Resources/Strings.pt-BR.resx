@@ -72,4 +72,27 @@
   <data name="UserFolders_Partial_Title" xml:space="preserve"><value>A pasta {0} não pôde ser lida por completo</value></data>
   <data name="UserFolders_Partial_Detail" xml:space="preserve"><value>Nenhum arquivo legível foi encontrado, mas algumas pastas dentro dela não puderam ser lidas.</value></data>
   <data name="UserFolders_Partial_Action" xml:space="preserve"><value>Confira a pasta {0} manualmente e copie o que precisar para um disco externo.</value></data>
+  <data name="GitRepos_Unsafe_Title" xml:space="preserve"><value>O repositório {0} tem trabalho que existe só neste PC</value></data>
+  <data name="GitRepos_Unsafe_Action" xml:space="preserve"><value>Faça commit e push, ou copie a pasta {0} para um disco externo.</value></data>
+  <data name="GitRepos_Uncommitted_One" xml:space="preserve"><value>1 alteração sem commit.</value></data>
+  <data name="GitRepos_Uncommitted_Many" xml:space="preserve"><value>{0} alterações sem commit.</value></data>
+  <data name="GitRepos_Ahead_One" xml:space="preserve"><value>A branch {0} tem 1 commit não enviado.</value></data>
+  <data name="GitRepos_Ahead_Many" xml:space="preserve"><value>A branch {0} tem {1} commits não enviados.</value></data>
+  <data name="GitRepos_NoUpstream_One" xml:space="preserve"><value>A branch {0} não tem upstream.</value></data>
+  <data name="GitRepos_NoUpstream_Many" xml:space="preserve"><value>Branches sem upstream: {0}.</value></data>
+  <data name="GitRepos_Stash_One" xml:space="preserve"><value>1 stash.</value></data>
+  <data name="GitRepos_Stash_Many" xml:space="preserve"><value>{0} stashes.</value></data>
+  <data name="GitRepos_NoRemote" xml:space="preserve"><value>O repositório não tem remote.</value></data>
+  <data name="GitRepos_Ok_Title_One" xml:space="preserve"><value>{0} repositório, tudo enviado</value></data>
+  <data name="GitRepos_Ok_Title_Many" xml:space="preserve"><value>{0} repositórios, tudo enviado</value></data>
+  <data name="GitRepos_Ok_Detail" xml:space="preserve"><value>Sem alterações sem commit, commits não enviados, stashes nem branches sem upstream.</value></data>
+  <data name="GitRepos_NoGit_Title" xml:space="preserve"><value>Repositórios Git não verificados</value></data>
+  <data name="GitRepos_NoGit_Detail_One" xml:space="preserve"><value>O Git não foi encontrado, então o repositório {0} não pôde ser inspecionado.</value></data>
+  <data name="GitRepos_NoGit_Detail_Many" xml:space="preserve"><value>O Git não foi encontrado, então estes repositórios não puderam ser inspecionados: {0}</value></data>
+  <data name="GitRepos_NoGit_Action" xml:space="preserve"><value>Instale o Git e rode este comando de novo, ou confira cada pasta manualmente: faça commit e push, ou copie para um disco externo.</value></data>
+  <data name="GitRepos_Failed_Title" xml:space="preserve"><value>O repositório {0} não foi verificado</value></data>
+  <data name="GitRepos_Failed_Detail" xml:space="preserve"><value>O Git falhou ou demorou demais ao lê-lo.</value></data>
+  <data name="GitRepos_Failed_Action" xml:space="preserve"><value>Confira a pasta {0} manualmente: faça commit e push, ou copie para um disco externo.</value></data>
+  <data name="GitRepos_Dubious_Detail" xml:space="preserve"><value>O Git se recusa a abri-lo porque a pasta pertence a outro usuário (dubious ownership).</value></data>
+  <data name="GitRepos_Dubious_Action" xml:space="preserve"><value>Se você confia nele, rode: git config --global --add safe.directory "{0}" e execute este comando de novo, ou confira a pasta manualmente.</value></data>
 </root>

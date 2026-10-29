@@ -72,4 +72,27 @@
   <data name="UserFolders_Partial_Title" xml:space="preserve"><value>{0} could not be fully read</value></data>
   <data name="UserFolders_Partial_Detail" xml:space="preserve"><value>No readable files were found, but some folders inside it could not be read.</value></data>
   <data name="UserFolders_Partial_Action" xml:space="preserve"><value>Check the folder {0} by hand and copy anything you need to an external drive.</value></data>
+  <data name="GitRepos_Unsafe_Title" xml:space="preserve"><value>Repository {0} has work that exists only on this PC</value></data>
+  <data name="GitRepos_Unsafe_Action" xml:space="preserve"><value>Commit and push, or copy the folder {0} to an external drive.</value></data>
+  <data name="GitRepos_Uncommitted_One" xml:space="preserve"><value>1 uncommitted change.</value></data>
+  <data name="GitRepos_Uncommitted_Many" xml:space="preserve"><value>{0} uncommitted changes.</value></data>
+  <data name="GitRepos_Ahead_One" xml:space="preserve"><value>Branch {0} has 1 commit not pushed.</value></data>
+  <data name="GitRepos_Ahead_Many" xml:space="preserve"><value>Branch {0} has {1} commits not pushed.</value></data>
+  <data name="GitRepos_NoUpstream_One" xml:space="preserve"><value>Branch {0} has no upstream.</value></data>
+  <data name="GitRepos_NoUpstream_Many" xml:space="preserve"><value>Branches without an upstream: {0}.</value></data>
+  <data name="GitRepos_Stash_One" xml:space="preserve"><value>1 stash.</value></data>
+  <data name="GitRepos_Stash_Many" xml:space="preserve"><value>{0} stashes.</value></data>
+  <data name="GitRepos_NoRemote" xml:space="preserve"><value>The repository has no remote.</value></data>
+  <data name="GitRepos_Ok_Title_One" xml:space="preserve"><value>{0} repository, all pushed</value></data>
+  <data name="GitRepos_Ok_Title_Many" xml:space="preserve"><value>{0} repositories, all pushed</value></data>
+  <data name="GitRepos_Ok_Detail" xml:space="preserve"><value>No uncommitted changes, unpushed commits, stashes or branches without an upstream.</value></data>
+  <data name="GitRepos_NoGit_Title" xml:space="preserve"><value>Git repositories not checked</value></data>
+  <data name="GitRepos_NoGit_Detail_One" xml:space="preserve"><value>Git was not found, so the repository {0} could not be inspected.</value></data>
+  <data name="GitRepos_NoGit_Detail_Many" xml:space="preserve"><value>Git was not found, so these repositories could not be inspected: {0}</value></data>
+  <data name="GitRepos_NoGit_Action" xml:space="preserve"><value>Install Git and run this command again, or check each folder by hand: commit and push, or copy it to an external drive.</value></data>
+  <data name="GitRepos_Failed_Title" xml:space="preserve"><value>Repository {0} not checked</value></data>
+  <data name="GitRepos_Failed_Detail" xml:space="preserve"><value>Git failed or took too long while reading it.</value></data>
+  <data name="GitRepos_Failed_Action" xml:space="preserve"><value>Check the folder {0} by hand: commit and push, or copy it to an external drive.</value></data>
+  <data name="GitRepos_Dubious_Detail" xml:space="preserve"><value>Git refuses to open it because the folder belongs to another user (dubious ownership).</value></data>
+  <data name="GitRepos_Dubious_Action" xml:space="preserve"><value>If you trust it, run: git config --global --add safe.directory "{0}" and run this command again, or check the folder by hand.</value></data>
 </root>
