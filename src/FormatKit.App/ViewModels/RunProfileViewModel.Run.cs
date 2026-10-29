@@ -19,6 +19,8 @@ public sealed partial class RunProfileViewModel
     private WorkerConnection? _connection;
     private StepRow? _current;
     private bool _stopSent;
+    private bool _stepStarted;
+    private string? _refusal;
     private TaskCompletionSource _runEnded = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public IAsyncRelayCommand RunCommand { get; private set; } = null!;
@@ -210,6 +212,8 @@ public sealed partial class RunProfileViewModel
         FinalStatus = null;
         ReportDirectory = null;
         EndedWithoutResult = false;
+        _stepStarted = false;
+        _refusal = null;
         ShowSteps(initialRows);
         IsRunning = true;
         Phase = RunPhase.Running;
@@ -252,6 +256,19 @@ public sealed partial class RunProfileViewModel
 
         if (status is null)
             _env.Log.Warning("Run: the worker channel ended without a result");
+        if (_refusal is not null)
+        {
+            // The worker refused before any step (the profile changed since the review): back to the review, which
+            // offers Reload, like a declined UAC prompt.
+            RunMessage = _refusal;
+            Steps.Clear();
+            RefreshInterruptedRun();
+            IsRunning = false;
+            Phase = RunPhase.Review;
+            _runEnded.TrySetResult();
+            return;
+        }
+
         EndedWithoutResult = status is null;
         FinalStatus = status ?? Strings.Get("RunProfile_UnexpectedEnd");
         // Also after a stop or a failure: the saved state decides whether Resume is offered.
@@ -267,9 +284,10 @@ public sealed partial class RunProfileViewModel
         switch (message)
         {
             case Planned planned:
-                ShowSteps(planned.Steps.Select(s => new StepRow(s.Id, s.Title)));
+                ShowSteps(planned.Steps.Select(NewRow));
                 return null;
             case StepStarted started:
+                _stepStarted = true;
                 _current = Find(started.Id);
                 if (_current is not null) _current.State = StepState.Running;
                 return null;
@@ -297,6 +315,8 @@ public sealed partial class RunProfileViewModel
             case Failed failed:
                 // Shown as it arrives: after a stop it is the worker's Worker_Stopped text, which offers Resume.
                 _env.Log.Warning("Run: the worker reported a failure: {Message}", failed.Message);
+                if (!_stepStarted && failed.Message == Strings.Get("Worker_ProfileChanged"))
+                    _refusal = failed.Message;
                 return failed.Message;
             default:
                 _env.Log.Warning("Run: unexpected {Type} from the worker ignored", message.GetType().Name);
@@ -332,6 +352,15 @@ public sealed partial class RunProfileViewModel
         Steps.Clear();
         foreach (var row in rows)
             Steps.Add(row);
+    }
+
+    /// <summary>A planned step; one already done before a stop or reboot shows its earlier state.</summary>
+    private static StepRow NewRow(PlannedStep step)
+    {
+        var row = new StepRow(step.Id, step.Title);
+        if (step.DoneBefore is { } outcome)
+            row.Finish(outcome, [Strings.Get("RunProfile_StepDoneBefore")], null);
+        return row;
     }
 
     private StepRow? Find(string id) => Steps.FirstOrDefault(s => s.Id == id);

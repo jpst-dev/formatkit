@@ -19,7 +19,7 @@ namespace FormatKit.App.Worker;
 [JsonDerivedType(typeof(RebootCancel), "rebootCancel")]
 public abstract record WorkerMessage;
 
-public sealed record PlannedStep(string Id, string Title, bool RequiresAdmin);
+public sealed record PlannedStep(string Id, string Title, bool RequiresAdmin, StepOutcome? DoneBefore = null);
 
 public sealed record Planned(IReadOnlyList<PlannedStep> Steps) : WorkerMessage;
 

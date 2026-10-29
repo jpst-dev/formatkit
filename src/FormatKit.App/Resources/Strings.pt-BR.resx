@@ -137,6 +137,7 @@
   <data name="RunProfile_Run" xml:space="preserve"><value>Executar</value></data>
   <data name="RunProfile_ConfirmTitle" xml:space="preserve"><value>Executar o perfil</value></data>
   <data name="RunProfile_ConfirmRun" xml:space="preserve"><value>Isto altera o sistema e pode reiniciar o computador. Executar o perfil agora?</value></data>
+  <data name="RunProfile_StepDoneBefore" xml:space="preserve"><value>Concluído antes da parada ou do reinício.</value></data>
   <data name="RunProfile_UacDeclined" xml:space="preserve"><value>A permissão de administrador foi recusada. Nada foi alterado.</value></data>
   <data name="RunProfile_StartFailed" xml:space="preserve"><value>Não foi possível iniciar a execução: {0}</value></data>
   <data name="RunProfile_Progress" xml:space="preserve"><value>Executando</value></data>

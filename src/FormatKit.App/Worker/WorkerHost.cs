@@ -3,6 +3,7 @@ using System.Text;
 using FormatKit.App.Localization;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Running;
+using FormatKit.Core.Steps;
 using FormatKit.Hosting;
 
 namespace FormatKit.App.Worker;
@@ -46,9 +47,10 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
             return await FailAsync(channel, Strings.Format("Worker_InvalidJob", string.Join(' ', job)), ct).ConfigureAwait(false);
 
         var session = new RunSession(env);
+        StateLoadResult? load = null;
         if (resume)
         {
-            var load = env.StateStore.Load();
+            load = env.StateStore.Load();
             switch (load.Status)
             {
                 case StateLoadStatus.None:
@@ -70,6 +72,7 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         }
 
         var profile = outcome.Profile;
+        var done = load?.State?.Results;
         if (!resume && !string.Equals(profile.Hash, hash, StringComparison.Ordinal))
         {
             env.Log.Warning("Worker: profile {Path} changed since it was reviewed", path);
@@ -77,7 +80,7 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         }
 
         var plan = PlanService.Build(profile.Profile, modules, env.SimulateRebootAfterStep);
-        await TrySendAsync(channel, new Planned(plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin)).ToList()), ct).ConfigureAwait(false);
+        await TrySendAsync(channel, new Planned(plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin, DoneBefore(done, s.Id))).ToList()), ct).ConfigureAwait(false);
 
         // Steps get the host token, never the stop token, so a stop never interrupts a step mid-work.
         // Every send below waits for the posted progress messages, so the window sees them in order.
@@ -106,6 +109,15 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         await TrySendAsync(channel, new Finished(summary), ct).ConfigureAwait(false);
         return ExitFinished;
     }
+
+    /// <summary>
+    /// The outcome the saved run recorded for a step the engine will skip on resume. A step that asked for a reboot is
+    /// left out: the engine decides after the restart whether it is done or runs again, and the final result reports it.
+    /// </summary>
+    private static StepOutcome? DoneBefore(IReadOnlyDictionary<string, StepRecord>? results, string id) =>
+        results is not null && results.TryGetValue(id, out var record) && record.Outcome != StepOutcome.RebootRequired
+            ? record.Outcome
+            : null;
 
     /// <summary>A resume that cannot go on: removes the resume task as the CLI does and reports the status.</summary>
     private async Task<int> EndResumeAsync(MessageChannel channel, RunSession session, RunStatus status, string? error, CancellationToken ct)

@@ -120,6 +120,58 @@ public sealed class RunProfileRunTests : IDisposable
     }
 
     [Fact]
+    public async Task Resume_StepsDoneBefore_ShowTheirEarlierStateAndNoneStaysPending()
+    {
+        var vm = Create();
+        _launcher.Script.Add(new Planned([
+            new PlannedStep("drivers.scan", "Scan drivers", true, StepOutcome.Succeeded),
+            new PlannedStep("programs.winget", "Install programs", false, StepOutcome.Skipped),
+            new PlannedStep("programs.direct", "Direct installs", false),
+        ]));
+
+        await vm.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.Equal(RunPhase.Result, vm.Phase);
+        Assert.Equal([StepState.Succeeded, StepState.Skipped, StepState.Pending], vm.Steps.Select(s => s.State));
+        Assert.All(vm.Steps.Take(2), r => Assert.Equal([Strings.Get("RunProfile_StepDoneBefore")], r.Messages));
+        Assert.Empty(vm.Steps[2].Messages);
+    }
+
+    [Fact]
+    public async Task Resume_StepsDoneBefore_FinalResultHasNoPendingRows()
+    {
+        var vm = Create();
+        _launcher.Script.Add(new Planned([
+            new PlannedStep("drivers.scan", "Scan drivers", true, StepOutcome.Succeeded),
+            new PlannedStep("programs.winget", "Install programs", false),
+        ]));
+        _launcher.Script.Add(new StepStarted(2, 2, "programs.winget"));
+        _launcher.Script.Add(new StepFinished("programs.winget", StepOutcome.Succeeded, [], null));
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+
+        await vm.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.DoesNotContain(vm.Steps, r => r.State == StepState.Pending);
+    }
+
+    [Fact]
+    public async Task Run_ProfileChangedRefusal_BackToReviewWithTheMessage()
+    {
+        var vm = Reviewed();
+        SeedState();
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged")));
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal(RunPhase.Review, vm.Phase);
+        Assert.Equal(Strings.Get("Worker_ProfileChanged"), vm.RunMessage);
+        Assert.Empty(vm.Steps);
+        Assert.Null(vm.FinalStatus);
+        Assert.False(vm.IsRunning);
+        Assert.False(vm.ResumeCommand.CanExecute(null) && vm.IsResult);
+    }
+
+    [Fact]
     public async Task Run_NoAdminSteps_StartsWithoutElevation()
     {
         var vm = Reviewed(NoAdminJson);

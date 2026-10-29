@@ -137,6 +137,7 @@
   <data name="RunProfile_Run" xml:space="preserve"><value>Run</value></data>
   <data name="RunProfile_ConfirmTitle" xml:space="preserve"><value>Run the profile</value></data>
   <data name="RunProfile_ConfirmRun" xml:space="preserve"><value>This changes the system and can restart the computer. Run the profile now?</value></data>
+  <data name="RunProfile_StepDoneBefore" xml:space="preserve"><value>Done before the stop or reboot.</value></data>
   <data name="RunProfile_UacDeclined" xml:space="preserve"><value>The administrator permission was declined. Nothing was changed.</value></data>
   <data name="RunProfile_StartFailed" xml:space="preserve"><value>The run could not start: {0}</value></data>
   <data name="RunProfile_Progress" xml:space="preserve"><value>Running</value></data>

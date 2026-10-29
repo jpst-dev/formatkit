@@ -254,6 +254,30 @@ public sealed class WorkerHostTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Resume_PlannedMarksTheStepsDoneBefore()
+    {
+        var a = new FakeStep("a") { CheckResult = false };
+        var b = new FakeStep("b") { CheckResult = false };
+        var c = new FakeStep("c") { CheckResult = false };
+        _module.Steps.AddRange([a, b, c]);
+        var path = WriteProfile();
+        Store.Save(new RunState(path, HashOf(path), ["a", "b", "c"],
+            new Dictionary<string, StepRecord>
+            {
+                ["a"] = new(StepOutcome.Succeeded, DateTimeOffset.UtcNow, [], null),
+                ["b"] = new(StepOutcome.Skipped, DateTimeOffset.UtcNow, [], null),
+            },
+            DateTimeOffset.UtcNow));
+
+        await _host.RunAsync(_worker, ["run", "--resume"], Ct);
+
+        var planned = Assert.IsType<Planned>((await WindowMessages())[0]);
+        Assert.Equal(
+            [StepOutcome.Succeeded, StepOutcome.Skipped, null],
+            planned.Steps.Select(s => s.DoneBefore));
+    }
+
+    [Fact]
     public async Task Run_StepThrowsTaskCanceled_SendsFailedWithError()
     {
         _module.Steps.Add(new FakeStep("a") { CheckResult = false, Throws = new TaskCanceledException("request timed out") });
