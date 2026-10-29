@@ -1,8 +1,7 @@
 using System.CommandLine;
-using System.Management;
-using System.Runtime.InteropServices;
 using FormatKit.Cli.Localization;
 using FormatKit.Core.Hardware;
+using FormatKit.Hosting;
 
 namespace FormatKit.Cli.Commands;
 
@@ -58,14 +57,11 @@ internal static class Output
     /// <summary>Runs a WMI/COM-backed query, turning access and query failures into a localized error (exit code 1).</summary>
     public static async Task<int> GuardSystemQueryAsync(TextWriter o, Func<Task<int>> action)
     {
-        try
-        {
-            return await action();
-        }
-        catch (Exception ex) when (ex is ManagementException or COMException or UnauthorizedAccessException)
-        {
-            o.WriteLine(Strings.Format("Error_Wmi", ex.Message));
-            return ExitCodes.CompletedWithFailures;
-        }
+        var result = await SystemQuery.GuardAsync(action);
+        if (result.Error is null)
+            return result.Value;
+
+        o.WriteLine(result.Error);
+        return ExitCodes.CompletedWithFailures;
     }
 }

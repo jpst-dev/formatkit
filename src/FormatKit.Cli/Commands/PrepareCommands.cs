@@ -1,7 +1,7 @@
 using System.CommandLine;
-using System.Security;
 using FormatKit.Cli.Localization;
 using FormatKit.Core.Profiles;
+using FormatKit.Hosting;
 using FormatKit.Prepare;
 using FormatKit.Prepare.Rendering;
 
@@ -38,23 +38,12 @@ internal static class PrepareCommands
                     return ExitCodes.InvalidInput;
             }
 
-            var env = Environment();
-            var volumes = await ListVolumesAsync(context, ct);
-            var prepareContext = new PrepareContext(
-                context.Env.Services,
-                env,
-                new WindowsVolume(env.SystemDrive, volumes),
-                profile,
-                CollectInputs(context, profile),
-                context.Env.Elevation.IsElevated,
-                context.Env.Log);
+            var runner = new PrepareRunner(context.Env.ToHost(), context.Modules, Checks, Environment);
+            var run = await runner.RunAsync(profile, ct);
+            ConsoleRenderer.Write(context.Out, run.Report);
 
-            var report = await new PrepareChecklist(Checks()).RunAsync(prepareContext, ct);
-            ConsoleRenderer.Write(context.Out, report);
-
-            var exit = report.HasBlockers ? ExitCodes.CompletedWithFailures : ExitCodes.Ok;
-            if (parse.GetValue(outputOption) is { } outputPath
-                && !WriteOutput(context, prepareContext.Windows, outputPath, report, env.ComputerName))
+            var exit = run.Report.HasBlockers ? ExitCodes.CompletedWithFailures : ExitCodes.Ok;
+            if (parse.GetValue(outputOption) is { } outputPath && !WriteOutput(context, runner, run, outputPath))
                 return ExitCodes.InvalidInput;
 
             return exit;
@@ -62,54 +51,15 @@ internal static class PrepareCommands
         return check;
     }
 
-    /// <summary>Read once per run and shared through the context; null when listing failed (other drives are then unknown).</summary>
-    private static async Task<IReadOnlyList<Core.SystemAccess.VolumeInfo>?> ListVolumesAsync(CommandContext context, CancellationToken ct)
-    {
-        try
-        {
-            return await context.Env.Services.Volumes.ListAsync(ct);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            context.Env.Log.Information(ex, "Could not list the volumes; the volume checks report them as not checked");
-            return null;
-        }
-    }
-
-    /// <summary>Inputs of every enabled module (the profile is already valid), plus the profile file itself.</summary>
-    private static List<ExternalInput> CollectInputs(CommandContext context, LoadedProfile? profile)
-    {
-        var inputs = new List<ExternalInput>();
-        if (profile is null)
-            return inputs;
-
-        foreach (var module in context.Modules)
-        {
-            if (profile.Profile.Modules.TryGetValue(module.Name, out var section) && module.IsEnabled(section))
-                inputs.AddRange(module.ExternalInputs(section, profile.Profile.BaseDirectory));
-        }
-
-        inputs.Add(new ExternalInput("", profile.Path, ExternalInputKind.File));
-        return inputs;
-    }
-
-    private static bool WriteOutput(
-        CommandContext context, WindowsVolume windows, string path, PrepareReport report, string computerName)
+    private static bool WriteOutput(CommandContext context, PrepareRunner runner, PrepareRun run, string path)
     {
         var o = context.Out;
-        try
+        var write = runner.WriteMarkdown(run, path);
+        if (write.OnWindowsDrive)
+            o.WriteLine(Strings.Format("Prepare_OutputOnWindows", path));
+        if (write.Error is not null)
         {
-            // IsLost resolves the path, so an invalid one fails here and is reported like a failed write (exit 2).
-            if (windows.IsLost(path))
-                o.WriteLine(Strings.Format("Prepare_OutputOnWindows", path));
-            context.Env.Services.Files.WriteAllTextAtomic(
-                path, MarkdownRenderer.Render(report, computerName, TimeProvider.System.GetLocalNow()));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException
-                                       or ArgumentException or SecurityException)
-        {
-            context.Env.Log.Information(ex, "Could not write the checklist to {Path}", path);
-            o.WriteLine(Strings.Format("Prepare_OutputFailed", path, ex.Message));
+            o.WriteLine(Strings.Format("Prepare_OutputFailed", path, write.Error));
             return false;
         }
 
