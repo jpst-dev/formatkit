@@ -141,4 +141,26 @@
   <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Warning: {0} is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.</value></data>
   <data name="Prepare_OutputFailed" xml:space="preserve"><value>Could not write {0}: {1}</value></data>
   <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist saved to {0}</value></data>
+  <data name="Cmd_Media" xml:space="preserve"><value>Create Windows installation media.</value></data>
+  <data name="Cmd_MediaBuild" xml:space="preserve"><value>Build the installation media in a folder.</value></data>
+  <data name="Cmd_MediaUsb" xml:space="preserve"><value>Write the installation media to a USB stick (erases it).</value></data>
+  <data name="Opt_MediaIso" xml:space="preserve"><value>Windows 11 ISO file.</value></data>
+  <data name="Opt_MediaProfile" xml:space="preserve"><value>Profile JSON to run on the first logon (optional).</value></data>
+  <data name="Opt_MediaOutput" xml:space="preserve"><value>Folder to write the media to. It must not exist or be empty.</value></data>
+  <data name="Opt_MediaDisk" xml:space="preserve"><value>Number of the USB disk to erase and write.</value></data>
+  <data name="Opt_MediaAllowHardDisk" xml:space="preserve"><value>Also allow an external hard disk.</value></data>
+  <data name="Media_OutputNotEmpty" xml:space="preserve"><value>{0} already holds files. Choose a folder that does not exist or is empty.</value></data>
+  <data name="Media_NotEnoughSpace" xml:space="preserve"><value>Not enough free space on {0}: the media needs {1} and {2} is free.</value></data>
+  <data name="Media_OutputDriveUnreadable" xml:space="preserve"><value>Could not read the free space of {0}: {1}</value></data>
+  <data name="Media_MissingInput" xml:space="preserve"><value>{0}: the file or folder does not exist.</value></data>
+  <data name="Media_UnreadableInput" xml:space="preserve"><value>Could not read the folder {0}.</value></data>
+  <data name="Media_Phase_Copying" xml:space="preserve"><value>Copying the Windows files...</value></data>
+  <data name="Media_Phase_Splitting" xml:space="preserve"><value>Splitting install.wim for FAT32 (this takes a few minutes)...</value></data>
+  <data name="Media_Phase_WritingFormatKit" xml:space="preserve"><value>Writing FormatKit and the profile...</value></data>
+  <data name="Media_Phase_WritingAnswerFile" xml:space="preserve"><value>Writing autounattend.xml...</value></data>
+  <data name="Media_Phase_Done" xml:space="preserve"><value>Done.</value></data>
+  <data name="Media_Percent" xml:space="preserve"><value>  {0} %</value></data>
+  <data name="Media_BuildDone" xml:space="preserve"><value>The installation media is ready in {0}.</value></data>
+  <data name="Media_BuildIncomplete" xml:space="preserve"><value>The media in {0} is incomplete ({1}). Delete the folder and run the command again.</value></data>
+  <data name="Media_PrepareReminder" xml:space="preserve"><value>Before formatting a PC from this media, run 'formatkit prepare check' on that PC.</value></data>
 </root>

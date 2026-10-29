@@ -141,4 +141,26 @@
   <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Aviso: {0} está em uma unidade que a formatação vai apagar, então o checklist será perdido. Copie-o para outro lugar.</value></data>
   <data name="Prepare_OutputFailed" xml:space="preserve"><value>Não foi possível gravar {0}: {1}</value></data>
   <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist salvo em {0}</value></data>
+  <data name="Cmd_Media" xml:space="preserve"><value>Cria a mídia de instalação do Windows.</value></data>
+  <data name="Cmd_MediaBuild" xml:space="preserve"><value>Monta a mídia de instalação em uma pasta.</value></data>
+  <data name="Cmd_MediaUsb" xml:space="preserve"><value>Grava a mídia de instalação em um pendrive (apaga o pendrive).</value></data>
+  <data name="Opt_MediaIso" xml:space="preserve"><value>Arquivo ISO do Windows 11.</value></data>
+  <data name="Opt_MediaProfile" xml:space="preserve"><value>Perfil JSON a executar no primeiro logon (opcional).</value></data>
+  <data name="Opt_MediaOutput" xml:space="preserve"><value>Pasta onde gravar a mídia. Não pode existir ou deve estar vazia.</value></data>
+  <data name="Opt_MediaDisk" xml:space="preserve"><value>Número do disco USB a apagar e gravar.</value></data>
+  <data name="Opt_MediaAllowHardDisk" xml:space="preserve"><value>Permite também um HD externo.</value></data>
+  <data name="Media_OutputNotEmpty" xml:space="preserve"><value>{0} já contém arquivos. Escolha uma pasta que não exista ou esteja vazia.</value></data>
+  <data name="Media_NotEnoughSpace" xml:space="preserve"><value>Não há espaço livre suficiente em {0}: a mídia precisa de {1} e há {2} livres.</value></data>
+  <data name="Media_OutputDriveUnreadable" xml:space="preserve"><value>Não foi possível ler o espaço livre de {0}: {1}</value></data>
+  <data name="Media_MissingInput" xml:space="preserve"><value>{0}: o arquivo ou a pasta não existe.</value></data>
+  <data name="Media_UnreadableInput" xml:space="preserve"><value>Não foi possível ler a pasta {0}.</value></data>
+  <data name="Media_Phase_Copying" xml:space="preserve"><value>Copiando os arquivos do Windows...</value></data>
+  <data name="Media_Phase_Splitting" xml:space="preserve"><value>Dividindo o install.wim para FAT32 (leva alguns minutos)...</value></data>
+  <data name="Media_Phase_WritingFormatKit" xml:space="preserve"><value>Gravando o FormatKit e o perfil...</value></data>
+  <data name="Media_Phase_WritingAnswerFile" xml:space="preserve"><value>Gravando o autounattend.xml...</value></data>
+  <data name="Media_Phase_Done" xml:space="preserve"><value>Concluído.</value></data>
+  <data name="Media_Percent" xml:space="preserve"><value>  {0} %</value></data>
+  <data name="Media_BuildDone" xml:space="preserve"><value>A mídia de instalação está pronta em {0}.</value></data>
+  <data name="Media_BuildIncomplete" xml:space="preserve"><value>A mídia em {0} está incompleta ({1}). Apague a pasta e execute o comando de novo.</value></data>
+  <data name="Media_PrepareReminder" xml:space="preserve"><value>Antes de formatar um PC com esta mídia, execute 'formatkit prepare check' nesse PC.</value></data>
 </root>

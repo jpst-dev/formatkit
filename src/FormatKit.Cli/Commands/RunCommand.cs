@@ -76,15 +76,19 @@ internal static class RunCommand
         if (result.IsValid)
             return result.Value;
 
-        context.Out.WriteLine(Strings.Format("Profile_Errors", result.Errors.Count));
-        foreach (var error in result.Errors)
+        PrintErrors(context, result.Errors);
+        return null;
+    }
+
+    internal static void PrintErrors(CommandContext context, IReadOnlyList<ProfileError> errors)
+    {
+        context.Out.WriteLine(Strings.Format("Profile_Errors", errors.Count));
+        foreach (var error in errors)
         {
             context.Out.WriteLine(error.Path.Length == 0
                 ? $"  {error.Message}"
                 : $"  {error.Path}: {error.Message}");
         }
-
-        return null;
     }
 }
 
