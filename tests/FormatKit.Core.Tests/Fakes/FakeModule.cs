@@ -24,6 +24,11 @@ public sealed class FakeModule(string name) : IModule
 
     public IReadOnlyList<IStep> CreateSteps(JsonElement section) => Steps;
 
+    /// <summary>Returned by <see cref="ExternalInputs"/>.</summary>
+    public List<ExternalInput> Inputs { get; } = [];
+
+    public IReadOnlyList<ExternalInput> ExternalInputs(JsonElement section, string? baseDirectory) => Inputs;
+
     /// <summary>The base directories passed to the directory-aware overloads, in call order.</summary>
     public List<string?> BaseDirectories { get; } = [];
 

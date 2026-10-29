@@ -70,7 +70,7 @@ internal static class RunCommand
         return run;
     }
 
-    private static LoadedProfile? LoadProfile(CommandContext context, string path)
+    internal static LoadedProfile? LoadProfile(CommandContext context, string path)
     {
         var result = new ProfileLoader(context.Modules).Load(path);
         if (result.IsValid)

@@ -134,4 +134,11 @@
   <data name="Dev_UserNameUnusable" xml:space="preserve"><value>The Windows user name '{0}' is not a valid Linux user name. Pass --profile with dev.wsl.user.</value></data>
   <data name="Dev_ProfileSection" xml:space="preserve"><value>The dev section of the profile has {0} problem(s):</value></data>
   <data name="Dev_NextAction" xml:space="preserve"><value>next: {0}</value></data>
+  <data name="Cmd_Prepare" xml:space="preserve"><value>Check what a Windows reinstall would lose (read-only).</value></data>
+  <data name="Cmd_PrepareCheck" xml:space="preserve"><value>Run the preparation checklist and print what blocks formatting.</value></data>
+  <data name="Opt_PrepareProfile" xml:space="preserve"><value>Profile JSON to also check its external files and folders.</value></data>
+  <data name="Opt_PrepareOutput" xml:space="preserve"><value>Save the checklist as a Markdown file at this path. Use another drive: the Windows drive is erased.</value></data>
+  <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Warning: {0} is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.</value></data>
+  <data name="Prepare_OutputFailed" xml:space="preserve"><value>Could not write {0}: {1}</value></data>
+  <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist saved to {0}</value></data>
 </root>

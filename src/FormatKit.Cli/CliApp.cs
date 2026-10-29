@@ -89,6 +89,7 @@ public sealed class CliApp
         root.Subcommands.Add(CleanupCommands.Create(context));
         root.Subcommands.Add(ProgramsCommands.Create(context));
         root.Subcommands.Add(DevCommands.Create(context));
+        root.Subcommands.Add(PrepareCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
 
         var parse = root.Parse(args);

@@ -134,4 +134,11 @@
   <data name="Dev_UserNameUnusable" xml:space="preserve"><value>O nome de usuário do Windows '{0}' não é um nome de usuário Linux válido. Passe --profile com dev.wsl.user.</value></data>
   <data name="Dev_ProfileSection" xml:space="preserve"><value>A seção dev do perfil tem {0} problema(s):</value></data>
   <data name="Dev_NextAction" xml:space="preserve"><value>próximo passo: {0}</value></data>
+  <data name="Cmd_Prepare" xml:space="preserve"><value>Verifica o que uma reinstalação do Windows perderia (somente leitura).</value></data>
+  <data name="Cmd_PrepareCheck" xml:space="preserve"><value>Executa o checklist de preparação e mostra o que impede a formatação.</value></data>
+  <data name="Opt_PrepareProfile" xml:space="preserve"><value>Perfil JSON, para verificar também seus arquivos e pastas externos.</value></data>
+  <data name="Opt_PrepareOutput" xml:space="preserve"><value>Salva o checklist em um arquivo Markdown neste caminho. Use outra unidade: a unidade do Windows será apagada.</value></data>
+  <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Aviso: {0} está em uma unidade que a formatação vai apagar, então o checklist será perdido. Copie-o para outro lugar.</value></data>
+  <data name="Prepare_OutputFailed" xml:space="preserve"><value>Não foi possível gravar {0}: {1}</value></data>
+  <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist salvo em {0}</value></data>
 </root>
