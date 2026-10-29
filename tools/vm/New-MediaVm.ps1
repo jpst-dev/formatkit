@@ -31,6 +31,9 @@ $ErrorActionPreference = 'Stop'
 
 # Never touch the regular test VM.
 if ($VmName -ieq 'FormatKit-Test') { throw "Refusing VM name '$VmName': it is the regular test VM. Use another name." }
+# Get-VM and Remove-VM take wildcards, and the name builds the disk path: allow plain names only.
+if ($VmName -notmatch '^[A-Za-z0-9][A-Za-z0-9 ._-]*$') { throw "Invalid VM name '$VmName': use letters, digits, space, '.', '_' and '-' only, starting with a letter or digit." }
+if ($VmName.Contains('..')) { throw "Invalid VM name '$VmName': '..' is not allowed." }
 
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 $mediaDir = Join-Path $repoRoot '.vm\media'
@@ -38,13 +41,22 @@ $isoPath = Join-Path $mediaDir 'media.iso'
 $vhdPath = Join-Path $mediaDir "$VmName.vhdx"
 
 # Validate the media folder before anything is created or removed.
-if (-not (Test-Path -LiteralPath $MediaFolder -PathType Container)) { throw "Media folder '$MediaFolder' does not exist." }
+if (-not (Test-Path -LiteralPath $MediaFolder -PathType Container)) {
+    # A relative path that does not resolve from the current directory may be relative to the repo root.
+    $fromRepo = Join-Path $repoRoot $MediaFolder
+    if (-not [System.IO.Path]::IsPathRooted($MediaFolder) -and (Test-Path -LiteralPath $fromRepo -PathType Container)) { $MediaFolder = $fromRepo }
+    else { throw "Media folder '$MediaFolder' does not exist." }
+}
 $MediaFolder = (Resolve-Path -LiteralPath $MediaFolder).ProviderPath
 $bootImage = Join-Path $MediaFolder 'efi\microsoft\boot\efisys_noprompt.bin'
 if (-not (Test-Path -LiteralPath (Join-Path $MediaFolder 'sources') -PathType Container)) { throw "'$MediaFolder' has no 'sources' folder: it is not a media folder made by 'formatkit media build'." }
-if (-not (Test-Path -LiteralPath $bootImage -PathType Leaf)) { throw "'$bootImage' not found: it is not a media folder made by 'formatkit media build'." }
-
-$existing = Get-VM -Name $VmName -ErrorAction SilentlyContinue
+foreach ($required in @($bootImage, (Join-Path $MediaFolder 'efiootootx64.efi'), (Join-Path $MediaFolder 'sourcesoot.wim'))) {
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "'$required' not found: it is not a media folder made by 'formatkit media build'." }
+}
+# Exact-name lookups (no wildcards), done before anything is removed.
+Get-VMSwitch -Name $SwitchName -ErrorAction Stop | Out-Null
+$existing = @(Get-VM | Where-Object Name -ieq $VmName)
+if ($existing | Where-Object Name -ieq 'FormatKit-Test') { throw 'Refusing to touch the regular test VM FormatKit-Test.' }
 if ($existing -and -not $Replace) { throw "VM '$VmName' already exists. Use -Replace to remove it and its disk first." }
 
 function New-IsoFile([string] $SourceDir, [string] $Path, [string] $Label, [string] $BootImagePath) {
@@ -78,14 +90,19 @@ public static void Save(object comStream, string path) {
     $image = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
     $image.FileSystemsToCreate = 6 # Joliet + UDF (long names and deep trees)
     $image.VolumeName = $Label
+    $image.FreeMediaBlocks = 0 # no size limit (the default is about 650 MB, too small for Windows media)
     $image.Root.AddTree($SourceDir, $false)
     # UEFI El Torito boot image (PlatformId 0xEF), no emulation.
     $boot = New-Object -ComObject IMAPI2FS.BootOptions
     $boot.PlatformId = 0xEF
     $boot.Emulation = 0
-    $boot.AssignBootImage([FormatKit.IStreamCopy]::OpenRead($BootImagePath))
-    $image.BootImageOptions = $boot
-    [FormatKit.IStreamCopy]::Save($image.CreateResultImage().ImageStream, $Path)
+    $bootStream = [FormatKit.IStreamCopy]::OpenRead($BootImagePath)
+    try {
+        $boot.AssignBootImage($bootStream)
+        $image.BootImageOptions = $boot
+        [FormatKit.IStreamCopy]::Save($image.CreateResultImage().ImageStream, $Path)
+    }
+    finally { [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($bootStream) }
 }
 
 New-Item -ItemType Directory -Force $mediaDir | Out-Null
@@ -94,8 +111,8 @@ if ($existing) {
     # Remove only the VM with this name and its own disks.
     $disks = @($existing | Get-VMHardDiskDrive | ForEach-Object { $_.Path })
     Write-Host "Removing VM $VmName"
-    Stop-VM -Name $VmName -TurnOff -Force -ErrorAction SilentlyContinue
-    Remove-VM -Name $VmName -Force
+    $existing | Stop-VM -TurnOff -Force -ErrorAction SilentlyContinue
+    $existing | Remove-VM -Force
     foreach ($disk in $disks) {
         $full = [System.IO.Path]::GetFullPath($disk)
         if ($full.StartsWith($mediaDir + '\', [System.StringComparison]::OrdinalIgnoreCase)) { Remove-Item -LiteralPath $full -Force }
@@ -104,7 +121,9 @@ if ($existing) {
 }
 if (Test-Path -LiteralPath $vhdPath) { throw "Disk '$vhdPath' already exists. Use -Replace (if its VM exists) or delete it." }
 
-Remove-Item -LiteralPath $isoPath -ErrorAction SilentlyContinue
+try { Remove-Item -LiteralPath $isoPath -ErrorAction Stop -Force }
+catch [System.Management.Automation.ItemNotFoundException] { }
+catch { throw "Cannot remove '$isoPath' (it may be in use by a running VM): $($_.Exception.Message)" }
 Write-Host "Packing $MediaFolder into $isoPath"
 New-IsoFile -SourceDir $MediaFolder -Path $isoPath -Label 'FORMATKIT_MEDIA' -BootImagePath $bootImage
 
