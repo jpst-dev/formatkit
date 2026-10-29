@@ -222,4 +222,30 @@ public class PowerShellVirtualDisksTests
 
         Assert.Equal(PowerShellVirtualDisks.MountScript(Vhdx), runner.Calls[0].Arguments[3]);
     }
+
+    [Theory]
+    [InlineData(@"C:\Users\Jo\u00e3o\u2019s\dev.vhdx", @"'C:\Users\Jo\u00e3o\u2019\u2019s\dev.vhdx'")]
+    [InlineData(@"x\u2019; Remove-Item C:\ -Recurse; \u2019", @"'x\u2019\u2019; Remove-Item C:\ -Recurse; \u2019\u2019'")]
+    [InlineData(@"a\u2018b\u201Ac\u201Bd'e", @"'a\u2018\u2018b\u201A\u201Ac\u201B\u201Bd''e'")]
+    public void MountScript_doubles_every_single_quote_character(string path, string expectedLiteral)
+    {
+        Assert.StartsWith($"$p = {Unescape(expectedLiteral)}; ", PowerShellVirtualDisks.MountScript(Unescape(path)));
+    }
+
+    [Fact]
+    public async Task Get_quotes_a_path_with_typographic_quotes()
+    {
+        var (disks, runner, files) = Create();
+        var path = Unescape(@"x\u2019; Remove-Item C:\ -Recurse; \u2019");
+        files.Seed(path, "vhdx");
+        runner.Enqueue("powershell.exe", Result(0, stdout: """{"Attached":false,"Letter":null,"Label":null}"""));
+
+        await disks.GetAsync(path, TestContext.Current.CancellationToken);
+
+        Assert.EndsWith(Unescape(@" 'x\u2019\u2019; Remove-Item C:\ -Recurse; \u2019\u2019'"), runner.Calls[0].Arguments[3]);
+    }
+
+    private static string Unescape(string value) =>
+        System.Text.RegularExpressions.Regex.Replace(
+            value, @"\\u([0-9A-Fa-f]{4})", m => ((char)Convert.ToInt32(m.Groups[1].Value, 16)).ToString());
 }

@@ -150,7 +150,7 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
         return RunPowerShellAsync(script, "Register-ScheduledTask", ct);
     }
 
-    private static string Quote(string value) => "'" + value.Replace("'", "''") + "'";
+    private static string Quote(string value) => PowerShellText.SingleQuote(value);
 
     private async Task<string> RunPowerShellAsync(string script, string operation, CancellationToken ct)
     {

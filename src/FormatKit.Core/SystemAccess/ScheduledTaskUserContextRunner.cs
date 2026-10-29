@@ -101,18 +101,5 @@ public sealed class ScheduledTaskUserContextRunner(IProcessRunner runner) : IUse
         return sb.Append('"').ToString();
     }
 
-    internal static string Quote(string value)
-    {
-        var sb = new StringBuilder("'");
-        foreach (var c in value)
-        {
-            sb.Append(c);
-            if (c is '\'' or '‘' or '’' or '‚' or '‛')
-            {
-                sb.Append(c);
-            }
-        }
-
-        return sb.Append('\'').ToString();
-    }
+    internal static string Quote(string value) => PowerShellText.SingleQuote(value);
 }
