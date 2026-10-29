@@ -20,7 +20,7 @@
   <data name="Nav_About" xml:space="preserve"><value>Sobre</value></data>
   <data name="Home_Intro" xml:space="preserve"><value>O FormatKit prepara a reinstalação do Windows e reconstrói a máquina depois. Ele verifica o que poderia ser perdido antes de formatar e depois instala drivers, programas e configurações a partir de um perfil JSON.</value></data>
   <data name="Home_Before_Title" xml:space="preserve"><value>Antes de formatar</value></data>
-  <data name="Home_Before_Text" xml:space="preserve"><value>Rode o checklist para ver o que seria perdido e prepare a mídia de instalação.</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Rode o checklist para ver o que seria perdido.</value></data>
   <data name="Home_Before_Checklist" xml:space="preserve"><value>Abrir Checklist</value></data>
   <data name="Home_After_Title" xml:space="preserve"><value>Depois de formatar</value></data>
   <data name="Home_After_Text" xml:space="preserve"><value>Execute o seu perfil para instalar drivers e programas e aplicar as configurações.</value></data>

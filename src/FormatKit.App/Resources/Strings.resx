@@ -20,7 +20,7 @@
   <data name="Nav_About" xml:space="preserve"><value>About</value></data>
   <data name="Home_Intro" xml:space="preserve"><value>FormatKit prepares a Windows reinstall and rebuilds the machine afterwards. It checks what could be lost before you format, then installs drivers, programs and settings from a JSON profile.</value></data>
   <data name="Home_Before_Title" xml:space="preserve"><value>Before formatting</value></data>
-  <data name="Home_Before_Text" xml:space="preserve"><value>Run the checklist to find what would be lost, and prepare the installation media.</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Run the checklist to find what would be lost.</value></data>
   <data name="Home_Before_Checklist" xml:space="preserve"><value>Open Checklist</value></data>
   <data name="Home_After_Title" xml:space="preserve"><value>After formatting</value></data>
   <data name="Home_After_Text" xml:space="preserve"><value>Run your profile to install drivers and programs and apply your settings.</value></data>
