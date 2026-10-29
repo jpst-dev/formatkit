@@ -13,7 +13,7 @@ public sealed record GitOptions(string? Name, string? Email, string? DefaultBran
 
 public sealed record SshOptions(string KeyType, string Comment);
 
-/// <summary><paramref name="To"/> is expanded and absolute, inside the user profile.</summary>
+/// <summary><paramref name="To"/> is expanded and normalized (<c>GetFullPath</c>), inside the user profile.</summary>
 public sealed record DotfileEntry(string From, string To);
 
 /// <summary>Exactly one of <paramref name="Repo"/> and <paramref name="LocalPath"/> is set.</summary>
@@ -50,6 +50,10 @@ public sealed partial record DevOptions(
 
     [GeneratedRegex(@"\A(https://\S+|git@[A-Za-z0-9.-]+:\S+)\z")]
     private static partial Regex RepoPattern();
+
+    /// <summary>An https address with anything but a host before the first '/', '?' or '#' carries credentials.</summary>
+    [GeneratedRegex(@"\Ahttps://[^/?#]*@")]
+    private static partial Regex RepoCredentialsPattern();
 
     [GeneratedRegex(@"\A[A-Za-z0-9._-]+\z")]
     private static partial Regex ThemePattern();
@@ -190,10 +194,19 @@ public sealed partial record DevOptions(
             errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, p, Strings.Get("Validation_RepoOrPath")));
         if (repo is not null && !RepoPattern().IsMatch(repo))
             errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.repo", Strings.Get("Validation_RepoScheme")));
+        else if (repo is not null && RepoCredentialsPattern().IsMatch(repo))
+            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.repo", Strings.Get("Validation_RepoCredentials")));
         if (localPath is not null)
             localPath = Resolve(env.Expand(localPath), baseDirectory);
 
         var cloneTo = env.Expand(ReadString(el, "cloneTo", p, errors) ?? @"%USERPROFILE%\dotfiles");
+        if (TryNormalize(cloneTo) is { } fullCloneTo && !fullCloneTo.StartsWith(@"\\", StringComparison.Ordinal)
+            && System.IO.Path.IsPathFullyQualified(cloneTo))
+            cloneTo = fullCloneTo;
+        else
+            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.cloneTo", Strings.Get("Validation_CloneToAbsolute")));
+
+        var seenTargets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var files = new List<DotfileEntry>();
         if (!el.TryGetProperty("files", out var list))
@@ -235,6 +248,15 @@ public sealed partial record DevOptions(
                         errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{fp}.to",
                             Strings.Format("Validation_ToInsideProfile", env.UserProfile)));
                         ok = false;
+                    }
+                    else
+                    {
+                        to = System.IO.Path.GetFullPath(to);
+                        if (!seenTargets.Add(to))
+                        {
+                            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{fp}.to", Strings.Get("Validation_DuplicateTo")));
+                            ok = false;
+                        }
                     }
                 }
 
@@ -376,7 +398,20 @@ public sealed partial record DevOptions(
         && char.IsAsciiLetter(value[0]) && value[1] == ':' && (value[2] is '\\' or '/')
         && value.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsInside(string candidate, string root)
+    private static string? TryNormalize(string path)
+    {
+        try
+        {
+            return System.IO.Path.GetFullPath(path);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>True when <paramref name="candidate"/> (fully qualified) normalizes to a path below <paramref name="root"/>.</summary>
+    internal static bool IsInside(string candidate, string root)
     {
         if (!System.IO.Path.IsPathFullyQualified(candidate))
             return false;

@@ -222,6 +222,46 @@ public class DevOptionsTests
             Dotfiles($$""" "path": "D:\\d", "files": [ { "from": "x", "to": "{{J(to)}}" } ] """),
             "modules.dev.dotfiles.files[0].to");
 
+    [Theory]
+    [InlineData("https://joao:ghp_token@github.com/joao/d.git")]
+    [InlineData("https://joao@github.com/joao/d.git")]
+    public void Dotfiles_repo_with_credentials_rejected(string repo) =>
+        AssertError(Dotfiles($$""" "repo": "{{repo}}", {{File}} """), "modules.dev.dotfiles.repo");
+
+    [Fact]
+    public void Dotfiles_repo_with_at_sign_in_path_is_valid() =>
+        Assert.Equal("https://github.com/joao/d@2.git", Valid(Dotfiles($$""" "repo": "https://github.com/joao/d@2.git", {{File}} """)).Dotfiles!.Repo);
+
+    [Theory]
+    [InlineData("relative\\dotfiles")]
+    [InlineData("\\\\server\\share\\dotfiles")]
+    [InlineData("\\dotfiles")]
+    public void Dotfiles_cloneTo_must_be_a_full_local_path(string cloneTo) =>
+        AssertError(Dotfiles($$""" "repo": "https://x.test/d.git", "cloneTo": "{{J(cloneTo)}}", {{File}} """), "modules.dev.dotfiles.cloneTo");
+
+    [Fact]
+    public void Dotfiles_cloneTo_is_normalized() =>
+        Assert.Equal(
+            @"C:\Users\Joao\b",
+            Valid(Dotfiles($$""" "repo": "https://x.test/d.git", "cloneTo": "C:\\Users\\Joao\\a\\..\\b", {{File}} """)).Dotfiles!.CloneTo);
+
+    [Fact]
+    public void Dotfiles_to_is_stored_normalized()
+    {
+        var options = Valid(Dotfiles(""" "path": "D:\\d", "files": [ { "from": "x", "to": "%USERPROFILE%\\a\\..\\b\\.rc" } ] """));
+
+        Assert.Equal(@"C:\Users\Joao\b\.rc", Assert.Single(options.Dotfiles!.Files).To);
+    }
+
+    [Fact]
+    public void Dotfiles_duplicate_to_rejected_ignoring_case_and_normalization() =>
+        AssertError(
+            Dotfiles("""
+                "path": "D:\\d",
+                "files": [ { "from": "a", "to": "%USERPROFILE%\\.rc" }, { "from": "b", "to": "%USERPROFILE%\\x\\..\\.RC" } ]
+                """),
+            "modules.dev.dotfiles.files[1].to");
+
     [Fact]
     public void Dotfiles_relative_path_resolves_against_profile()
     {

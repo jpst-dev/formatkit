@@ -41,6 +41,9 @@
   <data name="Validation_FromRelative" xml:space="preserve"><value>The source must be a relative path without &quot;..&quot;.</value></data>
   <data name="Validation_ToInsideProfile" xml:space="preserve"><value>The destination must be an absolute path inside {0}.</value></data>
   <data name="Validation_NeedsFile" xml:space="preserve"><value>Set at least one file.</value></data>
+  <data name="Validation_DuplicateTo" xml:space="preserve"><value>Two files have the same destination.</value></data>
+  <data name="Validation_CloneToAbsolute" xml:space="preserve"><value>The clone folder must be a full local path (not a network path).</value></data>
+  <data name="Validation_RepoCredentials" xml:space="preserve"><value>The repo address must not contain credentials; use Git Credential Manager or SSH.</value></data>
   <data name="Validation_ShellWslNeedsWsl" xml:space="preserve"><value>shell.wsl requires the wsl subsection.</value></data>
   <data name="Validation_OhMyZshNeedsZsh" xml:space="preserve"><value>ohMyZsh requires zsh to be true.</value></data>
   <data name="Validation_Plugin" xml:space="preserve"><value>A plugin must be an Oh My Zsh plugin name (letters, digits, . _ -); the only external plugins allowed are {0}.</value></data>

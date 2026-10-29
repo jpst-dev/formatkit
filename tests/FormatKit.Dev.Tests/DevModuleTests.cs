@@ -45,10 +45,11 @@ public class DevModuleTests
     public void Steps_follow_the_spec_order_when_their_options_are_present()
     {
         var steps = Module().CreateSteps(Json("""
-            { "enabled": true, "ssh": {}, "git": { "name": "Joao" }, "wsl": { "user": "joao" } }
+            { "enabled": true, "dotfiles": { "path": "D:\\d", "files": [ { "from": "x", "to": "%USERPROFILE%\\x" } ] },
+              "ssh": {}, "git": { "name": "Joao" }, "wsl": { "user": "joao" } }
             """));
 
-        Assert.Equal(["dev.wsl", "dev.git", "dev.ssh"], steps.Select(s => s.Id));
+        Assert.Equal(["dev.wsl", "dev.git", "dev.ssh", "dev.dotfiles"], steps.Select(s => s.Id));
     }
 
     [Fact]
