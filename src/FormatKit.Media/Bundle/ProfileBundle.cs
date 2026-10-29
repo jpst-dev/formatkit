@@ -16,24 +16,29 @@ public sealed class ProfileBundle
     private readonly long _profileBytes;
 
     private ProfileBundle(LoadedProfile profile, List<BundleItem> items, List<(string, string)> rewrites,
-        List<string> missing, long profileBytes)
+        List<string> missing, List<string> unreadable, long profileBytes)
     {
         _profile = profile;
         Items = items;
         _rewrites = rewrites;
         Missing = missing;
+        Unreadable = unreadable;
         _profileBytes = profileBytes;
     }
 
     public IReadOnlyList<BundleItem> Items { get; }
     public IReadOnlyList<string> Missing { get; }
+    /// <summary>Folders (inside folder inputs) that could not be listed; the bundle cannot be written while any exist.</summary>
+    public IReadOnlyList<string> Unreadable { get; }
     public long TotalBytes => Items.Sum(i => i.Bytes) + _profileBytes;
 
+    /// <summary>Plans the bundle. Reparse points (symlinks, junctions) inside folder inputs are skipped by design.</summary>
     public static ProfileBundle Plan(LoadedProfile profile, IReadOnlyList<ExternalInput> inputs, IFileSystem files)
     {
         var items = new List<BundleItem>();
         var rewrites = new List<(string, string)>();
         var missing = new List<string>();
+        var unreadable = new List<string>();
         var byPath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var input in inputs)
@@ -49,7 +54,7 @@ public sealed class ProfileBundle
             if (input.Kind == ExternalInputKind.Folder)
             {
                 if (!files.DirectoryExists(key)) { missing.Add(input.JsonPath); continue; }
-                bytes = files.EnumerateFileEntries(key, recursive: true).Sum(e => e.Length);
+                bytes = files.EnumerateFileEntries(key, recursive: true, unreadable.Add).Sum(e => e.Length);
             }
             else
             {
@@ -63,7 +68,7 @@ public sealed class ProfileBundle
             rewrites.Add((input.JsonPath, relative));
         }
 
-        return new ProfileBundle(profile, items, rewrites, missing, FileLength(profile.Path, files));
+        return new ProfileBundle(profile, items, rewrites, missing, unreadable, FileLength(profile.Path, files));
     }
 
     public void Write(string formatKitFolder, string exePath, IFileSystem files, IProgress<long>? copiedBytes,
@@ -71,6 +76,8 @@ public sealed class ProfileBundle
     {
         if (Missing.Count > 0)
             throw new InvalidOperationException("Inputs are missing: " + string.Join(", ", Missing));
+        if (Unreadable.Count > 0)
+            throw new InvalidOperationException("Input folders are unreadable: " + string.Join(", ", Unreadable));
 
         long copied = 0;
         files.CreateDirectory(formatKitFolder);
@@ -92,7 +99,8 @@ public sealed class ProfileBundle
 
             files.CreateDirectory(target);
             var root = item.Input.ResolvedPath;
-            foreach (var entry in files.EnumerateFileEntries(root, recursive: true))
+            var entries = files.EnumerateFileEntries(root, recursive: true, dir => throw new IOException($"Input folder became unreadable: {dir}"));
+            foreach (var entry in entries)
             {
                 ct.ThrowIfCancellationRequested();
                 var relative = Path.GetRelativePath(root, entry.Path);

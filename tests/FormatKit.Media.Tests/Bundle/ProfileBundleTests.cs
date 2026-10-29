@@ -114,6 +114,28 @@ public class ProfileBundleTests
             plan.Write(@"E:\FormatKit", @"C:\exe\formatkit.exe", fs, null, cts.Token));
     }
 
+    [Fact]
+    public void Plan_lists_unreadable_folders_and_write_refuses()
+    {
+        var (fs, profile, inputs) = Arrange();
+        fs.MarkUnreadable(@"C:\data\netdrivers\sub");
+        var plan = ProfileBundle.Plan(profile, inputs, fs);
+        Assert.Equal([@"C:\data\netdrivers\sub"], plan.Unreadable);
+        Assert.Throws<InvalidOperationException>(() =>
+            plan.Write(@"E:\FormatKit", @"C:\exe\formatkit.exe", fs, null, CancellationToken.None));
+    }
+
+    [Fact]
+    public void Write_fails_when_a_folder_becomes_unreadable_after_plan()
+    {
+        var (fs, profile, inputs) = Arrange();
+        var plan = ProfileBundle.Plan(profile, inputs, fs);
+        fs.MarkUnreadable(@"C:\data\netdrivers\sub");
+        var ex = Assert.Throws<IOException>(() =>
+            plan.Write(@"E:\FormatKit", @"C:\exe\formatkit.exe", fs, null, CancellationToken.None));
+        Assert.Contains("netdrivers", ex.Message);
+    }
+
     private sealed class Progress0(Action<long> a) : IProgress<long>
     {
         public void Report(long value) => a(value);
