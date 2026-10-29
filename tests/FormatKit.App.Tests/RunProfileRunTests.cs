@@ -288,6 +288,21 @@ public sealed class RunProfileRunTests : IDisposable
         Assert.Equal(["done"], vm.Steps[0].Messages);
     }
 
+    [Theory]
+    [InlineData("Strings.resx", "If the console window that opened asks for something, type it there.")]
+    [InlineData("Strings.pt-BR.resx", "Se a janela de console que abriu pedir algo, digite lá.")]
+    public void ConsoleHint_IsConditional(string file, string expected)
+    {
+        // Every attached console sends consoleOpened, also one that normally asks nothing (the dotfiles git clone).
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (!File.Exists(Path.Combine(root.FullName, "src", "FormatKit.App", "Resources", file)))
+            root = root.Parent ?? throw new InvalidOperationException("repository root not found");
+        var text = XDocument.Load(Path.Combine(root.FullName, "src", "FormatKit.App", "Resources", file)).Root!
+            .Elements("data").Single(d => (string?)d.Attribute("name") == "RunProfile_TypeInConsole").Element("value")!.Value;
+
+        Assert.Equal(expected, text);
+    }
+
     [Fact]
     public async Task StepFinished_ClearsAConsoleHintLeftOpen()
     {

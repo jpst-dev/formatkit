@@ -4,9 +4,10 @@ namespace FormatKit.App.Worker;
 
 /// <summary>
 /// The worker's interactive console (spec 6.5): runs and logs through <paramref name="inner"/> and tells the window
-/// about it, so the running step can say "type in the console window that opened" while the console is open and show
-/// the lines a step writes. Only that is sent: never the process's arguments (a remote URL) and never what the user
-/// types, which stays in the console window.
+/// about it, so the running step can say "if the console window that opened asks for something, type it there"
+/// while the console is open (also one that normally asks nothing, such as the dotfiles clone) and show the lines a
+/// step writes. Only that is sent: never the process's arguments (a remote URL) and never what the user types, which
+/// stays in the console window.
 /// </summary>
 public sealed class PipeInteractiveConsole(IInteractiveConsole inner, MessageChannel channel) : IInteractiveConsole
 {

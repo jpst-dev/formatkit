@@ -166,6 +166,6 @@
   <data name="Run_RebootPending" xml:space="preserve"><value>A execução continuará automaticamente no próximo logon. Você pode reiniciar agora ou depois.</value></data>
   <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Não foi possível agendar a retomada automática. Após reiniciar, execute `formatkit run --resume`.</value></data>
   <data name="Run_NextAction" xml:space="preserve"><value>Próximo passo: {0}</value></data>
-  <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>Digite na janela de console que abriu.</value></data>
+  <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>Se a janela de console que abriu pedir algo, digite lá.</value></data>
   <data name="RunProfile_Resume" xml:space="preserve"><value>Retomar</value></data>
 </root>
