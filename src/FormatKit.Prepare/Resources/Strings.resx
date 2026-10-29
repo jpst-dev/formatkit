@@ -100,4 +100,23 @@
   <data name="GitRepos_Unreadable_Many" xml:space="preserve"><value>{0} folders could not be read.</value></data>
   <data name="GitRepos_Unreadable_Title" xml:space="preserve"><value>Some folders were not searched for Git repositories</value></data>
   <data name="GitRepos_Unreadable_Action" xml:space="preserve"><value>Check those folders by hand for repositories: commit and push, or copy them to an external drive.</value></data>
+  <data name="Wsl_Title" xml:space="preserve"><value>The WSL distribution {0} will be erased</value></data>
+  <data name="Wsl_Detail" xml:space="preserve"><value>Everything inside {0} (files, packages and settings) is stored on this PC's disk.</value></data>
+  <data name="Wsl_Action" xml:space="preserve"><value>Export it with wsl --export {0} E:\{0}.tar (use a drive that is not being erased) and restore it afterwards with wsl --import.</value></data>
+  <data name="Keys_Title_One" xml:space="preserve"><value>1 SSH private key will be erased</value></data>
+  <data name="Keys_Title_Many" xml:space="preserve"><value>{0} SSH private keys will be erased</value></data>
+  <data name="Keys_Detail" xml:space="preserve"><value>Key files: {0}.</value></data>
+  <data name="Keys_Action_Backup" xml:space="preserve"><value>Back up the keys to an external drive, or plan to register new keys with the services that use them.</value></data>
+  <data name="Keys_Action_Profile" xml:space="preserve"><value>The profile creates a new SSH key; remember to remove the old one from GitHub and add the new one.</value></data>
+  <data name="Gpg_Title_One" xml:space="preserve"><value>1 GPG secret key will be erased</value></data>
+  <data name="Gpg_Title_Many" xml:space="preserve"><value>{0} GPG secret keys will be erased</value></data>
+  <data name="Gpg_Detail" xml:space="preserve"><value>The keys are stored in {0}.</value></data>
+  <data name="Gpg_Action" xml:space="preserve"><value>Export them with gpg --export-secret-keys and keep the file on an external drive.</value></data>
+  <data name="Keys_Unreadable_Title" xml:space="preserve"><value>SSH and GPG keys were not fully checked</value></data>
+  <data name="Keys_Unreadable_Detail" xml:space="preserve"><value>Some key folders or files could not be read.</value></data>
+  <data name="Keys_Unreadable_Action" xml:space="preserve"><value>Look in the .ssh and gnupg folders by hand and back up any private keys.</value></data>
+  <data name="DevDrive_Title" xml:space="preserve"><value>Drive {0} is a virtual disk stored on {1}</value></data>
+  <data name="DevDrive_Detail_Size" xml:space="preserve"><value>The virtual disk {0} ({1}) will be erased with the Windows drive.</value></data>
+  <data name="DevDrive_Detail" xml:space="preserve"><value>The virtual disk {0} will be erased with the Windows drive.</value></data>
+  <data name="DevDrive_Action" xml:space="preserve"><value>Copy what you need from {0} to an external drive before installing. Repositories inside it are reported separately.</value></data>
 </root>

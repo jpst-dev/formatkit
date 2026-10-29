@@ -100,4 +100,23 @@
   <data name="GitRepos_Unreadable_Many" xml:space="preserve"><value>{0} pastas não puderam ser lidas.</value></data>
   <data name="GitRepos_Unreadable_Title" xml:space="preserve"><value>Algumas pastas não foram examinadas em busca de repositórios Git</value></data>
   <data name="GitRepos_Unreadable_Action" xml:space="preserve"><value>Confira essas pastas manualmente em busca de repositórios: faça commit e push, ou copie para um disco externo.</value></data>
+  <data name="Wsl_Title" xml:space="preserve"><value>A distribuição WSL {0} será apagada</value></data>
+  <data name="Wsl_Detail" xml:space="preserve"><value>Tudo o que está dentro de {0} (arquivos, pacotes e configurações) fica no disco deste PC.</value></data>
+  <data name="Wsl_Action" xml:space="preserve"><value>Exporte com wsl --export {0} E:\{0}.tar (use um disco que não será apagado) e restaure depois com wsl --import.</value></data>
+  <data name="Keys_Title_One" xml:space="preserve"><value>1 chave privada SSH será apagada</value></data>
+  <data name="Keys_Title_Many" xml:space="preserve"><value>{0} chaves privadas SSH serão apagadas</value></data>
+  <data name="Keys_Detail" xml:space="preserve"><value>Arquivos de chave: {0}.</value></data>
+  <data name="Keys_Action_Backup" xml:space="preserve"><value>Faça backup das chaves em um disco externo ou planeje cadastrar novas chaves nos serviços que as usam.</value></data>
+  <data name="Keys_Action_Profile" xml:space="preserve"><value>O perfil cria uma nova chave SSH; lembre-se de remover a antiga do GitHub e adicionar a nova.</value></data>
+  <data name="Gpg_Title_One" xml:space="preserve"><value>1 chave secreta GPG será apagada</value></data>
+  <data name="Gpg_Title_Many" xml:space="preserve"><value>{0} chaves secretas GPG serão apagadas</value></data>
+  <data name="Gpg_Detail" xml:space="preserve"><value>As chaves ficam em {0}.</value></data>
+  <data name="Gpg_Action" xml:space="preserve"><value>Exporte com gpg --export-secret-keys e guarde o arquivo em um disco externo.</value></data>
+  <data name="Keys_Unreadable_Title" xml:space="preserve"><value>As chaves SSH e GPG não foram totalmente verificadas</value></data>
+  <data name="Keys_Unreadable_Detail" xml:space="preserve"><value>Algumas pastas ou arquivos de chaves não puderam ser lidos.</value></data>
+  <data name="Keys_Unreadable_Action" xml:space="preserve"><value>Confira as pastas .ssh e gnupg manualmente e faça backup das chaves privadas.</value></data>
+  <data name="DevDrive_Title" xml:space="preserve"><value>A unidade {0} é um disco virtual guardado em {1}</value></data>
+  <data name="DevDrive_Detail_Size" xml:space="preserve"><value>O disco virtual {0} ({1}) será apagado junto com a unidade do Windows.</value></data>
+  <data name="DevDrive_Detail" xml:space="preserve"><value>O disco virtual {0} será apagado junto com a unidade do Windows.</value></data>
+  <data name="DevDrive_Action" xml:space="preserve"><value>Copie o que precisar de {0} para um disco externo antes de instalar. Os repositórios dentro dela aparecem em itens separados.</value></data>
 </root>
