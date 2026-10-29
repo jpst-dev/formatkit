@@ -1,7 +1,7 @@
 // Pure check functions used by check-dist.mjs and tests. Plain ESM so it runs without a build.
 
 export function checkLocaleParity(docPaths) {
-  const set = new Set(docPaths.map((p) => p.replaceAll(String.fromCharCode(92), '/')));
+  const set = new Set(docPaths.map((p) => p.replace(/\\/g, '/')));
   const missing = [];
   for (const p of set) {
     const counterpart = p.startsWith('en/') ? p.slice(3) : `en/${p}`;
@@ -33,7 +33,15 @@ export function findExternalRefs(file, text, ownOrigin) {
     }
   }
   for (const m of text.matchAll(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)\s]*))\s*\)/gi)) add(m[1] ?? m[2] ?? m[3]);
+  for (const m of text.matchAll(/@import\s+(?:"([^"]*)"|'([^']*)')/gi)) add(m[1] ?? m[2]);
+  for (const m of text.matchAll(/image-set\(([^)]*)\)/gi)) {
+    for (const q of m[1].matchAll(/"([^"]*)"|'([^']*)'/g)) add(q[1] ?? q[2]);
+  }
   return found;
+}
+
+export function assertBuilt(htmlCount) {
+  return htmlCount > 0 ? [] : ['dist has no HTML: run npm run build first'];
 }
 
 export function findUnbasedLinks(text, base) {
@@ -51,7 +59,7 @@ export function commandTokens(line) {
   let m;
   while ((m = re.exec(line))) {
     const tokens = [];
-    for (const word of line.slice(m.index + m[0].length).split(/\s+/)) {
+    for (const word of line.slice(m.index + m[0].length).trim().split(/\s+/)) {
       const clean = word.replace(/[`.,;:)]+$/, '');
       if (tokens.length < 2 && /^[a-z][a-z-]*$/.test(clean)) tokens.push(clean);
       else break;
@@ -68,10 +76,23 @@ export function findUnknownCommands(contentText, readmeText) {
     if (line.startsWith('| `formatkit')) for (const t of commandTokens(line)) known.add(t.join(' '));
   }
   const unknown = new Set();
+  const codeLines = [];
+  let inFence = false;
   for (const line of contentText.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+    } else if (inFence) {
+      codeLines.push(line);
+    } else {
+      for (const m of line.matchAll(/`([^`]+)`/g)) codeLines.push(m[1]);
+    }
+  }
+  for (const line of codeLines) {
     for (const t of commandTokens(line)) {
+      if (t.length === 0) continue;
       const key = t.join(' ');
-      if (!known.has(key)) unknown.add(key);
+      // a one-word README command takes the second token as a positional argument
+      if (!known.has(key) && !known.has(t[0])) unknown.add(key);
     }
   }
   return [...unknown];

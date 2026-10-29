@@ -2,14 +2,16 @@ import { expect, test } from 'vitest';
 // @ts-expect-error plain ESM module without types
 import * as checks from '../scripts/dist-checks.mjs';
 
-const { checkLocaleParity, findExternalRefs, findUnbasedLinks, commandTokens, findUnknownCommands } = checks as {
+const { checkLocaleParity, findExternalRefs, findUnbasedLinks, commandTokens, findUnknownCommands, assertBuilt } = checks as {
   checkLocaleParity: (p: string[]) => string[];
   findExternalRefs: (f: string, t: string, o: string) => string[];
   findUnbasedLinks: (t: string, b: string) => string[];
   commandTokens: (l: string) => string[][];
   findUnknownCommands: (c: string, r: string) => string[];
+  assertBuilt: (n: number) => string[];
 };
 
+const NL = String.fromCharCode(10);
 const OWN = 'https://jpst-dev.github.io';
 const readme = [
   '| `formatkit hardware` | x |',
@@ -67,7 +69,45 @@ test('commandTokens takes up to two command words', () => {
 });
 
 test('unknown commands are reported, README ones pass', () => {
-  expect(findUnknownCommands('formatkit drivers scna', readme)).toEqual(['drivers scna']);
-  expect(findUnknownCommands('formatkit run --profile x', readme)).toEqual([]);
-  expect(findUnknownCommands('formatkit cleanup undo apps.x', readme)).toEqual([]);
+  expect(findUnknownCommands('`formatkit drivers scna`', readme)).toEqual(['drivers scna']);
+  expect(findUnknownCommands('`formatkit run --profile x`', readme)).toEqual([]);
+  expect(findUnknownCommands('`formatkit cleanup undo apps.x`', readme)).toEqual([]);
+});
+
+test('css @import string form and image-set strings are flagged', () => {
+  expect(findExternalRefs('a.css', '@import "https://x.com/y.css";', OWN)).toHaveLength(1);
+  expect(findExternalRefs('a.css', "@import 'https://x.com/y.css';", OWN)).toHaveLength(1);
+  expect(findExternalRefs('a.css', 'a{background:image-set("https://x.com/a.png" 1x, "/formatkit/b.png" 2x)}', OWN)).toHaveLength(1);
+  expect(findExternalRefs('a.css', '@import "./local.css";', OWN)).toEqual([]);
+});
+
+test('prose is not scanned for commands', () => {
+  expect(findUnknownCommands('O formatkit faz tudo e formatkit drivers scna no texto', readme)).toEqual([]);
+});
+
+test('inline code and fenced blocks are scanned', () => {
+  expect(findUnknownCommands(['```powershell', 'formatkit drivers scna', '```'].join(NL), readme)).toEqual(['drivers scna']);
+  expect(findUnknownCommands(['```powershell', 'formatkit drivers scan', '```'].join(NL), readme)).toEqual([]);
+});
+
+test('formatkit with no command word is skipped', () => {
+  expect(findUnknownCommands('`formatkit --help`', readme)).toEqual([]);
+});
+
+test('double spaces are tolerated', () => {
+  expect(findUnknownCommands('`formatkit  drivers   scan`', readme)).toEqual([]);
+});
+
+test('a one-word README command accepts a positional argument', () => {
+  expect(findUnknownCommands('`formatkit run foo`', readme)).toEqual([]);
+});
+
+test('unknown subcommand and bare group fail', () => {
+  expect(findUnknownCommands('`formatkit drivers scna`', readme)).toEqual(['drivers scna']);
+  expect(findUnknownCommands('`formatkit cleanup`', readme)).toEqual(['cleanup']);
+});
+
+test('assertBuilt fails when dist has no HTML', () => {
+  expect(assertBuilt(0)).toEqual(['dist has no HTML: run npm run build first']);
+  expect(assertBuilt(3)).toEqual([]);
 });

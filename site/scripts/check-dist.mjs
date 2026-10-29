@@ -1,7 +1,7 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkLocaleParity, findExternalRefs, findUnbasedLinks, findUnknownCommands } from './dist-checks.mjs';
+import { assertBuilt, checkLocaleParity, findExternalRefs, findUnbasedLinks, findUnknownCommands } from './dist-checks.mjs';
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const docsDir = join(siteDir, 'src', 'content', 'docs');
@@ -14,7 +14,7 @@ const walk = (dir, exts) =>
     .filter((e) => e.isFile() && exts.some((x) => e.name.endsWith(x)))
     .map((e) => join(e.parentPath, e.name));
 
-const rel = (root, f) => relative(root, f).replaceAll(String.fromCharCode(92), '/');
+const rel = (root, f) => relative(root, f).replace(/\\/g, '/');
 const problems = [];
 
 const docs = walk(docsDir, ['.mdx']);
@@ -27,7 +27,9 @@ for (const f of docs) {
   }
 }
 
-for (const f of walk(distDir, ['.html', '.css'])) {
+const distFiles = existsSync(distDir) ? walk(distDir, ['.html', '.css']) : [];
+problems.push(...assertBuilt(distFiles.filter((f) => f.endsWith('.html')).length));
+for (const f of distFiles) {
   const text = readFileSync(f, 'utf8');
   const name = rel(distDir, f);
   for (const r of findExternalRefs(name, text, OWN_ORIGIN)) problems.push(`external reference: ${r}`);
