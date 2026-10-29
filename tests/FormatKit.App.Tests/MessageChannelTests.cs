@@ -204,4 +204,22 @@ public class MessageChannelTests
         Assert.Equal(["s0", "s1", "s2", "s3", "s4"], read.Take(5).Select(m => Assert.IsType<StepStarted>(m).Id));
         Assert.IsType<RebootCountdown>(read[5]);
     }
+
+    [Fact]
+    public async Task Post_UnexpectedWriteException_DoesNotPoisonLaterSends()
+    {
+        var stream = new ThrowOnceWriteStream();
+        await using var ch = new MessageChannel(stream, Log);
+        ch.Post(new StepStarted(1, 3, "lost"));
+        ch.Post(new StepStarted(2, 3, "kept"));
+
+        await ch.DrainAsync();
+        await ch.SendAsync(new RebootCountdown(3), CancellationToken.None);
+
+        await using var reader = new MessageChannel(new MemoryStream(stream.ToArray()), Log);
+        var read = await ReadAll(reader);
+        Assert.Equal(2, read.Count);
+        Assert.Equal("kept", Assert.IsType<StepStarted>(read[0]).Id);
+        Assert.IsType<RebootCountdown>(read[1]);
+    }
 }

@@ -163,3 +163,35 @@ internal sealed class DuplexStream(Stream read, Stream write) : Stream
             new DuplexStream(toWindow.Reader.AsStream(), toWorker.Writer.AsStream()));
     }
 }
+
+/// <summary>The first write throws <see cref="InvalidOperationException"/>; later writes go to memory.</summary>
+internal sealed class ThrowOnceWriteStream : Stream
+{
+    private readonly MemoryStream _inner = new();
+    private int _writes;
+
+    public byte[] ToArray() => _inner.ToArray();
+
+    public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken ct = default)
+    {
+        if (Interlocked.Increment(ref _writes) == 1) throw new InvalidOperationException("unexpected");
+        _inner.Write(buffer.Span);
+        return ValueTask.CompletedTask;
+    }
+
+    public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ct) =>
+        WriteAsync(buffer.AsMemory(offset, count), ct).AsTask();
+
+    public override Task FlushAsync(CancellationToken ct) => Task.CompletedTask;
+
+    public override bool CanRead => false;
+    public override bool CanSeek => false;
+    public override bool CanWrite => true;
+    public override long Length => throw new NotSupportedException();
+    public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override void Flush() { }
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+    public override void SetLength(long value) => throw new NotSupportedException();
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+}

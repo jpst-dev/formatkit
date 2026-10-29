@@ -42,7 +42,16 @@ public sealed class MessageChannel(Stream stream, Serilog.ILogger log) : IAsyncD
 
     private async Task WriteAfterAsync(Task previous, WorkerMessage message)
     {
-        await previous.ConfigureAwait(false);
+        // Nothing may fault this chain: a faulted link would make every later Post and Send fail.
+        try
+        {
+            await previous.ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            log.Warning(ex, "Worker channel: an earlier posted send failed");
+        }
+
         try
         {
             await WriteLineAsync(message, CancellationToken.None).ConfigureAwait(false);
@@ -50,6 +59,10 @@ public sealed class MessageChannel(Stream stream, Serilog.ILogger log) : IAsyncD
         catch (Exception ex) when (ex is IOException or ObjectDisposedException)
         {
             log.Warning("Worker channel: could not send {Type} ({Reason})", message.GetType().Name, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex, "Worker channel: could not send {Type}", message.GetType().Name);
         }
     }
 
