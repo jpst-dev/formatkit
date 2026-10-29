@@ -165,4 +165,5 @@
   <data name="Run_RebootPending" xml:space="preserve"><value>The run will resume automatically at the next logon. You can reboot now or later.</value></data>
   <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Automatic resume could not be scheduled. After rebooting, run `formatkit run --resume`.</value></data>
   <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
+  <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>Type in the console window that opened.</value></data>
 </root>

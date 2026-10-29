@@ -22,6 +22,9 @@ public class MessageChannelTests
         new Cancel(),
         new RebootNow(),
         new RebootCancel(),
+        new ConsoleOpened(),
+        new ConsoleLine("ssh-ed25519 AAAA me@pc"),
+        new ConsoleClosed(),
     };
 
     private static ILogger Log => new LoggerConfiguration().CreateLogger();

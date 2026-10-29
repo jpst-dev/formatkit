@@ -11,6 +11,9 @@ namespace FormatKit.App.Worker;
 [JsonDerivedType(typeof(RebootCountdown), "rebootCountdown")]
 [JsonDerivedType(typeof(Finished), "finished")]
 [JsonDerivedType(typeof(Failed), "failed")]
+[JsonDerivedType(typeof(ConsoleOpened), "consoleOpened")]
+[JsonDerivedType(typeof(ConsoleLine), "consoleLine")]
+[JsonDerivedType(typeof(ConsoleClosed), "consoleClosed")]
 [JsonDerivedType(typeof(Cancel), "cancel")]
 [JsonDerivedType(typeof(RebootNow), "rebootNow")]
 [JsonDerivedType(typeof(RebootCancel), "rebootCancel")]
@@ -29,6 +32,15 @@ public sealed record RebootCountdown(int Seconds) : WorkerMessage;
 public sealed record Finished(RunSummary Summary) : WorkerMessage;
 
 public sealed record Failed(string Message) : WorkerMessage;
+
+/// <summary>A step opened a console window for the user to type in (a password or passphrase prompt).</summary>
+public sealed record ConsoleOpened : WorkerMessage;
+
+/// <summary>A line a step writes for the user (public data only, such as an SSH public key).</summary>
+public sealed record ConsoleLine(string Text) : WorkerMessage;
+
+/// <summary>The console window of <see cref="ConsoleOpened"/> has closed.</summary>
+public sealed record ConsoleClosed : WorkerMessage;
 
 public sealed record Cancel : WorkerMessage;
 

@@ -24,6 +24,13 @@ public sealed partial class StepRow(string id, string title) : ObservableObject
     [NotifyPropertyChangedFor(nameof(NextActionText))]
     private string? _nextAction;
 
+    /// <summary>The step opened a console window and waits for the user to type there.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConsoleHint))]
+    private bool _isWaitingForConsole;
+
+    public string? ConsoleHint => IsWaitingForConsole ? Strings.Get("RunProfile_TypeInConsole") : null;
+
     /// <summary>The step that is running now, highlighted on the page.</summary>
     public bool IsCurrent => State == StepState.Running;
 
@@ -36,6 +43,9 @@ public sealed partial class StepRow(string id, string title) : ObservableObject
     public string? NextActionText =>
         string.IsNullOrWhiteSpace(NextAction) ? null : Strings.Format("Run_NextAction", NextAction);
 
+    /// <summary>Adds a line the step wrote while running; the step's result replaces the messages.</summary>
+    public void AddMessage(string text) => Messages = [.. Messages, text];
+
     public void Finish(StepOutcome outcome, IReadOnlyList<string> messages, string? nextAction)
     {
         State = outcome switch
@@ -47,6 +57,7 @@ public sealed partial class StepRow(string id, string title) : ObservableObject
         };
         Messages = messages;
         NextAction = nextAction;
+        IsWaitingForConsole = false;
     }
 }
 

@@ -17,6 +17,7 @@ namespace FormatKit.App.ViewModels;
 public sealed partial class RunProfileViewModel
 {
     private WorkerConnection? _connection;
+    private StepRow? _current;
     private bool _stopSent;
     private TaskCompletionSource _runEnded = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -261,7 +262,17 @@ public sealed partial class RunProfileViewModel
                 ShowSteps(planned.Steps.Select(s => new StepRow(s.Id, s.Title)));
                 return null;
             case StepStarted started:
-                if (Find(started.Id) is { } running) running.State = StepState.Running;
+                _current = Find(started.Id);
+                if (_current is not null) _current.State = StepState.Running;
+                return null;
+            case ConsoleOpened:
+                if (_current is not null) _current.IsWaitingForConsole = true;
+                return null;
+            case ConsoleClosed:
+                if (_current is not null) _current.IsWaitingForConsole = false;
+                return null;
+            case ConsoleLine line:
+                _current?.AddMessage(line.Text);
                 return null;
             case StepFinished finished:
                 Find(finished.Id)?.Finish(finished.Outcome, finished.Messages, finished.NextAction);
@@ -309,6 +320,7 @@ public sealed partial class RunProfileViewModel
 
     private void ShowSteps(IEnumerable<StepRow> rows)
     {
+        _current = null;
         Steps.Clear();
         foreach (var row in rows)
             Steps.Add(row);

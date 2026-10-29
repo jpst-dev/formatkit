@@ -136,6 +136,9 @@
                                         <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                         <TextBlock Text="{Binding StateText}" Foreground="{Binding Color}" Margin="8,0,0,0" />
                                     </StackPanel>
+                                    <TextBlock Text="{Binding ConsoleHint}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                               Foreground="#5B8DB8" Margin="0,4,0,0"
+                                               Visibility="{Binding IsWaitingForConsole, Converter={StaticResource BoolToVisibility}}" />
                                     <ItemsControl ItemsSource="{Binding Messages}" Margin="0,4,0,0">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>

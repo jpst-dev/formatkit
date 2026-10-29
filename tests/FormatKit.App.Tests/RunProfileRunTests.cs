@@ -178,6 +178,57 @@ public sealed class RunProfileRunTests : IDisposable
         Assert.False(vm.IsRunning);
     }
 
+    [Fact]
+    public async Task Console_ShowsTheHintAndLinesOnTheRunningStep_UntilItCloses()
+    {
+        var vm = Reviewed();
+        var opened = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.Script.AddRange([
+            PlannedAll(),
+            new StepStarted(1, 3, "drivers.scan"),
+            new ConsoleLine("ssh-ed25519 AAAA me@pc"),
+            new ConsoleOpened(),
+            new Do(() => opened.Task),
+            new ConsoleClosed(),
+            new Do(() => closed.Task),
+            new StepFinished("drivers.scan", StepOutcome.Succeeded, ["done"], null),
+            FinishedWith(RunStatus.Completed),
+        ]);
+
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].IsWaitingForConsole);
+
+        Assert.Equal(Strings.Get("RunProfile_TypeInConsole"), vm.Steps[0].ConsoleHint);
+        Assert.Equal(["ssh-ed25519 AAAA me@pc"], vm.Steps[0].Messages);
+        Assert.False(vm.Steps[1].IsWaitingForConsole);
+
+        opened.SetResult();
+        await WaitUntil(() => !vm.Steps[0].IsWaitingForConsole);
+        Assert.Null(vm.Steps[0].ConsoleHint);
+
+        closed.SetResult();
+        await run.WaitAsync(Timeout, Ct);
+        Assert.Equal(["done"], vm.Steps[0].Messages);
+    }
+
+    [Fact]
+    public async Task StepFinished_ClearsAConsoleHintLeftOpen()
+    {
+        var vm = Reviewed();
+        _launcher.Script.AddRange([
+            PlannedAll(),
+            new StepStarted(1, 3, "drivers.scan"),
+            new ConsoleOpened(),
+            new StepFinished("drivers.scan", StepOutcome.Failed, [], null),
+            FinishedWith(RunStatus.CompletedWithFailures),
+        ]);
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.False(vm.Steps[0].IsWaitingForConsole);
+    }
+
     [Theory]
     [InlineData(RunStatus.Completed, false, "Run_Status_Completed")]
     [InlineData(RunStatus.CompletedWithFailures, false, "Run_Status_CompletedWithFailures")]

@@ -31,8 +31,13 @@ public static class WorkerProcess
             await using var channel = new MessageChannel(stream, host.Log);
             var rebooter = new PipeRebooter(channel, host.Services.Processes, host.Log);
 
-            // The rebooter is only held by the environment (no service uses it), so swapping it here is enough.
-            var env = host with { Rebooter = rebooter };
+            // The rebooter is only held by the environment (no service uses it), so swapping it here is enough. Steps
+            // reach the console through the run's StepContext, which takes the environment's services.
+            var env = host with
+            {
+                Rebooter = rebooter,
+                Services = host.Services with { Console = new PipeInteractiveConsole(host.Services.Console, channel) },
+            };
             var code = await new WorkerHost(env, modules, rebooter).RunAsync(channel, job, ct).ConfigureAwait(false);
             host.Log.Information("Worker: exiting with {ExitCode}", code);
             return code;
