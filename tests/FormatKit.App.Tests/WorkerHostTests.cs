@@ -24,17 +24,19 @@ public sealed class WorkerHostTests : IAsyncDisposable
     private readonly InMemoryFileSystem _files = new();
     private readonly FakeScheduledTasks _tasks = new();
     private readonly FakeReportWriter _reports = new();
+    private readonly FakeProcessRunner _processes = new();
+    private readonly DuplexStream _workerEnd;
     private readonly MessageChannel _worker;
     private readonly MessageChannel _window;
     private readonly WorkerHost _host;
 
     public WorkerHostTests()
     {
-        var (workerEnd, windowEnd) = DuplexStream.CreatePair();
+        (_workerEnd, var windowEnd) = DuplexStream.CreatePair();
         var log = new LoggerConfiguration().CreateLogger();
-        _worker = new MessageChannel(workerEnd, log);
+        _worker = new MessageChannel(_workerEnd, log);
         _window = new MessageChannel(windowEnd, log);
-        var rebooter = new PipeRebooter(_worker, new FakeProcessRunner(), log);
+        var rebooter = new PipeRebooter(_worker, _processes, log);
         var env = new HostEnvironment(
             TestServices.Create(files: _files),
             new Elevation(),
@@ -209,6 +211,9 @@ public sealed class WorkerHostTests : IAsyncDisposable
         var finished = Assert.IsType<Finished>(Assert.Single(await WindowMessages()));
         Assert.Equal(RunStatus.NothingToResume, finished.Summary.Status);
         Assert.Equal(1, _tasks.RemoveCalls);
+        var errors = new ProfileService([_module]).Load(Path.Combine(_dir, "gone.json")).Errors;
+        Assert.NotEmpty(errors);
+        Assert.All(errors, e => Assert.Contains(e.Message, finished.Summary.Error));
     }
 
     [Fact]
@@ -222,6 +227,9 @@ public sealed class WorkerHostTests : IAsyncDisposable
         var finished = Assert.IsType<Finished>(Assert.Single(await WindowMessages()));
         Assert.Equal(RunStatus.StateCorrupt, finished.Summary.Status);
         Assert.Equal(1, _tasks.RemoveCalls);
+        var corrupt = Store.Load().Error;
+        Assert.False(string.IsNullOrEmpty(corrupt));
+        Assert.Equal(corrupt, finished.Summary.Error);
     }
 
     [Fact]
@@ -243,6 +251,58 @@ public sealed class WorkerHostTests : IAsyncDisposable
         var messages = await WindowMessages();
         Assert.Contains(messages, m => m is StepStarted { Id: "b", Number: 2, Total: 2 });
         Assert.Equal(RunStatus.Completed, Assert.IsType<Finished>(messages[^1]).Summary.Status);
+    }
+
+    [Fact]
+    public async Task Run_StepThrowsTaskCanceled_SendsFailedWithError()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false, Throws = new TaskCanceledException("request timed out") });
+        var path = WriteProfile();
+
+        var exit = await _host.RunAsync(_worker, RunJob(path), Ct).WaitAsync(Wait, Ct);
+
+        Assert.Equal(2, exit);
+        var failed = Assert.IsType<Failed>((await WindowMessages())[^1]);
+        Assert.Equal(Strings.Format("Worker_Error", "request timed out"), failed.Message);
+    }
+
+    [Fact]
+    public async Task Reboot_CountdownComesAfterTheRebootStepFinished()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false, ExecuteResult = StepResult.Reboot("restart needed") });
+        var path = WriteProfile();
+        _workerEnd.WriteDelay = TimeSpan.FromMilliseconds(20);
+        _processes.Enqueue("shutdown.exe", new ProcessResult(0, "", "", TimeSpan.Zero, false)); // the countdown is zero
+
+        var exit = await _host.RunAsync(_worker, RunJob(path), Ct).WaitAsync(Wait, Ct);
+        var received = await WindowMessages();
+
+        Assert.Equal(0, exit);
+        var finishedAt = received.FindIndex(m => m is StepFinished { Id: "a", Outcome: StepOutcome.RebootRequired });
+        var countdownAt = received.FindIndex(m => m is RebootCountdown);
+        Assert.True(finishedAt >= 0 && countdownAt > finishedAt, string.Join(", ", received.Select(m => m.GetType().Name)));
+        Assert.Equal(RunStatus.RebootPending, Assert.IsType<Finished>(received[^1]).Summary.Status);
+    }
+
+    [Fact]
+    public async Task ReadLoopError_StopsAfterCurrentStepAndStillReturns()
+    {
+        var blocking = new BlockingStep("a");
+        var next = new FakeStep("b") { CheckResult = false };
+        _module.Steps.AddRange([blocking, next]);
+        var path = WriteProfile();
+
+        var run = _host.RunAsync(_worker, RunJob(path), Ct);
+        await blocking.Started.WaitAsync(Wait, Ct);
+        _workerEnd.ReadException = new InvalidOperationException("reader broke");
+        await _window.SendAsync(new RebootNow(), Ct); // wake the pending read so the next one throws
+        await _host.StopRequested.WaitAsync(Wait, Ct);
+        blocking.Release();
+        var exit = await run.WaitAsync(Wait, Ct);
+
+        Assert.Equal(2, exit);
+        Assert.Equal(0, next.CheckCalls);
+        Assert.Equal(Strings.Get("Worker_Stopped"), Assert.IsType<Failed>((await WindowMessages())[^1]).Message);
     }
 
     [Theory]

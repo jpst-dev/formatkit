@@ -98,15 +98,26 @@ internal sealed class NeverReadStream : Stream
 /// <summary>Reads from one stream and writes to another: one end of an in-memory duplex connection.</summary>
 internal sealed class DuplexStream(Stream read, Stream write) : Stream
 {
-    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default) => read.ReadAsync(buffer, ct);
+    /// <summary>When set, every read throws it.</summary>
+    public Exception? ReadException { get; set; }
+
+    /// <summary>Delay before each write, so a message sent out of order would overtake a queued one.</summary>
+    public TimeSpan WriteDelay { get; set; }
+
+    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default) =>
+        ReadException is { } ex ? ValueTask.FromException<int>(ex) : read.ReadAsync(buffer, ct);
 
     public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct) =>
-        read.ReadAsync(buffer, offset, count, ct);
+        ReadAsync(buffer.AsMemory(offset, count), ct).AsTask();
 
-    public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken ct = default) => write.WriteAsync(buffer, ct);
+    public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken ct = default)
+    {
+        if (WriteDelay > TimeSpan.Zero) await Task.Delay(WriteDelay, ct);
+        await write.WriteAsync(buffer, ct);
+    }
 
     public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ct) =>
-        write.WriteAsync(buffer, offset, count, ct);
+        WriteAsync(buffer.AsMemory(offset, count), ct).AsTask();
 
     public override Task FlushAsync(CancellationToken ct) => write.FlushAsync(ct);
 

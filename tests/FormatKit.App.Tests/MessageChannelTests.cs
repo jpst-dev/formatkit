@@ -188,4 +188,20 @@ public class MessageChannelTests
         var first = await Task.WhenAny(reading, Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Same(reading, first);
     }
+
+    [Fact]
+    public async Task Send_GoesOutAfterPostedMessages()
+    {
+        var stream = new ChunkedWriteStream();
+        await using var ch = new MessageChannel(stream, Log);
+        for (var i = 0; i < 5; i++) ch.Post(new StepStarted(i + 1, 5, "s" + i));
+
+        await ch.SendAsync(new RebootCountdown(3), CancellationToken.None);
+
+        await using var reader = new MessageChannel(new MemoryStream(stream.ToArray()), Log);
+        var read = await ReadAll(reader);
+        Assert.Equal(6, read.Count);
+        Assert.Equal(["s0", "s1", "s2", "s3", "s4"], read.Take(5).Select(m => Assert.IsType<StepStarted>(m).Id));
+        Assert.IsType<RebootCountdown>(read[5]);
+    }
 }

@@ -80,26 +80,29 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         await TrySendAsync(channel, new Planned(plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin)).ToList()), ct).ConfigureAwait(false);
 
         // Steps get the host token, never the stop token, so a stop never interrupts a step mid-work.
-        var progress = new PipeRunProgress(channel, stop, env.Log);
+        // Every send below waits for the posted progress messages, so the window sees them in order.
+        var progress = new PipeRunProgress(channel, stop);
         RunSummary summary;
         try
         {
             summary = await session.RunAsync(profile, plan, resume, progress, ct).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (stop.IsCancellationRequested && !ct.IsCancellationRequested)
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw; // the host is shutting down
+        }
+        catch (OperationCanceledException) when (stop.IsCancellationRequested)
         {
             env.Log.Information("Worker: run stopped after the current step");
-            await progress.DrainAsync().ConfigureAwait(false);
             return await FailAsync(channel, Strings.Get("Worker_Stopped"), ct).ConfigureAwait(false);
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex)
         {
+            // Includes a cancellation neither token asked for, e.g. an HTTP timeout surfacing from a step.
             env.Log.Error(ex, "Worker: the run failed");
-            await progress.DrainAsync().ConfigureAwait(false);
             return await FailAsync(channel, Strings.Format("Worker_Error", ex.Message), ct).ConfigureAwait(false);
         }
 
-        await progress.DrainAsync().ConfigureAwait(false);
         await TrySendAsync(channel, new Finished(summary), ct).ConfigureAwait(false);
         return ExitFinished;
     }
@@ -159,9 +162,10 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         {
             return; // the run is over
         }
-        catch (Exception ex) when (ex is IOException or ObjectDisposedException)
+        catch (Exception ex)
         {
-            env.Log.Warning("Worker channel: connection broken ({Reason}); stopping after the current step", ex.Message);
+            // Never let the read loop fail the run's result: any error ends reading and stops the run.
+            env.Log.Warning(ex, "Worker channel: reading failed; stopping after the current step");
         }
 
         RequestStop(stop);
