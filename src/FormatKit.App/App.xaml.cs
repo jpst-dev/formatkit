@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using FormatKit.App.Localization;
 using FormatKit.App.Services;
 using FormatKit.App.ViewModels;
+using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Drivers.Catalog;
 using FormatKit.Hosting;
 
@@ -52,7 +53,8 @@ public partial class App : Application
         var main = new MainViewModel(
             new HomeViewModel(_host.StateStore),
             new AboutViewModel(_dialogs),
-            new HardwareViewModel(_host.Services, vendors, _host.Log));
+            new HardwareViewModel(_host.Services, vendors, _host.Log),
+            new CleanupDiagnosisViewModel(_host.Services, KnownIssues.LoadEmbedded(), _host.Log));
         if (arguments.Mode == AppMode.Resume)
             main.Navigate(Page.RunProfile);
 

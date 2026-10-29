@@ -8,6 +8,7 @@
         <DataTemplate DataType="{x:Type vm:HomeViewModel}"><views:HomePage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:AboutViewModel}"><views:AboutPage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:HardwareViewModel}"><views:HardwarePage /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CleanupDiagnosisViewModel}"><views:CleanupDiagnosisPage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}"><views:PlaceholderPage /></DataTemplate>
     </Window.Resources>
     <Grid>

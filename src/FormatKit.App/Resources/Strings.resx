@@ -63,4 +63,12 @@
   <data name="Scan_WuError" xml:space="preserve"><value>Windows Update search failed: {0}</value></data>
   <data name="Value_Yes" xml:space="preserve"><value>yes</value></data>
   <data name="Value_No" xml:space="preserve"><value>no</value></data>
+  <data name="Check_Group_Breaks" xml:space="preserve"><value>Breaks Windows features:</value></data>
+  <data name="Check_Group_Security" xml:space="preserve"><value>Security risks:</value></data>
+  <data name="Check_Group_Contested" xml:space="preserve"><value>Contested tweaks:</value></data>
+  <data name="Check_Group_Info" xml:space="preserve"><value>For your information:</value></data>
+  <data name="Check_NoFindings" xml:space="preserve"><value>No known problems found.</value></data>
+  <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
+  <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
+  <data name="Diag_Refresh" xml:space="preserve"><value>Check again</value></data>
 </root>

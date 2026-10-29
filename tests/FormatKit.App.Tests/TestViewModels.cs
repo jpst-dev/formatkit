@@ -1,5 +1,6 @@
 using FormatKit.App.Tests.Fakes;
 using FormatKit.App.ViewModels;
+using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Core;
 using FormatKit.Core.Running;
 using FormatKit.Core.Tests.Fakes;
@@ -17,6 +18,7 @@ internal static class TestViewModels
         return new MainViewModel(
             new HomeViewModel(store),
             new AboutViewModel(new FakeDialogService()),
-            new HardwareViewModel(TestServices.Create(), VendorCatalog.LoadEmbedded()));
+            new HardwareViewModel(TestServices.Create(), VendorCatalog.LoadEmbedded()),
+            new CleanupDiagnosisViewModel(TestServices.Create(), new KnownIssues(1, [])));
     }
 }

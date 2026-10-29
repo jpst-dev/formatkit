@@ -63,4 +63,12 @@
   <data name="Scan_WuError" xml:space="preserve"><value>A busca no Windows Update falhou: {0}</value></data>
   <data name="Value_Yes" xml:space="preserve"><value>sim</value></data>
   <data name="Value_No" xml:space="preserve"><value>não</value></data>
+  <data name="Check_Group_Breaks" xml:space="preserve"><value>Quebra recursos do Windows:</value></data>
+  <data name="Check_Group_Security" xml:space="preserve"><value>Riscos de segurança:</value></data>
+  <data name="Check_Group_Contested" xml:space="preserve"><value>Ajustes contestados:</value></data>
+  <data name="Check_Group_Info" xml:space="preserve"><value>Para sua informação:</value></data>
+  <data name="Check_NoFindings" xml:space="preserve"><value>Nenhum problema conhecido encontrado.</value></data>
+  <data name="Check_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
+  <data name="Check_Fix" xml:space="preserve"><value>Correção: {0}</value></data>
+  <data name="Diag_Refresh" xml:space="preserve"><value>Verificar novamente</value></data>
 </root>

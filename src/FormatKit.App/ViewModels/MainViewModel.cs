@@ -8,13 +8,15 @@ public sealed partial class MainViewModel : ObservableObject
 {
     private readonly Dictionary<Page, object> _pages;
 
-    public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware)
+    public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware,
+        CleanupDiagnosisViewModel diagnosis)
     {
         _pages = new Dictionary<Page, object>
         {
             [Page.Home] = home,
             [Page.About] = about,
             [Page.Hardware] = hardware,
+            [Page.CleanupDiagnosis] = diagnosis,
         };
         foreach (var page in Enum.GetValues<Page>().Where(p => !_pages.ContainsKey(p)))
             _pages[page] = new PlaceholderViewModel(page);
@@ -48,6 +50,8 @@ public sealed partial class MainViewModel : ObservableObject
             left.Leave();
         if (_pages[newValue] is HardwareViewModel hardware)
             hardware.LoadCommand.Execute(null);
+        else if (_pages[newValue] is CleanupDiagnosisViewModel diagnosis)
+            diagnosis.LoadCommand.Execute(null);
     }
 
     public void Navigate(Page page)
