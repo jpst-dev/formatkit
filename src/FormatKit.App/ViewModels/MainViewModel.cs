@@ -25,6 +25,7 @@ public sealed partial class MainViewModel : ObservableObject
         foreach (var page in Enum.GetValues<Page>().Where(p => !_pages.ContainsKey(p)))
             _pages[page] = new PlaceholderViewModel(page);
 
+        RunProfile = runProfile;
         NavigateCommand = new RelayCommand<Page>(Navigate);
         home.NavigationRequested += Navigate;
         NavItems = Enum.GetValues<Page>()
@@ -36,6 +37,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>The installation-media page stays hidden until it exists.</summary>
     public bool IsMediaAvailable => false;
+
+    /// <summary>The Run profile page, which the window asks before closing during a run.</summary>
+    public RunProfileViewModel RunProfile { get; }
 
     public IReadOnlyList<NavItem> NavItems { get; }
 

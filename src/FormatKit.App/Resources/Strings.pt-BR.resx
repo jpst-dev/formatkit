@@ -134,4 +134,34 @@
   <data name="RunProfile_NoSteps" xml:space="preserve"><value>Este perfil não habilita nada para executar.</value></data>
   <data name="RunProfile_Reload" xml:space="preserve"><value>Recarregar</value></data>
   <data name="RunProfile_ChooseAnother" xml:space="preserve"><value>Escolher outro perfil</value></data>
+  <data name="RunProfile_Run" xml:space="preserve"><value>Executar</value></data>
+  <data name="RunProfile_ConfirmTitle" xml:space="preserve"><value>Executar o perfil</value></data>
+  <data name="RunProfile_ConfirmRun" xml:space="preserve"><value>Isto altera o sistema e pode reiniciar o computador. Executar o perfil agora?</value></data>
+  <data name="RunProfile_UacDeclined" xml:space="preserve"><value>A permissão de administrador foi recusada. Nada foi alterado.</value></data>
+  <data name="RunProfile_StartFailed" xml:space="preserve"><value>Não foi possível iniciar a execução: {0}</value></data>
+  <data name="RunProfile_Progress" xml:space="preserve"><value>Executando</value></data>
+  <data name="RunProfile_Result" xml:space="preserve"><value>Resultado</value></data>
+  <data name="RunProfile_Stop" xml:space="preserve"><value>Parar</value></data>
+  <data name="RunProfile_StopHint" xml:space="preserve"><value>Parar espera a etapa atual terminar.</value></data>
+  <data name="RunProfile_StopTitle" xml:space="preserve"><value>Há uma execução em andamento</value></data>
+  <data name="RunProfile_StopQuestion" xml:space="preserve"><value>Parar após a etapa atual?</value></data>
+  <data name="RunProfile_Stopped" xml:space="preserve"><value>Parado após a etapa atual.</value></data>
+  <data name="RunProfile_UnexpectedEnd" xml:space="preserve"><value>A execução terminou inesperadamente.</value></data>
+  <data name="RunProfile_CanResume" xml:space="preserve"><value>A execução pode ser retomada de onde parou.</value></data>
+  <data name="RunProfile_OpenReport" xml:space="preserve"><value>Abrir pasta do relatório</value></data>
+  <data name="StepState_Pending" xml:space="preserve"><value>Pendente</value></data>
+  <data name="StepState_Running" xml:space="preserve"><value>Executando</value></data>
+  <data name="StepState_Succeeded" xml:space="preserve"><value>Sucesso</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>Ignorado</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>Falhou</value></data>
+  <data name="StepState_RebootRequired" xml:space="preserve"><value>Requer reinício</value></data>
+  <data name="Run_NothingToResume" xml:space="preserve"><value>Não há execução interrompida para retomar.</value></data>
+  <data name="Run_StateCorrupt" xml:space="preserve"><value>O estado salvo da execução está ilegível ({0}). Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde o início da execução, então ela não pode ser retomada. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_Status_Completed" xml:space="preserve"><value>Execução concluída.</value></data>
+  <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Execução concluída com falhas.</value></data>
+  <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Execução interrompida por uma falha crítica.</value></data>
+  <data name="Run_RebootPending" xml:space="preserve"><value>A execução continuará automaticamente no próximo logon. Você pode reiniciar agora ou depois.</value></data>
+  <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Não foi possível agendar a retomada automática. Após reiniciar, execute `formatkit run --resume`.</value></data>
+  <data name="Run_NextAction" xml:space="preserve"><value>Próximo passo: {0}</value></data>
 </root>

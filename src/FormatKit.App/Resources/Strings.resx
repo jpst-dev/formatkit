@@ -134,4 +134,34 @@
   <data name="RunProfile_NoSteps" xml:space="preserve"><value>This profile enables nothing to run.</value></data>
   <data name="RunProfile_Reload" xml:space="preserve"><value>Reload</value></data>
   <data name="RunProfile_ChooseAnother" xml:space="preserve"><value>Choose another profile</value></data>
+  <data name="RunProfile_Run" xml:space="preserve"><value>Run</value></data>
+  <data name="RunProfile_ConfirmTitle" xml:space="preserve"><value>Run the profile</value></data>
+  <data name="RunProfile_ConfirmRun" xml:space="preserve"><value>This changes the system and can restart the computer. Run the profile now?</value></data>
+  <data name="RunProfile_UacDeclined" xml:space="preserve"><value>The administrator permission was declined. Nothing was changed.</value></data>
+  <data name="RunProfile_StartFailed" xml:space="preserve"><value>The run could not start: {0}</value></data>
+  <data name="RunProfile_Progress" xml:space="preserve"><value>Running</value></data>
+  <data name="RunProfile_Result" xml:space="preserve"><value>Result</value></data>
+  <data name="RunProfile_Stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="RunProfile_StopHint" xml:space="preserve"><value>Stop waits for the current step to finish.</value></data>
+  <data name="RunProfile_StopTitle" xml:space="preserve"><value>A run is in progress</value></data>
+  <data name="RunProfile_StopQuestion" xml:space="preserve"><value>Stop after the current step?</value></data>
+  <data name="RunProfile_Stopped" xml:space="preserve"><value>Stopped after the current step.</value></data>
+  <data name="RunProfile_UnexpectedEnd" xml:space="preserve"><value>The run ended unexpectedly.</value></data>
+  <data name="RunProfile_CanResume" xml:space="preserve"><value>The run can be resumed where it stopped.</value></data>
+  <data name="RunProfile_OpenReport" xml:space="preserve"><value>Open report folder</value></data>
+  <data name="StepState_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="StepState_Running" xml:space="preserve"><value>Running</value></data>
+  <data name="StepState_Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="StepState_RebootRequired" xml:space="preserve"><value>Reboot required</value></data>
+  <data name="Run_NothingToResume" xml:space="preserve"><value>There is no interrupted run to resume.</value></data>
+  <data name="Run_StateCorrupt" xml:space="preserve"><value>The saved run state is unreadable ({0}). Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_ProfileChanged" xml:space="preserve"><value>The profile changed since the run started, so it cannot be resumed. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_Status_Completed" xml:space="preserve"><value>Run completed.</value></data>
+  <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Run completed with failures.</value></data>
+  <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Run stopped on a critical failure.</value></data>
+  <data name="Run_RebootPending" xml:space="preserve"><value>The run will resume automatically at the next logon. You can reboot now or later.</value></data>
+  <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Automatic resume could not be scheduled. After rebooting, run `formatkit run --resume`.</value></data>
+  <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
 </root>

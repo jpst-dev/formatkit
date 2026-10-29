@@ -17,7 +17,7 @@ public sealed record PlanRow(string Id, string Title, bool RequiresAdmin, IReadO
     public bool HasItems => Items.Count > 0;
 }
 
-/// <summary>The Run profile page: choose a profile, review its plan. Running and the result belong to later tasks.</summary>
+/// <summary>The Run profile page: choose a profile, review its plan, then run it (RunProfileViewModel.Run.cs).</summary>
 public sealed partial class RunProfileViewModel : ObservableObject
 {
     private const string ProfileFilter = "JSON (*.json)|*.json|All files (*.*)|*.*";
@@ -45,6 +45,7 @@ public sealed partial class RunProfileViewModel : ObservableObject
         UseLastProfileCommand = new RelayCommand(() => Review(LastProfile!), () => LastProfile is not null);
         ReloadCommand = new RelayCommand(() => Review(ProfilePath!), () => ProfilePath is not null);
         ChooseAnotherCommand = new RelayCommand(ChooseAnother);
+        InitializeRun();
         RefreshLastProfile();
     }
 
@@ -64,7 +65,7 @@ public sealed partial class RunProfileViewModel : ObservableObject
     public IRelayCommand ChooseAnotherCommand { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsChoosing), nameof(IsReviewing))]
+    [NotifyPropertyChangedFor(nameof(IsChoosing), nameof(IsReviewing), nameof(IsShowingRun), nameof(IsResult))]
     private RunPhase _phase = RunPhase.Choose;
 
     [ObservableProperty]
@@ -127,6 +128,7 @@ public sealed partial class RunProfileViewModel : ObservableObject
     private void Review(string path)
     {
         ProfilePath = path;
+        RunMessage = null;
         Phase = RunPhase.Review;
         var outcome = _profiles.Load(path);
         if (outcome.Profile is not { } loaded)

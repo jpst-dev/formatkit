@@ -83,6 +83,72 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
+                <TextBlock Text="{loc:Loc RunProfile_NoSteps}" TextWrapping="Wrap" Margin="0,16,0,0"
+                           Visibility="{Binding HasNoSteps, Converter={StaticResource BoolToVisibility}}" />
+
+                <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange"
+                        Visibility="{Binding HasRunMessage, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding RunMessage}" TextWrapping="Wrap" />
+                </Border>
+
+                <Button Content="{loc:Loc RunProfile_Run}" Command="{Binding RunCommand}"
+                        HorizontalAlignment="Left" Padding="24,6" Margin="0,16,0,0"
+                        Visibility="{Binding HasPlan, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+
+            <!-- Running and result -->
+            <StackPanel Visibility="{Binding IsShowingRun, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding ProfileName}" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,0" />
+                <StackPanel Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}">
+                    <ProgressBar IsIndeterminate="True" Height="4" Margin="0,12,0,0" />
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="{loc:Loc RunProfile_Stop}" Command="{Binding StopCommand}" Padding="16,4" />
+                        <TextBlock Text="{loc:Loc RunProfile_StopHint}" Opacity="0.75" Margin="12,0,0,0"
+                                   VerticalAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Visibility="{Binding IsResult, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding FinalStatus}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,16,0,0" />
+                    <TextBlock Text="{loc:Loc RunProfile_CanResume}" TextWrapping="Wrap" Opacity="0.75" Margin="0,4,0,0"
+                               Visibility="{Binding HasInterruptedRun, Converter={StaticResource BoolToVisibility}}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="{loc:Loc RunProfile_OpenReport}" Command="{Binding OpenReportCommand}" Padding="16,4" />
+                        <Button Content="{loc:Loc RunProfile_ChooseAnother}" Command="{Binding ChooseAnotherCommand}"
+                                Padding="16,4" Margin="8,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <ItemsControl ItemsSource="{Binding Steps}" Margin="0,8,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="Row" Margin="0,8,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Gray">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Glyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                   Foreground="{Binding Color}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding StateText}" Foreground="{Binding Color}" Margin="8,0,0,0" />
+                                    </StackPanel>
+                                    <ItemsControl ItemsSource="{Binding Messages}" Margin="0,4,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="{Binding NextActionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                    <Setter TargetName="Row" Property="BorderBrush" Value="#5B8DB8" />
+                                    <Setter TargetName="Row" Property="BorderThickness" Value="2" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>
