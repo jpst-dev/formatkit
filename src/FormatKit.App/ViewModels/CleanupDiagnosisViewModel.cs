@@ -37,11 +37,29 @@ public sealed partial class CleanupDiagnosisViewModel : QueryPageViewModel
     [NotifyPropertyChangedFor(nameof(NoFindings))]
     private bool _hasReport;
 
-    /// <summary>True once a check has run and found nothing, so the page can say so.</summary>
-    public bool NoFindings => HasReport && Groups.Count == 0;
+    /// <summary>Rules whose evaluation threw: their problems, if any, are not in <see cref="Groups"/>.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NoFindings), nameof(HasNotChecked), nameof(NotCheckedText))]
+    private int _notChecked;
 
-    private Task LoadAsync() =>
-        RunQueryAsync(
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasJournalError), nameof(JournalErrorText))]
+    private string? _journalError;
+
+    public bool HasNotChecked => NotChecked > 0;
+
+    public string NotCheckedText => HasNotChecked ? Strings.Format("Check_NotChecked", NotChecked) : string.Empty;
+
+    public bool HasJournalError => JournalError is not null;
+
+    public string JournalErrorText => JournalError is { } error ? Strings.Format("Check_JournalError", error) : string.Empty;
+
+    /// <summary>True once a check has run, found nothing and skipped no rule, so the page can say so.</summary>
+    public bool NoFindings => HasReport && Groups.Count == 0 && NotChecked == 0;
+
+    private async Task LoadAsync()
+    {
+        await RunQueryAsync(
             ct => new CleanupDiagnosis(_issues, AppPaths.Default, _log).RunAsync(_services, ct),
             report =>
             {
@@ -49,8 +67,20 @@ public sealed partial class CleanupDiagnosisViewModel : QueryPageViewModel
                     .GroupBy(f => f.Issue.Severity)
                     .Select(g => new FindingGroup(g.Key, Strings.Get("Check_Group_" + g.Key), g.Select(ToRow).ToList()))
                     .ToList();
+                NotChecked = report.NotChecked;
+                JournalError = report.JournalError;
                 HasReport = true;
             });
+
+        // A failed refresh must not leave the previous report beside the error.
+        if (HasError)
+        {
+            Groups = [];
+            NotChecked = 0;
+            JournalError = null;
+            HasReport = false;
+        }
+    }
 
     private static FindingRow ToRow(Finding finding)
     {

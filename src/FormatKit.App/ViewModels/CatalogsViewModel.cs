@@ -73,10 +73,22 @@ public sealed partial class CatalogsViewModel : ObservableObject
     [ObservableProperty]
     private IReadOnlyList<CatalogProgram> _programItems;
 
-    /// <summary>The selected <see cref="CleanupItem"/> or <see cref="CatalogProgram"/>.</summary>
+    /// <summary>0 for the Cleanup tab, 1 for the Programs tab.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Details))]
-    private object? _selected;
+    [NotifyPropertyChangedFor(nameof(Selected), nameof(Details))]
+    private int _selectedTab;
+
+    // One selection per tab, so a list that reports null while its tab is hidden cannot clear the other.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Selected), nameof(Details))]
+    private CleanupItem? _selectedCleanup;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Selected), nameof(Details))]
+    private CatalogProgram? _selectedProgram;
+
+    /// <summary>The selected <see cref="CleanupItem"/> or <see cref="CatalogProgram"/> of the active tab.</summary>
+    public object? Selected => SelectedTab == 0 ? SelectedCleanup : SelectedProgram;
 
     public CatalogDetails? Details => Selected switch
     {
@@ -103,8 +115,10 @@ public sealed partial class CatalogsViewModel : ObservableObject
             .Where(p => ProgramCategoryFilter is null || p.Category == ProgramCategoryFilter)
             .Where(p => Matches(term, p.Id, p.LocalizedText().Name))
             .ToList();
-        if (Selected is not null && !CleanupItems.Contains(Selected) && !ProgramItems.Contains(Selected))
-            Selected = null;
+        if (SelectedCleanup is not null && !CleanupItems.Contains(SelectedCleanup))
+            SelectedCleanup = null;
+        if (SelectedProgram is not null && !ProgramItems.Contains(SelectedProgram))
+            SelectedProgram = null;
     }
 
     private static bool Matches(string term, string id, string title) =>

@@ -23,6 +23,15 @@
             <TextBlock Text="{loc:Loc Check_NoFindings}" Margin="0,16,0,0"
                        Visibility="{Binding NoFindings, Converter={StaticResource BoolToVisibility}}" />
 
+            <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange"
+                    Visibility="{Binding HasNotChecked, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding NotCheckedText}" TextWrapping="Wrap" />
+            </Border>
+            <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange"
+                    Visibility="{Binding HasJournalError, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding JournalErrorText}" TextWrapping="Wrap" />
+            </Border>
+
             <ItemsControl ItemsSource="{Binding Groups}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

@@ -103,4 +103,6 @@
   <data name="ProgramCategory_Utilities" xml:space="preserve"><value>Utilities</value></data>
   <data name="ProgramCategory_Productivity" xml:space="preserve"><value>Productivity</value></data>
   <data name="ProgramCategory_Development" xml:space="preserve"><value>Development</value></data>
+  <data name="Check_NotChecked" xml:space="preserve"><value>{0} checks could not be run (see log).</value></data>
+  <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
 </root>

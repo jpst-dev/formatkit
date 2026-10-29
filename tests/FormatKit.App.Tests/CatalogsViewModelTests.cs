@@ -105,32 +105,66 @@ public class CatalogsViewModelTests
     }
 
     [Fact]
-    public void Selected_ShowsDetails()
+    public void Selected_ShowsDetailsOfTheActiveTab()
     {
         var vm = Create();
         Assert.Null(vm.Details);
 
-        vm.Selected = vm.CleanupItems.Single(i => i.Id == "apps.bloat");
+        vm.SelectedCleanup = vm.CleanupItems.Single(i => i.Id == "apps.bloat");
 
         Assert.NotNull(vm.Details);
         Assert.Equal("Remove Bloat", vm.Details.Title);
         Assert.Contains(vm.Details.Lines, l => l.Contains("what apps.bloat"));
         Assert.Contains(vm.Details.Lines, l => l.Contains("gain apps.bloat"));
 
-        vm.Selected = vm.ProgramItems.Single(p => p.Id == "git");
+        vm.SelectedTab = 1;
+        Assert.Null(vm.Details);
+        Assert.Null(vm.Selected);
+
+        vm.SelectedProgram = vm.ProgramItems.Single(p => p.Id == "git");
         Assert.Equal("Git", vm.Details!.Title);
         Assert.Contains(vm.Details.Lines, l => l.Contains("Vendor.git"));
+
+        vm.SelectedTab = 0;
+        Assert.Equal("Remove Bloat", vm.Details!.Title);
     }
 
     [Fact]
-    public void Filtering_ClearsSelectionThatDisappears()
+    public void OtherTabListPushingNull_DoesNotLoseTheSelection()
     {
         var vm = Create();
-        vm.Selected = vm.ProgramItems.Single(p => p.Id == "git");
+        vm.SelectedCleanup = vm.CleanupItems.Single(i => i.Id == "apps.bloat");
+        vm.SelectedTab = 1;
+
+        vm.SelectedProgram = null; // the Programs list reports "nothing selected" when it appears
+
+        vm.SelectedTab = 0;
+        Assert.Equal("Remove Bloat", vm.Details!.Title);
+    }
+
+    [Fact]
+    public void Filtering_ClearsSelectionsThatDisappear()
+    {
+        var vm = Create();
+        vm.SelectedTab = 1;
+        vm.SelectedProgram = vm.ProgramItems.Single(p => p.Id == "git");
 
         vm.SearchText = "firefox";
 
-        Assert.Null(vm.Selected);
+        Assert.Null(vm.SelectedProgram);
         Assert.Null(vm.Details);
+    }
+
+    [Fact]
+    public void EveryFilterValue_HasAResourceInBothLanguages()
+    {
+        var keys = Enum.GetValues<CleanupLevel>().Select(v => "Level_" + v)
+            .Concat(Enum.GetValues<CleanupCategory>().Select(v => "CleanupCategory_" + v))
+            .Concat(Enum.GetValues<ProgramCategory>().Select(v => "ProgramCategory_" + v))
+            .Append("Cat_Context_Machine").Append("Cat_Context_User");
+        var manager = new System.Resources.ResourceManager("FormatKit.App.Resources.Strings", typeof(FormatKit.App.Localization.LocExtension).Assembly);
+        foreach (var culture in new[] { "en", "pt-BR" })
+            foreach (var key in keys)
+                Assert.False(string.IsNullOrEmpty(manager.GetString(key, System.Globalization.CultureInfo.GetCultureInfo(culture))), $"{key} ({culture})");
     }
 }

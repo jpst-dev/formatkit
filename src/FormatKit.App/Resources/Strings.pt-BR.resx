@@ -103,4 +103,6 @@
   <data name="ProgramCategory_Utilities" xml:space="preserve"><value>Utilitários</value></data>
   <data name="ProgramCategory_Productivity" xml:space="preserve"><value>Produtividade</value></data>
   <data name="ProgramCategory_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
+  <data name="Check_NotChecked" xml:space="preserve"><value>{0} verificações não puderam ser executadas (veja o log).</value></data>
+  <data name="Check_JournalError" xml:space="preserve"><value>O diário de limpeza não pôde ser lido: {0}</value></data>
 </root>
