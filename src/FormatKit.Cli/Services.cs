@@ -33,6 +33,7 @@ public static class Services
         var processes = new ProcessRunner(log);
 
         var registry = new WindowsRegistry();
+        var userSession = new WindowsUserSession();
         var services = new ServiceSet(
             processes,
             files,
@@ -46,9 +47,15 @@ public static class Services
             new PowerCfg(processes),
             new PowerShellAppxPackages(processes),
             new PowerShellOptionalFeatures(processes),
-            new WindowsUserSession(),
+            userSession,
             new DirectInstaller(new HttpDownloader(), processes, files, paths),
-            new ScheduledTaskUserContextRunner(processes));
+            new ScheduledTaskUserContextRunner(processes),
+            new WindowsInteractiveConsole(userSession, log),
+            new RegistryUserEnvironment(registry),
+            new ToolLocator(
+                files,
+                name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Machine),
+                name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)));
 
         return new CliEnvironment(
             services,

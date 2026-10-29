@@ -30,6 +30,28 @@ public sealed class InMemoryFileSystem : IFileSystem
     public string ReadAllText(string path) =>
         _files.TryGetValue(path, out var text) ? text : throw new FileNotFoundException(path);
 
+    public byte[] ReadAllBytes(string path) => System.Text.Encoding.UTF8.GetBytes(ReadAllText(path));
+
+    public void Copy(string source, string destination)
+    {
+        _files[destination] = ReadAllText(source);
+        AddParents(destination);
+        WriteCount++;
+    }
+
+    public void Move(string source, string destination)
+    {
+        var text = ReadAllText(source);
+        if (_files.ContainsKey(destination))
+            throw new IOException($"destination exists: {destination}");
+        if (OpenHandles(source) > 0)
+            throw new IOException($"file is open (no delete sharing): {source}");
+        _files.Remove(source);
+        _files[destination] = text;
+        AddParents(destination);
+        WriteCount++;
+    }
+
     public void WriteAllTextAtomic(string path, string contents)
     {
         if (FailWrites)

@@ -235,6 +235,9 @@ public class ProgramsOptionsTests
         public bool FileExists(string path) => true;
         public string ReadAllText(string path) => throw new UnauthorizedAccessException(path);
         public bool DirectoryExists(string path) => throw new NotSupportedException();
+        public byte[] ReadAllBytes(string path) => throw new NotSupportedException();
+        public void Copy(string source, string destination) => throw new NotSupportedException();
+        public void Move(string source, string destination) => throw new NotSupportedException();
         public void WriteAllTextAtomic(string path, string contents) => throw new NotSupportedException();
         public void Delete(string path) => throw new NotSupportedException();
         public void CreateDirectory(string path) => throw new NotSupportedException();

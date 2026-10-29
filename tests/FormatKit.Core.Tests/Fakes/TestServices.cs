@@ -19,7 +19,10 @@ public static class TestServices
         FakeOptionalFeatures? features = null,
         FakeUserSession? session = null,
         DirectInstaller? direct = null,
-        IUserContextRunner? userContext = null)
+        IUserContextRunner? userContext = null,
+        FakeInteractiveConsole? console = null,
+        FakeUserEnvironment? userEnvironment = null,
+        FakeToolLocator? tools = null)
     {
         processes ??= new FakeProcessRunner();
         files ??= new InMemoryFileSystem();
@@ -38,7 +41,10 @@ public static class TestServices
             features ?? new FakeOptionalFeatures(),
             session ?? new FakeUserSession(),
             direct ?? new DirectInstaller(new FakeHttpDownloader(files), processes, files, new AppPaths(@"C:\FormatKitTest")),
-            userContext ?? new FakeUserContextRunner());
+            userContext ?? new FakeUserContextRunner(),
+            console ?? new FakeInteractiveConsole(),
+            userEnvironment ?? new FakeUserEnvironment(),
+            tools ?? new FakeToolLocator());
     }
 
     public static StepContext Context(ServiceSet services) =>

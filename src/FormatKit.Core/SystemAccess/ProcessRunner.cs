@@ -23,6 +23,11 @@ public sealed class ProcessRunner(ILogger log) : IProcessRunner
             startInfo.ArgumentList.Add(argument);
         }
 
+        foreach (var (name, value) in spec.Environment ?? new Dictionary<string, string>())
+        {
+            startInfo.Environment[name] = value;
+        }
+
         var commandLine = $"{spec.FileName} {string.Join(' ', spec.Arguments)}".TrimEnd();
         log.Debug("Starting process: {CommandLine}", commandLine);
 

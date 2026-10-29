@@ -19,4 +19,7 @@ public sealed record ServiceSet(
     IOptionalFeatures Features,
     IUserSession UserSession,
     DirectInstaller Direct,
-    IUserContextRunner UserContext);
+    IUserContextRunner UserContext,
+    IInteractiveConsole Console,
+    IUserEnvironment UserEnvironment,
+    IToolLocator Tools);

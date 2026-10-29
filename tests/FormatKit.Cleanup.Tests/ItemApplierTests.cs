@@ -211,6 +211,9 @@ public class ItemApplierTests
         public bool FileExists(string path) => inner.FileExists(path);
         public bool DirectoryExists(string path) => inner.DirectoryExists(path);
         public string ReadAllText(string path) => inner.ReadAllText(path);
+        public byte[] ReadAllBytes(string path) => inner.ReadAllBytes(path);
+        public void Copy(string source, string destination) => inner.Copy(source, destination);
+        public void Move(string source, string destination) => inner.Move(source, destination);
         public void Delete(string path) => inner.Delete(path);
         public void CreateDirectory(string path) => inner.CreateDirectory(path);
         public Stream OpenRead(string path) => inner.OpenRead(path);

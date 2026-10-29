@@ -1,6 +1,10 @@
 namespace FormatKit.Core.SystemAccess;
 
-public sealed record ProcessSpec(string FileName, IReadOnlyList<string> Arguments, TimeSpan Timeout);
+public sealed record ProcessSpec(
+    string FileName,
+    IReadOnlyList<string> Arguments,
+    TimeSpan Timeout,
+    IReadOnlyDictionary<string, string>? Environment = null);
 
 public sealed record ProcessResult(int ExitCode, string StdOut, string StdErr, TimeSpan Duration, bool TimedOut);
 

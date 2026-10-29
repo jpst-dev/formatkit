@@ -8,6 +8,12 @@ public sealed class FileSystem : IFileSystem
 
     public string ReadAllText(string path) => File.ReadAllText(path);
 
+    public byte[] ReadAllBytes(string path) => File.ReadAllBytes(path);
+
+    public void Copy(string source, string destination) => File.Copy(source, destination, overwrite: true);
+
+    public void Move(string source, string destination) => File.Move(source, destination, overwrite: false);
+
     public void WriteAllTextAtomic(string path, string contents)
     {
         var tmp = path + ".tmp";
