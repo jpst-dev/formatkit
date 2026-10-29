@@ -28,6 +28,9 @@ public sealed partial class RunProfileViewModel
 
     public IRelayCommand OpenReportCommand { get; private set; } = null!;
 
+    /// <summary>Resumes the interrupted run from the result page (the stop text says "Use Resume").</summary>
+    public IAsyncRelayCommand ResumeCommand { get; private set; } = null!;
+
     public ObservableCollection<StepRow> Steps { get; } = [];
 
     /// <summary>The final status in plain words (the CLI's run summary texts), or why the run ended.</summary>
@@ -75,6 +78,7 @@ public sealed partial class RunProfileViewModel
         StopCommand = new AsyncRelayCommand(StopAsync, () => IsRunning && !_stopSent);
         OpenReportCommand = new RelayCommand(() => _dialogs.OpenFolder(ReportDirectory!), () => ReportDirectory is not null);
         OpenLogFolderCommand = new RelayCommand(() => _dialogs.OpenFolder(AppPaths.Default.LogsDirectory));
+        ResumeCommand = new AsyncRelayCommand(ResumeAsync, () => HasInterruptedRun && !IsRunning && !IsBusy);
         RefreshInterruptedRun();
     }
 
@@ -85,13 +89,17 @@ public sealed partial class RunProfileViewModel
         UseLastProfileCommand.NotifyCanExecuteChanged();
         ReloadCommand.NotifyCanExecuteChanged();
         ChooseAnotherCommand.NotifyCanExecuteChanged();
+        ResumeCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsRunningChanged(bool value)
     {
         RunCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged();
+        ResumeCommand.NotifyCanExecuteChanged();
     }
+
+    partial void OnHasInterruptedRunChanged(bool value) => ResumeCommand?.NotifyCanExecuteChanged();
 
     partial void OnReportDirectoryChanged(string? value) => OpenReportCommand.NotifyCanExecuteChanged();
 

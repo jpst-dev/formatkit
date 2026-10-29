@@ -143,6 +143,37 @@ public sealed class ResumeTests
         Assert.True(home.HasInterruptedRun);
     }
 
+    [Fact]
+    public async Task ResultPage_ResumeCommand_ResumesTheStoppedRun()
+    {
+        // The worker's stop text says "Use Resume": the result page offers it.
+        var (_, _, run) = Create();
+        _launcher.Script.Add(new Do(SeedState));
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_Stopped")));
+        await run.ResumeAsync().WaitAsync(Timeout, Ct);
+        Assert.Equal(RunPhase.Result, run.Phase);
+        Assert.True(run.HasInterruptedRun);
+        Assert.True(run.ResumeCommand.CanExecute(null));
+
+        _launcher.Script.Clear();
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+        await run.ResumeCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal([["run", "--resume"], ["run", "--resume"]], _launcher.Jobs);
+        Assert.Equal(Strings.Get("Run_Status_Completed"), run.FinalStatus);
+    }
+
+    [Fact]
+    public async Task ResultPage_ResumeCommand_UnavailableWithoutAnInterruptedRun()
+    {
+        var (_, _, run) = Create();
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+        await run.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.False(run.HasInterruptedRun);
+        Assert.False(run.ResumeCommand.CanExecute(null));
+    }
+
     private static async Task WaitUntil(Func<bool> condition)
     {
         var deadline = DateTime.UtcNow + Timeout;

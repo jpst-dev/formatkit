@@ -166,4 +166,5 @@
   <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Automatic resume could not be scheduled. After rebooting, run `formatkit run --resume`.</value></data>
   <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
   <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>Type in the console window that opened.</value></data>
+  <data name="RunProfile_Resume" xml:space="preserve"><value>Resume</value></data>
 </root>
