@@ -87,4 +87,20 @@ public class ProfileInputsCheckTests : InvariantCultureTests
         Assert.Empty(await RunAsync(new InMemoryFileSystem(), AnyProfile(),
             new ExternalInput("modules.programs.importFile", @"C:\p.json", ExternalInputKind.File),
             new ExternalInput("modules.drivers.networkDriverBackup", @"C:\net", ExternalInputKind.Folder)));
+
+    [Fact]
+    public async Task An_input_off_the_system_drive_is_not_checked_when_the_volume_list_is_unknown()
+    {
+        var files = new InMemoryFileSystem();
+        files.SeedDirectory(@"E:\dotfiles");
+        var context = PrepareTestContext.Create(TestServices.Create(files: files), profile: AnyProfile(),
+            inputs: [new ExternalInput("modules.dev.dotfiles.path", @"E:\dotfiles", ExternalInputKind.Folder)],
+            windows: PrepareTestContext.UnknownVolumes());
+
+        var item = Assert.Single(await new ProfileInputsCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains("modules.dev.dotfiles.path", item.Title);
+        Assert.Contains(@"E:\dotfiles", item.Detail);
+    }
 }

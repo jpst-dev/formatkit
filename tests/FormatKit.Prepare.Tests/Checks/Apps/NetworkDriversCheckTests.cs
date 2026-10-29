@@ -135,4 +135,19 @@ public class NetworkDriversCheckTests : InvariantCultureTests
     [Fact]
     public async Task Profile_without_drivers_section_gives_no_item() =>
         Assert.Empty(await RunAsync(new InMemoryFileSystem(), Profile(("dev", """{"enabled":true}"""))));
+
+    [Fact]
+    public async Task Folder_off_the_system_drive_with_an_inf_is_not_checked_when_the_volume_list_is_unknown()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed(@"E:\net\a\x.inf", "x");
+        var context = PrepareTestContext.Create(TestServices.Create(files: files), profile: Enabled(),
+            inputs: [new ExternalInput(Path, @"E:\net", ExternalInputKind.Folder)],
+            windows: PrepareTestContext.UnknownVolumes());
+
+        var item = Assert.Single(await new NetworkDriversCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains(@"E:\net", item.Detail);
+    }
 }

@@ -57,7 +57,7 @@ report (it already exists in the core); installation media (sub-project 5).
 | D5 | `Blocker` only for loss FormatKit can prove; what only the user can confirm is `Attention`. | Otherwise the command could never report "safe" (it cannot know a recovery key was saved). |
 | D6 | Exit code 0 when there is no `Blocker`, 1 when there is, 2 for invalid arguments, an invalid profile or a failed `--output` write. | Scriptable, like `cleanup check`. |
 | D7 | Output never contains secrets: no Git remote URLs, product keys, recovery keys or Wi-Fi passwords. Only names, paths, sizes and counts. | Remote URLs can embed tokens; the Markdown file travels on USB drives. |
-| D8 | A path is lost in the format when it is on `%SystemDrive%` or on a volume whose backing VHDX is on `%SystemDrive%`. UNC paths are never lost. | A Dev Drive at `C:\DevDrive\dev.vhdx` mounted as `D:` disappears with `C:`. |
+| D8 | A path is lost in the format when it is on `%SystemDrive%` or on a volume whose backing VHDX is on `%SystemDrive%`. UNC paths (`\\server\share`, `\\?\UNC\...`) are never lost; the local device forms `\\?\C:\...` and `\\.\C:\...` count as their drive letter. When the volume list could not be read, or does not include `%SystemDrive%`, a path on any other drive is *unknown*: it may be on a virtual disk stored on `%SystemDrive%`. An unknown path is never reported `Ok` (the check reports `NotChecked` instead) and is still scanned where a check scans lost paths. A `subst` drive or a junction pointing into `%SystemDrive%` is not resolved (known limitation). | A Dev Drive at `C:\DevDrive\dev.vhdx` mounted as `D:` disappears with `C:`. |
 
 ## 4. Architecture
 
@@ -71,7 +71,7 @@ New project `FormatKit.Prepare`, referencing only `FormatKit.Core`. Tests in
 | `PrepareItem` | Record: `CheckId`, `Group`, `Status`, `Title`, `Detail?`, `Action?`. Text is already localized. |
 | `IPrepareCheck` | `Id`, `Group`, `Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext, CancellationToken)`. One class per check id in section 6. |
 | `PrepareContext` | `ServiceSet`, the loaded profile or null, the external inputs, `IsElevated`, the user profile folder, and a `WindowsVolume`. |
-| `WindowsVolume` | `bool IsLost(string path)` per D8. Built once from `%SystemDrive%` and `IVolumes`. |
+| `WindowsVolume` | `Locate(path)` (`Kept`, `Lost`, `Unknown`) and `bool IsLost(string path)` per D8. Built once per run from `%SystemDrive%` and one `IVolumes` call; the volume list is shared through it (`Volumes`, `VolumesKnown`), so no check lists the volumes again. |
 | `PrepareChecklist` | Runs the checks in order. A check that throws becomes one `NotChecked` item for that check ("see the log"), and the exception is logged; the other checks still run (as in `CleanupDiagnosis`). Sorts by status, then group, then check id. |
 | `PrepareReport` | The items and `HasBlockers`. |
 | `ConsoleRenderer`, `MarkdownRenderer` | Pure functions from `PrepareReport` to text. |
@@ -164,16 +164,16 @@ when `--profile` is given.
 
 | Id | Reads | Result |
 |---|---|---|
-| `security.bitlocker` | `IVolumes`: BitLocker state of each fixed volume; recovery password protector when elevated. | Windows volume encrypted: `Ok`, noting that reinstalling turns device encryption on again. Another volume not `Off`: `Attention` "save the recovery key of D: (aka.ms/myrecoverykey, or `manage-bde -protectors -get D:`); without it, D: does not open after the reinstall". When elevated and that volume has no recovery password protector, the action says to add one (`manage-bde -protectors -add D: -RecoveryPassword`). Not elevated: one extra `NotChecked` item per encrypted non-Windows volume with the `manage-bde -protectors -get` command. State `Unknown`: `NotChecked`. |
+| `security.bitlocker` | `IVolumes`: BitLocker state of each fixed volume; recovery password protector when elevated. | Windows volume encrypted: `Ok`, noting that reinstalling turns device encryption on again. Another volume not `Off`: `Attention` "save the recovery key of D: (aka.ms/myrecoverykey, or `manage-bde -protectors -get D:`); without it, D: does not open after the reinstall". When elevated and that volume has no recovery password protector, the action says to add one (`manage-bde -protectors -add D: -RecoveryPassword`). Not elevated: one extra `NotChecked` item per encrypted non-Windows volume with the `manage-bde -protectors -get` command. State `Unknown`: `NotChecked`. Volume list unknown (listing failed, or the Windows drive is not in it): one `NotChecked` item "run `manage-bde -status`", besides the items for the volumes that were listed. |
 | `security.activation` | `ILicensing`. | Activated, channel `OEM:DM` (key in firmware): `Ok`, it reactivates by itself. Activated `Retail`: `Attention` "link the license to your Microsoft account in Settings > System > Activation, or keep your product key". Activated `Volume:*`: `Attention` "licensed by an organization; ask its IT". Any other channel while activated: `Attention` with the Retail text. Not activated: `Attention` "Windows is not activated; you will need a product key". |
 
 ### 6.2 Personal data
 
 | Id | Reads | Result |
 |---|---|---|
-| `data.user-folders` | Desktop, Documents, Pictures, Videos, Music and Downloads from `HKCU\...\Explorer\User Shell Folders` (expanded, so redirected folders are found). Total size of each, skipping files with `RecallOnDataAccess` or `Offline` (cloud-only placeholders). | Folder under the user's OneDrive folder (`OneDrive` environment value): `Ok` "synced by OneDrive; make sure it is up to date". Folder not lost: `Ok`. Folder lost with files: `Attention` with the size, "copy it to an external drive". Empty: `Ok`. Folders that could not be read are counted in the detail. |
+| `data.user-folders` | Desktop, Documents, Pictures, Videos, Music and Downloads from `HKCU\...\Explorer\User Shell Folders` (expanded, so redirected folders are found). Total size of each, skipping files with `RecallOnDataAccess` or `Offline` (cloud-only placeholders). | Folder under the user's OneDrive folder (`OneDrive` environment value): `Ok` "synced by OneDrive; make sure it is up to date". Folder not lost: `Ok`. Folder on another drive while the volume list is unknown: `NotChecked` "could not confirm it is off C:". Folder lost with files: `Attention` with the size, "copy it to an external drive". Empty: `Ok`. Folders that could not be read are counted in the detail. |
 | `data.other-users` | `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList`: local profiles other than the current user, skipping well-known system SIDs (`S-1-5-18`, `-19`, `-20`) and profiles whose folder is missing. | Each profile: `Attention` "the account X also has files that will be lost". Its size is shown only when readable. |
-| `data.volumes` | `IVolumes`: other fixed volumes and their disk number. | Another volume on the same disk as Windows: `Attention` "in Windows Setup, delete only the Windows partitions; do not delete D:". On another disk: `Ok` (informational). Disk numbers unreadable: one `NotChecked` item. A volume backed by a lost VHDX is handled by `dev.devdrive`, not here. |
+| `data.volumes` | `IVolumes`: other fixed volumes and their disk number. | Another volume on the same disk as Windows: `Attention` "in Windows Setup, delete only the Windows partitions; do not delete D:". On another disk: `Ok` (informational). Disk numbers unreadable, or the volume list unknown: one `NotChecked` item. A volume backed by a lost VHDX is handled by `dev.devdrive`, not here. |
 
 ### 6.3 Developer
 
@@ -182,7 +182,7 @@ when `--profile` is given.
 | `dev.git-repos` | Folders containing `.git` (folder or file) under the user profile, up to 5 levels deep, skipping `AppData`, `node_modules`, hidden folders and reparse points; and the root of every volume backed by a lost VHDX, same depth. The scan keeps descending into a repository it found (never into its `.git`), so a repository at the profile root, nested repositories, submodules and linked worktrees placed inside a repository (their `.git` is a file) are each inspected as their own repository (final review C1: stopping at the first repository hid all of them). Every git call runs as `git -C <repo> -c core.fsmonitor=false ...` so a configured fsmonitor hook or daemon never starts. For each: `git status --porcelain=v2 --branch --untracked-files=normal --ignore-submodules=none` (the user's `status.showUntrackedFiles` and submodule `ignore` settings cannot hide work), `git for-each-ref --format=... refs/heads` (no upstream, or ahead), `git stash list`, `git remote` (names only). | Per repository with any of: uncommitted changes, commits not pushed, local branch without upstream, stash entries, no remote at all: `Blocker` with what is missing (counts and branch names) and the action "commit and push, or copy the folder". All clean: one `Ok` line "N repositories, all pushed", whose detail adds that files ignored by Git (such as `.env`) are not in the remote. Repositories found but `git.exe` missing: `NotChecked` listing their paths. A repository whose git call fails or times out: `NotChecked` for that repository. Repositories that are not lost are skipped. |
 | `dev.wsl` | `WslClient.ListDistrosAsync`, skipping `docker-desktop` and `docker-desktop-data`. | Each distro: `Attention` "export it with `wsl --export <distro> E:\<distro>.tar`". No WSL: no item. |
 | `dev.keys` | `%USERPROFILE%\.ssh`: private keys (an `id_*` file without `.pub`, or a file whose first line contains `PRIVATE KEY`). `%APPDATA%\gnupg\private-keys-v1.d` with files. Only names and counts are read; key contents beyond the first line are never read. | SSH keys present: `Attention` "back them up, or plan to register a new key". With a profile that has `dev.ssh`: "the profile creates a new key; remember to remove the old one from GitHub and add the new one". GPG secret keys: `Attention` "export them with `gpg --export-secret-keys`". Nothing found: no item. |
-| `dev.devdrive` | `IVolumes`: volumes whose backing VHDX is on the Windows volume. | Each: `Attention` with the VHDX size, "this virtual disk is on C: and will be erased; copy what you need". Repositories inside are reported by `dev.git-repos`. |
+| `dev.devdrive` | `IVolumes`: volumes whose backing VHDX is on the Windows volume. | Each: `Attention` with the VHDX size, "this virtual disk is on C: and will be erased; copy what you need". Repositories inside are reported by `dev.git-repos`. Volume list unknown: one `NotChecked` item saying that a virtual disk stored on C: may exist and its repositories were not scanned, with "check Disk Management". |
 
 ### 6.4 Apps and FormatKit
 
@@ -190,7 +190,7 @@ when `--profile` is given.
 |---|---|---|
 | `apps.programs-export` | `Attention` "run `formatkit programs export E:\programs.json` and keep the file off C:". | `importFile` present and not lost: `Ok`. Lost: `Blocker` "move it off C: and update the profile". Section without `importFile`: `Attention` as without profile. Programs section disabled or absent: no item. |
 | `apps.network-drivers` | `Attention` "run `formatkit drivers backup-network --output E:\netdrivers`". | `networkDriverBackup` not lost and holding at least one `.inf` (recursive): `Ok`. Lost: `Blocker`. Missing or without `.inf`: `Blocker` "run `drivers backup-network` into it". Not set: `Attention` as without profile. Drivers section disabled or absent: no item. |
-| `apps.profile-inputs` | No item. | Every other external input (`direct[].path`, `dotfiles.path`) and the profile file itself: lost → `Blocker` naming the JSON path (or "the profile file"); missing → `Blocker`; otherwise one `Ok` line "N profile files are off C:". `importFile` and `networkDriverBackup` are left to the two checks above, so no path is reported twice. |
+| `apps.profile-inputs` | No item. | Every other external input (`direct[].path`, `dotfiles.path`) and the profile file itself: lost → `Blocker` naming the JSON path (or "the profile file"); missing → `Blocker`; otherwise one `Ok` line "N profile files are off C:". An input on another drive while the volume list is unknown (D8) is `NotChecked` instead of counted as off C:; the same applies to `importFile` and `networkDriverBackup` in the two checks above. `importFile` and `networkDriverBackup` are left to the two checks above, so no path is reported twice. |
 | `apps.browsers` | Browsers with a user data folder: Edge, Chrome, Brave, Vivaldi (`%LOCALAPPDATA%\...\User Data`), Opera (`%APPDATA%\Opera Software\Opera Stable`), Firefox (`%APPDATA%\Mozilla\Firefox\Profiles` with a profile). Each: `Attention` "turn on sync or export bookmarks and passwords". | Same. |
 
 ## 7. Error handling
@@ -200,11 +200,12 @@ when `--profile` is given.
 - What needs elevation is `NotChecked` with the manual command, not an error.
 - Every external call uses the query timeout. A repository that times out is
   `NotChecked`; the scan goes on.
+- The volume list is read once. If that fails, or `Get-Volume` itself fails (the script exits with an error instead of printing an empty list), the volume checks report `NotChecked` and other drives are unknown per D8; nothing is reported `Ok` on the strength of it.
 - Folders the scan cannot read are skipped and counted in the item's detail
   ("N folders could not be read").
 - `--output` failure: the report has already been printed; the error is shown
   and the exit code is 2.
-- Ctrl+C exits with 130.
+- Ctrl+C exits with 130. The folder and repository scans check the cancellation token as they walk, so a large scan stops promptly.
 - The log has every external command, its exit code and output. No command
   that prints a remote URL is ever run (`git remote` lists names only;
   `git remote -v` and `git config remote.*.url` are never used), so the log

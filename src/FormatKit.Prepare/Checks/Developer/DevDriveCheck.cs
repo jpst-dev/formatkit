@@ -28,6 +28,15 @@ public sealed class DevDriveCheck : IPrepareCheck
                 Strings.Format("DevDrive_Action", letter)));
         }
 
+        if (!context.Windows.VolumesKnown)
+        {
+            var drive = $"{char.ToUpperInvariant(context.Env.SystemDrive)}:";
+            items.Add(new PrepareItem(Id, Group, PrepareStatus.NotChecked,
+                Strings.Format("DevDrive_Unlisted_Title", drive),
+                Strings.Format("DevDrive_Unlisted_Detail", drive),
+                Strings.Format("DevDrive_Unlisted_Action", drive)));
+        }
+
         return Task.FromResult<IReadOnlyList<PrepareItem>>(items);
     }
 

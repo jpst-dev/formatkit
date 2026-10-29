@@ -129,19 +129,33 @@ public sealed class PrepareCommandsTests : IDisposable
         await Run();
 
         Assert.True(_check.Context!.Windows.IsLost(@"D:\code"));
+        Assert.True(_check.Context.Windows.VolumesKnown);
+        Assert.Equal(['C', 'D'], _check.Context.Windows.Volumes.Select(v => v.Letter));
         Assert.False(_check.Context.IsElevated);
     }
 
     [Fact]
-    public async Task A_volume_listing_failure_leaves_only_the_system_drive_lost()
+    public async Task The_volumes_are_listed_once_per_run()
+    {
+        PrepareCommands.Checks = () =>
+            [new FormatKit.Prepare.Checks.Security.BitLockerCheck(), new FormatKit.Prepare.Checks.Data.VolumesCheck(), _check];
+
+        await Run();
+
+        Assert.Equal(1, _volumes.Calls);
+    }
+
+    [Fact]
+    public async Task A_volume_listing_failure_makes_other_drives_unknown()
     {
         _volumes.Throw = new IOException("no volumes");
 
         var exit = await Run();
 
         Assert.Equal(ExitCodes.Ok, exit);
-        Assert.True(_check.Context!.Windows.IsLost(@"C:\x"));
-        Assert.False(_check.Context.Windows.IsLost(@"D:\x"));
+        Assert.False(_check.Context!.Windows.VolumesKnown);
+        Assert.True(_check.Context.Windows.IsLost(@"C:\x"));
+        Assert.Equal(PathLocation.Unknown, _check.Context.Windows.Locate(@"D:\x"));
     }
 
     [Fact]

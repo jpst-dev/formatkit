@@ -63,4 +63,30 @@ public class DevDriveCheckTests : IDisposable
 
         Assert.Empty(await RunAsync(files, Vol('C'), Vol('D'), Vol('F', @"E:\Disks\other.vhdx")));
     }
+
+    [Fact]
+    public async Task An_unknown_volume_list_is_one_not_checked_item()
+    {
+        var context = PrepareTestContext.Create(windows: PrepareTestContext.UnknownVolumes());
+
+        var item = Assert.Single(await new DevDriveCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Equal("dev.devdrive", item.CheckId);
+        Assert.Contains("could not be read", item.Detail);
+        Assert.Contains("Disk Management", item.Action);
+    }
+
+    [Fact]
+    public async Task A_list_without_the_system_drive_still_reports_a_lost_vhdx_and_adds_not_checked()
+    {
+        var windows = new WindowsVolume('C', [Vol('D', @"C:\DevDrive\dev.vhdx")]);
+        var context = PrepareTestContext.Create(windows: windows);
+
+        var items = await new DevDriveCheck().RunAsync(context, CancellationToken.None);
+
+        Assert.Single(items, i => i.Status == PrepareStatus.Attention && i.Title.Contains("D:"));
+        Assert.Single(items, i => i.Status == PrepareStatus.NotChecked);
+        Assert.Equal(2, items.Count);
+    }
 }

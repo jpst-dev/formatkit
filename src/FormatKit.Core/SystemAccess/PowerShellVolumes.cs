@@ -6,7 +6,8 @@ namespace FormatKit.Core.SystemAccess;
 /// Lists fixed volumes with a letter, their disk, BitLocker state and backing VHDX. Read-only. BitLocker is read as the
 /// numeric shell property System.Volume.BitLockerProtection, so no display text (language dependent) is parsed.
 /// The disk number falls back to Win32_LogicalDiskToPartition (DeviceID "Disk #N", not localized) when the Storage
-/// provider is broken. Known limitation: the backing VHDX comes from Get-Disk (BusType 15 = File Backed Virtual), so
+/// provider is broken. A failing Get-Volume makes the script exit 3, so the caller reports the volumes as not checked
+/// instead of seeing an empty list. Known limitation: the backing VHDX comes from Get-Disk (BusType 15 = File Backed Virtual), so
 /// on a PC with a broken Storage provider the VHDX is not detected.
 /// </summary>
 public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
@@ -15,7 +16,8 @@ public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
         "$ErrorActionPreference = 'SilentlyContinue'; " +
         "$elevated = $false; try { $elevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } catch { }; " +
         "$shell = $null; try { $shell = New-Object -ComObject Shell.Application } catch { }; " +
-        "$items = @(Get-Volume | Where-Object { $_.DriveType -eq 'Fixed' -and $_.DriveLetter } | ForEach-Object { " +
+        "$all = $null; try { $all = @(Get-Volume -ErrorAction Stop) } catch { [Console]::Error.WriteLine('Get-Volume failed'); exit 3 }; " +
+        "$items = @($all | Where-Object { $_.DriveType -eq 'Fixed' -and $_.DriveLetter } | ForEach-Object { " +
         "$l = [string]$_.DriveLetter; " +
         "$disk = $null; try { $disk = (Get-Partition -DriveLetter $l -ErrorAction Stop | Select-Object -First 1).DiskNumber } catch { $disk = $null }; " +
         "if ($null -eq $disk) { try { $m = Get-CimInstance -ClassName Win32_LogicalDiskToPartition -ErrorAction Stop | Where-Object { $_.Dependent.DeviceID -eq ($l + ':') } | Select-Object -First 1; if ($m -and $m.Antecedent.DeviceID -match 'Disk #(\\d+)') { $disk = [int]$Matches[1] } } catch { $disk = $null } }; " +
@@ -37,9 +39,10 @@ public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
             throw new InvalidOperationException($"Listing volumes failed (exit {result.ExitCode}).");
         }
 
+        // The script always prints a JSON array; no output means it did not finish, not that there are no volumes.
         if (string.IsNullOrWhiteSpace(result.StdOut))
         {
-            return [];
+            throw new InvalidOperationException($"Listing volumes printed nothing (exit {result.ExitCode}).");
         }
 
         try

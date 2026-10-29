@@ -11,10 +11,21 @@ public sealed class VolumesCheck : IPrepareCheck
 
     public PrepareGroup Group => PrepareGroup.Data;
 
-    public async Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct)
+    public Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct) =>
+        Task.FromResult(Run(context));
+
+    private IReadOnlyList<PrepareItem> Run(PrepareContext context)
     {
+        if (!context.Windows.VolumesKnown)
+        {
+            return [new PrepareItem(Id, Group, PrepareStatus.NotChecked,
+                Strings.Get("Volumes_Unknown_Title"),
+                Strings.Format("Volumes_Unlisted_Detail", $"{char.ToUpperInvariant(context.Env.SystemDrive)}:"),
+                Strings.Get("Volumes_Unknown_Action"))];
+        }
+
         var lost = context.Windows.LostVhdxVolumes.Select(v => char.ToUpperInvariant(v.Letter)).ToHashSet();
-        var volumes = (await context.Services.Volumes.ListAsync(ct))
+        var volumes = context.Windows.Volumes
             .Where(v => !lost.Contains(char.ToUpperInvariant(v.Letter)))
             .OrderBy(v => v.Letter)
             .ToList();

@@ -88,4 +88,20 @@ public class ProgramsExportCheckTests : InvariantCultureTests
     [Fact]
     public async Task Profile_without_programs_section_gives_no_item() =>
         Assert.Empty(await RunAsync(new InMemoryFileSystem(), Profile(("dev", """{"enabled":true}"""))));
+
+    [Fact]
+    public async Task Import_file_off_the_system_drive_is_not_checked_when_the_volume_list_is_unknown()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed(@"E:\p.json", "[]");
+        var context = PrepareTestContext.Create(TestServices.Create(files: files),
+            profile: Profile(("programs", """{"enabled":true}""")),
+            inputs: [new ExternalInput(Path, @"E:\p.json", ExternalInputKind.File)],
+            windows: PrepareTestContext.UnknownVolumes());
+
+        var item = Assert.Single(await new ProgramsExportCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains(@"E:\p.json", item.Detail);
+    }
 }

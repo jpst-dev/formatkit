@@ -35,7 +35,7 @@ public sealed class OtherUsersCheck : IPrepareCheck
                 continue;
 
             var name = Path.GetFileName(folder);
-            var scan = FolderScan.Run(context.Services.Files, folder);
+            var scan = FolderScan.Run(context.Services.Files, folder, ct);
             var detail = scan.UnreadableFolders == 0
                 ? Strings.Format("OtherUsers_Detail_Size", name, Sizes.Format(scan.Bytes), folder)
                 : Strings.Format("OtherUsers_Detail", name, folder);

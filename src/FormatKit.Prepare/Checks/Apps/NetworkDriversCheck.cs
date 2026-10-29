@@ -26,7 +26,8 @@ public sealed class NetworkDriversCheck : IPrepareCheck
         var folder = input.ResolvedPath;
         var drive = ProfileSections.SystemDriveLabel(context);
         PrepareItem item;
-        if (context.Windows.IsLost(folder))
+        var location = context.Windows.Locate(folder);
+        if (location == PathLocation.Lost)
         {
             item = new PrepareItem(Id, Group, PrepareStatus.Blocker,
                 Strings.Format("NetworkDrivers_Lost_Title", folder, drive),
@@ -35,7 +36,9 @@ public sealed class NetworkDriversCheck : IPrepareCheck
         else
         {
             var (hasInf, unreadable) = FindInf(context, folder);
-            if (hasInf)
+            if (hasInf && location == PathLocation.Unknown)
+                item = UnknownLocation.Item(this, context, folder, folder);
+            else if (hasInf)
                 item = new PrepareItem(Id, Group, PrepareStatus.Ok, Strings.Format("NetworkDrivers_Ok_Title", folder, drive));
             else if (unreadable)
                 item = new PrepareItem(Id, Group, PrepareStatus.NotChecked,

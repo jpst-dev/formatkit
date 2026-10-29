@@ -20,9 +20,10 @@ public class UserFoldersCheckTests : IDisposable
 
     public void Dispose() => CultureInfo.CurrentUICulture = _saved;
 
-    private async Task<IReadOnlyList<PrepareItem>> RunAsync()
+    private async Task<IReadOnlyList<PrepareItem>> RunAsync(WindowsVolume? windows = null)
     {
-        var context = PrepareTestContext.Create(TestServices.Create(files: _files, registry: _registry, userEnvironment: _userEnv));
+        var context = PrepareTestContext.Create(
+            TestServices.Create(files: _files, registry: _registry, userEnvironment: _userEnv), windows: windows);
         return await new UserFoldersCheck().RunAsync(context, CancellationToken.None);
     }
 
@@ -165,5 +166,19 @@ public class UserFoldersCheckTests : IDisposable
         Assert.Equal(PrepareStatus.NotChecked, item.Status);
         Assert.Contains("1 folder could not be read", item.Detail);
         Assert.NotNull(item.Action);
+    }
+
+    [Fact]
+    public async Task A_folder_off_the_system_drive_is_not_checked_when_the_volume_list_is_unknown()
+    {
+        // D: could be a Dev Drive stored on C:, so "not on the Windows drive" cannot be claimed.
+        Shell("Personal", @"D:\Docs");
+
+        var item = Assert.Single(await RunAsync(PrepareTestContext.UnknownVolumes()), i => i.Title.Contains("Documents"));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains(@"D:\Docs", item.Detail);
+        Assert.Contains("could not be read", item.Detail);
+        Assert.Contains("Disk Management", item.Action);
     }
 }

@@ -12,11 +12,10 @@ public sealed class BitLockerCheck : IPrepareCheck
 
     public PrepareGroup Group => PrepareGroup.Security;
 
-    public async Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct)
+    public Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct)
     {
-        var volumes = await context.Services.Volumes.ListAsync(ct);
         var items = new List<PrepareItem>();
-        foreach (var volume in volumes.OrderBy(v => v.Letter))
+        foreach (var volume in context.Windows.Volumes.OrderBy(v => v.Letter))
         {
             var letter = char.ToUpperInvariant(volume.Letter);
             if (volume.BitLocker == BitLockerState.Off)
@@ -54,7 +53,16 @@ public sealed class BitLockerCheck : IPrepareCheck
             }
         }
 
-        return items;
+        // A volume missing from the list may be encrypted: never stay silent about it.
+        if (!context.Windows.VolumesKnown)
+        {
+            items.Add(Item(PrepareStatus.NotChecked,
+                Strings.Get("BitLocker_Unlisted_Title"),
+                Strings.Format("Volumes_Unlisted_Detail", $"{char.ToUpperInvariant(context.Env.SystemDrive)}:"),
+                Strings.Get("BitLocker_Unlisted_Action")));
+        }
+
+        return Task.FromResult<IReadOnlyList<PrepareItem>>(items);
     }
 
     private PrepareItem Item(PrepareStatus status, string title, string? detail, string? action = null) =>

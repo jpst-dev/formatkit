@@ -98,4 +98,40 @@ public class BitLockerCheckTests : IDisposable
         Assert.Equal(PrepareStatus.NotChecked, item.Status);
         Assert.Contains("D:", item.Title);
     }
+
+    [Fact]
+    public async Task An_unknown_volume_list_is_one_not_checked_item()
+    {
+        var context = PrepareTestContext.Create(windows: PrepareTestContext.UnknownVolumes());
+
+        var item = Assert.Single(await new BitLockerCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains("could not be read", item.Detail);
+        Assert.Contains("manage-bde -status", item.Action);
+    }
+
+    [Fact]
+    public async Task A_list_without_the_system_drive_reports_what_it_has_and_adds_not_checked()
+    {
+        var windows = new WindowsVolume('C', [Vol('D', BitLockerState.On, recovery: true)]);
+        var context = PrepareTestContext.Create(windows: windows, isElevated: true);
+
+        var items = await new BitLockerCheck().RunAsync(context, CancellationToken.None);
+
+        Assert.Single(items, i => i.Status == PrepareStatus.Attention && i.Title.Contains("D:"));
+        Assert.Single(items, i => i.Status == PrepareStatus.NotChecked);
+        Assert.Equal(2, items.Count);
+    }
+
+    [Fact]
+    public async Task Reads_the_volume_list_shared_in_the_context()
+    {
+        var services = TestServices.Create(volumes: new FakeVolumes { Throw = new InvalidOperationException("second read") });
+        var context = PrepareTestContext.Create(services, [Vol('C', BitLockerState.On)]);
+
+        var item = Assert.Single(await new BitLockerCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.Ok, item.Status);
+    }
 }

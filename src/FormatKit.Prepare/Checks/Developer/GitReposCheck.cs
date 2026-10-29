@@ -23,7 +23,7 @@ public sealed class GitReposCheck : IPrepareCheck
 
         var repos = roots
             .SelectMany(root => scanner.Find(root, MaxDepth, _ => unreadable++, ct))
-            .Where(context.Windows.IsLost)
+            .Where(context.Windows.MayBeLost)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
             .ToList();

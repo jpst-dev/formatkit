@@ -62,7 +62,7 @@ public sealed class KeysCheck : IPrepareCheck
         PrepareContext context, string dir, CancellationToken ct, Tally unreadable)
     {
         ct.ThrowIfCancellationRequested();
-        if (!context.Windows.IsLost(dir) || !context.Services.Files.DirectoryExists(dir))
+        if (!context.Windows.MayBeLost(dir) || !context.Services.Files.DirectoryExists(dir))
             return [];
         var failed = 0;
         var files = context.Services.Files.EnumerateFileEntries(dir, recursive: false, _ => failed++).ToList();

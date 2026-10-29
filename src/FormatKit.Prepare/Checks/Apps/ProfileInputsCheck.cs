@@ -27,7 +27,8 @@ public sealed class ProfileInputsCheck : IPrepareCheck
         {
             ct.ThrowIfCancellationRequested();
             var name = input.JsonPath.Length == 0 ? Strings.Get("ProfileInputs_ProfileFile") : input.JsonPath;
-            if (context.Windows.IsLost(input.ResolvedPath))
+            var location = context.Windows.Locate(input.ResolvedPath);
+            if (location == PathLocation.Lost)
                 items.Add(new PrepareItem(Id, Group, PrepareStatus.Blocker,
                     Strings.Format("ProfileInputs_Lost_Title", name, drive),
                     Strings.Format("ProfileInputs_Detail", input.ResolvedPath),
@@ -37,6 +38,8 @@ public sealed class ProfileInputsCheck : IPrepareCheck
                     Strings.Format("ProfileInputs_Missing_Title", name),
                     Strings.Format("ProfileInputs_Detail", input.ResolvedPath),
                     Strings.Get("ProfileInputs_Missing_Action")));
+            else if (location == PathLocation.Unknown)
+                items.Add(UnknownLocation.Item(this, context, name, input.ResolvedPath));
             else
                 fine++;
         }

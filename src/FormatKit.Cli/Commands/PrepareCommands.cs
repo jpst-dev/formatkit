@@ -61,7 +61,8 @@ internal static class PrepareCommands
         return check;
     }
 
-    private static async Task<IReadOnlyList<Core.SystemAccess.VolumeInfo>> ListVolumesAsync(CommandContext context, CancellationToken ct)
+    /// <summary>Read once per run and shared through the context; null when listing failed (other drives are then unknown).</summary>
+    private static async Task<IReadOnlyList<Core.SystemAccess.VolumeInfo>?> ListVolumesAsync(CommandContext context, CancellationToken ct)
     {
         try
         {
@@ -69,8 +70,8 @@ internal static class PrepareCommands
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            context.Env.Log.Warning(ex, "Could not list the volumes; only the system drive counts as lost");
-            return [];
+            context.Env.Log.Warning(ex, "Could not list the volumes; the volume checks report them as not checked");
+            return null;
         }
     }
 

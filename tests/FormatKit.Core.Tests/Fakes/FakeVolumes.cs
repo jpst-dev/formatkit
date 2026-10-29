@@ -9,6 +9,12 @@ public sealed class FakeVolumes(params VolumeInfo[] volumes) : IVolumes
     /// <summary>When set, <see cref="ListAsync"/> throws it.</summary>
     public Exception? Throw { get; set; }
 
-    public Task<IReadOnlyList<VolumeInfo>> ListAsync(CancellationToken ct) =>
-        Throw is null ? Task.FromResult<IReadOnlyList<VolumeInfo>>([.. Volumes]) : Task.FromException<IReadOnlyList<VolumeInfo>>(Throw);
+    /// <summary>How many times <see cref="ListAsync"/> was called.</summary>
+    public int Calls { get; private set; }
+
+    public Task<IReadOnlyList<VolumeInfo>> ListAsync(CancellationToken ct)
+    {
+        Calls++;
+        return Throw is null ? Task.FromResult<IReadOnlyList<VolumeInfo>>([.. Volumes]) : Task.FromException<IReadOnlyList<VolumeInfo>>(Throw);
+    }
 }

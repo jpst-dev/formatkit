@@ -68,4 +68,30 @@ public class VolumesCheckTests : IDisposable
     {
         Assert.Empty(await RunAsync(Vol('C', 0)));
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task An_unknown_volume_list_is_one_not_checked_item(bool listWithoutSystemDrive)
+    {
+        var windows = new WindowsVolume('C', listWithoutSystemDrive ? [Vol('D', 0)] : null);
+        var context = PrepareTestContext.Create(windows: windows);
+
+        var item = Assert.Single(await new VolumesCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Equal("Disk layout not checked", item.Title);
+        Assert.Contains("could not be read", item.Detail);
+    }
+
+    [Fact]
+    public async Task Reads_the_volume_list_shared_in_the_context()
+    {
+        var services = TestServices.Create(volumes: new FakeVolumes { Throw = new InvalidOperationException("second read") });
+        var context = PrepareTestContext.Create(services, [Vol('C', 0), Vol('D', 1)]);
+
+        var item = Assert.Single(await new VolumesCheck().RunAsync(context, CancellationToken.None));
+
+        Assert.Equal(PrepareStatus.Ok, item.Status);
+    }
 }

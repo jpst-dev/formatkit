@@ -34,21 +34,24 @@ public sealed class UserFoldersCheck : IPrepareCheck
             ct.ThrowIfCancellationRequested();
             var path = ResolvePath(context, value, defaultName);
             var name = Strings.Get($"UserFolders_Name_{key}");
-            items.Add(CheckFolder(context, name, path, oneDrive));
+            items.Add(CheckFolder(context, name, path, oneDrive, ct));
         }
 
         return Task.FromResult<IReadOnlyList<PrepareItem>>(items);
     }
 
-    private PrepareItem CheckFolder(PrepareContext context, string name, string path, string? oneDrive)
+    private PrepareItem CheckFolder(PrepareContext context, string name, string path, string? oneDrive, CancellationToken ct)
     {
         if (IsUnder(path, oneDrive))
             return Item(PrepareStatus.Ok, Strings.Format("UserFolders_OneDrive_Title", name), Strings.Get("UserFolders_OneDrive_Detail"));
 
-        if (!context.Windows.IsLost(path))
+        var location = context.Windows.Locate(path);
+        if (location == PathLocation.Unknown)
+            return UnknownLocation.Item(this, context, name, path);
+        if (location == PathLocation.Kept)
             return Item(PrepareStatus.Ok, Strings.Format("UserFolders_Safe_Title", name), Strings.Format("UserFolders_Safe_Detail", path));
 
-        var scan = FolderScan.Run(context.Services.Files, path);
+        var scan = FolderScan.Run(context.Services.Files, path, ct);
         if (scan.FileCount == 0)
         {
             return scan.UnreadableFolders == 0

@@ -26,6 +26,8 @@
   <data name="BitLocker_Unknown_Title" xml:space="preserve"><value>Estado do BitLocker de {0}: não verificado</value></data>
   <data name="BitLocker_Unknown_Detail" xml:space="preserve"><value>O Windows não informou se este volume está criptografado.</value></data>
   <data name="BitLocker_Unknown_Action" xml:space="preserve"><value>Confira com manage-bde -status {0}: em um terminal de administrador.</value></data>
+  <data name="BitLocker_Unlisted_Title" xml:space="preserve"><value>Estado do BitLocker dos volumes: não verificado</value></data>
+  <data name="BitLocker_Unlisted_Action" xml:space="preserve"><value>Execute manage-bde -status em um terminal de administrador; para cada volume criptografado, guarde a chave de recuperação (aka.ms/myrecoverykey) antes de formatar.</value></data>
   <data name="Activation_Firmware_Title" xml:space="preserve"><value>O Windows está ativado com a chave do firmware</value></data>
   <data name="Activation_Firmware_Detail" xml:space="preserve"><value>Ele se reativa sozinho depois da reinstalação.</value></data>
   <data name="Activation_Retail_Title" xml:space="preserve"><value>O Windows está ativado com uma licença Retail</value></data>
@@ -63,6 +65,7 @@
   <data name="Volumes_Unknown_Title" xml:space="preserve"><value>Layout dos discos não verificado</value></data>
   <data name="Volumes_Unknown_Detail" xml:space="preserve"><value>O Windows não informou em qual disco físico cada volume está.</value></data>
   <data name="Volumes_Unknown_Action" xml:space="preserve"><value>Abra o Gerenciamento de Disco e veja quais volumes dividem o disco com o Windows. Na instalação do Windows, apague somente as partições do Windows.</value></data>
+  <data name="Volumes_Unlisted_Detail" xml:space="preserve"><value>Não foi possível ler a lista de volumes, ou ela não incluía a unidade do Windows {0}.</value></data>
   <data name="Volumes_SameDisk_Title" xml:space="preserve"><value>O volume {0}: está no mesmo disco do Windows</value></data>
   <data name="Volumes_SameDisk_Detail" xml:space="preserve"><value>A instalação do Windows pode apagar o volume {0}: se você apagar ou formatar a partição errada.</value></data>
   <data name="Volumes_SameDisk_Action" xml:space="preserve"><value>Na instalação do Windows, apague somente as partições do Windows; não apague {0}:.</value></data>
@@ -119,6 +122,12 @@
   <data name="DevDrive_Detail_Size" xml:space="preserve"><value>O disco virtual {0} ({1}) será apagado junto com a unidade do Windows.</value></data>
   <data name="DevDrive_Detail" xml:space="preserve"><value>O disco virtual {0} será apagado junto com a unidade do Windows.</value></data>
   <data name="DevDrive_Action" xml:space="preserve"><value>Copie o que precisar de {0} para um disco externo antes de instalar. Os repositórios dentro dela aparecem em itens separados.</value></data>
+  <data name="DevDrive_Unlisted_Title" xml:space="preserve"><value>Discos virtuais guardados em {0} não verificados</value></data>
+  <data name="DevDrive_Unlisted_Detail" xml:space="preserve"><value>Não foi possível ler a lista de volumes, ou ela não incluía a unidade do Windows {0}. Uma unidade que é um disco virtual guardado em {0} (como um Dev Drive) é apagada junto com ela, e os repositórios dentro dela não foram verificados.</value></data>
+  <data name="DevDrive_Unlisted_Action" xml:space="preserve"><value>Abra o Gerenciamento de Disco: de cada unidade cujo disco é um disco virtual (VHD) guardado em {0}, copie o que precisar para um disco externo.</value></data>
+  <data name="Location_Unknown_Title" xml:space="preserve"><value>Não foi possível confirmar que {0} está fora de {1}</value></data>
+  <data name="Location_Unknown_Detail" xml:space="preserve"><value>{0}: não foi possível ler a lista de volumes, então não se sabe se essa unidade é um disco virtual (como um Dev Drive) guardado em {1}.</value></data>
+  <data name="Location_Unknown_Action" xml:space="preserve"><value>Abra o Gerenciamento de Disco e confira se a unidade não é um disco virtual (VHD) guardado em {0}; se for, tire isto de {0}.</value></data>
   <data name="ProgramsExport_Todo_Title" xml:space="preserve"><value>A lista de programas instalados não foi exportada</value></data>
   <data name="ProgramsExport_Todo_Detail" xml:space="preserve"><value>Depois da reinstalação, o FormatKit só consegue instalar seus programas de novo a partir de uma lista exportada.</value></data>
   <data name="ProgramsExport_Action" xml:space="preserve"><value>Execute formatkit programs export E:\programs.json e guarde o arquivo fora do disco do Windows.</value></data>

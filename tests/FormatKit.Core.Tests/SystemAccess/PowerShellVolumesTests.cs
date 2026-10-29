@@ -85,9 +85,27 @@ public class PowerShellVolumesTests
     }
 
     [Fact]
-    public async Task EmptyOutput_IsNoVolumes()
+    public void Script_FailsWhenGetVolumeFails_InsteadOfReturningAnEmptyList()
     {
-        var volumes = await Create(Result(0, "")).ListAsync(TestContext.Current.CancellationToken);
+        // A broken Storage provider must surface as a failure the caller reports as not checked, not as "no volumes".
+        var script = PowerShellVolumes.Script;
+
+        Assert.Contains("Get-Volume -ErrorAction Stop", script);
+        Assert.Contains("exit 3", script);
+        Assert.DoesNotContain("@(Get-Volume |", script);
+    }
+
+    [Fact]
+    public async Task EmptyOutput_Throws()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => Create(Result(0, "")).ListAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task EmptyArray_IsNoVolumes()
+    {
+        var volumes = await Create(Result(0, "[]")).ListAsync(TestContext.Current.CancellationToken);
 
         Assert.Empty(volumes);
     }

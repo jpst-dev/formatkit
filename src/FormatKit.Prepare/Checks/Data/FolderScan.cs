@@ -7,13 +7,15 @@ internal sealed record FolderScan(long Bytes, int FileCount, int UnreadableFolde
 {
     private const FileAttributes CloudOnly = (FileAttributes)0x400000 | FileAttributes.Offline;
 
-    public static FolderScan Run(IFileSystem files, string folder)
+    /// <summary>Checks <paramref name="ct"/> per file, so Ctrl+C stops a large scan promptly.</summary>
+    public static FolderScan Run(IFileSystem files, string folder, CancellationToken ct)
     {
         long bytes = 0;
         var count = 0;
         var unreadable = 0;
         foreach (var entry in files.EnumerateFileEntries(folder, recursive: true, _ => unreadable++))
         {
+            ct.ThrowIfCancellationRequested();
             if ((entry.Attributes & CloudOnly) != 0)
                 continue;
             bytes += entry.Length;

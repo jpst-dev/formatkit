@@ -26,6 +26,8 @@
   <data name="BitLocker_Unknown_Title" xml:space="preserve"><value>BitLocker state of {0}: not checked</value></data>
   <data name="BitLocker_Unknown_Detail" xml:space="preserve"><value>Windows did not report whether this volume is encrypted.</value></data>
   <data name="BitLocker_Unknown_Action" xml:space="preserve"><value>Check it with manage-bde -status {0}: in an administrator terminal.</value></data>
+  <data name="BitLocker_Unlisted_Title" xml:space="preserve"><value>BitLocker state of the volumes: not checked</value></data>
+  <data name="BitLocker_Unlisted_Action" xml:space="preserve"><value>Run manage-bde -status in an administrator terminal; for every encrypted volume, save its recovery key (aka.ms/myrecoverykey) before formatting.</value></data>
   <data name="Activation_Firmware_Title" xml:space="preserve"><value>Windows is activated with the key in the firmware</value></data>
   <data name="Activation_Firmware_Detail" xml:space="preserve"><value>It reactivates by itself after the reinstall.</value></data>
   <data name="Activation_Retail_Title" xml:space="preserve"><value>Windows is activated with a retail license</value></data>
@@ -63,6 +65,7 @@
   <data name="Volumes_Unknown_Title" xml:space="preserve"><value>Disk layout not checked</value></data>
   <data name="Volumes_Unknown_Detail" xml:space="preserve"><value>Windows did not report which physical disk each volume is on.</value></data>
   <data name="Volumes_Unknown_Action" xml:space="preserve"><value>Open Disk Management and check which volumes share the disk with Windows. In Windows Setup, delete only the Windows partitions.</value></data>
+  <data name="Volumes_Unlisted_Detail" xml:space="preserve"><value>The volume list could not be read, or it did not include the Windows drive {0}.</value></data>
   <data name="Volumes_SameDisk_Title" xml:space="preserve"><value>{0}: is on the same disk as Windows</value></data>
   <data name="Volumes_SameDisk_Detail" xml:space="preserve"><value>Windows Setup can erase {0}: if you delete or format the wrong partition.</value></data>
   <data name="Volumes_SameDisk_Action" xml:space="preserve"><value>In Windows Setup, delete only the Windows partitions; do not delete {0}:.</value></data>
@@ -119,6 +122,12 @@
   <data name="DevDrive_Detail_Size" xml:space="preserve"><value>The virtual disk {0} ({1}) will be erased with the Windows drive.</value></data>
   <data name="DevDrive_Detail" xml:space="preserve"><value>The virtual disk {0} will be erased with the Windows drive.</value></data>
   <data name="DevDrive_Action" xml:space="preserve"><value>Copy what you need from {0} to an external drive before installing. Repositories inside it are reported separately.</value></data>
+  <data name="DevDrive_Unlisted_Title" xml:space="preserve"><value>Virtual disks stored on {0} not checked</value></data>
+  <data name="DevDrive_Unlisted_Detail" xml:space="preserve"><value>The volume list could not be read, or it did not include the Windows drive {0}. A drive that is a virtual disk stored on {0} (such as a Dev Drive) is erased with it, and the repositories inside it were not scanned.</value></data>
+  <data name="DevDrive_Unlisted_Action" xml:space="preserve"><value>Open Disk Management: from every drive whose disk is a virtual disk (VHD) stored on {0}, copy what you need to an external drive.</value></data>
+  <data name="Location_Unknown_Title" xml:space="preserve"><value>Could not confirm that {0} is off {1}</value></data>
+  <data name="Location_Unknown_Detail" xml:space="preserve"><value>{0}: the volume list could not be read, so it is not known whether that drive is a virtual disk (such as a Dev Drive) stored on {1}.</value></data>
+  <data name="Location_Unknown_Action" xml:space="preserve"><value>Open Disk Management and check that the drive is not a virtual disk (VHD) stored on {0}; if it is, move this off {0}.</value></data>
   <data name="ProgramsExport_Todo_Title" xml:space="preserve"><value>The list of installed programs has not been exported</value></data>
   <data name="ProgramsExport_Todo_Detail" xml:space="preserve"><value>After the reinstall, FormatKit can install your programs again only from an exported list.</value></data>
   <data name="ProgramsExport_Action" xml:space="preserve"><value>Run formatkit programs export E:\programs.json and keep the file off the Windows drive.</value></data>

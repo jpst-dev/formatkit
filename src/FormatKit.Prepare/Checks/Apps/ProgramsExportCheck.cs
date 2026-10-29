@@ -25,7 +25,8 @@ public sealed class ProgramsExportCheck : IPrepareCheck
 
         var drive = ProfileSections.SystemDriveLabel(context);
         PrepareItem item;
-        if (context.Windows.IsLost(input.ResolvedPath))
+        var location = context.Windows.Locate(input.ResolvedPath);
+        if (location == PathLocation.Lost)
             item = new PrepareItem(Id, Group, PrepareStatus.Blocker,
                 Strings.Format("ProgramsExport_Lost_Title", input.ResolvedPath, drive),
                 Strings.Get("ProgramsExport_Lost_Detail"), Strings.Format("ProgramsExport_Lost_Action", drive));
@@ -33,6 +34,8 @@ public sealed class ProgramsExportCheck : IPrepareCheck
             item = new PrepareItem(Id, Group, PrepareStatus.Blocker,
                 Strings.Format("ProgramsExport_Missing_Title", input.ResolvedPath),
                 Strings.Get("ProgramsExport_Missing_Detail"), Strings.Get("ProgramsExport_Action"));
+        else if (location == PathLocation.Unknown)
+            item = UnknownLocation.Item(this, context, input.ResolvedPath, input.ResolvedPath);
         else
             item = new PrepareItem(Id, Group, PrepareStatus.Ok,
                 Strings.Format("ProgramsExport_Ok_Title", input.ResolvedPath, drive));
