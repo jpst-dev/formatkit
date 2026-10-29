@@ -50,7 +50,7 @@ if (-not (Test-Path -LiteralPath $MediaFolder -PathType Container)) {
 $MediaFolder = (Resolve-Path -LiteralPath $MediaFolder).ProviderPath
 $bootImage = Join-Path $MediaFolder 'efi\microsoft\boot\efisys_noprompt.bin'
 if (-not (Test-Path -LiteralPath (Join-Path $MediaFolder 'sources') -PathType Container)) { throw "'$MediaFolder' has no 'sources' folder: it is not a media folder made by 'formatkit media build'." }
-foreach ($required in @($bootImage, (Join-Path $MediaFolder 'efiootootx64.efi'), (Join-Path $MediaFolder 'sourcesoot.wim'))) {
+foreach ($required in @($bootImage, (Join-Path $MediaFolder 'efi\boot\bootx64.efi'), (Join-Path $MediaFolder 'sources\boot.wim'))) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "'$required' not found: it is not a media folder made by 'formatkit media build'." }
 }
 # Exact-name lookups (no wildcards), done before anything is removed.
