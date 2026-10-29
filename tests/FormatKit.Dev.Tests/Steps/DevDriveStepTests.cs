@@ -61,6 +61,7 @@ public class DevDriveStepTests
         Assert.Equal(StepOutcome.Succeeded, result.Outcome);
         Assert.Empty(rig.Disks.Calls);
         Assert.Empty(rig.Environment.Values);
+        Assert.Contains(result.Messages, m => m.Contains(Strings.Get("Next_UpdateWindows")));
         Assert.All(result.Messages, m => Assert.Contains(Text("NotApplicable"), m));
         Assert.Equal(3, result.Messages.Count); // drive, remount, npm
     }
@@ -74,6 +75,7 @@ public class DevDriveStepTests
         var result = await rig.Run(Options());
 
         Assert.Empty(rig.Disks.Calls);
+        Assert.Contains(result.Messages, m => m.Contains(Strings.Get("Next_UpdateWindows")));
     }
 
     [Fact]

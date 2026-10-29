@@ -45,7 +45,7 @@ internal sealed class DevDriveStep(DevDriveOptions options) : IStep
 
         if (!IsSupportedBuild(ctx.Services.Registry))
         {
-            items.Add(new DevItem(DriveLabel, DevItemOutcome.NotApplicable, Strings.Get("Next_UpdateWindows")));
+            items.Add(new DevItem(DriveLabel, DevItemOutcome.NotApplicable, Detail: Strings.Get("Next_UpdateWindows")));
             items.Add(new DevItem(RemountLabel, DevItemOutcome.NotApplicable));
             items.AddRange(options.Caches.Select(c => new DevItem(c, DevItemOutcome.NotApplicable)));
             return DevStepResult.From(items);
