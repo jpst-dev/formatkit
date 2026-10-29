@@ -184,7 +184,7 @@ public class PowerShellVirtualDisksTests
     }
 
     [Fact]
-    public async Task Register_remount_task_doubles_single_quotes_and_replaces_existing()
+    public async Task Register_remount_task_encodes_mount_script_and_replaces_existing()
     {
         var (disks, runner, _) = Create();
         runner.Enqueue("powershell.exe", Result(0));
@@ -192,9 +192,34 @@ public class PowerShellVirtualDisksTests
         await disks.RegisterRemountTaskAsync(@"D:\it's\dev.vhdx", TestContext.Current.CancellationToken);
 
         var script = runner.Calls[0].Arguments[3];
-        Assert.Contains("Mount-DiskImage -ImagePath ''D:\\it''''s\\dev.vhdx''", script);
+        var encoded = System.Text.RegularExpressions.Regex.Match(script, "-EncodedCommand ([A-Za-z0-9+/=]+)").Groups[1].Value;
+        var decoded = System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(encoded));
+        Assert.Equal(PowerShellVirtualDisks.MountScript(@"D:\it's\dev.vhdx"), decoded);
         Assert.Contains("-TaskName 'FormatKit-DevDrive'", script);
         Assert.Contains("-AtStartup", script);
         Assert.Contains("-Force", script);
+    }
+
+    [Fact]
+    public void Mount_script_retries_then_falls_back_to_diskpart()
+    {
+        var script = PowerShellVirtualDisks.MountScript(@"D:\it's\dev.vhdx");
+
+        Assert.StartsWith("$p = 'D:\\it''s\\dev.vhdx'; ", script);
+        Assert.Contains("for ($i = 0; $i -lt 12; $i++)", script);
+        Assert.Contains("Mount-DiskImage -ImagePath $p -ErrorAction Stop", script);
+        Assert.Contains("$OutputEncoding = [Console]::OutputEncoding", script);
+        Assert.Contains("\"select vdisk file=`\"$p`\"\", 'attach vdisk' | diskpart.exe", script);
+    }
+
+    [Fact]
+    public async Task Attach_runs_mount_script()
+    {
+        var (disks, runner, _) = Create();
+        runner.Enqueue("powershell.exe", Result(0));
+
+        await disks.AttachAsync(Vhdx, TestContext.Current.CancellationToken);
+
+        Assert.Equal(PowerShellVirtualDisks.MountScript(Vhdx), runner.Calls[0].Arguments[3]);
     }
 }

@@ -43,7 +43,22 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
     }
 
     public Task AttachAsync(string vhdxPath, CancellationToken ct) =>
-        RunPowerShellAsync($"Mount-DiskImage -ImagePath {Quote(vhdxPath)}", "Mount-DiskImage", ct);
+        RunPowerShellAsync(MountScript(vhdxPath), "Mount-DiskImage", ct);
+
+    /// <summary>
+    /// Attaches the VHDX. Seen in the VM: right after boot Mount-DiskImage fails with "access denied" or "in use"
+    /// for a while, so it is retried for about a minute and then diskpart (which still worked) is tried once.
+    /// The pipe to diskpart uses the console OEM code page so a non-ASCII path survives.
+    /// </summary>
+    internal static string MountScript(string vhdxPath) =>
+        $"$p = {Quote(vhdxPath)}; " +
+        "for ($i = 0; $i -lt 12; $i++) { " +
+        "if ((Get-DiskImage -ImagePath $p -ErrorAction SilentlyContinue).Attached) { exit 0 }; " +
+        "try { Mount-DiskImage -ImagePath $p -ErrorAction Stop | Out-Null; exit 0 } catch { Start-Sleep -Seconds 5 } }; " +
+        "$OutputEncoding = [Console]::OutputEncoding; " +
+        "$out = \"select vdisk file=`\"$p`\"\", 'attach vdisk' | diskpart.exe; " +
+        "if ($LASTEXITCODE -ne 0) { [Console]::Error.WriteLine(($out -join [Environment]::NewLine)) }; " +
+        "exit $LASTEXITCODE";
 
     public async Task CreateDevDriveAsync(string vhdxPath, int sizeGB, char letter, string label, CancellationToken ct)
     {
@@ -123,8 +138,9 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
 
     public Task RegisterRemountTaskAsync(string vhdxPath, CancellationToken ct)
     {
-        // The mount command sits in single quotes inside the task's argument string, which sits in single quotes in the script.
-        var argument = $"-NoProfile -Command Mount-DiskImage -ImagePath {Quote(vhdxPath)}";
+        // The mount script travels base64-encoded (UTF-16LE, as -EncodedCommand expects), so no quoting nests.
+        var encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(MountScript(vhdxPath)));
+        var argument = $"-NoProfile -NonInteractive -EncodedCommand {encoded}";
         var script =
             $"$a = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument {Quote(argument)}; " +
             "$t = New-ScheduledTaskTrigger -AtStartup; " +
