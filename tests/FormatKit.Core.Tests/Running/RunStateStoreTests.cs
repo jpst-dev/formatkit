@@ -169,6 +169,8 @@ public class RunStateStoreTests
         public void CreateDirectory(string path) { }
         public Stream OpenRead(string path) => throw toThrow;
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => [];
+        public IEnumerable<string> EnumerateDirectories(string dir, Action<string>? onUnreadable = null) => throw new NotSupportedException();
+        public IEnumerable<FormatKit.Core.SystemAccess.FileEntry> EnumerateFileEntries(string dir, bool recursive, Action<string>? onUnreadable = null) => throw new NotSupportedException();
     }
 
     [Fact]

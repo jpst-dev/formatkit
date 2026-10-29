@@ -23,6 +23,29 @@ public sealed class InMemoryFileSystem : IFileSystem
         AddParents(path);
     }
 
+    private readonly Dictionary<string, FileEntry> _entries = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, FileAttributes> _directoryAttributes = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _unreadable = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Seeds a file known only by size and attributes (no content), for scans.</summary>
+    public void SeedEntry(string path, long length, FileAttributes attributes = FileAttributes.Normal)
+    {
+        _entries[path] = new FileEntry(path, length, attributes);
+        AddParents(path);
+    }
+
+    /// <summary>Seeds a folder (and its parents) with the given attributes.</summary>
+    public void SeedDirectory(string path, FileAttributes attributes = FileAttributes.Directory)
+    {
+        var trimmed = path.TrimEnd(Sep);
+        _directories.Add(trimmed);
+        _directoryAttributes[trimmed] = attributes;
+        AddParents(trimmed);
+    }
+
+    /// <summary>Makes listing <paramref name="dir"/> fail, as an access-denied folder would.</summary>
+    public void MarkUnreadable(string dir) => _unreadable.Add(dir.TrimEnd(Sep));
+
     public bool FileExists(string path) => _files.ContainsKey(path);
 
     public bool DirectoryExists(string path) => _directories.Contains(path.TrimEnd(Sep));
@@ -135,6 +158,60 @@ public sealed class InMemoryFileSystem : IFileSystem
             .Where(f => System.IO.Enumeration.FileSystemName.MatchesSimpleExpression(pattern, Path.GetFileName(f), true))
             .ToList();
     }
+
+    public IEnumerable<string> EnumerateDirectories(string dir, Action<string>? onUnreadable = null)
+    {
+        var parent = dir.TrimEnd(Sep);
+        if (_unreadable.Contains(parent))
+        {
+            onUnreadable?.Invoke(parent);
+            return [];
+        }
+
+        const FileAttributes skipped = FileAttributes.Hidden | FileAttributes.System | FileAttributes.ReparsePoint;
+        return _directories
+            .Where(d => IsDirectChild(parent, d))
+            .Where(d => (AttributesOf(d) & skipped) == 0)
+            .ToList();
+    }
+
+    public IEnumerable<FileEntry> EnumerateFileEntries(string dir, bool recursive, Action<string>? onUnreadable = null)
+    {
+        var result = new List<FileEntry>();
+        var pending = new Stack<string>();
+        pending.Push(dir.TrimEnd(Sep));
+        while (pending.Count > 0)
+        {
+            var current = pending.Pop();
+            if (_unreadable.Contains(current))
+            {
+                onUnreadable?.Invoke(current);
+                continue;
+            }
+
+            result.AddRange(AllFileEntries().Where(f => IsDirectChild(current, f.Path)));
+            if (recursive)
+            {
+                foreach (var sub in _directories.Where(d => IsDirectChild(current, d)))
+                {
+                    if ((AttributesOf(sub) & FileAttributes.ReparsePoint) == 0)
+                        pending.Push(sub);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private IEnumerable<FileEntry> AllFileEntries() =>
+        _files.Select(f => new FileEntry(f.Key, System.Text.Encoding.UTF8.GetByteCount(f.Value), FileAttributes.Normal))
+            .Concat(_entries.Values);
+
+    private FileAttributes AttributesOf(string directory) =>
+        _directoryAttributes.GetValueOrDefault(directory, FileAttributes.Directory);
+
+    private static bool IsDirectChild(string parent, string path) =>
+        string.Equals(Path.GetDirectoryName(path)?.TrimEnd(Sep), parent, StringComparison.OrdinalIgnoreCase);
 
     private void AddParents(string path)
     {

@@ -244,5 +244,7 @@ public class ProgramsOptionsTests
         public void CreateDirectory(string path) => throw new NotSupportedException();
         public Stream OpenRead(string path) => throw new NotSupportedException();
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => throw new NotSupportedException();
+        public IEnumerable<string> EnumerateDirectories(string dir, Action<string>? onUnreadable = null) => throw new NotSupportedException();
+        public IEnumerable<FormatKit.Core.SystemAccess.FileEntry> EnumerateFileEntries(string dir, bool recursive, Action<string>? onUnreadable = null) => throw new NotSupportedException();
     }
 }

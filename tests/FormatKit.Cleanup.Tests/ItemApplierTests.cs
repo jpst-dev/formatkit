@@ -218,6 +218,8 @@ public class ItemApplierTests
         public void CreateDirectory(string path) => inner.CreateDirectory(path);
         public Stream OpenRead(string path) => inner.OpenRead(path);
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => inner.EnumerateFiles(dir, pattern, recursive);
+        public IEnumerable<string> EnumerateDirectories(string dir, Action<string>? onUnreadable = null) => throw new NotSupportedException();
+        public IEnumerable<FileEntry> EnumerateFileEntries(string dir, bool recursive, Action<string>? onUnreadable = null) => throw new NotSupportedException();
 
         public void WriteAllBytes(string path, byte[] bytes) => inner.WriteAllBytes(path, bytes);
 
