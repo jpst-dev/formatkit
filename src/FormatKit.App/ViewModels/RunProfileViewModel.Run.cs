@@ -21,6 +21,8 @@ public sealed partial class RunProfileViewModel
     private bool _stopSent;
     private bool _stepStarted;
     private string? _refusal;
+    private CancellationTokenSource? _startCts;
+    private bool _stopOnConnect;
     private TaskCompletionSource _runEnded = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public IAsyncRelayCommand RunCommand { get; private set; } = null!;
@@ -57,6 +59,12 @@ public sealed partial class RunProfileViewModel
 
     public bool HasRunMessage => RunMessage is not null;
 
+    /// <summary>
+    /// True while a run starts (the UAC prompt, the worker's connection) or runs: closing the window asks first
+    /// (<see cref="ConfirmCloseAsync"/>).
+    /// </summary>
+    public bool IsRunInProgress => IsBusy || IsRunning;
+
     public IRelayCommand OpenLogFolderCommand { get; private set; } = null!;
 
     /// <summary>The last run ended without Finished or Failed (the worker exited unexpectedly): the log folder is offered.</summary>
@@ -86,6 +94,7 @@ public sealed partial class RunProfileViewModel
 
     partial void OnIsBusyChanged(bool value)
     {
+        OnPropertyChanged(nameof(IsRunInProgress));
         OpenCommand.NotifyCanExecuteChanged();
         UseDriversOnlyCommand.NotifyCanExecuteChanged();
         UseLastProfileCommand.NotifyCanExecuteChanged();
@@ -96,6 +105,7 @@ public sealed partial class RunProfileViewModel
 
     partial void OnIsRunningChanged(bool value)
     {
+        OnPropertyChanged(nameof(IsRunInProgress));
         RunCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged();
         ResumeCommand.NotifyCanExecuteChanged();
@@ -118,19 +128,24 @@ public sealed partial class RunProfileViewModel
     }
 
     /// <summary>
-    /// Closing the window: true at once when no run is going on; during a run asks to stop after the current step,
-    /// and on yes sends <see cref="Cancel"/> and waits until the run ends. False keeps the window open. After Stop was
+    /// Closing the window: true at once when no run is going on; while a run starts or runs asks to stop after the
+    /// current step, and on yes cancels a pending start, sends <see cref="Cancel"/> to a connected worker (also one that
+    /// connects despite the cancelled start) and waits until the run ends. False keeps the window open. After Stop was
     /// already sent it does not ask again: it only waits for the run to end.
     /// </summary>
     public async Task<bool> ConfirmCloseAsync()
     {
-        if (!IsRunning)
+        if (!IsRunInProgress)
             return true;
-        if (!_stopSent && !_dialogs.Confirm(Strings.Get("RunProfile_StopTitle"), Strings.Get("RunProfile_StopQuestion")))
+        if (!_stopSent && !_stopOnConnect
+            && !_dialogs.Confirm(Strings.Get("RunProfile_StopTitle"), Strings.Get("RunProfile_StopQuestion")))
             return false;
 
         var ended = _runEnded.Task;
-        await StopAsync();
+        _stopOnConnect = true;
+        _startCts?.Cancel();
+        if (IsRunning)
+            await StopAsync();
         await ended;
         return true;
     }
@@ -177,30 +192,55 @@ public sealed partial class RunProfileViewModel
         }
     }
 
-    /// <summary>Starts the worker and follows it; false when it did not start (the reason is in <see cref="RunMessage"/>).</summary>
+    /// <summary>
+    /// Starts the worker and follows it; false when it did not start (the reason is in <see cref="RunMessage"/>, none
+    /// when closing the window cancelled the start).
+    /// </summary>
     private async Task<bool> StartAndFollowAsync(string[] job, bool elevate, IEnumerable<StepRow> initialRows)
     {
-        RunMessage = null;
-        WorkerConnection? connection;
+        _runEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _stopOnConnect = false;
         try
         {
-            connection = await Launcher.StartAsync(job, elevate, CancellationToken.None);
-        }
-        catch (Exception ex)
-        {
-            _env.Log.Error(ex, "Run: the worker could not start");
-            RunMessage = Strings.Format("RunProfile_StartFailed", ex.Message);
-            return false;
-        }
+            RunMessage = null;
+            WorkerConnection? connection;
+            using (var start = new CancellationTokenSource())
+            {
+                _startCts = start;
+                try
+                {
+                    connection = await Launcher.StartAsync(job, elevate, start.Token);
+                }
+                catch (OperationCanceledException) when (start.IsCancellationRequested)
+                {
+                    _env.Log.Information("Run: the start was cancelled because the window is closing");
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    _env.Log.Error(ex, "Run: the worker could not start");
+                    RunMessage = Strings.Format("RunProfile_StartFailed", ex.Message);
+                    return false;
+                }
+                finally
+                {
+                    _startCts = null;
+                }
+            }
 
-        if (connection is null)
-        {
-            RunMessage = Strings.Get("RunProfile_UacDeclined");
-            return false;
-        }
+            if (connection is null)
+            {
+                RunMessage = Strings.Get("RunProfile_UacDeclined");
+                return false;
+            }
 
-        await FollowAsync(connection, initialRows);
-        return true;
+            await FollowAsync(connection, initialRows);
+            return true;
+        }
+        finally
+        {
+            _runEnded.TrySetResult();
+        }
     }
 
     /// <summary>Reads the worker's messages until the run ends, then shows the result.</summary>
@@ -208,7 +248,6 @@ public sealed partial class RunProfileViewModel
     {
         _connection = connection;
         _stopSent = false;
-        _runEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         FinalStatus = null;
         ReportDirectory = null;
         EndedWithoutResult = false;
@@ -221,6 +260,10 @@ public sealed partial class RunProfileViewModel
         string? status = null;
         try
         {
+            // The window is closing and the worker connected despite the cancelled start: stop it after the current step.
+            if (_stopOnConnect)
+                await StopAsync();
+
             await foreach (var message in connection.Channel.ReadAllAsync(CancellationToken.None))
             {
                 status = await HandleAsync(message);
@@ -265,7 +308,6 @@ public sealed partial class RunProfileViewModel
             RefreshInterruptedRun();
             IsRunning = false;
             Phase = RunPhase.Review;
-            _runEnded.TrySetResult();
             return;
         }
 
@@ -275,7 +317,6 @@ public sealed partial class RunProfileViewModel
         RefreshInterruptedRun();
         IsRunning = false;
         Phase = RunPhase.Result;
-        _runEnded.TrySetResult();
     }
 
     /// <summary>Applies one message; returns the final status when the message ends the run.</summary>

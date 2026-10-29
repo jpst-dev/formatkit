@@ -16,7 +16,7 @@ public partial class MainWindow : Window
         Width = size.Width;
         Height = size.Height;
         DataContext = viewModel;
-        _closeGuard = new CloseGuard(() => viewModel.RunProfile.IsRunning, viewModel.RunProfile.ConfirmCloseAsync);
+        _closeGuard = new CloseGuard(() => viewModel.RunProfile.IsRunInProgress, viewModel.RunProfile.ConfirmCloseAsync);
     }
 
     /// <summary>

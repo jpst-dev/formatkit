@@ -591,6 +591,98 @@ public sealed class RunProfileRunTests : IDisposable
     }
 
     [Fact]
+    public async Task StartPending_CountsAsARunInProgressForClosing()
+    {
+        // The UAC prompt or the worker's connection is pending: closing must ask, not close at once.
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.StartGate = gate.Task;
+        _launcher.Declines = true;
+        Assert.False(vm.IsRunInProgress);
+
+        var run = vm.RunCommand.ExecuteAsync(null);
+        Assert.True(vm.IsRunInProgress);
+        Assert.False(vm.IsRunning);
+
+        gate.SetResult();
+        await run.WaitAsync(Timeout, Ct);
+        Assert.False(vm.IsRunInProgress);
+    }
+
+    [Fact]
+    public async Task ConfirmClose_StartPendingAndYes_CancelsTheStart()
+    {
+        var vm = Reviewed();
+        _launcher.StartGate = new TaskCompletionSource().Task;
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => _launcher.Jobs.Count == 1);
+        _dialogs.Confirmations.Clear();
+
+        Assert.True(await vm.ConfirmCloseAsync().WaitAsync(Timeout, Ct));
+        await run.WaitAsync(Timeout, Ct);
+
+        Assert.Equal(Strings.Get("RunProfile_StopQuestion"), Assert.Single(_dialogs.Confirmations).Message);
+        Assert.True(_launcher.StartToken.IsCancellationRequested);
+        Assert.False(vm.IsRunning);
+        Assert.False(vm.IsBusy);
+        Assert.Null(vm.RunMessage);
+    }
+
+    [Fact]
+    public async Task ConfirmClose_StartPendingAndYes_WorkerConnectsAnyway_SendsCancelAndWaits()
+    {
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.StartGate = gate.Task;
+        _launcher.IgnoresCancellation = true;
+        _launcher.Script.AddRange([
+            PlannedAll(),
+            new Expect<Cancel>(),
+            new Do(() => release.Task),
+            new Failed(Strings.Get("Worker_Stopped")),
+        ]);
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => _launcher.Jobs.Count == 1);
+        _dialogs.Confirmations.Clear();
+
+        var close = vm.ConfirmCloseAsync();
+        await Task.Delay(50, Ct);
+        Assert.False(close.IsCompleted);
+        gate.SetResult();
+        await _launcher.WaitForAsync<Cancel>().WaitAsync(Timeout, Ct);
+        await Task.Delay(50, Ct);
+        Assert.False(close.IsCompleted);
+
+        release.SetResult();
+        Assert.True(await close.WaitAsync(Timeout, Ct));
+        await run.WaitAsync(Timeout, Ct);
+        Assert.Single(_dialogs.Confirmations);
+        Assert.Single(_launcher.Received.OfType<Cancel>());
+        Assert.False(vm.IsRunning);
+    }
+
+    [Fact]
+    public async Task ConfirmClose_StartPendingAndNo_StaysOpenAndKeepsStarting()
+    {
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.StartGate = gate.Task;
+        _launcher.Script.AddRange([PlannedAll(), FinishedWith(RunStatus.Completed)]);
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => _launcher.Jobs.Count == 1);
+        _dialogs.ConfirmResult = false;
+
+        Assert.False(await vm.ConfirmCloseAsync().WaitAsync(Timeout, Ct));
+        Assert.False(_launcher.StartToken.IsCancellationRequested);
+
+        gate.SetResult();
+        await run.WaitAsync(Timeout, Ct);
+        Assert.Empty(_launcher.Received.OfType<Cancel>());
+        Assert.Equal(Strings.Get("Run_Status_Completed"), vm.FinalStatus);
+    }
+
+    [Fact]
     public async Task ConfirmClose_AfterStop_WaitsWithoutAskingAgain()
     {
         var vm = Reviewed();
