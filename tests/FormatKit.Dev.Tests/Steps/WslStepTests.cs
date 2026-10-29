@@ -247,6 +247,48 @@ public class WslStepTests
         Assert.Single(rig.Console.Attached);
     }
 
+    [Fact]
+    public async Task EnsureUser_fails_for_wrong_account_without_running_wsl()
+    {
+        var rig = new Rig { Session = { IsConsoleUser = false } };
+
+        var item = await WslStep.EnsureUserAsync(Options(), rig.Context(), TestContext.Current.CancellationToken);
+
+        Assert.Equal(DevItemOutcome.Failed, item.Outcome);
+        Assert.Equal(Strings.Get("Next_WrongAccount"), item.NextAction);
+        Assert.Empty(rig.Processes.Calls);
+    }
+
+    [Fact]
+    public async Task Cat_timeout_fails_without_writing_wsl_conf()
+    {
+        var rig = new Rig();
+        rig.Wsl(0, "1000");
+        rig.Wsl(0, "joao P 2026-10-29 0 99999 7 -1");
+        rig.Processes.Enqueue("wsl.exe", new ProcessResult(-1, "", "", TimeSpan.Zero, true));
+
+        var item = await WslStep.EnsureUserAsync(Options(), rig.Context(), TestContext.Current.CancellationToken);
+
+        Assert.Equal(DevItemOutcome.Failed, item.Outcome);
+        Assert.Equal(Strings.Get("Next_SeeLog"), item.NextAction);
+        Assert.Equal(3, rig.Processes.Calls.Count);
+    }
+
+    [Fact]
+    public async Task Cat_wsl_failure_fails_without_writing_wsl_conf()
+    {
+        var rig = new Rig();
+        rig.Wsl(0, "1000");
+        rig.Wsl(0, "joao P 2026-10-29 0 99999 7 -1");
+        rig.Wsl(-1, "", "boom");
+
+        var item = await WslStep.EnsureUserAsync(Options(), rig.Context(), TestContext.Current.CancellationToken);
+
+        Assert.Equal(DevItemOutcome.Failed, item.Outcome);
+        Assert.Equal(Strings.Get("Next_SeeLog"), item.NextAction);
+        Assert.Equal(3, rig.Processes.Calls.Count);
+    }
+
     private static void EnqueueInOrder(Rig rig)
     {
         rig.Wsl(0);

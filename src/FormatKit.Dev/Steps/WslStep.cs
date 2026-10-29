@@ -71,9 +71,9 @@ internal sealed class WslStep(WslOptions options, DevEnvironment env, TimeProvid
             items.Add(new(options.Distro, DevItemOutcome.Done));
         }
 
-        var user = await EnsureUserAsync(options, ctx, ct).ConfigureAwait(false);
-        items.Add(user);
-        if (user.Outcome == DevItemOutcome.Failed && IsBlocking(user))
+        var user = await RunUserAsync(options, ctx, ct).ConfigureAwait(false);
+        items.Add(user.Item);
+        if (user.Stop)
             return DevStepResult.From(items);
 
         if (options.Config is not null)
@@ -83,29 +83,36 @@ internal sealed class WslStep(WslOptions options, DevEnvironment env, TimeProvid
     }
 
     /// <summary>Creates the Linux user if missing, has its password set when someone can type, and makes it the default user.</summary>
-    internal static async Task<DevItem> EnsureUserAsync(WslOptions options, StepContext ctx, CancellationToken ct)
+    internal static async Task<DevItem> EnsureUserAsync(WslOptions options, StepContext ctx, CancellationToken ct) =>
+        (await RunUserAsync(options, ctx, ct).ConfigureAwait(false)).Item;
+
+    private static async Task<UserResult> RunUserAsync(WslOptions options, StepContext ctx, CancellationToken ct)
     {
         var wsl = ctx.Services.Wsl;
         var label = UserLabel(options);
+        var wrong = ctx.Services.UserSession.IsConsoleUser ? null : new DevItem(label, DevItemOutcome.Failed, Strings.Get("Next_WrongAccount"));
+        if (wrong is not null)
+            return wrong;
+
         var changed = false;
 
         var id = await wsl.ExecAsync(options.Distro, "root", ["/usr/bin/id", "-u", options.User], ct).ConfigureAwait(false);
         if (id.ExitCode != 0 || id.TimedOut)
         {
             if (WslClient.IsVirtualizationError(id) || WslClient.IsNetworkError(id))
-                return Failure(label, id, ctx);
+                return Fail(label, id, ctx);
 
             var add = await wsl.ExecAsync(
                 options.Distro, "root",
                 ["/usr/sbin/useradd", "-m", "-G", "sudo", "-s", "/bin/bash", options.User], ct).ConfigureAwait(false);
             if (add.ExitCode != 0 || add.TimedOut)
-                return Failure(label, add, ctx);
+                return Fail(label, add, ctx);
             changed = true;
         }
 
         var status = await wsl.ExecAsync(options.Distro, "root", ["/usr/bin/passwd", "-S", options.User], ct).ConfigureAwait(false);
         if (status.ExitCode != 0 || status.TimedOut)
-            return Failure(label, status, ctx);
+            return Fail(label, status, ctx);
 
         var passwordPending = false;
         if (IsLocked(status.StdOut))
@@ -115,7 +122,7 @@ internal sealed class WslStep(WslOptions options, DevEnvironment env, TimeProvid
                 var exit = await ctx.Services.Console.RunAttachedAsync(
                     WslClient.ExecSpec(options.Distro, "root", ["/usr/bin/passwd", options.User], Timeouts.Install), ct).ConfigureAwait(false);
                 if (exit != 0)
-                    return new(label, DevItemOutcome.Failed, Strings.Get("Next_SeeLog"));
+                    return new DevItem(label, DevItemOutcome.Failed, Strings.Get("Next_SeeLog"));
                 changed = true;
             }
             else
@@ -124,27 +131,26 @@ internal sealed class WslStep(WslOptions options, DevEnvironment env, TimeProvid
             }
         }
 
-        // A missing /etc/wsl.conf makes cat fail; that means empty, unless the failure is one we report.
+        // Only a plain Linux exit 1 means the file is missing; a timeout or a wsl.exe failure must not look like an empty file.
         var cat = await wsl.ExecAsync(options.Distro, "root", ["/usr/bin/cat", "/etc/wsl.conf"], ct).ConfigureAwait(false);
-        var catFailed = cat.ExitCode != 0 || cat.TimedOut;
-        if (catFailed && (WslClient.IsVirtualizationError(cat) || WslClient.IsNetworkError(cat)))
-            return Failure(label, cat, ctx);
+        if (cat.TimedOut || cat.ExitCode < 0 || cat.ExitCode > 1)
+            return Fail(label, cat, ctx);
 
-        var existing = catFailed ? "" : cat.StdOut;
+        var existing = cat.ExitCode == 0 ? cat.StdOut : "";
         var merged = WslConf.SetDefaultUser(existing, options.User);
         if (merged != existing)
         {
             var write = await wsl.WriteFileAsync(options.Distro, "root", "/etc/wsl.conf", merged, ct).ConfigureAwait(false);
             if (write.ExitCode != 0 || write.TimedOut)
-                return Failure(label, write, ctx);
+                return Fail(label, write, ctx);
             await wsl.TerminateAsync(options.Distro, ct).ConfigureAwait(false);
             changed = true;
         }
 
         if (passwordPending)
-            return new(label, DevItemOutcome.Pending, Strings.Get("Next_RunWslUser"));
+            return new DevItem(label, DevItemOutcome.Pending, Strings.Get("Next_RunWslUser"));
 
-        return new(label, changed ? DevItemOutcome.Done : DevItemOutcome.AlreadyInOrder);
+        return new DevItem(label, changed ? DevItemOutcome.Done : DevItemOutcome.AlreadyInOrder);
     }
 
     private DevItem EnsureWslConfig(WslConfig config, StepContext ctx)
@@ -181,8 +187,8 @@ internal sealed class WslStep(WslOptions options, DevEnvironment env, TimeProvid
         return fields.Length > 1 && fields[1] == "L";
     }
 
-    private static bool IsBlocking(DevItem item) =>
-        item.NextAction == Strings.Get("Next_EnableVirtualization") || item.NextAction == Strings.Get("Next_CheckNetwork");
+    private static UserResult Fail(string label, ProcessResult result, StepContext ctx) =>
+        new(Failure(label, result, ctx), WslClient.IsVirtualizationError(result) || WslClient.IsNetworkError(result));
 
     private static DevItem Failure(string label, ProcessResult result, StepContext ctx)
     {
@@ -192,5 +198,11 @@ internal sealed class WslStep(WslOptions options, DevEnvironment env, TimeProvid
             : WslClient.IsNetworkError(result) ? "Next_CheckNetwork"
             : "Next_SeeLog";
         return new(label, DevItemOutcome.Failed, Strings.Get(next));
+    }
+
+    /// <summary>The user item, and whether later items must not run (virtualization or network failure).</summary>
+    private readonly record struct UserResult(DevItem Item, bool Stop)
+    {
+        public static implicit operator UserResult(DevItem item) => new(item, false);
     }
 }
