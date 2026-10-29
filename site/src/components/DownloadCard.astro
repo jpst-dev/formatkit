@@ -1,0 +1,101 @@
+---
+import { getLatestRelease } from '../loaders/releases';
+import type { Release } from '../loaders/releases';
+import { localeFromAstro, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+
+interface Props {
+  release?: Release | null;
+  locale?: SiteLocale;
+}
+
+const props = Astro.props;
+const release = props.release !== undefined ? props.release : await getLatestRelease();
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+
+const HASH_COMMAND = String.raw`Get-FileHash .\formatkit.exe -Algorithm SHA256`;
+const RELEASES = 'https://github.com/jpst-dev/formatkit/releases';
+const FILES = [
+  { name: 'FormatKitUI.exe', what: 'dl.ui.desc' },
+  { name: 'formatkit.exe', what: 'dl.cli.desc' },
+];
+
+const size = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+const rows = release
+  ? FILES.map((f) => ({ ...f, asset: release.assets.find((a) => a.name === f.name) })).filter((r) => r.asset)
+  : [];
+---
+
+<div class="fk-download">
+  {
+    release ? (
+      <>
+        <p class="fk-meta">
+          <strong>{t(locale, 'dl.version')}:</strong> {release.tag} · <strong>{t(locale, 'dl.released')}:</strong>{' '}
+          {release.date.slice(0, 10)} · <a href={release.url}>{t(locale, 'dl.release-page')}</a>
+        </p>
+        <ul class="fk-files">
+          {rows.map(({ name, what, asset }) => (
+            <li>
+              <h3>{name}</h3>
+              <p>{t(locale, what)}</p>
+              <p>
+                {t(locale, 'dl.size')}: {size(asset!.size)}
+              </p>
+              <p>
+                {asset!.sha256 ? (
+                  <>
+                    SHA-256: <code class="fk-hash">{asset!.sha256}</code>
+                  </>
+                ) : (
+                  <em>{t(locale, 'dl.hash-missing')}</em>
+                )}
+              </p>
+              <p>
+                <a class="fk-button" href={asset!.url}>
+                  {t(locale, 'dl.button')} {name}
+                </a>
+              </p>
+            </li>
+          ))}
+        </ul>
+        <h3>{t(locale, 'dl.verify.title')}</h3>
+        <p>{t(locale, 'dl.verify.text')}</p>
+        <pre><code>{HASH_COMMAND}</code></pre>
+        <h3>{t(locale, 'dl.smartscreen.title')}</h3>
+        <p>{t(locale, 'dl.smartscreen.text')}</p>
+      </>
+    ) : (
+      <p>
+        {t(locale, 'dl.none')} <a href={RELEASES}>{RELEASES}</a>
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .fk-files {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+  .fk-files li {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 0;
+  }
+  .fk-hash {
+    overflow-wrap: anywhere;
+  }
+  .fk-button {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.4rem;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert);
+    text-decoration: none;
+  }
+</style>

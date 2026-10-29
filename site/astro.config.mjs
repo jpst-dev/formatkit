@@ -15,7 +15,10 @@ export default defineConfig({
         en: { label: 'English', lang: 'en' },
       },
       // Pages are added to the sidebar by the task that writes them.
-      sidebar: [],
+      sidebar: [
+        { label: 'Download', translations: { 'pt-BR': 'Baixar' }, slug: 'download' },
+        { label: 'Changelog', translations: { 'pt-BR': 'Novidades' }, slug: 'changelog' },
+      ],
       plugins: [starlightLinksValidator()],
     }),
     fkWarnings(),

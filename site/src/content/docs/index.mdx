@@ -2,6 +2,32 @@
 title: FormatKit
 description: Reconstrua o seu PC depois de uma instalação limpa do Windows.
 template: splash
+hero:
+  tagline: Depois de formatar e instalar o Windows, o FormatKit detecta o seu hardware e leva a máquina a um estado totalmente funcional, com o mínimo de cliques.
+  actions:
+    - text: Baixar
+      link: /formatkit/download/
+      icon: right-arrow
+      variant: primary
+    - text: Ver no GitHub
+      link: https://github.com/jpst-dev/formatkit
+      variant: minimal
 ---
 
-Reconstrua o seu PC depois de uma instalação limpa do Windows.
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Esta ferramenta altera o sistema">
+  O FormatKit instala drivers e programas, executa ferramentas de fabricantes, precisa de direitos de administrador e **pode reiniciar o computador**. Teste primeiro em uma máquina virtual e use `--dry-run` antes de uma execução real. Você usa por sua conta e risco.
+</Aside>
+
+<CardGrid>
+  <Card title="Instalação limpa, não clonada" icon="seti:windows">
+    Não restaura uma imagem antiga. Recria o ambiente a partir de um perfil: um pequeno arquivo JSON que diz o que configurar.
+  </Card>
+  <Card title="Tudo registrado e com prévia" icon="document">
+    Cada passo vai para o log e pode ser visto antes com `--dry-run`.
+  </Card>
+  <Card title="Janela ou linha de comando" icon="laptop">
+    `FormatKitUI.exe` para clicar, `formatkit.exe` para o terminal. Windows 11 x64, sem instalar o .NET.
+  </Card>
+</CardGrid>

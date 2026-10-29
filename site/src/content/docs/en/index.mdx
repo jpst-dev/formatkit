@@ -2,6 +2,32 @@
 title: FormatKit
 description: Rebuild your PC after a clean Windows install.
 template: splash
+hero:
+  tagline: After you format and install Windows, FormatKit detects your hardware and gets the machine to a fully working state with minimal clicking.
+  actions:
+    - text: Download
+      link: /formatkit/en/download/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/jpst-dev/formatkit
+      variant: minimal
 ---
 
-Rebuild your PC after a clean Windows install.
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="This tool changes your system">
+  FormatKit installs drivers and software, runs vendor tools, needs administrator rights and **can reboot the computer**. Try it in a virtual machine first and use `--dry-run` before a real run. You use it at your own risk.
+</Aside>
+
+<CardGrid>
+  <Card title="A clean install, not a clone" icon="seti:windows">
+    It does not restore an old image. It rebuilds your environment from a profile: a small JSON file that says what to set up.
+  </Card>
+  <Card title="Logged and previewable" icon="document">
+    Every step is logged and can be previewed first with `--dry-run`.
+  </Card>
+  <Card title="Window or command line" icon="laptop">
+    `FormatKitUI.exe` to click, `formatkit.exe` for the terminal. Windows 11 x64, no .NET install needed.
+  </Card>
+</CardGrid>

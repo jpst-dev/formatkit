@@ -5,5 +5,22 @@
   "category.developer": "Desenvolvedor",
   "level.safe": "Seguro",
   "level.balanced": "Equilibrado",
-  "level.aggressive": "Agressivo"
+  "level.aggressive": "Agressivo",
+  "dl.version": "Versão",
+  "dl.released": "Publicada em",
+  "dl.release-page": "Página da versão no GitHub",
+  "dl.ui.desc": "A janela. Escolha este se quer seguir os passos clicando.",
+  "dl.cli.desc": "A linha de comando. Escolha este para scripts e para o terminal.",
+  "dl.size": "Tamanho",
+  "dl.hash-missing": "SHA-256 indisponível para este arquivo",
+  "dl.button": "Baixar",
+  "dl.verify.title": "Confira o arquivo",
+  "dl.verify.text": "Compare o SHA-256 acima com o que o PowerShell mostra para o arquivo baixado:",
+  "dl.smartscreen.title": "Windows SmartScreen",
+  "dl.smartscreen.text": "Os arquivos não são assinados digitalmente, então o SmartScreen pode mostrar \"O Windows protegeu o computador\". Clique em Mais informações e depois em Executar assim mesmo, se você confia na origem.",
+  "dl.none": "Nenhuma versão foi publicada ainda. Veja as versões no GitHub:",
+  "notes.none": "Sem notas de versão.",
+  "notes.no-releases": "Nenhuma versão publicada ainda.",
+  "notes.prerelease": "Pré-lançamento",
+  "notes.github": "Ver no GitHub"
 }
