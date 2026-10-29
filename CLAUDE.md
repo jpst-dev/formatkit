@@ -22,7 +22,7 @@ Windows CLI (.NET 10, single self-contained `formatkit.exe`) that rebuilds a mac
 
 - Everything goes through the `SystemAccess` interfaces (registry, files, processes, services, console), so steps are unit-tested with fakes. No direct `Registry`, `File` or `Process` calls in steps.
 - TDD: write the failing test first. Every fix found in a VM run gets a unit test that pins it.
-- `ServiceSet`: add new services as the last parameter, then wire them in `src/FormatKit.Cli/Services.cs` and `tests/FormatKit.Core.Tests/Fakes/TestServices.cs` (an optional parameter with a fake default).
+- `ServiceSet`: add new services as the last parameter, then wire them in `src/FormatKit.Hosting/Services.cs` and `tests/FormatKit.Core.Tests/Fakes/TestServices.cs` (an optional parameter with a fake default).
 - Dev module items are `DevItem` records with a `DevItemOutcome`; `DevStepResult.From` turns them into a `StepResult`.
 - A step that is not done after a reboot returns `StepResult.RebootAndRunAgain` (it runs once more after the resume; a second request fails).
 - PowerShell literals built in C# go through `PowerShellText.SingleQuote`.

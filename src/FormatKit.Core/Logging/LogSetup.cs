@@ -8,18 +8,23 @@ public static class LogSetup
     /// <summary>
     /// Creates the run logger. The returned logger implements <see cref="IDisposable"/>;
     /// dispose it to flush and release the log file.
+    /// <paramref name="console"/> false omits the console sink (a GUI host has no console).
     /// </summary>
-    public static Serilog.ILogger Create(AppPaths paths, TimeProvider clock, bool verbose)
+    public static Serilog.ILogger Create(AppPaths paths, TimeProvider clock, bool verbose, bool console = true)
     {
         var stamp = clock.GetLocalNow().ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
         var file = Path.Combine(paths.LogsDirectory, $"run-{stamp}-{Environment.ProcessId}.log");
-        return new LoggerConfiguration()
+        var config = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.File(file)
-            .WriteTo.Console(
+            .WriteTo.File(file);
+        if (console)
+        {
+            config = config.WriteTo.Console(
                 restrictedToMinimumLevel: verbose ? LogEventLevel.Debug : LogEventLevel.Warning,
                 // Stack traces stay in the log file unless --verbose asks for them on screen.
-                outputTemplate: verbose ? "{Message:lj}{NewLine}{Exception}" : "{Message:lj}{NewLine}")
-            .CreateLogger();
+                outputTemplate: verbose ? "{Message:lj}{NewLine}{Exception}" : "{Message:lj}{NewLine}");
+        }
+
+        return config.CreateLogger();
     }
 }

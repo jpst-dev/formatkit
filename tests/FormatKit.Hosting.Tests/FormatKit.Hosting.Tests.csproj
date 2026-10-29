@@ -2,8 +2,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
-    <!-- Exit code 8 = zero tests ran; tolerated until this project gets its first tests. -->
-    <TestingPlatformCommandLineArguments>--ignore-exit-code 8</TestingPlatformCommandLineArguments>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FormatKit.Core\FormatKit.Core.csproj" />
@@ -11,6 +9,7 @@
     <ProjectReference Include="..\..\src\FormatKit.Drivers\FormatKit.Drivers.csproj" />
     <ProjectReference Include="..\..\src\FormatKit.Programs\FormatKit.Programs.csproj" />
     <ProjectReference Include="..\..\src\FormatKit.Dev\FormatKit.Dev.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Hosting\FormatKit.Hosting.csproj" />
     <ProjectReference Include="..\..\src\FormatKit.Cli\FormatKit.Cli.csproj" />
   </ItemGroup>
   <ItemGroup>

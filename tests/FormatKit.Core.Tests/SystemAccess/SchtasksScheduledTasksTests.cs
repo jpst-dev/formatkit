@@ -7,21 +7,49 @@ public class SchtasksScheduledTasksTests
 {
     private const string Exe = "C:\\Tools\\formatkit.exe";
 
+    private static readonly string[] CliArguments = ["run", "--resume", "--wait-on-exit"];
+
     private static ProcessResult Result(int exit, string stdout = "", string stderr = "") =>
         new(exit, stdout, stderr, TimeSpan.Zero, false);
 
     [Fact]
-    public async Task Register_uses_onlogon_highest_and_quoted_exe()
+    public async Task RegisterResumeTask_CliArguments_Unchanged()
     {
         var runner = new FakeProcessRunner();
         runner.Enqueue("schtasks.exe", Result(0));
 
-        await new SchtasksScheduledTasks(runner, Exe).RegisterResumeTaskAsync(TestContext.Current.CancellationToken);
+        await new SchtasksScheduledTasks(runner, Exe, CliArguments).RegisterResumeTaskAsync(TestContext.Current.CancellationToken);
 
         var call = Assert.Single(runner.Calls);
         Assert.Equal(
             ["/Create", "/TN", "FormatKit\\Resume", "/TR", "\"C:\\Tools\\formatkit.exe\" run --resume --wait-on-exit","/SC", "ONLOGON", "/RL", "HIGHEST", "/F"],
             call.Arguments);
+    }
+
+    [Fact]
+    public async Task RegisterResumeTask_UsesGivenArguments()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("schtasks.exe", Result(0));
+
+        await new SchtasksScheduledTasks(runner, "C:\\x\\FormatKit.exe", ["--resume"])
+            .RegisterResumeTaskAsync(TestContext.Current.CancellationToken);
+
+        var call = Assert.Single(runner.Calls);
+        Assert.Equal("\"C:\\x\\FormatKit.exe\" --resume", call.Arguments[call.Arguments.ToList().IndexOf("/TR") + 1]);
+    }
+
+    [Fact]
+    public async Task RegisterResumeTask_QuotesArgumentsContainingSpaces()
+    {
+        var runner = new FakeProcessRunner();
+        runner.Enqueue("schtasks.exe", Result(0));
+
+        await new SchtasksScheduledTasks(runner, Exe, ["--profile", "C:\\my dir\\p.json"])
+            .RegisterResumeTaskAsync(TestContext.Current.CancellationToken);
+
+        var call = Assert.Single(runner.Calls);
+        Assert.Equal("\"C:\\Tools\\formatkit.exe\" --profile \"C:\\my dir\\p.json\"", call.Arguments[call.Arguments.ToList().IndexOf("/TR") + 1]);
     }
 
     [Fact]
@@ -31,7 +59,7 @@ public class SchtasksScheduledTasksTests
         runner.Enqueue("schtasks.exe", Result(1, stderr: "ERROR: Access is denied."));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            new SchtasksScheduledTasks(runner, Exe).RegisterResumeTaskAsync(TestContext.Current.CancellationToken));
+            new SchtasksScheduledTasks(runner, Exe, CliArguments).RegisterResumeTaskAsync(TestContext.Current.CancellationToken));
 
         Assert.Contains("Access is denied", ex.Message);
     }
@@ -43,7 +71,7 @@ public class SchtasksScheduledTasksTests
         runner.Enqueue("schtasks.exe", new ProcessResult(0, "", "", TimeSpan.Zero, true));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            new SchtasksScheduledTasks(runner, Exe).RegisterResumeTaskAsync(TestContext.Current.CancellationToken));
+            new SchtasksScheduledTasks(runner, Exe, CliArguments).RegisterResumeTaskAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -53,7 +81,7 @@ public class SchtasksScheduledTasksTests
         runner.Enqueue("schtasks.exe", Result(0));
         runner.Enqueue("schtasks.exe", Result(0));
 
-        var removed = await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
+        var removed = await new SchtasksScheduledTasks(runner, Exe, CliArguments).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
 
         Assert.True(removed);
         Assert.Equal(2, runner.Calls.Count);
@@ -67,7 +95,7 @@ public class SchtasksScheduledTasksTests
         var runner = new FakeProcessRunner();
         runner.Enqueue("schtasks.exe", Result(1, stderr: "ERRO: O sistema nao pode encontrar o arquivo especificado."));
 
-        var removed = await new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
+        var removed = await new SchtasksScheduledTasks(runner, Exe, CliArguments).RemoveResumeTaskAsync(TestContext.Current.CancellationToken);
 
         Assert.False(removed);
         var call = Assert.Single(runner.Calls);
@@ -82,6 +110,6 @@ public class SchtasksScheduledTasksTests
         runner.Enqueue("schtasks.exe", Result(1, stderr: "ERRO: Acesso negado."));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            new SchtasksScheduledTasks(runner, Exe).RemoveResumeTaskAsync(TestContext.Current.CancellationToken));
+            new SchtasksScheduledTasks(runner, Exe, CliArguments).RemoveResumeTaskAsync(TestContext.Current.CancellationToken));
     }
 }
