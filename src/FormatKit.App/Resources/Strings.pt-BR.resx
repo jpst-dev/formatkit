@@ -39,4 +39,28 @@
   <data name="About_Cli_dev_wsl_user" xml:space="preserve"><value>Cria o usuário Linux dentro de uma distribuição WSL.</value></data>
   <data name="About_Cli_dev_ssh_key" xml:space="preserve"><value>Cria uma chave SSH e mostra a parte pública.</value></data>
   <data name="Placeholder_Soon" xml:space="preserve"><value>Esta página chega em uma etapa posterior.</value></data>
+  <data name="Hw_Machine" xml:space="preserve"><value>Máquina</value></data>
+  <data name="Hw_Board" xml:space="preserve"><value>Placa-mãe</value></data>
+  <data name="Hw_Bios" xml:space="preserve"><value>BIOS</value></data>
+  <data name="Hw_Gpus" xml:space="preserve"><value>GPUs</value></data>
+  <data name="Hw_ProblemDevices" xml:space="preserve"><value>Dispositivos com problema</value></data>
+  <data name="Hw_NetworkAdapters" xml:space="preserve"><value>Adaptadores de rede</value></data>
+  <data name="Hw_None" xml:space="preserve"><value>nenhum</value></data>
+  <data name="Hw_Unknown" xml:space="preserve"><value>desconhecido</value></data>
+  <data name="Hw_Gpu" xml:space="preserve"><value>{0} (driver {1})</value></data>
+  <data name="Hw_Problem" xml:space="preserve"><value>{0} (código de erro {1})</value></data>
+  <data name="Hw_Adapter" xml:space="preserve"><value>{0} (inf {1}, driver {2})</value></data>
+  <data name="Hw_Refresh" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="Hw_ScanButton" xml:space="preserve"><value>Procurar drivers</value></data>
+  <data name="Hw_ScanTitle" xml:space="preserve"><value>Busca de drivers</value></data>
+  <data name="Scan_MachineType" xml:space="preserve"><value>Tipo de máquina</value></data>
+  <data name="Scan_Oem" xml:space="preserve"><value>OEM ({0})</value></data>
+  <data name="Scan_Board" xml:space="preserve"><value>Montada (suporte da placa: {0})</value></data>
+  <data name="Scan_Custom" xml:space="preserve"><value>Montada (sem ferramenta OEM)</value></data>
+  <data name="Scan_Online" xml:space="preserve"><value>Online</value></data>
+  <data name="Scan_Updates" xml:space="preserve"><value>Drivers do Windows Update</value></data>
+  <data name="Scan_GpuPackages" xml:space="preserve"><value>Pacotes de GPU</value></data>
+  <data name="Scan_WuError" xml:space="preserve"><value>A busca no Windows Update falhou: {0}</value></data>
+  <data name="Value_Yes" xml:space="preserve"><value>sim</value></data>
+  <data name="Value_No" xml:space="preserve"><value>não</value></data>
 </root>

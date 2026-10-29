@@ -8,12 +8,13 @@ public sealed partial class MainViewModel : ObservableObject
 {
     private readonly Dictionary<Page, object> _pages;
 
-    public MainViewModel(HomeViewModel home, AboutViewModel about)
+    public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware)
     {
         _pages = new Dictionary<Page, object>
         {
             [Page.Home] = home,
             [Page.About] = about,
+            [Page.Hardware] = hardware,
         };
         foreach (var page in Enum.GetValues<Page>().Where(p => !_pages.ContainsKey(p)))
             _pages[page] = new PlaceholderViewModel(page);
@@ -39,6 +40,15 @@ public sealed partial class MainViewModel : ObservableObject
     private Page _current;
 
     public object CurrentViewModel => _pages[Current];
+
+    partial void OnCurrentChanged(Page oldValue, Page newValue)
+    {
+        // A page that queries the system stops its query when the user leaves it, and reads again when it opens.
+        if (_pages[oldValue] is QueryPageViewModel left)
+            left.Leave();
+        if (_pages[newValue] is HardwareViewModel hardware)
+            hardware.LoadCommand.Execute(null);
+    }
 
     public void Navigate(Page page)
     {

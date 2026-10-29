@@ -1,0 +1,89 @@
+<UserControl x:Class="FormatKit.App.Views.HardwarePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:FormatKit.App.Localization">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <Style x:Key="CardTitle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Opacity" Value="0.75" />
+        </Style>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Gray" />
+        </Style>
+        <DataTemplate x:Key="LineTemplate">
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+        </DataTemplate>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32" MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Text="{loc:Loc Nav_Hardware}" FontSize="28" FontWeight="SemiBold" />
+
+            <ProgressBar IsIndeterminate="True" Height="4" Margin="0,12,0,0"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+
+            <Border Style="{StaticResource Card}" BorderBrush="Firebrick"
+                    Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding Error}" TextWrapping="Wrap" />
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                <Button Content="{loc:Loc Hw_Refresh}" Command="{Binding LoadCommand}" Padding="16,4" />
+                <Button Content="{loc:Loc Hw_ScanButton}" Command="{Binding ScanCommand}" Padding="16,4" Margin="8,0,0,0" />
+            </StackPanel>
+
+            <Border Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="{loc:Loc Hw_Machine}" Style="{StaticResource CardTitle}" />
+                <TextBlock Text="{Binding MachineText}" TextWrapping="Wrap" />
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="{loc:Loc Hw_Board}" Style="{StaticResource CardTitle}" />
+                <TextBlock Text="{Binding BoardText}" TextWrapping="Wrap" />
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="{loc:Loc Hw_Bios}" Style="{StaticResource CardTitle}" />
+                <TextBlock Text="{Binding BiosText}" TextWrapping="Wrap" />
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="{loc:Loc Hw_Gpus}" Style="{StaticResource CardTitle}" />
+                <ItemsControl ItemsSource="{Binding GpuLines}" ItemTemplate="{StaticResource LineTemplate}" />
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="{loc:Loc Hw_NetworkAdapters}" Style="{StaticResource CardTitle}" />
+                <ItemsControl ItemsSource="{Binding AdapterLines}" ItemTemplate="{StaticResource LineTemplate}" />
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="{loc:Loc Hw_ProblemDevices}" Style="{StaticResource CardTitle}" />
+                <ItemsControl ItemsSource="{Binding ProblemLines}" ItemTemplate="{StaticResource LineTemplate}" />
+            </StackPanel></Border>
+
+            <StackPanel Visibility="{Binding HasScan, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{loc:Loc Hw_ScanTitle}" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,0" />
+                <Border Style="{StaticResource Card}"><StackPanel>
+                    <TextBlock Text="{loc:Loc Scan_MachineType}" Style="{StaticResource CardTitle}" />
+                    <TextBlock Text="{Binding MachineTypeText}" TextWrapping="Wrap" />
+                </StackPanel></Border>
+                <Border Style="{StaticResource Card}"><StackPanel>
+                    <TextBlock Text="{loc:Loc Scan_Online}" Style="{StaticResource CardTitle}" />
+                    <TextBlock Text="{Binding OnlineText}" />
+                </StackPanel></Border>
+                <Border Style="{StaticResource Card}"><StackPanel>
+                    <TextBlock Text="{loc:Loc Scan_Updates}" Style="{StaticResource CardTitle}" />
+                    <ItemsControl ItemsSource="{Binding UpdateLines}" ItemTemplate="{StaticResource LineTemplate}" />
+                </StackPanel></Border>
+                <Border Style="{StaticResource Card}"><StackPanel>
+                    <TextBlock Text="{loc:Loc Scan_GpuPackages}" Style="{StaticResource CardTitle}" />
+                    <ItemsControl ItemsSource="{Binding GpuPackageLines}" ItemTemplate="{StaticResource LineTemplate}" />
+                </StackPanel></Border>
+                <Border Style="{StaticResource Card}" BorderBrush="Orange"
+                        Visibility="{Binding HasWindowsUpdateError, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding WindowsUpdateErrorText}" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

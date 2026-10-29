@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using FormatKit.App.Localization;
 using FormatKit.App.Services;
 using FormatKit.App.ViewModels;
+using FormatKit.Drivers.Catalog;
 using FormatKit.Hosting;
 
 namespace FormatKit.App;
@@ -47,7 +48,11 @@ public partial class App : Application
         if (e.Args.Length > 0 && arguments.Mode == AppMode.Window)
             _host.Log.Warning("Unrecognized arguments, opening the window: {Arguments}", e.Args);
 
-        var main = new MainViewModel(new HomeViewModel(_host.StateStore), new AboutViewModel(_dialogs));
+        var vendors = VendorCatalog.LoadEmbedded();
+        var main = new MainViewModel(
+            new HomeViewModel(_host.StateStore),
+            new AboutViewModel(_dialogs),
+            new HardwareViewModel(_host.Services, vendors, _host.Log));
         if (arguments.Mode == AppMode.Resume)
             main.Navigate(Page.RunProfile);
 

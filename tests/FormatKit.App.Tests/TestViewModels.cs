@@ -3,6 +3,7 @@ using FormatKit.App.ViewModels;
 using FormatKit.Core;
 using FormatKit.Core.Running;
 using FormatKit.Core.Tests.Fakes;
+using FormatKit.Drivers.Catalog;
 
 namespace FormatKit.App.Tests;
 
@@ -13,6 +14,9 @@ internal static class TestViewModels
     public static MainViewModel CreateMain(InMemoryFileSystem? files = null)
     {
         var store = Store(files ?? new InMemoryFileSystem());
-        return new MainViewModel(new HomeViewModel(store), new AboutViewModel(new FakeDialogService()));
+        return new MainViewModel(
+            new HomeViewModel(store),
+            new AboutViewModel(new FakeDialogService()),
+            new HardwareViewModel(TestServices.Create(), VendorCatalog.LoadEmbedded()));
     }
 }
