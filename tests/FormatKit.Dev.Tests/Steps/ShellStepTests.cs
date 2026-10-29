@@ -276,6 +276,62 @@ public class ShellStepTests
     }
 
     [Fact]
+    public async Task Network_error_reports_untried_wsl_items_and_still_runs_windows_side()
+    {
+        var rig = WithOhMyPosh();
+        rig.Ready();
+        rig.Wsl(1);                                  // command -v zsh
+        rig.Wsl(1, "", "WININET_E_NAME_NOT_RESOLVED"); // apt-get update
+
+        var result = await Run(Step(Zsh("robbyrussell", "git", "zsh-autosuggestions"), Win()), rig);
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Equal(Strings.Get("Next_CheckNetwork"), result.NextAction);
+        Assert.Contains("zsh: " + Strings.Get("Outcome_Failed"), result.Messages);
+        foreach (var label in new[] { "Oh My Zsh", "plugin zsh-autosuggestions", ".zshrc", "login shell" })
+            Assert.Contains(label + ": " + Strings.Get("Outcome_NotApplicable"), result.Messages);
+        Assert.Single(rig.UserContext.Calls);
+        Assert.True(rig.Files.FileExists(WinPsProfile));
+        Assert.True(rig.Files.FileExists(Fragment));
+    }
+
+    [Fact]
+    public async Task Virtualization_error_at_clone_reports_rest_and_still_runs_windows_side()
+    {
+        var rig = WithOhMyPosh();
+        rig.Ready();
+        rig.Wsl(0, "/usr/bin/zsh\n");
+        rig.Wsl(1);                                  // test -d
+        rig.Wsl(0, "/usr/bin/git\n");
+        rig.Wsl(1, "", "HCS_E_HYPERV_NOT_INSTALLED"); // clone
+
+        var result = await Run(Step(Zsh(), Win()), rig);
+
+        Assert.Equal(Strings.Get("Next_EnableVirtualization"), result.NextAction);
+        Assert.Contains("zsh: " + Strings.Get("Outcome_AlreadyInOrder"), result.Messages);
+        Assert.Contains("Oh My Zsh: " + Strings.Get("Outcome_Failed"), result.Messages);
+        Assert.Contains(".zshrc: " + Strings.Get("Outcome_NotApplicable"), result.Messages);
+        Assert.Contains("login shell: " + Strings.Get("Outcome_NotApplicable"), result.Messages);
+        Assert.Single(rig.UserContext.Calls);
+        Assert.True(rig.Files.FileExists(Fragment));
+    }
+
+    [Fact]
+    public async Task Timed_out_user_check_is_failed_not_pending()
+    {
+        var rig = new Rig();
+        rig.Wsl(0, "Ubuntu\r\n");
+        rig.Processes.Enqueue("wsl.exe", new ProcessResult(-1, "", "", TimeSpan.Zero, true));
+
+        var result = await Run(Step(Zsh()), rig);
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Equal(Strings.Get("Next_SeeLog"), result.NextAction);
+        Assert.Contains("zsh: " + Strings.Get("Outcome_Failed"), result.Messages);
+        Assert.DoesNotContain(result.Messages, m => m.Contains(Strings.Get("Outcome_Pending")));
+    }
+
+    [Fact]
     public async Task Failed_clone_fails_oh_my_zsh_and_skips_its_dependents()
     {
         var rig = new Rig();

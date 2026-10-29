@@ -33,11 +33,7 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
         var items = new List<DevItem>();
 
         if (options.Wsl is { Zsh: true } shell && wsl is not null)
-        {
-            var stop = await RunWslAsync(shell, wsl, items, ctx, ct).ConfigureAwait(false);
-            if (stop)
-                return DevStepResult.From(items);
-        }
+            await RunWslAsync(shell, wsl, items, ctx, ct).ConfigureAwait(false);
 
         if (options.Windows is { OhMyPosh: true } windows)
             await RunWindowsAsync(windows, items, ctx, ct).ConfigureAwait(false);
@@ -47,8 +43,29 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
 
     // ---- WSL side ----
 
-    /// <summary>Adds the WSL items; true when a virtualization or network failure means nothing else can run.</summary>
-    private async Task<bool> RunWslAsync(WslShellOptions shell, WslOptions target, List<DevItem> items, StepContext ctx, CancellationToken ct)
+    /// <summary>
+    /// Adds one item per WSL step. Whatever stops the WSL side early (a virtualization or network error, a failed install),
+    /// the items not tried are reported NotApplicable so none vanishes, and the Windows side still runs.
+    /// </summary>
+    private async Task RunWslAsync(WslShellOptions shell, WslOptions target, List<DevItem> items, StepContext ctx, CancellationToken ct)
+    {
+        await RunWslCoreAsync(shell, target, items, ctx, ct).ConfigureAwait(false);
+
+        List<string> planned = [ZshLabel];
+        if (shell.OhMyZsh)
+        {
+            planned.Add(OhMyZshLabel);
+            planned.AddRange(shell.Plugins.Where(p => DevOptions.ExternalPlugins.Contains(p)).Select(p => $"plugin {p}"));
+            planned.Add(ZshrcLabel);
+        }
+
+        planned.Add(LoginShellLabel);
+        foreach (var label in planned.Where(l => items.All(i => i.Label != l)))
+            items.Add(new(label, DevItemOutcome.NotApplicable));
+    }
+
+    /// <summary>Runs the WSL items in order; true when a virtualization or network failure stopped it.</summary>
+    private async Task<bool> RunWslCoreAsync(WslShellOptions shell, WslOptions target, List<DevItem> items, StepContext ctx, CancellationToken ct)
     {
         var client = ctx.Services.Wsl;
         var home = $"/home/{target.User}";
@@ -64,6 +81,13 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
             {
                 items.Add(Failure(ZshLabel, id, ctx));
                 return true;
+            }
+
+            // Only a plain exit 1 means the user does not exist; a timeout or a wsl.exe failure is not "missing".
+            if (id.TimedOut || id.ExitCode is < 0 or > 1)
+            {
+                items.Add(Failure(ZshLabel, id, ctx));
+                return false;
             }
 
             ready = id is { ExitCode: 0, TimedOut: false };

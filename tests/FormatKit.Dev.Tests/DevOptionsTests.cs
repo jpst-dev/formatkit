@@ -319,6 +319,7 @@ public class DevOptionsTests
 
         Assert.Equal(["git", "zsh-autosuggestions", "z"], options.Shell!.Wsl!.Plugins);
     }
+
     [Theory]
     [InlineData("Comic Sans")]
     [InlineData("meslo")]
