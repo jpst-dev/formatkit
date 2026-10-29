@@ -119,7 +119,7 @@ public class PowerShellDisksTests
         {
             "Get-Disk -Number 3",
             "-ne 'ab''cd') { exit 4 }",
-            "Clear-Disk -Number 3 -RemoveData -RemoveOEM -Confirm:$false",
+            "if ($d.PartitionStyle -ne 'RAW') { Clear-Disk -Number 3 -RemoveData -RemoveOEM -Confirm:$false }",
             "if ($d.PartitionStyle -eq 'RAW')",
             "Initialize-Disk -Number 3 -PartitionStyle MBR",
             "New-Partition -DiskNumber 3 -Size $size -IsActive -AssignDriveLetter",

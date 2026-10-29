@@ -98,7 +98,8 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
             $"if ($null -eq $d -or [string]$d.UniqueId -ne {id}) {{ exit 4 }}; " +
             // One MiB is left free: a partition as large as the whole disk does not fit after the MBR and alignment.
             $"$size = [Math]::Min([int64]$d.Size - 1048576, {max}L); " +
-            $"Clear-Disk -Number {n} -RemoveData -RemoveOEM -Confirm:$false; " +
+            // Clear-Disk fails on a disk that was never initialized (RAW), for example one an earlier run already cleared.
+            $"if ($d.PartitionStyle -ne 'RAW') {{ Clear-Disk -Number {n} -RemoveData -RemoveOEM -Confirm:$false }}; " +
             $"$d = Get-Disk -Number {n}; " +
             $"if ($d.PartitionStyle -eq 'RAW') {{ Initialize-Disk -Number {n} -PartitionStyle MBR }}; " +
             $"$p = New-Partition -DiskNumber {n} -Size $size -IsActive -AssignDriveLetter; " +
