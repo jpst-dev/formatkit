@@ -16,6 +16,7 @@
     <ProjectReference Include="..\FormatKit.Programs\FormatKit.Programs.csproj" />
     <ProjectReference Include="..\FormatKit.Dev\FormatKit.Dev.csproj" />
     <ProjectReference Include="..\FormatKit.Prepare\FormatKit.Prepare.csproj" />
+    <ProjectReference Include="..\FormatKit.Media\FormatKit.Media.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
