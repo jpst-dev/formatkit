@@ -10,7 +10,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware,
         CleanupDiagnosisViewModel diagnosis, ChecklistViewModel checklist,
-        CatalogsViewModel catalogs)
+        CatalogsViewModel catalogs, RunProfileViewModel runProfile)
     {
         _pages = new Dictionary<Page, object>
         {
@@ -20,6 +20,7 @@ public sealed partial class MainViewModel : ObservableObject
             [Page.CleanupDiagnosis] = diagnosis,
             [Page.Checklist] = checklist,
             [Page.Catalogs] = catalogs,
+            [Page.RunProfile] = runProfile,
         };
         foreach (var page in Enum.GetValues<Page>().Where(p => !_pages.ContainsKey(p)))
             _pages[page] = new PlaceholderViewModel(page);

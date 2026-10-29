@@ -11,6 +11,7 @@
         <DataTemplate DataType="{x:Type vm:CleanupDiagnosisViewModel}"><views:CleanupDiagnosisPage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:ChecklistViewModel}"><views:ChecklistPage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:CatalogsViewModel}"><views:CatalogsPage /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RunProfileViewModel}"><views:RunProfilePage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}"><views:PlaceholderPage /></DataTemplate>
     </Window.Resources>
     <Grid>

@@ -121,4 +121,17 @@
   <data name="Worker_Stopped" xml:space="preserve"><value>Stopped after the current step. Use Resume to continue the run.</value></data>
   <data name="Worker_InvalidJob" xml:space="preserve"><value>The worker was started with an invalid job: {0}</value></data>
   <data name="Worker_Error" xml:space="preserve"><value>The run stopped because of an error: {0}</value></data>
+  <data name="RunProfile_Intro" xml:space="preserve"><value>Choose the profile to run. You review the plan before anything changes.</value></data>
+  <data name="RunProfile_Open" xml:space="preserve"><value>Open a profile...</value></data>
+  <data name="RunProfile_DriversOnly" xml:space="preserve"><value>Drivers only</value></data>
+  <data name="RunProfile_DriversOnlyHint" xml:space="preserve"><value>Installs the drivers this machine needs, without a profile file.</value></data>
+  <data name="RunProfile_LastProfile" xml:space="preserve"><value>Last profile</value></data>
+  <data name="RunProfile_UseLast" xml:space="preserve"><value>Use it</value></data>
+  <data name="RunProfile_Errors" xml:space="preserve"><value>This profile has errors</value></data>
+  <data name="RunProfile_Plan" xml:space="preserve"><value>Plan</value></data>
+  <data name="RunProfile_Admin" xml:space="preserve"><value>admin</value></data>
+  <data name="RunProfile_NeedsAdmin" xml:space="preserve"><value>This plan needs administrator rights. Windows asks for permission when the run starts.</value></data>
+  <data name="RunProfile_NoSteps" xml:space="preserve"><value>This profile enables nothing to run.</value></data>
+  <data name="RunProfile_Reload" xml:space="preserve"><value>Reload</value></data>
+  <data name="RunProfile_ChooseAnother" xml:space="preserve"><value>Choose another profile</value></data>
 </root>

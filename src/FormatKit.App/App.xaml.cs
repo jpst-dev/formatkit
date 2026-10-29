@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using FormatKit.App.Localization;
@@ -52,13 +53,19 @@ public partial class App : Application
 
         var set = ModuleSet.CreateReal(_host.Services, _host.Log, _host.NetworkRetryDelay, _host.Dev);
         var runner = new PrepareRunner(_host, set.Modules, PrepareChecks.All, PrepareEnvironment.Current);
+        var launcher = new WorkerLauncher(new ElevationStarter(), _host.Log);
         var main = new MainViewModel(
             new HomeViewModel(_host.StateStore),
             new AboutViewModel(_dialogs),
             new HardwareViewModel(_host.Services, set.Vendors, _host.Log),
             new CleanupDiagnosisViewModel(_host.Services, set.Issues, _host.Log),
             new ChecklistViewModel(runner, new ProfileService(set.Modules), _dialogs, _host.Log),
-            new CatalogsViewModel(set.Cleanup, set.Programs));
+            new CatalogsViewModel(set.Cleanup, set.Programs),
+            new RunProfileViewModel(
+                new ProfileService(set.Modules), set.Modules, launcher, _host.Elevation, _dialogs,
+                new AppSettings(_host.Services.Files, Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatKit", "app.json")),
+                _host));
         if (arguments.Mode == AppMode.Resume)
             main.Navigate(Page.RunProfile);
 

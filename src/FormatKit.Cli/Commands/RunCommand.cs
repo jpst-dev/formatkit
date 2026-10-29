@@ -3,7 +3,6 @@ using FormatKit.Cleanup.Steps;
 using FormatKit.Cli.Localization;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Running;
-using FormatKit.Core.Steps;
 using FormatKit.Hosting;
 
 namespace FormatKit.Cli.Commands;
@@ -102,14 +101,8 @@ internal static class RunFlow
             {
                 var admin = step.RequiresAdmin ? $" [{Strings.Get("Plan_Admin")}]" : "";
                 o.WriteLine($"  {step.Id}  {step.Title}{admin}");
-                if (step is CleanupCategoryStep cleanup)
-                {
-                    foreach (var item in cleanup.Items)
-                        o.WriteLine($"    {item.Id}  {item.LocalizedText().Title}{CleanupCommands.Markers(item)}");
-                }
-
-                foreach (var line in ProgramsCommands.DryRunLines(step))
-                    o.WriteLine(line);
+                foreach (var line in DryRun.Items(step))
+                    o.WriteLine($"    {line}");
             }
 
             return ExitCodes.Ok;

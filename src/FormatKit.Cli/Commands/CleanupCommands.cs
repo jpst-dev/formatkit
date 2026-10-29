@@ -23,10 +23,6 @@ internal static class CleanupCommands
         return cleanup;
     }
 
-    /// <summary>The ` [level]` and ` [contested]` suffix shown after an item's title in the dry-run plan.</summary>
-    internal static string Markers(CleanupItem item) =>
-        $" [{LevelName(item.Level)}]" + (item.Contested ? $" [{Strings.Get("Marker_Contested")}]" : "");
-
     private static string LevelName(CleanupLevel level) => level.ToString().ToLowerInvariant();
 
     private static Command CreateList(CommandContext context)
