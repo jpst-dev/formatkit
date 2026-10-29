@@ -22,7 +22,7 @@ public sealed class RunStateStore(IFileSystem files, AppPaths paths)
         {
             var state = JsonSerializer.Deserialize<RunState>(files.ReadAllText(paths.StateFile), Options);
             if (state is null || state.ProfilePath is null || state.ProfileHash is null
-                || state.PlanStepIds is null || state.Results is null)
+                || state.PlanStepIds is null || state.Results is null || state.RanAgain is null)
                 return Corrupt("State file is missing required fields.");
             if (state.PlanStepIds.Any(id => id is null)
                 || state.Results.Any(kv => kv.Value is null || kv.Value.Messages is null || kv.Value.Messages.Any(m => m is null)))

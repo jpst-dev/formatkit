@@ -321,7 +321,7 @@ formatkit dev wsl-user --profile profiles\dev-example.json
 formatkit dev ssh-key --profile profiles\dev-example.json
 ```
 
-Both read the profile's `dev.wsl` or `dev.ssh` section. Without `--profile` they use `Ubuntu` with your Windows user name in lowercase (exit code 2 if that is not a valid Linux user name) and `ed25519`. They need a console where you can type (exit code 2 otherwise). Exit code 0 means every item is done, already in order or not applicable, 1 that an item failed or is pending, 2 an invalid profile. `dev ssh-key` relaunches elevated (like `run`) because it sets ssh-agent to Automatic.
+Both read the profile's `dev.wsl` or `dev.ssh` section. Without `--profile` they use `Ubuntu` with your Windows user name in lowercase (exit code 2 if that is not a valid Linux user name) and `ed25519`. They need a console where you can type (exit code 2 otherwise). Exit code 0 means every item is done, already in order or not applicable, 1 that an item failed or is pending, 2 an invalid profile. `dev ssh-key` relaunches elevated (like `run`) because it sets ssh-agent to Automatic, and exits with code 5 when you decline the UAC prompt. The `dev` commands write no report.
 
 ## Building
 

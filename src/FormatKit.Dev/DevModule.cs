@@ -1,19 +1,14 @@
 using System.Text.Json;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Steps;
-using FormatKit.Core.SystemAccess;
 using FormatKit.Dev.Steps;
 
 namespace FormatKit.Dev;
 
 /// <param name="time">Stamps backups; used by the steps.</param>
 /// <param name="env">The machine facts; the real ones unless a test supplies others.</param>
-/// <param name="files">The file system for the steps; the real one unless a test supplies another.</param>
-public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFileSystem? files = null) : IModule
+public sealed class DevModule(TimeProvider time, DevEnvironment? env = null) : IModule
 {
-    // Handed to the steps as they are added.
-    internal IFileSystem? Files => files;
-
     public string Name => "dev";
 
     public bool IsEnabled(JsonElement section) =>

@@ -20,6 +20,9 @@ public interface IVirtualDisks
 
     long FreeBytes(string hostRoot);
 
+    /// <summary>True when the drive root (for example <c>C:\</c>) is a local fixed disk, not removable, network or optical.</summary>
+    bool IsFixedDrive(string root);
+
     /// <summary>Registers (replacing any existing) a startup task that re-attaches the VHDX after a reboot.</summary>
     Task RegisterRemountTaskAsync(string vhdxPath, CancellationToken ct);
 }

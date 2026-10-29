@@ -136,6 +136,8 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
 
     public long FreeBytes(string hostRoot) => new DriveInfo(hostRoot).AvailableFreeSpace;
 
+    public bool IsFixedDrive(string root) => new DriveInfo(root).DriveType == DriveType.Fixed;
+
     public Task RegisterRemountTaskAsync(string vhdxPath, CancellationToken ct)
     {
         // The mount script travels base64-encoded (UTF-16LE, as -EncodedCommand expects), so no quoting nests.

@@ -231,6 +231,21 @@ public class DevDriveStepTests
     }
 
     [Fact]
+    public async Task Path_on_a_non_fixed_drive_fails_before_creating()
+    {
+        var rig = new Rig();
+        rig.Disks.FixedDrive = false;
+
+        var result = await rig.Run(Options("npm"));
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Contains(Strings.Get("Next_OtherVhdx"), result.NextAction);
+        Assert.Contains(Strings.Get("Detail_NotFixedDrive"), Message(result, "Dev Drive"));
+        Assert.Contains(Text("NotApplicable"), Message(result, "remount at startup"));
+        Assert.DoesNotContain(rig.Disks.Calls, c => c.StartsWith("Create ", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task Vhdx_missing_after_attach_is_not_created_over()
     {
         var rig = new Rig();

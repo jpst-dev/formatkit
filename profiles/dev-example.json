@@ -10,7 +10,7 @@
     "cleanup": {
       "enabled": true,
       "level": "safe",
-      "include": ["developer.developer-mode", "developer.long-paths", "developer.show-extensions"]
+      "include": ["developer.developer-mode", "developer.long-paths", "developer.show-extensions", "developer.ps-execution-policy"]
     },
     "dev": {
       "enabled": true,

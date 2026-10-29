@@ -54,6 +54,7 @@
   <data name="Validation_VhdxPath" xml:space="preserve"><value>O caminho deve ser absoluto, começar com uma letra de unidade e terminar em .vhdx.</value></data>
   <data name="Validation_VhdxPathChars" xml:space="preserve"><value>O caminho tem caracteres que o Windows não permite, ou indica um arquivo direto na raiz da unidade, sem nome.</value></data>
   <data name="Detail_LetterInUse" xml:space="preserve"><value>a unidade {0}: já está em uso</value></data>
+  <data name="Detail_NotFixedDrive" xml:space="preserve"><value>O VHDX deve ficar em uma unidade fixa local</value></data>
   <data name="Detail_LowSpace" xml:space="preserve"><value>{0} GiB livres, {1} GiB necessários</value></data>
   <data name="Detail_Kept" xml:space="preserve"><value>mantido {0}</value></data>
   <data name="Validation_SizeMin" xml:space="preserve"><value>sizeGB deve ser no mínimo 50.</value></data>

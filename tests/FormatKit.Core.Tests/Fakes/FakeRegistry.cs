@@ -28,8 +28,11 @@ public class FakeRegistry : IRegistry
             .ToList();
     }
 
+    /// <summary>When set, <see cref="GetValueNames"/> throws it.</summary>
+    public Exception? ValueNamesFailure { get; set; }
+
     public IReadOnlyList<string> GetValueNames(string path) =>
-        _values.Keys.Where(k => string.Equals(k.Path, path.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase)).Select(k => k.Name).ToList();
+        ValueNamesFailure is not null ? throw ValueNamesFailure : _values.Keys.Where(k => string.Equals(k.Path, path.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase)).Select(k => k.Name).ToList();
 
     private sealed class KeyComparer : IEqualityComparer<(string Path, string Name)>
     {

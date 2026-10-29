@@ -65,6 +65,11 @@ public sealed class FakeVirtualDisks : IVirtualDisks
     /// <summary>When set, <see cref="AttachAsync"/> leaves the VHDX unknown afterwards (the file vanished).</summary>
     public bool VanishOnAttach { get; set; }
 
+    /// <summary>What <see cref="IsFixedDrive"/> answers for every root.</summary>
+    public bool FixedDrive { get; set; } = true;
+
+    public bool IsFixedDrive(string root) => FixedDrive;
+
     public long FreeBytes(string hostRoot) => FreeBytesFailure is null ? FreeBytesValue : throw FreeBytesFailure;
 
     public Task RegisterRemountTaskAsync(string vhdxPath, CancellationToken ct)

@@ -129,6 +129,7 @@ public class RunStateStoreTests
     [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":null}}")]
     [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":{\"outcome\":\"Failed\",\"finishedAt\":\"2026-10-27T10:00:00+00:00\"}}}")]
     [InlineData("{" + Head + ",\"planStepIds\":[null],\"results\":{}}")]
+    [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{},\"ranAgain\":null}")]
     [InlineData("{" + Head + ",\"planStepIds\":[\"a\"],\"results\":{\"a\":{\"outcome\":99,\"finishedAt\":\"2026-10-27T10:00:00+00:00\",\"messages\":[]}}}")]
     public void Null_entries_or_integer_outcome_return_Corrupt(string json)
     {

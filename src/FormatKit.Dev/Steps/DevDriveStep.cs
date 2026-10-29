@@ -125,6 +125,10 @@ internal sealed class DevDriveStep(DevDriveOptions options) : IStep
     private async Task<DevItem> CreateAsync(StepContext ctx, CancellationToken ct)
     {
         var disks = ctx.Services.VirtualDisks;
+        // The Dev Drive's host must be a local fixed disk: a removable or network volume would not be there at boot.
+        if (!disks.IsFixedDrive(Path.GetPathRoot(options.Path)!))
+            return new DevItem(DriveLabel, DevItemOutcome.Failed, Strings.Get("Next_OtherVhdx"), Strings.Get("Detail_NotFixedDrive"));
+
         if (disks.IsLetterInUse(options.Letter))
             return new DevItem(DriveLabel, DevItemOutcome.Failed, Strings.Get("Next_OtherVhdx"), Strings.Format("Detail_LetterInUse", options.Letter));
 

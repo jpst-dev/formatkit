@@ -309,9 +309,7 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
             return;
         }
 
-        items.Add(IsFontInstalled(windows.Font, ctx)
-            ? new DevItem(fontLabel, DevItemOutcome.AlreadyInOrder)
-            : await InstallFontAsync(ohMyPosh, windows.Font, fontLabel, ctx, ct).ConfigureAwait(false));
+        items.Add(await EnsureFontAsync(ohMyPosh, windows.Font, fontLabel, ctx, ct).ConfigureAwait(false));
         foreach (var profile in profiles)
         {
             var item = EnsureProfile(profile.Path, profile.InitLine, ctx);
@@ -351,6 +349,25 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
     /// Installing again replaces the per-user font files, which crashed a Windows Terminal opened right after (spec 12), so an installed
     /// family is left alone. Font names look like "MesloLGM Nerd Font Regular (TrueType)"; the space after the family keeps "MesloLGMX" out.
     /// </summary>
+    private static async Task<DevItem> EnsureFontAsync(string ohMyPosh, string font, string label, StepContext ctx, CancellationToken ct)
+    {
+        bool installed;
+        try
+        {
+            installed = IsFontInstalled(font, ctx);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // A registry error fails this item only; the profiles and the fragment are still reported.
+            ctx.Log.Warning(ex, "The installed fonts could not be read");
+            return new DevItem(label, DevItemOutcome.Failed, Strings.Get("Next_SeeLog"), ex.Message);
+        }
+
+        return installed
+            ? new DevItem(label, DevItemOutcome.AlreadyInOrder)
+            : await InstallFontAsync(ohMyPosh, font, label, ctx, ct).ConfigureAwait(false);
+    }
+
     private static bool IsFontInstalled(string font, StepContext ctx)
     {
         var prefix = TerminalFragment.FontFamilies[font] + " ";

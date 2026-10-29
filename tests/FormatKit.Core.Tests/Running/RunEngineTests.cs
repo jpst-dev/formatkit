@@ -1,6 +1,7 @@
 using FormatKit.Core.Running;
 using FormatKit.Core.Steps;
 using FormatKit.Core.Tests.Fakes;
+using FormatKit.Core.Localization;
 
 namespace FormatKit.Core.Tests.Running;
 
@@ -236,8 +237,9 @@ public class RunEngineTests
         var summary = await h.Engine.RunAsync(Harness.Request(true, a), TestContext.Current.CancellationToken);
 
         Assert.Equal(2, a.ExecuteCalls);
-        Assert.Equal(StepOutcome.Succeeded, summary.Steps[0].Outcome);
-        Assert.Equal(RunStatus.Completed, summary.Status);
+        Assert.Equal(StepOutcome.Failed, summary.Steps[0].Outcome);
+        Assert.Equal(Strings.Get("Step_RunAgainTwice"), summary.Steps[0].NextAction);
+        Assert.Equal(RunStatus.CompletedWithFailures, summary.Status);
     }
 
     [Fact]

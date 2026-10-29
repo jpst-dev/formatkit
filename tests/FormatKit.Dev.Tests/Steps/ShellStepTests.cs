@@ -412,6 +412,22 @@ public class ShellStepTests
         Assert.All(result.Messages, m => Assert.Contains(Strings.Get("Outcome_Done"), m));
     }
 
+    [Fact]
+    public async Task Font_registry_error_fails_only_the_font_item()
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.ValueNamesFailure = new System.Security.SecurityException("denied");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Contains("font Meslo: " + Strings.Get("Outcome_Failed"), result.Messages.Single(m => m.StartsWith("font Meslo", StringComparison.Ordinal)));
+        Assert.Contains(result.Messages, m => m.Contains("Microsoft.PowerShell_profile.ps1", StringComparison.Ordinal));
+        Assert.Contains(result.Messages, m => m.Contains("formatkit.json", StringComparison.Ordinal));
+        Assert.Contains(Strings.Get("Next_SeeLog"), result.NextAction);
+        Assert.Empty(rig.UserContext.Calls);
+    }
+
     private const string UserFonts = @"HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts";
     private const string MachineFonts = @"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
 

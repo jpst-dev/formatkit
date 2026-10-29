@@ -141,6 +141,14 @@ public sealed class RunEngine(
                 state.Results.Remove(id);
                 state.RanAgain.Add(id);
             }
+            else if (record.RunAgain)
+                // It already ran again once and still wants another run: it never finished, so do not call it done.
+                state.Results[id] = record with
+                {
+                    Outcome = StepOutcome.Failed,
+                    Messages = [.. record.Messages, Strings.Get("Step_RunAgainTwice")],
+                    NextAction = Strings.Get("Step_RunAgainTwice"),
+                };
             else
                 state.Results[id] = record with
                 {

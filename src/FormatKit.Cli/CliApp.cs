@@ -46,7 +46,7 @@ public sealed class CliApp
             new DriversModule(catalog, env.NetworkRetryDelay),
             new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files, env.Log),
             new ProgramsModule(_programs, AppPaths.Default, env.Services.Files, env.Log),
-            new DevModule(TimeProvider.System, env.Dev, files: env.Services.Files),
+            new DevModule(TimeProvider.System, env.Dev),
         ];
     }
 

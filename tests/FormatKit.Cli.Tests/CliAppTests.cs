@@ -586,7 +586,7 @@ public sealed class CliAppTests : IDisposable
     [Fact]
     public void Dev_example_profile_is_valid()
     {
-        var dev = new DevModule(TimeProvider.System, DevEnvironment.Current() with { LogicalProcessors = 16 }, _fs);
+        var dev = new DevModule(TimeProvider.System, DevEnvironment.Current() with { LogicalProcessors = 16 });
         var loader = new ProfileLoader(
         [
             new CleanupModule(CleanupCatalog.LoadEmbedded(), _paths, _fs),
