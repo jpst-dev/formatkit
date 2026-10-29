@@ -145,10 +145,10 @@
   <data name="RunProfile_StopHint" xml:space="preserve"><value>Parar espera a etapa atual terminar.</value></data>
   <data name="RunProfile_StopTitle" xml:space="preserve"><value>Há uma execução em andamento</value></data>
   <data name="RunProfile_StopQuestion" xml:space="preserve"><value>Parar após a etapa atual?</value></data>
-  <data name="RunProfile_Stopped" xml:space="preserve"><value>Parado após a etapa atual.</value></data>
   <data name="RunProfile_UnexpectedEnd" xml:space="preserve"><value>A execução terminou inesperadamente.</value></data>
   <data name="RunProfile_CanResume" xml:space="preserve"><value>A execução pode ser retomada de onde parou.</value></data>
   <data name="RunProfile_OpenReport" xml:space="preserve"><value>Abrir pasta do relatório</value></data>
+  <data name="RunProfile_OpenLogs" xml:space="preserve"><value>Abrir pasta de logs</value></data>
   <data name="StepState_Pending" xml:space="preserve"><value>Pendente</value></data>
   <data name="StepState_Running" xml:space="preserve"><value>Executando</value></data>
   <data name="StepState_Succeeded" xml:space="preserve"><value>Sucesso</value></data>

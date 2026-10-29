@@ -145,10 +145,10 @@
   <data name="RunProfile_StopHint" xml:space="preserve"><value>Stop waits for the current step to finish.</value></data>
   <data name="RunProfile_StopTitle" xml:space="preserve"><value>A run is in progress</value></data>
   <data name="RunProfile_StopQuestion" xml:space="preserve"><value>Stop after the current step?</value></data>
-  <data name="RunProfile_Stopped" xml:space="preserve"><value>Stopped after the current step.</value></data>
   <data name="RunProfile_UnexpectedEnd" xml:space="preserve"><value>The run ended unexpectedly.</value></data>
   <data name="RunProfile_CanResume" xml:space="preserve"><value>The run can be resumed where it stopped.</value></data>
   <data name="RunProfile_OpenReport" xml:space="preserve"><value>Open report folder</value></data>
+  <data name="RunProfile_OpenLogs" xml:space="preserve"><value>Open log folder</value></data>
   <data name="StepState_Pending" xml:space="preserve"><value>Pending</value></data>
   <data name="StepState_Running" xml:space="preserve"><value>Running</value></data>
   <data name="StepState_Succeeded" xml:space="preserve"><value>Succeeded</value></data>

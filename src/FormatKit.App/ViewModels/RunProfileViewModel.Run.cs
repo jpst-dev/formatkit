@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FormatKit.App.Localization;
 using FormatKit.App.Worker;
+using FormatKit.Core;
 using FormatKit.Core.Running;
 
 namespace FormatKit.App.ViewModels;
@@ -50,6 +51,16 @@ public sealed partial class RunProfileViewModel
 
     public bool HasRunMessage => RunMessage is not null;
 
+    public IRelayCommand OpenLogFolderCommand { get; private set; } = null!;
+
+    /// <summary>The last run ended without Finished or Failed (the worker exited unexpectedly): the log folder is offered.</summary>
+    [ObservableProperty]
+    private bool _endedWithoutResult;
+
+    /// <summary>True from the run's confirmation until it ends, including the UAC prompt and the worker's start.</summary>
+    [ObservableProperty]
+    private bool _isBusy;
+
     /// <summary>A valid profile that enables no step: there is nothing to run.</summary>
     public bool HasNoSteps => ReviewedHash is not null && Plan.Count == 0;
 
@@ -62,7 +73,17 @@ public sealed partial class RunProfileViewModel
         RunCommand = new AsyncRelayCommand(RunAsync, () => ReviewedHash is not null && HasPlan && !IsRunning);
         StopCommand = new AsyncRelayCommand(StopAsync, () => IsRunning && !_stopSent);
         OpenReportCommand = new RelayCommand(() => _dialogs.OpenFolder(ReportDirectory!), () => ReportDirectory is not null);
+        OpenLogFolderCommand = new RelayCommand(() => _dialogs.OpenFolder(AppPaths.Default.LogsDirectory));
         RefreshInterruptedRun();
+    }
+
+    partial void OnIsBusyChanged(bool value)
+    {
+        OpenCommand.NotifyCanExecuteChanged();
+        UseDriversOnlyCommand.NotifyCanExecuteChanged();
+        UseLastProfileCommand.NotifyCanExecuteChanged();
+        ReloadCommand.NotifyCanExecuteChanged();
+        ChooseAnotherCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsRunningChanged(bool value)
@@ -87,13 +108,14 @@ public sealed partial class RunProfileViewModel
 
     /// <summary>
     /// Closing the window: true at once when no run is going on; during a run asks to stop after the current step,
-    /// and on yes sends <see cref="Cancel"/> and waits until the run ends. False keeps the window open.
+    /// and on yes sends <see cref="Cancel"/> and waits until the run ends. False keeps the window open. After Stop was
+    /// already sent it does not ask again: it only waits for the run to end.
     /// </summary>
     public async Task<bool> ConfirmCloseAsync()
     {
         if (!IsRunning)
             return true;
-        if (!_dialogs.Confirm(Strings.Get("RunProfile_StopTitle"), Strings.Get("RunProfile_StopQuestion")))
+        if (!_stopSent && !_dialogs.Confirm(Strings.Get("RunProfile_StopTitle"), Strings.Get("RunProfile_StopQuestion")))
             return false;
 
         var ended = _runEnded.Task;
@@ -107,6 +129,19 @@ public sealed partial class RunProfileViewModel
         if (!_dialogs.Confirm(Strings.Get("RunProfile_ConfirmTitle"), Strings.Get("RunProfile_ConfirmRun")))
             return;
 
+        IsBusy = true;
+        try
+        {
+            await StartAndFollowAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task StartAndFollowAsync()
+    {
         RunMessage = null;
         // The worker parses exactly this job (WorkerHost.TryParse).
         string[] job = ["run", "--profile", ProfilePath!, "--profile-hash", ReviewedHash!];
@@ -140,6 +175,7 @@ public sealed partial class RunProfileViewModel
         _runEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         FinalStatus = null;
         ReportDirectory = null;
+        EndedWithoutResult = false;
         ShowSteps(Plan.Select(r => new StepRow(r.Id, r.Title)));
         IsRunning = true;
         Phase = RunPhase.Running;
@@ -157,20 +193,34 @@ public sealed partial class RunProfileViewModel
         {
             _env.Log.Warning("Run: reading from the worker failed ({Reason})", ex.Message);
         }
+        catch (Exception ex)
+        {
+            // Never leave the page running: the run ends as unexpected, and closing the window stays possible.
+            _env.Log.Error(ex, "Run: handling a worker message failed");
+        }
+        finally
+        {
+            await EndRunAsync(connection, status);
+        }
+    }
 
+    private async Task EndRunAsync(WorkerConnection connection, string? status)
+    {
         _connection = null;
         try
         {
             await connection.Channel.DisposeAsync();
         }
-        catch (Exception ex) when (ex is IOException or ObjectDisposedException)
+        catch (Exception ex)
         {
             _env.Log.Warning("Run: closing the worker channel failed ({Reason})", ex.Message);
         }
 
         if (status is null)
             _env.Log.Warning("Run: the worker channel ended without a result");
+        EndedWithoutResult = status is null;
         FinalStatus = status ?? Strings.Get("RunProfile_UnexpectedEnd");
+        // Also after a stop or a failure: the saved state decides whether Resume is offered.
         RefreshInterruptedRun();
         IsRunning = false;
         Phase = RunPhase.Result;
@@ -201,8 +251,9 @@ public sealed partial class RunProfileViewModel
                 ReportDirectory = done.Summary.ReportDirectory;
                 return RunStatusText.Of(done.Summary);
             case Failed failed:
-                // After a stop the worker reports Worker_Stopped as a failure: show it as the stop it is.
-                return _stopSent ? Strings.Get("RunProfile_Stopped") : failed.Message;
+                // Shown as it arrives: after a stop it is the worker's Worker_Stopped text, which offers Resume.
+                _env.Log.Warning("Run: the worker reported a failure: {Message}", failed.Message);
+                return failed.Message;
             default:
                 _env.Log.Warning("Run: unexpected {Type} from the worker ignored", message.GetType().Name);
                 return null;

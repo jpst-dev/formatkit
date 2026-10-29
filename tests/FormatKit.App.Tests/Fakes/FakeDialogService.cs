@@ -10,6 +10,9 @@ public sealed class FakeDialogService : IDialogService
     public bool ConfirmResult { get; set; } = true;
     public bool RebootResult { get; set; } = true;
 
+    /// <summary>When set, the reboot countdown throws it.</summary>
+    public Exception? RebootException { get; set; }
+
     public List<string> Calls { get; } = [];
     public List<string> Errors { get; } = [];
     public List<string> OpenedFolders { get; } = [];
@@ -51,6 +54,7 @@ public sealed class FakeDialogService : IDialogService
     {
         Calls.Add("RebootCountdown");
         RebootCountdowns.Add(seconds);
+        if (RebootException is { } ex) throw ex;
         return Task.FromResult(RebootResult);
     }
 }

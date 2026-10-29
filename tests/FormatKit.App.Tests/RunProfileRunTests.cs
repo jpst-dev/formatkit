@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using CommunityToolkit.Mvvm.Input;
 using FormatKit.App.Localization;
 using FormatKit.App.Services;
 using FormatKit.App.Tests.Fakes;
@@ -257,7 +258,7 @@ public sealed class RunProfileRunTests : IDisposable
         await run.WaitAsync(Timeout, Ct);
 
         Assert.Single(_launcher.Received.OfType<Cancel>());
-        Assert.Equal(Strings.Get("RunProfile_Stopped"), vm.FinalStatus);
+        Assert.Equal(Strings.Get("Worker_Stopped"), vm.FinalStatus);
         Assert.True(vm.HasInterruptedRun);
         Assert.Equal(StepState.Succeeded, vm.Steps[0].State);
         Assert.False(vm.StopCommand.CanExecute(null));
@@ -402,5 +403,113 @@ public sealed class RunProfileRunTests : IDisposable
 
         Assert.False(vm.HasNoSteps);
         Assert.True(vm.RunCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task ChannelEndsEarly_OffersTheLogFolder()
+    {
+        var vm = Reviewed();
+        _launcher.Script.AddRange([PlannedAll(), new StepStarted(1, 3, "drivers.scan")]);
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+        Assert.True(vm.EndedWithoutResult);
+        vm.OpenLogFolderCommand.Execute(null);
+
+        Assert.Equal([AppPaths.Default.LogsDirectory], _dialogs.OpenedFolders);
+    }
+
+    [Fact]
+    public async Task Finished_HasAResult()
+    {
+        var vm = Reviewed();
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.False(vm.EndedWithoutResult);
+    }
+
+    [Fact]
+    public async Task Stop_ThenAnotherFailure_ShowsItsMessage()
+    {
+        var vm = Reviewed();
+        _launcher.Script.AddRange([
+            PlannedAll(),
+            new StepStarted(1, 3, "drivers.scan"),
+            new Expect<Cancel>(),
+            new Do(SeedState),
+            new Failed("other"),
+        ]);
+
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].State == StepState.Running);
+        await vm.StopCommand.ExecuteAsync(null);
+        await run.WaitAsync(Timeout, Ct);
+
+        Assert.Equal("other", vm.FinalStatus);
+        Assert.True(vm.HasInterruptedRun);
+    }
+
+    [Fact]
+    public async Task HandlingThrows_EndsTheRunAsUnexpected()
+    {
+        var vm = Reviewed();
+        _dialogs.RebootException = new InvalidOperationException("dialog broke");
+        _launcher.Script.AddRange([PlannedAll(), new RebootCountdown(60), new Expect<RebootNow>()]);
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.False(vm.IsRunning);
+        Assert.Equal(RunPhase.Result, vm.Phase);
+        Assert.Equal(Strings.Get("RunProfile_UnexpectedEnd"), vm.FinalStatus);
+        Assert.True(await vm.ConfirmCloseAsync().WaitAsync(Timeout, Ct));
+    }
+
+    [Fact]
+    public async Task Starting_DisablesChoosingAnotherProfile()
+    {
+        _files.Seed(Path.Combine(_dir, "profile.json"), AdminJson);
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource();
+        _launcher.StartGate = gate.Task;
+        _launcher.Declines = true;
+        IRelayCommand[] choose =
+            [vm.OpenCommand, vm.ReloadCommand, vm.ChooseAnotherCommand, vm.UseDriversOnlyCommand, vm.UseLastProfileCommand];
+        Assert.All(choose, c => Assert.True(c.CanExecute(null)));
+
+        var run = vm.RunCommand.ExecuteAsync(null);
+        Assert.All(choose, c => Assert.False(c.CanExecute(null)));
+
+        gate.SetResult();
+        await run.WaitAsync(Timeout, Ct);
+        Assert.All(choose, c => Assert.True(c.CanExecute(null)));
+    }
+
+    [Fact]
+    public async Task ConfirmClose_AfterStop_WaitsWithoutAskingAgain()
+    {
+        var vm = Reviewed();
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.Script.AddRange([
+            PlannedAll(),
+            new StepStarted(1, 3, "drivers.scan"),
+            new Expect<Cancel>(),
+            new Do(() => release.Task),
+            new Failed(Strings.Get("Worker_Stopped")),
+        ]);
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].State == StepState.Running);
+        await vm.StopCommand.ExecuteAsync(null);
+        _dialogs.Confirmations.Clear();
+
+        var close = vm.ConfirmCloseAsync();
+        await Task.Delay(50, Ct);
+        Assert.False(close.IsCompleted);
+
+        release.SetResult();
+        Assert.True(await close.WaitAsync(Timeout, Ct));
+        await run.WaitAsync(Timeout, Ct);
+        Assert.Empty(_dialogs.Confirmations);
+        Assert.Single(_launcher.Received.OfType<Cancel>());
     }
 }

@@ -52,12 +52,17 @@ public sealed class FakeWorkerLauncher : IWorkerLauncher
         }
     }
 
-    public Task<WorkerConnection?> StartAsync(IReadOnlyList<string> job, bool elevate, CancellationToken ct)
+    /// <summary>When set, the start waits for it (a pending UAC prompt).</summary>
+    public Task? StartGate { get; set; }
+
+    public async Task<WorkerConnection?> StartAsync(IReadOnlyList<string> job, bool elevate, CancellationToken ct)
     {
         Jobs.Add(job);
         Elevations.Add(elevate);
+        if (StartGate is { } gate)
+            await gate;
         if (Declines)
-            return Task.FromResult<WorkerConnection?>(null);
+            return null;
 
         var (workerEnd, windowEnd) = DuplexStream.CreatePair();
         var log = new Serilog.LoggerConfiguration().CreateLogger();
@@ -76,7 +81,7 @@ public sealed class FakeWorkerLauncher : IWorkerLauncher
                 exited.TrySetResult(0);
             }
         });
-        return Task.FromResult<WorkerConnection?>(new WorkerConnection(new MessageChannel(windowEnd, log), exited.Task));
+        return new WorkerConnection(new MessageChannel(windowEnd, log), exited.Task);
     }
 
     public async Task WaitForAsync<T>() where T : WorkerMessage

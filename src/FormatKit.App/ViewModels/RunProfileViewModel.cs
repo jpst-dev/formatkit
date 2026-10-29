@@ -40,11 +40,12 @@ public sealed partial class RunProfileViewModel : ObservableObject
         _settings = settings;
         _env = env;
 
-        OpenCommand = new RelayCommand(Open);
-        UseDriversOnlyCommand = new RelayCommand(() => Review(BuiltInProfiles.DriversOnlyPath));
-        UseLastProfileCommand = new RelayCommand(() => Review(LastProfile!), () => LastProfile is not null);
-        ReloadCommand = new RelayCommand(() => Review(ProfilePath!), () => ProfilePath is not null);
-        ChooseAnotherCommand = new RelayCommand(ChooseAnother);
+        // None of these while a run starts or runs: the page would show another profile than the one running.
+        OpenCommand = new RelayCommand(Open, () => !IsBusy);
+        UseDriversOnlyCommand = new RelayCommand(() => Review(BuiltInProfiles.DriversOnlyPath), () => !IsBusy);
+        UseLastProfileCommand = new RelayCommand(() => Review(LastProfile!), () => LastProfile is not null && !IsBusy);
+        ReloadCommand = new RelayCommand(() => Review(ProfilePath!), () => ProfilePath is not null && !IsBusy);
+        ChooseAnotherCommand = new RelayCommand(ChooseAnother, () => !IsBusy);
         InitializeRun();
         RefreshLastProfile();
     }
