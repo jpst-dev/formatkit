@@ -335,7 +335,7 @@ formatkit prepare check
 formatkit prepare check --profile profiles\my-profile.json --output E:\checklist.md
 ```
 
-- `--profile <file>` also checks the files and folders the profile needs after the format: `programs.importFile`, `programs.direct[].path`, `drivers.networkDriverBackup` and `dev.dotfiles.path`, plus the profile file itself. An invalid profile prints its errors and exits with code 2 before any check runs.
+- `--profile <file>` also checks the files and folders the profile needs after the format: `programs.importFile`, `programs.direct[].path`, `drivers.networkDriverBackup` and `dev.dotfiles.path`, plus the profile file itself. A profile input that does not exist is also a Blocker. An invalid profile prints its errors and exits with code 2 before any check runs.
 - `--output <file.md>` also writes the checklist as Markdown, with a `- [ ]` box before every Blocker and Attention item. Write it to another drive: if the file is on the Windows drive, the command warns that it will be erased (it is written anyway). An existing file is overwritten.
 
 Example output (abridged):

@@ -525,12 +525,12 @@ Record what the scenarios find in the "Found while running" section of the [prep
    .\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check; "exit=$LASTEXITCODE"'
    ```
 
-**Expected:** exit code **0** and the last line `Safe to format.`. There is no Blocker. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: the user folders (empty or not on the Windows drive). No Git, WSL or key item appears. Nothing in the output holds a product key.
+**Expected:** exit code **0** and the last line `Safe to format.`. There is no Blocker. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: usually the user folders (empty or not on the Windows drive; a folder on `C:` that holds files is an Attention item). No Git, WSL or key item appears. Nothing in the output holds a product key.
 
 ## 18. Prepare: Git repositories with unpushed work
 
-1. Restore `clean`, copy `formatkit.exe`, and install Git: `.\tools\vm\vm.ps1 run -Command 'winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements'`.
-2. Copy this script to `C:\fk\repos.ps1` and run it (`vm.ps1 run -Command '& ([scriptblock]::Create((Get-Content C:\fk\repos.ps1 -Raw)))'`). It uses the `Documents` folder of the account that runs it, which must be the signed-in user, and the bare repository stands in for GitHub:
+1. Restore `clean`, copy `formatkit.exe`, and install Git. winget is per user, so do not use `vm.ps1 run` (no desktop): create `git-install.ps1` on the host with `winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements *> C:\fk\git-install.txt` and run `.\tools\vm\vm.ps1 job -File git-install.ps1` (the user must be signed in and connected), then check `C:\fk\git-install.txt` and `Test-Path 'C:\Program Files\Git\cmd\git.exe'`. Alternatively install it through a small profile with `development.git` in `programs` and `formatkit run`, as scenario 14 does.
+2. Copy this script to `C:\fk\repos.ps1` and run it (`vm.ps1 run -Command '& ([scriptblock]::Create((Get-Content C:\fk\repos.ps1 -Raw)))'`). It uses the `Documents` folder of the account that runs it; `vm.ps1 run` and the check in step 3 both run as the VM admin account, so they see the same folder. The bare repository stands in for GitHub:
 
    ```powershell
    $git = 'C:\Program Files\Git\cmd\git.exe'
@@ -578,7 +578,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
 
 4. Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check --profile C:\fk\prepare.json; "exit=$LASTEXITCODE"'`.
 
-   **Expected:** exit code **1**. Under Blocker (group Apps and FormatKit): `The program list C:\fk\programs.json is on C: and will be erased` and `The network driver backup C:\fk\netdrivers is on C: and will be erased`, each with the action to move it off `C:` and update the JSON path named in it, and `The profile file is on C: and will be erased` (the profile itself lives on `C:`). No path is reported twice.
+   **Expected:** exit code **1**. Under Blocker (group Apps and FormatKit): `The program list C:\fk\programs.json is on C: and will be erased` and `The network driver backup C:\fk\netdrivers is on C: and will be erased`, the first two with the action to move it off `C:` and update the profile (the program list and driver backup actions name `modules.programs.importFile` and `modules.drivers.networkDriverBackup`), and `The profile file is on C: and will be erased` with the action `Move it off C: and update the profile.` (the profile itself lives on `C:`). No path is reported twice.
 5. Move everything to `F:`: `Copy-Item C:\fk\programs.json, C:\fk\prepare.json F:\; Copy-Item C:\fk\netdrivers F:\ -Recurse`, then edit `F:\prepare.json` so the two paths are `F:\\netdrivers` and `F:\\programs.json`. Run `.\formatkit.exe prepare check --profile F:\prepare.json`.
 
    **Expected:** exit code **0**. `The program list F:\programs.json is off C:` and `The network driver backup F:\netdrivers is off C:` under Ok, plus `1 profile file is off C:` (the profile).
@@ -587,7 +587,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
 ## 20. Prepare: BitLocker on the data disk
 
 1. On the host check whether the VM has a virtual TPM: `Get-VMSecurity -VMName <vm name>` and read `TpmEnabled`. **If it is `False`, the scenario is not covered:** do not enable BitLocker, and record "scenario 20: not covered (no vTPM)" in the "Found while running" section of the spec. If it is `True`, continue.
-2. Restore `clean`, copy `formatkit.exe`, attach the data disk (`F:`). In the VM, in an elevated PowerShell (`vm.ps1 run` is elevated), turn BitLocker on for `F:` and wait until `Get-BitLockerVolume F:` shows `ProtectionStatus` `On`:
+2. Restore `clean`, copy `formatkit.exe`, attach the data disk (`F:`). In the VM, in an elevated PowerShell (`vm.ps1 run` is assumed to be elevated; step 4 confirms it with the `IsInRole` line), turn BitLocker on for `F:` and wait until `Get-BitLockerVolume F:` shows `ProtectionStatus` `On`:
 
    ```powershell
    Enable-BitLocker -MountPoint F: -RecoveryPasswordProtector -UsedSpaceOnly -SkipHardwareTest
@@ -603,7 +603,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
 ## 21. Prepare: WSL distribution
 
 1. Restore the **`nested`** checkpoint (`.\tools\vm\vm.ps1 nested`), copy `formatkit.exe`, and install one distro by running scenario 13 up to step 5. Keep the user signed in and connected.
-2. WSL is registered per user, so run the check on that user's desktop: write `C:\fk\prepare-wsl.ps1` with `C:\fk\formatkit.exe prepare check *> C:\fk\prepare.txt; "exit=$LASTEXITCODE" | Add-Content C:\fk\prepare.txt` and run `.\tools\vm\vm.ps1 job -File prepare-wsl.ps1`, then read `C:\fk\prepare.txt`. (Running the command in a console of the signed-in user works too.)
+2. WSL is registered per user, so run the check on that user's desktop: create `prepare-wsl.ps1` on the host (in the repo working directory; `job -File` takes a host path and copies it into the VM) with `C:\fk\formatkit.exe prepare check *> C:\fk\prepare.txt; "exit=$LASTEXITCODE" | Add-Content C:\fk\prepare.txt` and run `.\tools\vm\vm.ps1 job -File prepare-wsl.ps1`, then read `C:\fk\prepare.txt`. (Running the command in a console of the signed-in user works too.)
 
    **Expected:** under Attention (group Developer) `The WSL distribution Ubuntu will be erased` with the action `Export it with wsl --export Ubuntu E:\Ubuntu.tar ...`. Docker's own distros are never listed. Exit code **0**. On the plain `clean` checkpoint (no WSL) there is no WSL item.
 
