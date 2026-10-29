@@ -116,4 +116,9 @@
   <data name="ProgramCategory_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
   <data name="Check_NotChecked" xml:space="preserve"><value>{0} verificações não puderam ser executadas (veja o log).</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>O diário de limpeza não pôde ser lido: {0}</value></data>
+  <data name="Worker_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde que você o revisou. Revise-o novamente.</value></data>
+  <data name="Worker_ProfileErrors" xml:space="preserve"><value>O perfil tem {0} problema(s); nada foi executado:</value></data>
+  <data name="Worker_Stopped" xml:space="preserve"><value>Parado após a etapa atual. Use Retomar para continuar a execução.</value></data>
+  <data name="Worker_InvalidJob" xml:space="preserve"><value>O processo de execução foi iniciado com uma tarefa inválida: {0}</value></data>
+  <data name="Worker_Error" xml:space="preserve"><value>A execução parou por causa de um erro: {0}</value></data>
 </root>

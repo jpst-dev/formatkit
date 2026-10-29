@@ -21,11 +21,12 @@ public sealed class MessageChannel(Stream stream, Serilog.ILogger log) : IAsyncD
         json.CopyTo(line, 0);
         line[^1] = (byte)'\n';
 
-        await _sendLock.WaitAsync(ct);
+        await _sendLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await stream.WriteAsync(line, ct);
-            await stream.FlushAsync(ct);
+            // Once the lock is held the line goes out whole: a cancelled write would leave half a line on the stream.
+            await stream.WriteAsync(line, CancellationToken.None).ConfigureAwait(false);
+            await stream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
         }
         finally
         {
@@ -41,7 +42,8 @@ public sealed class MessageChannel(Stream stream, Serilog.ILogger log) : IAsyncD
 
         while (true)
         {
-            var read = await stream.ReadAsync(buffer, ct);
+            // WaitAsync: a stream that ignores the token still lets the reader end when it is cancelled.
+            var read = await stream.ReadAsync(buffer, ct).AsTask().WaitAsync(ct).ConfigureAwait(false);
             if (read == 0)
             {
                 // End of stream: a final line without a newline is parsed if complete, dropped if partial.
@@ -101,6 +103,6 @@ public sealed class MessageChannel(Stream stream, Serilog.ILogger log) : IAsyncD
     public async ValueTask DisposeAsync()
     {
         _sendLock.Dispose();
-        await stream.DisposeAsync();
+        await stream.DisposeAsync().ConfigureAwait(false);
     }
 }

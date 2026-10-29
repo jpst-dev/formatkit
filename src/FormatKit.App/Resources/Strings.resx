@@ -116,4 +116,9 @@
   <data name="ProgramCategory_Development" xml:space="preserve"><value>Development</value></data>
   <data name="Check_NotChecked" xml:space="preserve"><value>{0} checks could not be run (see log).</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
+  <data name="Worker_ProfileChanged" xml:space="preserve"><value>The profile changed since you reviewed it. Review it again.</value></data>
+  <data name="Worker_ProfileErrors" xml:space="preserve"><value>The profile has {0} problem(s); nothing was run:</value></data>
+  <data name="Worker_Stopped" xml:space="preserve"><value>Stopped after the current step. Use Resume to continue the run.</value></data>
+  <data name="Worker_InvalidJob" xml:space="preserve"><value>The worker was started with an invalid job: {0}</value></data>
+  <data name="Worker_Error" xml:space="preserve"><value>The run stopped because of an error: {0}</value></data>
 </root>

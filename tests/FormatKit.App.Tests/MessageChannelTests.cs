@@ -1,4 +1,5 @@
 using System.Text;
+using FormatKit.App.Tests.Fakes;
 using FormatKit.App.Worker;
 using FormatKit.Core.Running;
 using FormatKit.Core.Steps;
@@ -125,16 +126,66 @@ public class MessageChannelTests
     [Fact]
     public async Task Send_Concurrent_LinesNeverInterleave()
     {
-        var ms = new MemoryStream();
-        await using var ch = new MessageChannel(ms, Log);
-        var msg = new string('y', 5000);
-        await Task.WhenAll(Enumerable.Range(0, 200).Select(i =>
+        // The stream writes 7 bytes at a time and yields between chunks, so unserialized sends would interleave.
+        var stream = new ChunkedWriteStream();
+        await using var ch = new MessageChannel(stream, Log);
+        var msg = new string('y', 500);
+        await Task.WhenAll(Enumerable.Range(0, 50).Select(i =>
             Task.Run(() => ch.SendAsync(new Failed(msg + i), CancellationToken.None))));
-        var lines = Encoding.UTF8.GetString(ms.ToArray()).Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        Assert.Equal(200, lines.Length);
-        ms.Position = 0;
+        await using var reader = new MessageChannel(new MemoryStream(stream.ToArray()), Log);
+        var read = await ReadAll(reader);
+        Assert.Equal(50, read.Count);
+        Assert.Equal(
+            Enumerable.Range(0, 50).Select(i => msg + i).Order(),
+            read.Select(m => Assert.IsType<Failed>(m).Message).Order());
+    }
+
+    [Fact]
+    public async Task Send_CancelledWhileWriting_StillWritesTheWholeLine()
+    {
+        using var cts = new CancellationTokenSource();
+        var stream = new ChunkedWriteStream { AfterChunk = cts.Cancel };
+        await using var ch = new MessageChannel(stream, Log);
+
+        await ch.SendAsync(new Failed(new string('z', 100)), cts.Token);
+
+        var text = Encoding.UTF8.GetString(stream.ToArray());
+        Assert.EndsWith("\n", text);
+        await using var reader = new MessageChannel(new MemoryStream(stream.ToArray()), Log);
+        Assert.Equal(new string('z', 100), Assert.IsType<Failed>(Assert.Single(await ReadAll(reader))).Message);
+    }
+
+    [Fact]
+    public async Task Read_FewBytesPerRead_SplitsUtf8MidCharacter()
+    {
+        var bytes = new UTF8Encoding(false).GetBytes("{\"type\":\"failed\",\"message\":\"ação ação\"}\n{\"type\":\"cancel\"}\n");
+        await using var ch = new MessageChannel(new TrickleReadStream(bytes), Log);
+
         var read = await ReadAll(ch);
-        Assert.Equal(200, read.Count);
-        Assert.All(read, m => Assert.StartsWith(msg, Assert.IsType<Failed>(m).Message));
+
+        Assert.Equal(2, read.Count);
+        Assert.Equal("ação ação", Assert.IsType<Failed>(read[0]).Message);
+        Assert.IsType<Cancel>(read[1]);
+    }
+
+    [Fact]
+    public async Task Read_Cancelled_EndsPromptlyOnAStreamThatNeverAnswers()
+    {
+        await using var ch = new MessageChannel(new NeverReadStream(), Log);
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+
+        var reading = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var _ in ch.ReadAllAsync(cts.Token)) { }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }, TestContext.Current.CancellationToken);
+
+        var first = await Task.WhenAny(reading, Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+        Assert.Same(reading, first);
     }
 }
