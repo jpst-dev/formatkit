@@ -15,6 +15,8 @@ FormatKit changes the system. Run this script in a disposable VM, never first on
 3. Take a checkpoint named `clean`. Restore it between scenarios.
 4. Create a shared folder on the host (for example `C:\FormatKitShare`) reachable from the VM (Enhanced Session drive redirection or an SMB share).
 
+   With a VM made by `New-TestVm.ps1`, `tools\vm\vm.ps1` replaces the shared folder: it restores the checkpoint, copies files into `C:\fk` and runs commands or job scripts in the VM, using the credentials in `.vm\test-vm.json`. Its help (`Get-Help .\tools\vm\vm.ps1`) lists the actions.
+
 **Expected:** the VM boots to the desktop with internet access; the checkpoint exists.
 
 ## 1. Fresh VM sanity
