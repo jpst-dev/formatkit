@@ -650,7 +650,7 @@ Record what the scenarios find in the "Found while running" section of the insta
 1. Build as above, without `--profile`. **Expected:** the command prints the phases (copying the Windows files, splitting `install.wim` when it is larger than 4 GiB, writing autounattend.xml), a percentage every 10 %, `The installation media is ready in ...` and the reminder to run `formatkit prepare check`; exit code **0**.
 2. Create the VM, start it and watch Setup.
 
-**Expected:** Setup starts without a language screen (the language, keyboard and time zone come from the host or the `setup` section). The only manual screens are **disk selection**, the **local account** (name and password, typed by you in the VM console) and, because a VM has no firmware key, the **edition** screen. No license terms or privacy screens. After the first logon: `Test-Path C:\FormatKit` is **False** (no profile was bundled) and nothing starts by itself.
+**Expected:** Setup starts without a language screen (the language, keyboard and time zone come from the host or the `setup` section). The only manual screens are, because a VM has no firmware key, the **product key** screen ("I don't have a product key") and the **edition** screen, then **disk selection** and the **local account** (name and password, typed by you in the VM console; a blank password is fine in this disposable VM). OOBE may offer an update: "Update later" skips it. No license terms or privacy screens. After the first logon: `Test-Path C:\FormatKit` is **False** (no profile was bundled) and nothing starts by itself.
 
 ## 24. Media: profile with `importFile` and `networkDriverBackup`
 

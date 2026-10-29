@@ -555,9 +555,40 @@ Pro, Pro Education, Pro for Workstations).
   no USB disk was found. Not changed here: the refresh changes host state and
   was not run in away mode. If scenario 27 shows it, run
   `Update-HostStorageCache` first, and consider calling it in the list script.
-- Pending, need the user: scenarios 23-25 in the `FormatKit-Media` VM
-  (`tools\vm\New-MediaVm.ps1 -MediaFolder .vm\media\plain` and `profile`),
-  which confirm section 6's three items (the offline local account screen,
-  the `$OEM$` copy, the first logon token), and scenario 27 on a real stick,
-  which confirms R7 (what counts as removable). `New-MediaVm.ps1` itself has
-  not run yet.
+- VM runs on 2026-10-29 (Claude drove the `FormatKit-Media` VM through
+  screenshots and the Hyper-V virtual keyboard; the local account was made
+  with a blank password, so no password was typed):
+  - **Fixed:** `New-MediaVm.ps1` failed on its first run: IMAPI2 refuses
+    Joliet without ISO9660 (`6`), and ISO9660 rejects the Setup tree
+    (0xC0AAB132 with `7`). The ISO is now UDF only (`4`); it boots in a
+    Generation 2 VM with Secure Boot and no "press any key" prompt.
+  - Scenario 23 (no profile): no language screen; manual screens were the
+    **product key** ("I don't have a product key"), the edition, the disk
+    and the local account. The product key screen comes before the edition
+    screen whenever the answer file has no key (no `setup.edition`) and the
+    PC has no firmware key, as in a VM. No license or privacy screens. OOBE
+    offered an update ("Update later" skips it). Result: Windows 11 Home
+    26300, time zone (UTC-03:00) Brasilia, keyboard `0416:00000416`,
+    `C:\FormatKit` absent, nothing started.
+  - Section 6 item 1 confirmed: build 26300 shows the local account screen
+    with `HideOnlineAccountScreens`, even on Home with the network up; no
+    `BypassNRO` needed.
+  - Scenario 24 (profile): item 2 confirmed, `$OEM$\$1` was copied to
+    `C:\FormatKit` (exe, `profile.json`, `inputs-netdriversake.inf`,
+    `inputs-winget.json`). Item 3 confirmed: the first logon command ran
+    elevated, with no UAC prompt and one log file (no relaunch). The window
+    counted down from 60 and ran the profile; winget installed 7-Zip from
+    the bundled `importFile`. Esc during the countdown printed the cancel
+    message and the command to run later.
+  - **Fixed:** the first logon window closed as soon as the run ended, so
+    its summary could not be read. The first logon command now passes
+    `--wait-on-exit`, like the resume task; a cancelled countdown no longer
+    asks for Enter itself, so Enter is asked for once.
+  - Scenario 25 (`account: "microsoft"`, `edition: "Windows 11 Pro"`): no
+    product key or edition screen (the generic key picks Pro); OOBE showed
+    the online flow (device name, personal or work use, Microsoft sign-in),
+    which was not completed.
+- Pending, need the user: scenario 27 on a real stick, which confirms R7
+  (what counts as removable). An 8 GB stick is refused as too small before
+  any prompt, so it only checks the listing; the full run needs a 16 GB or
+  larger stick.
