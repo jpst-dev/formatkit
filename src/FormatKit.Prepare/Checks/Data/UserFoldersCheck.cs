@@ -50,9 +50,18 @@ public sealed class UserFoldersCheck : IPrepareCheck
 
         var scan = FolderScan.Run(context.Services.Files, path);
         if (scan.FileCount == 0)
-            return Item(PrepareStatus.Ok, Strings.Format("UserFolders_Empty_Title", name), Unreadable(scan));
+        {
+            return scan.UnreadableFolders == 0
+                ? Item(PrepareStatus.Ok, Strings.Format("UserFolders_Empty_Title", name))
+                : Item(PrepareStatus.NotChecked, Strings.Format("UserFolders_Partial_Title", name),
+                    Strings.Get("UserFolders_Partial_Detail") + " " + Unreadable(scan),
+                    Strings.Format("UserFolders_Partial_Action", name));
+        }
 
-        var detail = Strings.Format("UserFolders_Lost_Detail", Sizes.Format(scan.Bytes), scan.FileCount, path);
+        var size = Sizes.Format(scan.Bytes);
+        var detail = scan.FileCount == 1
+            ? Strings.Format("UserFolders_Lost_Detail_One", size, path)
+            : Strings.Format("UserFolders_Lost_Detail", size, scan.FileCount, path);
         if (scan.UnreadableFolders > 0)
             detail += " " + Unreadable(scan);
         return Item(PrepareStatus.Attention, Strings.Format("UserFolders_Lost_Title", name), detail, Strings.Format("UserFolders_Lost_Action", name));
@@ -79,6 +88,6 @@ public sealed class UserFoldersCheck : IPrepareCheck
         return (path.TrimEnd('\\') + "\\").StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
     }
 
-    private PrepareItem Item(PrepareStatus status, string title, string? detail, string? action = null) =>
+    private PrepareItem Item(PrepareStatus status, string title, string? detail = null, string? action = null) =>
         new(Id, Group, status, title, detail, action);
 }

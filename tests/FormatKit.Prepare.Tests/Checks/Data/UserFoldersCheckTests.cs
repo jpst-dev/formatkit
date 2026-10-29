@@ -141,4 +141,29 @@ public class UserFoldersCheckTests : IDisposable
 
         Assert.Contains("2 folders could not be read", item.Detail);
     }
+
+    [Fact]
+    public async Task Single_file_uses_the_singular()
+    {
+        Shell("Personal", @"%USERPROFILE%\Documents");
+        _files.SeedEntry(@"C:\Users\joao\Documents\a.docx", MB);
+
+        var item = Assert.Single(await RunAsync(), i => i.Status == PrepareStatus.Attention);
+
+        Assert.Contains("1.0 MB in 1 file in", item.Detail);
+    }
+
+    [Fact]
+    public async Task Empty_folder_with_unreadable_subfolders_is_not_checked_not_ok()
+    {
+        Shell("My Music", @"%USERPROFILE%\Music");
+        _files.SeedDirectory(@"C:\Users\joao\Music\locked");
+        _files.MarkUnreadable(@"C:\Users\joao\Music\locked");
+
+        var item = Assert.Single(await RunAsync(), i => i.Title.Contains("Music"));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains("1 folder could not be read", item.Detail);
+        Assert.NotNull(item.Action);
+    }
 }

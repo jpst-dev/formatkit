@@ -68,4 +68,8 @@
   <data name="Volumes_SameDisk_Action" xml:space="preserve"><value>In Windows Setup, delete only the Windows partitions; do not delete {0}:.</value></data>
   <data name="Volumes_OtherDisk_Title" xml:space="preserve"><value>{0}: is on another disk</value></data>
   <data name="Volumes_OtherDisk_Detail" xml:space="preserve"><value>{0}: is on disk {1} and is not touched by the reinstall.</value></data>
+  <data name="UserFolders_Lost_Detail_One" xml:space="preserve"><value>{0} in 1 file in {1}.</value></data>
+  <data name="UserFolders_Partial_Title" xml:space="preserve"><value>{0} could not be fully read</value></data>
+  <data name="UserFolders_Partial_Detail" xml:space="preserve"><value>No readable files were found, but some folders inside it could not be read.</value></data>
+  <data name="UserFolders_Partial_Action" xml:space="preserve"><value>Check the folder {0} by hand and copy anything you need to an external drive.</value></data>
 </root>

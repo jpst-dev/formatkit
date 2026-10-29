@@ -13,3 +13,8 @@ src/FormatKit.Prepare/Checks/Data/{FolderScan,UserFoldersCheck,OtherUsersCheck,V
 - One item per known folder (6 items) from user-folders. Folders not on a lost path: Ok. Empty/only placeholders: Ok.
 - Volumes: lost-VHDX volumes excluded; any null disk number (including Windows volume) -> one NotChecked; no other volumes -> no item.
 - Other users: profile folder name used as account name; size omitted when any folder unreadable.
+
+## Fix round 1
+Changes: pt-BR UserFolders titles/details now read "A pasta {0} ..." (and "O volume {0}:" in Volumes_* strings, same agreement risk); added UserFolders_Lost_Detail_One (singular, both resx); lost folder with zero readable files and unreadable subfolders is now NotChecked (UserFolders_Partial_Title/Detail/Action, both resx) instead of Ok; Empty Ok only when the whole tree was read.
+Tests added: Single_file_uses_the_singular, Empty_folder_with_unreadable_subfolders_is_not_checked_not_ok (code and tests were written together, so no separate RED run for these two).
+Command: `dotnet test -- --filter-not-trait "Category=Integration"` -> total 1033, failed 0, passed 1033 (includes UserFoldersCheckTests and ResourcesTests parity).

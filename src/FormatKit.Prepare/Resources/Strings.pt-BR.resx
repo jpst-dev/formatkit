@@ -46,14 +46,14 @@
   <data name="UserFolders_Name_Videos" xml:space="preserve"><value>Vídeos</value></data>
   <data name="UserFolders_Name_Music" xml:space="preserve"><value>Músicas</value></data>
   <data name="UserFolders_Name_Downloads" xml:space="preserve"><value>Downloads</value></data>
-  <data name="UserFolders_OneDrive_Title" xml:space="preserve"><value>{0} é sincronizada pelo OneDrive</value></data>
+  <data name="UserFolders_OneDrive_Title" xml:space="preserve"><value>A pasta {0} é sincronizada pelo OneDrive</value></data>
   <data name="UserFolders_OneDrive_Detail" xml:space="preserve"><value>Sincronizada pelo OneDrive; confirme que está atualizada antes da reinstalação.</value></data>
-  <data name="UserFolders_Safe_Title" xml:space="preserve"><value>{0} não está na unidade do Windows</value></data>
-  <data name="UserFolders_Safe_Detail" xml:space="preserve"><value>{0} sobrevive à reinstalação.</value></data>
-  <data name="UserFolders_Empty_Title" xml:space="preserve"><value>{0} está vazia</value></data>
-  <data name="UserFolders_Lost_Title" xml:space="preserve"><value>{0} tem arquivos que serão apagados</value></data>
+  <data name="UserFolders_Safe_Title" xml:space="preserve"><value>A pasta {0} não está na unidade do Windows</value></data>
+  <data name="UserFolders_Safe_Detail" xml:space="preserve"><value>A pasta {0} sobrevive à reinstalação.</value></data>
+  <data name="UserFolders_Empty_Title" xml:space="preserve"><value>A pasta {0} está vazia</value></data>
+  <data name="UserFolders_Lost_Title" xml:space="preserve"><value>A pasta {0} tem arquivos que serão apagados</value></data>
   <data name="UserFolders_Lost_Detail" xml:space="preserve"><value>{0} em {1} arquivos em {2}.</value></data>
-  <data name="UserFolders_Lost_Action" xml:space="preserve"><value>Copie {0} para um disco externo.</value></data>
+  <data name="UserFolders_Lost_Action" xml:space="preserve"><value>Copie a pasta {0} para um disco externo.</value></data>
   <data name="UserFolders_Unreadable_One" xml:space="preserve"><value>1 pasta não pôde ser lida.</value></data>
   <data name="UserFolders_Unreadable_Many" xml:space="preserve"><value>{0} pastas não puderam ser lidas.</value></data>
   <data name="OtherUsers_Title" xml:space="preserve"><value>A conta {0} também tem arquivos que serão perdidos</value></data>
@@ -63,9 +63,13 @@
   <data name="Volumes_Unknown_Title" xml:space="preserve"><value>Layout dos discos não verificado</value></data>
   <data name="Volumes_Unknown_Detail" xml:space="preserve"><value>O Windows não informou em qual disco físico cada volume está.</value></data>
   <data name="Volumes_Unknown_Action" xml:space="preserve"><value>Abra o Gerenciamento de Disco e veja quais volumes dividem o disco com o Windows. Na instalação do Windows, apague somente as partições do Windows.</value></data>
-  <data name="Volumes_SameDisk_Title" xml:space="preserve"><value>{0}: está no mesmo disco do Windows</value></data>
-  <data name="Volumes_SameDisk_Detail" xml:space="preserve"><value>A instalação do Windows pode apagar {0}: se você apagar ou formatar a partição errada.</value></data>
+  <data name="Volumes_SameDisk_Title" xml:space="preserve"><value>O volume {0}: está no mesmo disco do Windows</value></data>
+  <data name="Volumes_SameDisk_Detail" xml:space="preserve"><value>A instalação do Windows pode apagar o volume {0}: se você apagar ou formatar a partição errada.</value></data>
   <data name="Volumes_SameDisk_Action" xml:space="preserve"><value>Na instalação do Windows, apague somente as partições do Windows; não apague {0}:.</value></data>
-  <data name="Volumes_OtherDisk_Title" xml:space="preserve"><value>{0}: está em outro disco</value></data>
-  <data name="Volumes_OtherDisk_Detail" xml:space="preserve"><value>{0}: está no disco {1} e não é afetado pela reinstalação.</value></data>
+  <data name="Volumes_OtherDisk_Title" xml:space="preserve"><value>O volume {0}: está em outro disco</value></data>
+  <data name="Volumes_OtherDisk_Detail" xml:space="preserve"><value>O volume {0}: está no disco {1} e não é afetado pela reinstalação.</value></data>
+  <data name="UserFolders_Lost_Detail_One" xml:space="preserve"><value>{0} em 1 arquivo em {1}.</value></data>
+  <data name="UserFolders_Partial_Title" xml:space="preserve"><value>A pasta {0} não pôde ser lida por completo</value></data>
+  <data name="UserFolders_Partial_Detail" xml:space="preserve"><value>Nenhum arquivo legível foi encontrado, mas algumas pastas dentro dela não puderam ser lidas.</value></data>
+  <data name="UserFolders_Partial_Action" xml:space="preserve"><value>Confira a pasta {0} manualmente e copie o que precisar para um disco externo.</value></data>
 </root>
