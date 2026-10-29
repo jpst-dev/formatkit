@@ -52,7 +52,7 @@ section 2 as later versions.
 
 - A shared library `FormatKit.Hosting` that holds the composition root and the
   flows the CLI and the UI both need (section 4.1). The CLI moves onto it.
-- A WPF app `FormatKit.App`, published as `FormatKit.exe` (section 4.2), with
+- A WPF app `FormatKit.App`, published as `FormatKitUI.exe` (section 4.2), with
   the screens in section 5: Home, Checklist, Run profile, Hardware, Cleanup
   diagnosis, Catalogs, Installation media, About.
 - An elevated worker mode of the same exe, talking to the window over a named
@@ -84,9 +84,9 @@ showing or logging passwords and passphrases.
 | D1 | Scope B + media: run flow, checklist, queries and catalogs, then media as the last phase. | Covers "before formatting → stick → after formatting"; actions are rare or risky and come in v2. Asked and chosen by the user. |
 | D2 | Profiles are opened and shown, not edited; the editor is v3. | An editor over four modules and their validation rules is a sub-project on its own. Chosen by the user. |
 | D3 | The UI runs unelevated; an elevated worker (the same exe with `--worker`) runs the engine. | Privilege only when needed, as the CLI does; queries and checklist never prompt. Chosen by the user. |
-| D4 | Two independent self-contained single-file exes: `formatkit.exe` (CLI) and `FormatKit.exe` (UI). | Each works alone; one exe for both would need `AttachConsole` hacks. Chosen by the user. |
+| D4 | Two independent self-contained single-file exes: `formatkit.exe` (CLI) and `FormatKitUI.exe` (UI). | Each works alone; one exe for both would need `AttachConsole` hacks. Chosen by the user. The UI exe is not called `FormatKitUI.exe` because Windows file names are case-insensitive: it would collide with `formatkit.exe` in `artifacts/`, a Downloads folder and the release assets. |
 | D5 | Language follows the Windows UI language (en, pt-BR), like the CLI. | Consistent; reuses the resources; a selector can come later. Chosen by the user. |
-| D6 | A run resumes in the app that started it: a UI run registers `FormatKit.exe --resume`. | One window from start to finish. Chosen by the user. |
+| D6 | A run resumes in the app that started it: a UI run registers `FormatKitUI.exe --resume`. | One window from start to finish. Chosen by the user. |
 | D7 | The worker refuses to run when the profile's hash differs from the one the UI reviewed. | The user must never run something other than what they saw. |
 | D8 | The UI uses the core in process (approach 1), not the CLI's output. | Reuses all the code, keeps each exe independent; the only new infrastructure is the progress pipe. Chosen by the user over driving `formatkit.exe --json`. |
 | D9 | WPF's built-in Fluent theme (`ThemeMode="System"`), no third-party UI library. | Native Windows 11 look, follows light and dark mode, no extra dependency. |
@@ -97,7 +97,7 @@ showing or logging passwords and passphrases.
 ```
 src/FormatKit.Hosting      composition root and shared flows (new)
 src/FormatKit.Cli          System.CommandLine commands over Hosting
-src/FormatKit.App          WPF app + worker mode, FormatKit.exe (new)
+src/FormatKit.App          WPF app + worker mode, FormatKitUI.exe (new)
 tests/FormatKit.Hosting.Tests
 tests/FormatKit.App.Tests  ViewModels, pipe protocol, worker
 ```
@@ -144,7 +144,7 @@ file in both languages.
 
 ### 4.2 `FormatKit.App`
 
-- `OutputType` `WinExe`, `AssemblyName` `FormatKit`, `UseWPF`, `win-x64`,
+- `OutputType` `WinExe`, `AssemblyName` `FormatKitUI`, `UseWPF`, `win-x64`,
   `PublishSingleFile`, self-contained on publish, `SatelliteResourceLanguages`
   `en;pt-BR`, embedded debug symbols: the same publish settings as the CLI.
 - `ThemeMode` is experimental in WPF (diagnostic `WPF0001`). The project
@@ -183,7 +183,8 @@ second banner says so with a **Resume** button (section 7).
   the action. Ok items start collapsed.
 - The summary line from the CLI (`N items block formatting.` and so on).
 - **Save as Markdown**: a save dialog, the same Windows-drive warning as
-  `--output`, and the written path or the error.
+  `--output`, and the written path or the error. On a failed save the page
+  shows only the failure, without the "Windows drive will be erased" warning.
 - An invalid profile shows its error list instead of results.
 
 ### 5.3 Run profile
@@ -200,7 +201,10 @@ second banner says so with a **Resume** button (section 7).
    step runs the worker unelevated).
 4. **Progress:** every step with its state (pending, running, succeeded,
    skipped, failed, reboot required), the current step highlighted, and a
-   **Stop** button that stops after the current step (like Ctrl+C).
+   **Stop** button that stops after the current step (like Ctrl+C). A stopped
+   run ends as `failed` with the worker's Worker_Stopped text ("Stopped after
+   the current step. Use Resume to continue the run.") and the window offers
+   **Resume**; any other failure after a stop shows its own message.
 5. **Result:** each step's messages and next action, the final status in plain
    words (the same texts as the CLI's run summary), and **Open report folder**.
 6. **Reboot:** a dialog with a 60-second countdown, **Restart now** and
@@ -219,7 +223,8 @@ available updates, GPU packages, Windows Update error).
 ### 5.5 Cleanup diagnosis (`cleanup check`)
 
 The `DiagnosisReport` grouped as the CLI groups it ("Breaks Windows features",
-"Security risks", and the rest), each finding with its explanation and fix.
+"Security risks", and the rest), each finding with its explanation and fix. The page also shows the NotChecked
+items and the journal error, so it never gives a false all-clear.
 
 ### 5.6 Catalogs
 
@@ -278,7 +283,7 @@ does not cover yet (section 2) with one line each.
 ### 6.1 Start
 
 The window creates a pipe name `FormatKit-<guid>` and starts
-`FormatKit.exe --worker --pipe <name> <job>` where the job is
+`FormatKitUI.exe --worker --pipe <name> --client-pid <pid> <job>` where the job is
 `run --profile <path> --profile-hash <hash>`, `run --resume` or, in the media
 phase, `media ...`. It uses `runas` when the job needs administrator rights and
 the window is not elevated, and a plain start otherwise (a resumed window is
@@ -287,7 +292,8 @@ and returns to the review; nothing has changed.
 
 The worker creates the pipe server, with an ACL that allows only the current
 user, accepts **one** connection and exits with an error if none arrives within
-30 seconds. The window connects as the client.
+30 seconds. The window connects as the client. The worker checks the pipe
+client's process id against `--client-pid` and exits with 2 on a mismatch.
 
 ### 6.2 Protocol
 
@@ -335,7 +341,7 @@ waits for `rebootNow`, `rebootCancel` or the countdown's end, then runs
 `shutdown.exe /r /t 0` as `ConsoleRebooter` does (the shutdown part is shared,
 not copied). The window shows the countdown dialog (section 5.3).
 
-A run started from the UI registers the resume task with `FormatKit.exe
+A run started from the UI registers the resume task with `FormatKitUI.exe
 --resume` (D6). At the next logon the task starts the window elevated; the
 window opens on Run profile and starts the worker with `run --resume` without
 `runas`. Resume errors (nothing to resume, corrupt state, profile changed or
@@ -363,8 +369,8 @@ through FormatKit, as today.
 - **Pipe broken or window gone:** the worker treats it as `cancel`: it finishes
   the current step and stops; the run state stays saved for **Resume**.
 - **Worker exits unexpectedly** (pipe closed without `finished`): the page says
-  the run ended unexpectedly, with **Open log folder** and **Open report
-  folder**; **Resume** is offered when `RunStateStore` holds a run.
+  the run ended unexpectedly, with **Open log folder** (built) and **Open
+  report folder**; **Resume** is offered when `RunStateStore` holds a run.
 - **Interrupted run found at start:** Home shows the Resume banner (section
   5.1). Resume starts the worker with `run --resume` (with UAC when the window
   is not elevated).
@@ -397,7 +403,7 @@ through FormatKit, as today.
 ### 8.1 VM scenarios
 
 Run in the Hyper-V test VM (`tools/vm/vm.ps1`) with the published
-`FormatKit.exe`, on the signed-in user's desktop (`vm.ps1 job -Visible`):
+`FormatKitUI.exe`, on the signed-in user's desktop (`vm.ps1 job -Visible`):
 
 1. Open the app; Home, Hardware, Scan for drivers, Cleanup diagnosis, Catalogs
    and Checklist work with no UAC prompt.
@@ -455,6 +461,14 @@ The user approved D1-D6, D8 and sections 1-3 of the design in conversation and
 then switched to away mode. These were decided by Claude's recommendation and
 await review:
 
+- **Authority:** this spec is the authority. The lines below align it with what
+  was built and ruled during implementation.
+- **Exe name `FormatKitUI.exe` (D4):** case-insensitive file names made
+  `FormatKit.exe` collide with `formatkit.exe`; ruled by the controller.
+- **Catalogs developer category:** follows `cleanup list --level`.
+- **Copied CLI result texts:** stay word for word even where they name
+  `formatkit run ...`.
+- **Reboot countdown:** completes and restarts if the window disappears.
 - **Section 4 of the conversation (error handling, section 7 here):** presented
   and not yet approved when the user left; written as presented.
 - **D7 (profile hash check):** recommended in the error handling section.

@@ -19,8 +19,12 @@ jobs:
       - name: Unit tests
         run: dotnet test -c Release -- --filter-not-trait "Category=Integration"
       - name: Publish
-        run: dotnet publish src/FormatKit.Cli -c Release -o artifacts
+        run: |
+          dotnet publish src/FormatKit.Cli -c Release -o artifacts
+          dotnet publish src/FormatKit.App -c Release -o artifacts
       - name: Upload to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/formatkit.exe
+          files: |
+            artifacts/formatkit.exe
+            artifacts/FormatKitUI.exe
