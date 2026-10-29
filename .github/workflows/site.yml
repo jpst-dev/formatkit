@@ -1,0 +1,44 @@
+name: Site
+
+on:
+  push:
+    paths:
+      - "site/**"
+      - "src/FormatKit.Cleanup/Catalog/Data/**"
+      - "src/FormatKit.Programs/Catalog/Data/**"
+      - ".github/workflows/site.yml"
+      - ".github/workflows/pages.yml"
+  pull_request:
+    paths:
+      - "site/**"
+      - "src/FormatKit.Cleanup/Catalog/Data/**"
+      - "src/FormatKit.Programs/Catalog/Data/**"
+      - ".github/workflows/site.yml"
+      - ".github/workflows/pages.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Check
+        run: npm run check
+      - name: Build
+        run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check the built site
+        run: npm run check:dist

@@ -1,0 +1,63 @@
+name: Pages
+
+on:
+  workflow_call:
+    inputs:
+      require-release:
+        description: Fail the build when the latest release cannot be read
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      require-release:
+        description: Fail the build when the latest release cannot be read
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Check
+        run: npm run check
+      - name: Build
+        run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FK_REQUIRE_RELEASE: ${{ inputs.require-release && '1' || '' }}
+      - name: Check the built site
+        run: npm run check:dist
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
