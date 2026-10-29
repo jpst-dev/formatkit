@@ -654,12 +654,12 @@ Record what the scenarios find in the "Found while running" section of the insta
 
 ## 24. Media: profile with `importFile` and `networkDriverBackup`
 
-1. On the host make a profile outside `.vm\media\` with a `programs.importFile` (`formatkit programs export`) and a `drivers.networkDriverBackup` folder (a folder with an `.inf`), using relative paths, plus `"setup": { "account": "local" }`. Build with `--profile`.
+1. On the host make a profile outside `.vm\media\` with a `programs.importFile` (`formatkit programs export`) and a `drivers.networkDriverBackup` folder (a folder with an `.inf`), using relative paths, plus `"setup": { "account": "local" }`. Build with `artifactsormatkit.exe media build --iso C:\path	o\Win11.iso --profile <profile> --output .vm\media\out` (empty `--output`).
 
    **Expected:** exit code **0**; `.vm\media\out\sources\$OEM$\$1\FormatKit` holds `formatkit.exe`, `profile.json` and `inputs\1-...`, `inputs\2-...`; in the copied `profile.json` the two paths read `inputs\1-...` and `inputs\2-...`. A path used twice in the profile is copied once.
 2. Create the VM, start it, finish Setup (disk, local account, edition) and sign in.
 
-**Expected:** `Test-Path C:\FormatKit\formatkit.exe` is **True**. A visible console opens at the first logon with `Starting the profile '...' in 60 s (press Esc to cancel)...` counting down; press **Esc** in one run (**Expected:** `Automatic start cancelled.`, the command to run later, and the window closes after Enter; nothing ran) and let it run in another (restore or reinstall). The run starts after the countdown, reads `C:\FormatKit\inputs\`, asks for UAC if the first logon token is not elevated (record which happened), and writes logs and the report under `%ProgramData%\FormatKit\logs`. It resumes after reboots as scenario 4 does. `C:\FormatKit` stays afterwards.
+**Expected:** `Test-Path C:\FormatKit\formatkit.exe` is **True**. A visible console opens at the first logon with `Starting the profile '...' in 60 s (press Esc to cancel)...` counting down; press **Esc** in one run (**Expected:** `Automatic start cancelled.`, then `Automatic run cancelled. To run it later, use:` and the command, and the window closes after Enter; nothing ran) and let it run in another (restore or reinstall). The run starts after the countdown, reads `C:\FormatKit\inputs\`, asks for UAC if the first logon token is not elevated (record which happened), and writes logs and the report under `%ProgramData%\FormatKit\logs`. It resumes after reboots as scenario 4 does. `C:\FormatKit` stays afterwards.
 
 ## 25. Media: `account: "microsoft"`
 
@@ -684,7 +684,7 @@ Run this one yourself, on the host, in an elevated PowerShell. **Use a spare sti
 
 1. **Listing.** `artifacts\formatkit.exe media usb --iso C:\path\to\Win11.iso --profile C:\path\to\my-profile.json`, with the stick plugged in and no `--disk`.
 
-   **Expected:** exit code **2**, the USB disks with number, model, size, `(USB, removable)`, drive letters and labels, and `Can be used.` for your stick. The boot and system disk are not listed. Nothing is erased. If your stick is listed as `not removable`, or shows up under hidden hard disks, record the exact model: the removable test (spec R7) needs a fix.
+   **Expected:** exit code **2**, the USB disks with number, model, size, `(USB, removable)`, drive letters and labels, and `Can be used.` for your stick. The boot and system disk are never offered (a USB one would show `Cannot be used`). Nothing is erased. If your stick is listed as `not removable`, or shows up under hidden hard disks, record the exact model: the removable test (spec R7) needs a fix.
 2. **Hidden external hard disk.** Plug in an external USB hard disk, run step 1 again.
 
    **Expected:** it is not listed; the line `1 external hard disk(s) are hidden. Use --allow-hard-disk to include them.` appears. With `--allow-hard-disk` it is listed (as not removable), still without erasing anything.

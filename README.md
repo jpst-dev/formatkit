@@ -399,7 +399,7 @@ The checks, by group:
 - **Developer:** `dev.git-repos`, `dev.wsl`, `dev.keys`, `dev.devdrive`.
 - **Apps and FormatKit:** `apps.programs-export`, `apps.network-drivers`, `apps.profile-inputs`, `apps.browsers`.
 
-`security.windows11-requirements` matters on Windows 10 only: it warns when this PC would not install Windows 11 as is (RAM below about 4 GB, not UEFI, Secure Boot off, no TPM 2.0), because the installation media does not bypass those requirements. FormatKit keeps no list of supported processors, so every warning points you to the PC Health Check app for the processor. The TPM version is read only in an administrator terminal; otherwise (or when it cannot be read) the item is Not checked and suggests `tpm.msc`. On Windows 11 it is Ok.
+`security.windows11-requirements` matters on Windows 10 only: it warns when this PC would not install Windows 11 as is (RAM below 4 GB, warned under 3.5 GiB as Windows reports it; not UEFI, Secure Boot off, no TPM 2.0), because the installation media does not bypass those requirements. FormatKit keeps no list of supported processors, so every warning points you to the PC Health Check app for the processor. The TPM version is read only in an administrator terminal; otherwise (or when it cannot be read) the item is Not checked and suggests `tpm.msc`. On Windows 11 it is Ok.
 
 In an elevated terminal the command also reads the BitLocker recovery protectors; otherwise it reports them as Not checked with the `manage-bde` command to run. It never elevates by itself.
 

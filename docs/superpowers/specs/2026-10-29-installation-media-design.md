@@ -78,7 +78,7 @@ that ship with Windows.
 | D5 | The edition is not set by default. With `setup.edition`, the answer file selects it and uses Microsoft's public generic installation key for it. | A firmware (OEM) key picks the right edition and reactivates by itself; forcing Pro on a Home license leaves Windows unactivated, which `security.activation` exists to prevent. |
 | D6 | On the first logon, FormatKit starts on its own in a visible console with a cancelable 60-second countdown, once. | Whoever built the stick with a profile wants it to run; the countdown protects a stick used on the wrong PC or a user who only wanted a clean Windows. |
 | D7 | No bypass of Windows 11 requirements; `prepare check` warns on the old PC instead. | The audience includes non-developers; an unsupported Windows 11 may stop getting security updates, and FormatKit promises a healthy system. |
-| D8 | The stick gets one active FAT32 partition of up to 32 GB on MBR; `install.wim` larger than 4 GiB − 1 byte is split into `.swm` parts. | UEFI firmware boots FAT32 with Secure Boot and no boot sector; Windows cannot format FAT32 above 32 GB; Setup reads split images natively. |
+| D8 | The stick gets one active FAT32 partition of `min(disk size − 1 MiB, 32 GiB)` on MBR; `install.wim` larger than 4 GiB − 1 byte is split into `.swm` parts. | UEFI firmware boots FAT32 with Secure Boot and no boot sector; Windows cannot format FAT32 above 32 GB; Setup reads split images natively. |
 | D9 | `media usb` lists only removable USB disks by default; external USB hard disks need `--allow-hard-disk`. There is no `--yes`: erasing always needs the disk number typed at the console. | External hard disks are where people keep backups (Rufus hides them too). |
 | D10 | The profile and every file it reads are copied into the media; the run never depends on the stick after Setup. | The stick may be removed or get another letter; reboots during the run resume from `C:`. |
 | D11 | Media options live in the profile's `setup` section; the command line only takes what belongs to the media (`--iso`, `--output`, `--disk`, `--allow-hard-disk`). | The profile stays the single declarative description of the machine. |
@@ -132,7 +132,7 @@ CIM like `PowerShellVirtualDisks`, with literals through
   - `Task<string> PrepareUsbAsync(int number, string uniqueId, CancellationToken ct)`:
     fails without changing anything when disk `number` no longer has
     `uniqueId`; otherwise `Clear-Disk -RemoveData -RemoveOEM`, MBR, one active
-    partition of `min(disk size, 32 GB)`, FAT32, label `FORMATKIT`, a drive
+    partition of `min(disk size − 1 MiB, 32 GiB)`, FAT32, label `FORMATKIT`, a drive
     letter; returns the root.
 - Copying uses the existing `IFileSystem` (`EnumerateFileEntries`, `Copy`,
   `CreateDirectory`); free space uses the existing
@@ -198,7 +198,7 @@ A disk is eligible when all hold:
    message tells the user to copy them elsewhere first (the profile often lives
    on the stick; copying it to a temporary folder and erasing would lose it if
    the write failed).
-4. Its size fits the needed size (with the 32 GB partition cap).
+4. Its size fits the needed size (with the 32 GiB partition cap, measured on the usable size: disk size − 1 MiB).
 
 With `--disk <n>`:
 
@@ -351,7 +351,7 @@ its fallback:
 
 | Reads | Result |
 |---|---|
-| Windows build (`IRegistry`, `CurrentBuild`), RAM (`Win32_ComputerSystem`), UEFI and Secure Boot (`HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`, `UEFISecureBootEnabled`), TPM version when elevated (`Win32_Tpm`). | Already Windows 11 (build 22000 or later): `Ok`. Windows 10: `Attention` for each requirement read as failed (RAM below 4 GB, not UEFI, Secure Boot off), "Windows 11 will not install on this PC as is"; TPM not readable without elevation: `NotChecked` with "run `tpm.msc`"; always a pointer to the PC Health Check app for the CPU. All readable requirements met: `Ok`. |
+| Windows build (`IRegistry`, `CurrentBuild`), RAM (`Win32_ComputerSystem`), UEFI and Secure Boot (`HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`, `UEFISecureBootEnabled`), TPM version when elevated (`Win32_Tpm`). | Already Windows 11 (build 22000 or later): `Ok`. Windows 10: `Attention` for each requirement read as failed (RAM below 3.5 GiB, since `TotalPhysicalMemory` reads under the installed 4 GB; not UEFI, Secure Boot off), "Windows 11 will not install on this PC as is"; TPM not readable without elevation: `NotChecked` with "run `tpm.msc`"; always a pointer to the PC Health Check app for the CPU. All readable requirements met: `Ok`. |
 
 FormatKit keeps no list of supported CPUs.
 
