@@ -417,3 +417,34 @@ override the sections above where they differ.
   `LongPathsEnabled`, Explorer values written, `sudo config` reports inline
   mode (`sudo.exe` exists on this build), `Get-ExecutionPolicy -Scope
   LocalMachine` is `RemoteSigned`.
+
+### Found while running scenarios 13-16 (2026-10-29)
+
+- **Steps that run again after a reboot:** a step that finished as
+  `RebootRequired` was treated as complete after the reboot, so `dev.wsl`
+  never installed the distro. `StepResult.RebootAndRunAgain` makes the resumed
+  run execute the step again, once per run (`RunState.RanAgain`), so reboots
+  cannot loop. The dev steps use it.
+- **Dev Drive:** `diskpart create vdisk` fails with "path not found" when the
+  VHDX folder is missing, so the folder is created first. Right after boot
+  `Mount-DiskImage` fails for a while with "access denied" or "in use"; the
+  attach and the startup task retry it for about a minute and then attach with
+  `diskpart` (piped in the console OEM code page, so non-ASCII paths work). The
+  task runs the script through `-EncodedCommand`. A non-ASCII path
+  (`F:\Dev Ünicode\dev.vhdx`) works for create and for the fallback.
+- **SSH:** a clean Windows has no `%USERPROFILE%\.ssh`; it is created before
+  `ssh-keygen`.
+- **Windows PowerShell profile:** the effective execution policy is
+  `Restricted` on a clean Windows, so the profile never loads. The item is
+  pending (`Next_EnablePsScripts`) unless the policy (GPO, current user, local
+  machine) allows scripts; profiles pair Oh My Posh with
+  `developer.ps-execution-policy`, which the cleanup module applies before the
+  dev module runs.
+- **Nerd Font:** installed only when no value under the HKCU or HKLM `Fonts`
+  key starts with the family name. Reinstalling it on every run replaced the
+  font files, and Windows Terminal opened meanwhile crashed (divide by zero in
+  `Microsoft.Terminal.Control.dll`). The fragment font was confirmed applied in
+  Windows Terminal settings, with FormatKit listed and enabled under
+  Extensions.
+- **Per-user installs need the user connected:** with the VM user's session
+  disconnected, Oh My Posh (MSIX, per user) fails with "no user signed in".

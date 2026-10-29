@@ -305,6 +305,10 @@ Give the VM at least 8 GB of RAM and 2 or more virtual processors, restore the `
 
 Three things cannot be checked by a program and are verified **by hand** in these scenarios: typing the `passwd` password live (scenario 13), the Windows Terminal fragment font being visible (scenario 15) and `diskpart` with a non-ASCII VHDX path (scenario 16).
 
+Keep the VM's user **signed in and connected** while a scenario runs (in Virtual Machine Connection, a basic session shows the existing desktop; an enhanced session that is closed leaves the user disconnected). Per-user installs such as Oh My Posh fail with "no user signed in" otherwise, and the passwords and passphrases are typed in the console window that FormatKit opens on that desktop.
+
+Last run in a VM (2026-10-29, Windows 11 build 26300, Windows Terminal 1.24): scenarios 13-16 passed after these fixes, each found by these scenarios: a step that needs to run again after the WSL reboot (the engine had marked it complete), the VHDX folder created before `diskpart`, the Dev Drive mount retried at boot with a `diskpart` fallback, `.ssh` created before `ssh-keygen`, a pending Windows PowerShell profile item when scripts are blocked, and the Nerd Font installed only once (reinstalling it while Windows Terminal started crashed the terminal).
+
 ## 13. Dev: WSL from nothing, reboot and resume, Linux password
 
 1. Restore `clean`. Copy `formatkit.exe` to `C:\fk`. In `C:\fk` create `dev-wsl.json` (replace `joao` with a lowercase user name of your choice):
@@ -330,7 +334,7 @@ Three things cannot be checked by a program and are verified **by hand** in thes
 3. Run `.\formatkit.exe run --profile dev-wsl.json` and accept the UAC prompt.
 
    **Expected:** the step installs the WSL platform (`wsl --install --no-distribution`) and reports `WSL: done`. A reboot is **always** required after the platform install: the countdown appears and the run exits with code **4**.
-4. Let the VM reboot and log on. **Expected:** the resume task opens a console with `formatkit run --resume`. The step now installs Ubuntu (`wsl --install Ubuntu --no-launch`) and creates the Linux user.
+4. Let the VM reboot and log on. **Expected:** the resume task opens a console with `formatkit run --resume`. `dev.wsl` runs **again** (it asked to, unlike a step that is complete after its reboot): it now installs Ubuntu (`wsl --install Ubuntu --no-launch`) and creates the Linux user. If the distro install fails with a network error right after the boot, the next action says to check the internet connection; run the profile again.
 5. **By hand:** when `passwd` asks for the new password, type it **live in that console** (twice). Nothing you type is echoed, read or logged by FormatKit.
 
    **Expected:** the run ends with `WSL: already in order`, `Ubuntu: done`, `user joao: done` and `.wslconfig: done`, and exit code 0 (or 1 only if an item failed; read its next action).
@@ -388,13 +392,14 @@ This scenario does not need scenario 13. Git must be installed first, which the 
 
    **Expected:** `user.name`, `user.email`, `init.defaultBranch=main`, `core.editor=code --wait`, `core.autocrlf=input` and `core.sshCommand` pointing at `C:/Windows/System32/OpenSSH/ssh.exe`; `ssh-agent` Running and Automatic; one key listed (`test@fk-vm`); the `.pub` file ends in `test@fk-vm`.
 4. Copy `$env:USERPROFILE\.ssh\id_ed25519` to the shared folder, run `.\formatkit.exe run --profile dev-git-ssh.json` again. **Expected:** `key: already in order`, no passphrase prompt, the key file is byte-identical, every item is `already in order`, exit code 0.
-5. Pending path: restore `clean`, remove the programs line, run only the dev part with input redirected (`.\formatkit.exe run --profile dev-git-ssh.json < NUL` from an elevated console). **Expected:** `key: pending`, the next action names `formatkit dev ssh-key`, exit code **1**. Then run `.\formatkit.exe dev ssh-key --profile dev-git-ssh.json` from a non-elevated console, accept the UAC prompt, and type the passphrase. **Expected:** the key is created, exit code 0. `.\formatkit.exe dev ssh-key < NUL` exits with code **2**.
+   On a clean Windows `%USERPROFILE%\.ssh` does not exist; FormatKit creates it before `ssh-keygen`.
+5. Pending path: restore `clean`, remove the programs line (so the Git items fail: Git is not installed; that is expected in this variant), run only the dev part with input redirected (`.\formatkit.exe run --profile dev-git-ssh.json < NUL` from an elevated console). **Expected:** `key: pending`, the next action names `formatkit dev ssh-key`, exit code **1**. Then run `.\formatkit.exe dev ssh-key --profile dev-git-ssh.json` from a non-elevated console, accept the UAC prompt, and type the passphrase. **Expected:** the key is created, exit code 0. `.\formatkit.exe dev ssh-key < NUL` exits with code **2**.
 
 ## 15. Dev: dotfiles, zsh, Oh My Zsh and Oh My Posh
 
 Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Posh; restore the state of scenario 13 step 5 or run its profile first.
 
-1. Create a **public** GitHub repository with, at least, `powershell/profile.ps1` (a line like `Write-Host "dotfiles profile"`) and `git/.gitconfig.local` (`[user]` with a name). Keep both files LF.
+1. Create a **public** GitHub repository with, at least, `powershell/profile.ps1` (a line like `Write-Host "dotfiles profile"`) and `git/.gitconfig.local` (`[user]` with a name). Keep both files LF. (Without a repository, put the two files in a folder such as `C:\fk\dotfiles` and use `"path": "C:\\fk\\dotfiles"` instead of `repo` and `cloneTo`; `repository` is then reported as not applicable.)
 2. In `C:\fk` create `dev-shell.json` (use your repository address and the WSL user from scenario 13):
 
    ```json
@@ -402,6 +407,7 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
      "schemaVersion": 1,
      "name": "Dev shell",
      "modules": {
+       "cleanup": { "enabled": true, "include": ["developer.ps-execution-policy"] },
        "programs": { "enabled": true, "acceptAgreements": true, "catalog": ["development.git", "development.oh-my-posh"] },
        "dev": {
          "enabled": true,
@@ -440,7 +446,8 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
    **Expected:** the file and its `.bak`; a JSON fragment that updates the Windows PowerShell and PowerShell 7 profiles with `font.face` `MesloLGM Nerd Font`; the passwd line ends in `/usr/bin/zsh` (or `/bin/zsh`); the first `.zshrc` line is `# Managed by FormatKit`, and the file lists the three plugins and `ZSH_THEME="robbyrussell"`.
 6. **By hand:** open a **new** Windows Terminal window (close all existing ones first), start a Windows PowerShell tab and a PowerShell 7 tab. **Expected:** the dotfiles profile message and the Oh My Posh `paradox` prompt appear, and the prompt glyphs render correctly, which means the fragment font (`MesloLGM Nerd Font`) is applied. Look at Settings > Profiles > Windows PowerShell > Appearance to confirm the font face. If the glyphs are boxes, the fragment did not take effect: note it in the issue tracker. Then start the Ubuntu tab: `zsh` with the Oh My Zsh prompt, autosuggestions and syntax highlighting.
 7. Run the profile again. **Expected:** every item is `already in order`, no new `.bak` file, the PowerShell profile has exactly one FormatKit block, `.zshrc` is unchanged, exit code 0.
-8. Keep-user-file check: in the distro replace `.zshrc` with your own (`wsl -d Ubuntu --exec /bin/sh -c "echo '# mine' > /home/joao/.zshrc"`) and run again. **Expected:** `.zshrc` is reported with a warning and kept as is.
+8. Blocked scripts check: on a restored state without the `cleanup` line (Windows PowerShell's policy is `Restricted` on a clean Windows), run the profile. **Expected:** the Windows PowerShell profile item is `pending - Restricted`, its next action says to add `developer.ps-execution-policy` to the cleanup include list, and the exit code is 1. With the line back, the item is `already in order` and the exit code is 0.
+9. Keep-user-file check: in the distro replace `.zshrc` with your own (`wsl -d Ubuntu --exec /bin/sh -c "echo '# mine' > /home/joao/.zshrc"`) and run again. **Expected:** `.zshrc` is reported with a warning and kept as is.
 
 ## 16. Dev: Dev Drive survives a reboot, caches, developer cleanup
 
@@ -471,9 +478,9 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
    }
    ```
 
-   The VM disk needs at least 60 GB free (the size plus 10 GB).
+   The disk that holds the VHDX needs at least 60 GB free (the size plus 10 GB); with less, `Dev Drive` fails before creating anything and its detail gives both sizes. If the VM's system disk is smaller, attach a second virtual disk to the VM (for example 100 GB, dynamic), format it as `F:` and use `"path": "F:\\DevDrive\\dev.vhdx"`.
 2. Run `.\formatkit.exe run --profile dev-drive.json --dry-run`. **Expected:** the plan lists the cleanup items of the `developer` category and `dev.devdrive`; nothing changes.
-3. Run it for real and accept the UAC prompt. **Expected:** `Dev Drive: done`, `remount at startup: done`, each cache done, exit code 0.
+3. Run it for real and accept the UAC prompt. **Expected:** the developer cleanup asks for a reboot (the countdown appears; the run resumes after logon), then `Dev Drive: done`, `remount at startup: done`, each cache done, exit code 0. The VHDX folder (`C:\DevDrive`) does not need to exist beforehand.
 4. Check:
 
    ```powershell
@@ -489,7 +496,7 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
 
    **Expected:** ReFS volume labelled `Dev`; `fsutil` reports the volume as a trusted Dev Drive; the task exists; `D:\packages` holds `npm`, `nuget`, `pip` and `cargo`; the four user variables point inside `D:\packages`.
 5. **By hand (non-ASCII path):** repeat on a restored `clean` with `"path": "C:\\Dev Ünicode\\dev.vhdx"` (and `letter` `E`). **Expected:** the drive is created and `fsutil devdrv query E:` works. If diskpart cannot handle the path, the item fails with its next action, the half-created VHDX is detached and deleted so a retry starts clean, and nothing is left under `C:\Dev Ünicode`. Record which of the two happened.
-6. Reboot the VM and log on. **Expected:** `D:` is back with the same letter and `fsutil devdrv query D:` still reports it as trusted (the `FormatKit-DevDrive` startup task mounted the VHDX). Run the profile again: **Expected:** `Dev Drive: already in order`, caches already in order, exit code 0.
+6. Reboot the VM twice and log on each time. **Expected:** `D:` is back with the same letter (the startup task retries `Mount-DiskImage` for about a minute, which fails with "access denied" or "in use" right after boot, then falls back to `diskpart`) and `fsutil devdrv query D:` still reports it as trusted (the `FormatKit-DevDrive` startup task mounted the VHDX). Run the profile again: **Expected:** `Dev Drive: already in order`, caches already in order, exit code 0.
 7. Developer cleanup: check Settings > System > For developers (Developer Mode on), `Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem LongPathsEnabled` (1), Explorer shows file extensions and hidden files, `sudo config` reports `inline`, and `Get-ExecutionPolicy -Scope LocalMachine` is `RemoteSigned`.
 8. Undo: `.\formatkit.exe cleanup undo --all` and accept the UAC prompt. **Expected:** the six values return to what they were before the run (Developer Mode off, `LongPathsEnabled` 0, extensions and hidden files hidden again, `sudo` as before, execution policy as before). The Dev Drive is **not** touched by undo (the `dev` module has no undo): remove it by hand if needed with `Dismount-DiskImage -ImagePath C:\DevDrive\dev.vhdx`, `Unregister-ScheduledTask FormatKit-DevDrive` and by deleting the file.
 9. Cache already set: on a restored `clean`, set `NUGET_PACKAGES` to another folder first (`[Environment]::SetEnvironmentVariable('NUGET_PACKAGES', 'C:\nuget', 'User')`) and run the profile. **Expected:** the other three caches are set, `NUGET_PACKAGES` keeps its value and the run reports a warning for it.
