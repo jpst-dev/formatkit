@@ -284,7 +284,7 @@ Oh My Posh is installed per user (an MSIX package). Windows PowerShell 5.1 only 
 ### WSL, passwords and reboots
 
 - After the WSL platform is installed a **reboot is always required**; the run resumes after it, like any other reboot.
-- Passwords are typed live in the console: the Linux user's password (`passwd`) and the SSH key passphrase (`ssh-keygen`, `ssh-add`). FormatKit never sees them and never logs them. When nobody can type (input redirected or nobody signed in) the item stays **pending** and its next action names `formatkit dev wsl-user` or `formatkit dev ssh-key`. A pending item makes the step fail, so the run exits with code 1 and the report lists it.
+- Passwords are typed live in the console: the Linux user's password (`passwd`) and the SSH key passphrase (`ssh-keygen`, `ssh-add`). FormatKit never sees them and never logs them. When nobody can type (input redirected or nobody signed in) the item stays **pending** and its next action names `formatkit dev wsl-user --profile <your-profile.json>` or `formatkit dev ssh-key --profile <your-profile.json>`; replace the placeholder with the profile file you ran, because without `--profile` the commands use defaults instead of your `distro`, `user` and `keyType`. A pending item makes the step fail, so the run exits with code 1 and the report lists it.
 - WSL is registered per Windows user. Run FormatKit from the account that will use WSL, or the step fails instead of installing for the wrong account.
 - Virtualization must be on in the firmware (and, in a VM, nested virtualization), or WSL 2 cannot start.
 

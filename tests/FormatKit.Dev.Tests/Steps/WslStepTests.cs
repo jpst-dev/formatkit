@@ -298,4 +298,14 @@ public class WslStepTests
         rig.Wsl(0, "joao P 2026-10-29 0 99999 7 -1");
         rig.Wsl(0, "[user]\ndefault=joao\n");
     }
+
+    [Theory]
+    [InlineData("Next_RunWslUser", "dev wsl-user")]
+    [InlineData("Next_RunSshKey", "dev ssh-key")]
+    public void Pending_next_actions_name_the_profile(string key, string command)
+    {
+        var text = Strings.Get(key);
+
+        Assert.Contains($"formatkit {command} --profile <your-profile.json>", text);
+    }
 }
