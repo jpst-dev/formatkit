@@ -17,6 +17,9 @@ public class ShellStepTests
     private const string Home = "/home/joao";
     private const string Omz = "/home/joao/.oh-my-zsh";
     private const string Zshrc = "/home/joao/.zshrc";
+    private const string LocalMachineShell = @"HKLM\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell";
+    private const string CurrentUserShell = @"HKCU\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell";
+    private const string MachinePolicy = @"HKLM\SOFTWARE\Policies\Microsoft\Windows\PowerShell";
 
     private sealed class Rig
     {
@@ -24,9 +27,10 @@ public class ShellStepTests
         public FakeUserContextRunner UserContext { get; } = new();
         public FakeToolLocator Tools { get; } = new();
         public InMemoryFileSystem Files { get; } = new();
+        public FakeRegistry Registry { get; } = new();
 
         public StepContext Context() =>
-            TestServices.Context(TestServices.Create(processes: Processes, files: Files, tools: Tools, userContext: UserContext));
+            TestServices.Context(TestServices.Create(processes: Processes, files: Files, tools: Tools, userContext: UserContext, registry: Registry));
 
         public void Wsl(int exit, string stdout = "", string stderr = "") =>
             Processes.Enqueue("wsl.exe", new ProcessResult(exit, stdout, stderr, TimeSpan.Zero, false));
@@ -370,6 +374,7 @@ public class ShellStepTests
     {
         var rig = new Rig();
         rig.Tools.Add("oh-my-posh.exe", OhMyPoshExe);
+        rig.Registry.Set(LocalMachineShell, "ExecutionPolicy", RegistryKind.String, "RemoteSigned");
         rig.Files.CreateDirectory(@"C:\Users\Joao\Documents");
         return rig;
     }
@@ -485,6 +490,81 @@ public class ShellStepTests
         await Run(Step(windows: Win()), with);
         Assert.True(with.Files.FileExists(Pwsh7Profile));
         Assert.True(with.Files.FileExists(WinPsProfile));
+    }
+
+    [Fact]
+    public async Task Restricted_default_leaves_windows_powershell_profile_pending_but_written()
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.Delete(LocalMachineShell, "ExecutionPolicy");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Equal(Strings.Get("Next_EnablePsScripts"), result.NextAction);
+        Assert.Contains(WinPsProfile + ": " + Strings.Get("Outcome_Pending") + " — Restricted", result.Messages);
+        Assert.Contains("oh-my-posh init powershell", rig.Files.ReadAllText(WinPsProfile));
+    }
+
+    [Fact]
+    public async Task Restricted_policy_does_not_affect_pwsh7_profile()
+    {
+        var rig = WithOhMyPosh();
+        rig.Files.Seed(Pwsh7Exe, "");
+        rig.Registry.Delete(LocalMachineShell, "ExecutionPolicy");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Contains(Pwsh7Profile + ": " + Strings.Get("Outcome_Done"), result.Messages);
+    }
+
+    [Fact]
+    public async Task Local_machine_remote_signed_is_done()
+    {
+        var rig = WithOhMyPosh();
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Contains(WinPsProfile + ": " + Strings.Get("Outcome_Done"), result.Messages);
+    }
+
+    [Fact]
+    public async Task Policy_with_scripts_disabled_overrides_remote_signed()
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.Set(MachinePolicy, "EnableScripts", RegistryKind.Dword, "0");
+        rig.Registry.Set(MachinePolicy, "ExecutionPolicy", RegistryKind.String, "RemoteSigned");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Equal(Strings.Get("Next_EnablePsScripts"), result.NextAction);
+    }
+
+    [Fact]
+    public async Task Policy_with_scripts_enabled_wins_over_local_machine()
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.Set(MachinePolicy, "EnableScripts", RegistryKind.Dword, "1");
+        rig.Registry.Set(MachinePolicy, "ExecutionPolicy", RegistryKind.String, "AllSigned");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Equal(Strings.Get("Next_EnablePsScripts"), result.NextAction);
+        Assert.Contains(result.Messages, m => m.EndsWith("AllSigned"));
+    }
+
+    [Fact]
+    public async Task Current_user_unrestricted_over_restricted_local_machine_is_done()
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.Set(LocalMachineShell, "ExecutionPolicy", RegistryKind.String, "Restricted");
+        rig.Registry.Set(CurrentUserShell, "ExecutionPolicy", RegistryKind.String, "unrestricted");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Contains(WinPsProfile + ": " + Strings.Get("Outcome_Done"), result.Messages);
     }
 
     [Fact]

@@ -311,22 +311,39 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
 
         items.Add(await InstallFontAsync(ohMyPosh, windows.Font, fontLabel, ctx, ct).ConfigureAwait(false));
         foreach (var profile in profiles)
-            items.Add(EnsureProfile(profile.Path, profile.InitLine, ctx));
+        {
+            var item = EnsureProfile(profile.Path, profile.InitLine, ctx);
+            items.Add(profile.WindowsPowerShell ? RequireScripts(item, ctx) : item);
+        }
         items.Add(EnsureFragment(fragmentPath, windows.Font, ctx));
     }
 
     /// <summary>PowerShell 7 only when it is installed; Windows PowerShell 5.1 always (its init command is <c>powershell</c>, spec 12).</summary>
-    private List<(string Path, string InitLine)> ProfileTargets(IFileSystem files, string theme)
+    private List<(string Path, string InitLine, bool WindowsPowerShell)> ProfileTargets(IFileSystem files, string theme)
     {
         const string ProfileFile = "Microsoft.PowerShell_profile.ps1";
-        List<(string, string)> targets = [];
+        List<(string, string, bool)> targets = [];
         if (files.FileExists(env.Expand(@"%ProgramFiles%\PowerShell\7\pwsh.exe")))
-            targets.Add((Path.Combine(env.Documents, "PowerShell", ProfileFile), Init("pwsh", theme)));
-        targets.Add((Path.Combine(env.Documents, "WindowsPowerShell", ProfileFile), Init("powershell", theme)));
+            targets.Add((Path.Combine(env.Documents, "PowerShell", ProfileFile), Init("pwsh", theme), false));
+        targets.Add((Path.Combine(env.Documents, "WindowsPowerShell", ProfileFile), Init("powershell", theme), true));
         return targets;
     }
 
     private static string Init(string shell, string theme) => $"oh-my-posh init {shell} --config {theme} | Invoke-Expression";
+
+    /// <summary>The profile is written regardless, but Windows PowerShell 5.1 only loads it when its execution policy allows scripts (spec 12).</summary>
+    private static DevItem RequireScripts(DevItem item, StepContext ctx)
+    {
+        if (item.Outcome is not (DevItemOutcome.Done or DevItemOutcome.AlreadyInOrder))
+            return item;
+
+        var policy = PowerShellExecutionPolicy.Effective(ctx.Services.Registry);
+        if (PowerShellExecutionPolicy.RunsScripts(policy))
+            return item;
+
+        ctx.Log.Warning("Windows PowerShell execution policy is {Policy}; {Path} will not load", policy, item.Label);
+        return item with { Outcome = DevItemOutcome.Pending, NextAction = Strings.Get("Next_EnablePsScripts"), Detail = policy };
+    }
 
     /// <summary>Exit 0 also when the font is already installed (spec 12), so success is reported as done.</summary>
     private static async Task<DevItem> InstallFontAsync(string ohMyPosh, string font, string label, StepContext ctx, CancellationToken ct)

@@ -18,7 +18,8 @@
   <data name="Next_RunWslUser" xml:space="preserve"><value>Execute `formatkit dev wsl-user` quando estiver no PC.</value></data>
   <data name="Next_RunSshKey" xml:space="preserve"><value>Execute `formatkit dev ssh-key` quando estiver no PC.</value></data>
   <data name="Next_AddGit" xml:space="preserve"><value>Adicione `development.git` à seção programs.</value></data>
-  <data name="Next_AddOhMyPosh" xml:space="preserve"><value>Adicione `development.oh-my-posh` à seção programs.</value></data>
+  <data name="Next_AddOhMyPosh" xml:space="preserve"><value>O Oh My Posh não está instalado: adicione `development.oh-my-posh` à seção programs (ou veja por que a instalação falhou) e execute novamente.</value></data>
+  <data name="Next_EnablePsScripts" xml:space="preserve"><value>O Windows PowerShell não executa scripts de perfil. Adicione developer.ps-execution-policy à lista include do cleanup e execute novamente.</value></data>
   <data name="Next_EnableVirtualization" xml:space="preserve"><value>Ative a virtualização na BIOS/UEFI e execute novamente.</value></data>
   <data name="Next_WrongAccount" xml:space="preserve"><value>Execute o FormatKit pela conta que vai usar o WSL.</value></data>
   <data name="Next_OtherCloneTo" xml:space="preserve"><value>Escolha outra pasta em `cloneTo`.</value></data>

@@ -18,7 +18,8 @@
   <data name="Next_RunWslUser" xml:space="preserve"><value>Run `formatkit dev wsl-user` when you are at the PC.</value></data>
   <data name="Next_RunSshKey" xml:space="preserve"><value>Run `formatkit dev ssh-key` when you are at the PC.</value></data>
   <data name="Next_AddGit" xml:space="preserve"><value>Add `development.git` to the programs section.</value></data>
-  <data name="Next_AddOhMyPosh" xml:space="preserve"><value>Add `development.oh-my-posh` to the programs section.</value></data>
+  <data name="Next_AddOhMyPosh" xml:space="preserve"><value>Oh My Posh is not installed: add `development.oh-my-posh` to the programs section (or check why its install failed) and run again.</value></data>
+  <data name="Next_EnablePsScripts" xml:space="preserve"><value>Windows PowerShell does not run profile scripts. Add developer.ps-execution-policy to the cleanup include list and run again.</value></data>
   <data name="Next_EnableVirtualization" xml:space="preserve"><value>Enable virtualization in the BIOS/UEFI and run again.</value></data>
   <data name="Next_WrongAccount" xml:space="preserve"><value>Run FormatKit from the account that will use WSL.</value></data>
   <data name="Next_OtherCloneTo" xml:space="preserve"><value>Choose another `cloneTo` folder.</value></data>
