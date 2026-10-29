@@ -73,8 +73,10 @@ internal static class RunCommand
             if (profile is null)
                 return ExitCodes.InvalidInput;
 
-            // Before RunFlow, so before elevation: the UAC prompt appears only after the countdown.
-            if (wait is > 0 && context.Env.Services.Console.CanPrompt)
+            // Before RunFlow, so before elevation: the UAC prompt appears only after the countdown. The elevated
+            // child gets the same arguments, but its parent already counted down: it must not wait again.
+            var elevatedChild = parse.GetValue<bool>(CliApp.ElevatedChildFlag);
+            if (wait is > 0 && !elevatedChild && context.Env.Services.Console.CanPrompt)
             {
                 var starter = context.Env.Countdown ?? new StartCountdown();
                 if (!await starter.WaitAsync(profile.Profile.Name, TimeSpan.FromSeconds(wait.Value), ct))

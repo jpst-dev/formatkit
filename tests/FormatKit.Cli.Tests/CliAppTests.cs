@@ -182,6 +182,26 @@ public sealed class CliAppTests : IDisposable
     }
 
     [Fact]
+    public async Task Run_countdown_is_skipped_in_the_elevated_child()
+    {
+        // The parent already counted down before the UAC prompt; the child must not wait again.
+        var step = new FakeStep("a") { CheckResult = false };
+        _module.Steps.Add(step);
+        _elevation.IsElevated = true;
+        _escPressed = true;
+        var app = App();
+        app.WaitForClose = () => Task.CompletedTask;
+
+        var exit = await app.RunAsync(
+            ["run", "--profile", WriteProfile(), "--countdown", "60", "--elevated-child"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Empty(_countdownLines);
+        Assert.Equal(1, step.ExecuteCalls);
+        Assert.DoesNotContain("Automatic run cancelled", _out.ToString());
+    }
+
+    [Fact]
     public async Task Run_countdown_zero_does_not_wait()
     {
         _module.Steps.Add(new FakeStep("a") { CheckResult = false });
