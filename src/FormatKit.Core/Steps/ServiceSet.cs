@@ -23,4 +23,5 @@ public sealed record ServiceSet(
     IInteractiveConsole Console,
     IUserEnvironment UserEnvironment,
     IToolLocator Tools,
-    WslClient Wsl);
+    WslClient Wsl,
+    IVirtualDisks VirtualDisks);

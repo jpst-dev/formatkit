@@ -22,7 +22,8 @@ public static class TestServices
         IUserContextRunner? userContext = null,
         FakeInteractiveConsole? console = null,
         FakeUserEnvironment? userEnvironment = null,
-        FakeToolLocator? tools = null)
+        FakeToolLocator? tools = null,
+        FakeVirtualDisks? virtualDisks = null)
     {
         processes ??= new FakeProcessRunner();
         files ??= new InMemoryFileSystem();
@@ -45,7 +46,8 @@ public static class TestServices
             console ?? new FakeInteractiveConsole(),
             userEnvironment ?? new FakeUserEnvironment(),
             tools ?? new FakeToolLocator(),
-            new WslClient(processes));
+            new WslClient(processes),
+            virtualDisks ?? new FakeVirtualDisks());
     }
 
     public static StepContext Context(ServiceSet services) =>
