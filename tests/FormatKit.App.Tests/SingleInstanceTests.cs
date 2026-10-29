@@ -26,6 +26,7 @@ public class SingleInstanceTests
         Assert.NotNull(first);
         using var raised = new ManualResetEventSlim();
         first.Activated += (_, _) => raised.Set();
+        first.Start();
 
         SingleInstance.SignalExisting(name, resume: false);
 
@@ -40,14 +41,15 @@ public class SingleInstanceTests
         using var first = SingleInstance.TryAcquire(name);
         Assert.NotNull(first);
         using var resumed = new ManualResetEventSlim();
-        var activated = false;
+        using var activated = new ManualResetEventSlim();
         first.ResumeRequested += (_, _) => resumed.Set();
-        first.Activated += (_, _) => activated = true;
+        first.Activated += (_, _) => activated.Set();
+        first.Start();
 
         SingleInstance.SignalExisting(name, resume: true);
 
         Assert.True(resumed.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        Assert.False(activated);
+        Assert.False(activated.IsSet);
     }
 
     [Fact]
@@ -57,14 +59,43 @@ public class SingleInstanceTests
         using var first = SingleInstance.TryAcquire(name);
         Assert.NotNull(first);
         using var activated = new ManualResetEventSlim();
-        var resumed = false;
-        first.ResumeRequested += (_, _) => resumed = true;
+        using var resumed = new ManualResetEventSlim();
+        first.ResumeRequested += (_, _) => resumed.Set();
         first.Activated += (_, _) => activated.Set();
+        first.Start();
 
         SingleInstance.SignalExisting(name, resume: false);
 
         Assert.True(activated.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        Assert.False(resumed);
+        Assert.False(resumed.IsSet);
+    }
+
+    [Fact]
+    public void SignalExisting_BeforeStart_IsRaisedOnceStarted()
+    {
+        // The resume task can signal while the open window is still starting, before it has subscribed: the request
+        // waits on the event until the owner listens.
+        var name = UniqueName();
+        using var first = SingleInstance.TryAcquire(name);
+        Assert.NotNull(first);
+        SingleInstance.SignalExisting(name, resume: true);
+        using var resumed = new ManualResetEventSlim();
+        first.ResumeRequested += (_, _) => resumed.Set();
+
+        first.Start();
+
+        Assert.True(resumed.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void Dispose_NeverStarted_DoesNotThrow()
+    {
+        var first = SingleInstance.TryAcquire(UniqueName());
+        Assert.NotNull(first);
+
+        var exception = Record.Exception(first.Dispose);
+
+        Assert.Null(exception);
     }
 
     [Fact]

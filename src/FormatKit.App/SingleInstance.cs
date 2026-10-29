@@ -24,7 +24,6 @@ public sealed class SingleInstance : IDisposable
         _activate = activate;
         _resume = resume;
         _listener = new Thread(Listen) { IsBackground = true, Name = "FormatKit.SingleInstance" };
-        _listener.Start();
     }
 
     /// <summary>Raised on a background thread when a later instance asks the first one to come forward.</summary>
@@ -93,10 +92,18 @@ public sealed class SingleInstance : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts raising <see cref="Activated"/> and <see cref="ResumeRequested"/>; call it once the handlers are
+    /// subscribed. A signal sent earlier stays on its event and is raised then, so a resume request sent while this
+    /// window is still starting is not lost.
+    /// </summary>
+    public void Start() => _listener.Start();
+
     public void Dispose()
     {
         _stop.Set();
-        _listener.Join();
+        if (_listener.IsAlive)
+            _listener.Join();
         _stop.Dispose();
         _resume.Dispose();
         _activate.Dispose();

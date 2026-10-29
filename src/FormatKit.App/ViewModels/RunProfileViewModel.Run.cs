@@ -143,11 +143,24 @@ public sealed partial class RunProfileViewModel
 
         var ended = _runEnded.Task;
         _stopOnConnect = true;
-        _startCts?.Cancel();
+        CancelStart();
         if (IsRunning)
             await StopAsync();
         await ended;
         return true;
+    }
+
+    private void CancelStart()
+    {
+        // The start can end and dispose its source between the read and the cancel.
+        var start = _startCts;
+        try
+        {
+            start?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     /// <summary>

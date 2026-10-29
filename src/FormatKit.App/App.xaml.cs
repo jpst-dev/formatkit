@@ -78,6 +78,7 @@ public partial class App : Application
             _window?.BringToFront();
             _ = main.ResumeAsync();
         });
+        _instance.Start();
         _window.Show();
         if (arguments.Mode == AppMode.Resume)
         {
