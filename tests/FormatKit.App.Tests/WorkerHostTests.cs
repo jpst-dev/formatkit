@@ -93,6 +93,7 @@ public sealed class WorkerHostTests : IAsyncDisposable
         Assert.Equal(6, messages.Count);
         var planned = Assert.IsType<Planned>(messages[0]);
         Assert.Equal([new PlannedStep("a", "Step A", true), new PlannedStep("b", "Step B", false)], planned.Steps);
+        Assert.Equal("Mine", planned.ProfileName);
         Assert.Equal(new StepStarted(1, 2, "a"), messages[1]);
         var a = Assert.IsType<StepFinished>(messages[2]);
         Assert.Equal(("a", StepOutcome.Succeeded), (a.Id, a.Outcome));
@@ -275,6 +276,8 @@ public sealed class WorkerHostTests : IAsyncDisposable
         Assert.Equal(
             [StepOutcome.Succeeded, StepOutcome.Skipped, null],
             planned.Steps.Select(s => s.DoneBefore));
+        // The window has not reviewed this profile: the resumed run shows its name from here.
+        Assert.Equal("Mine", planned.ProfileName);
     }
 
     [Fact]

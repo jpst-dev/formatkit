@@ -325,6 +325,9 @@ public sealed partial class RunProfileViewModel
         switch (message)
         {
             case Planned planned:
+                // A resumed run was not reviewed here: its header shows the name the worker sends.
+                if (planned.ProfileName is { } name)
+                    ProfileName = name;
                 ShowSteps(planned.Steps.Select(NewRow));
                 return null;
             case StepStarted started:

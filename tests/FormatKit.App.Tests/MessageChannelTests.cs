@@ -12,6 +12,7 @@ public class MessageChannelTests
     public static TheoryData<WorkerMessage> AllMessages() => new()
     {
         new Planned([new PlannedStep("a", "Step A", true), new PlannedStep("b", "Step B", false)]),
+        new Planned([new PlannedStep("a", "Step A", true)], "Mine"),
         new StepStarted(1, 2, "a"),
         new StepFinished("a", StepOutcome.RebootRequired, ["m1", "m2"], "do this"),
         new StepFinished("b", StepOutcome.Succeeded, [], null),
@@ -89,6 +90,24 @@ public class MessageChannelTests
         var text = Encoding.UTF8.GetString(ms.ToArray());
         Assert.Contains("\"outcome\":\"Skipped\"", text);
         Assert.Contains("\"nextAction\"", text);
+    }
+
+    [Fact]
+    public async Task Read_PlannedWithoutProfileName_HasNoName()
+    {
+        // A worker that does not send the name: the window keeps the name it shows.
+        await using var ch = Over("{\"type\":\"planned\",\"steps\":[]}\n");
+        var planned = Assert.IsType<Planned>(Assert.Single(await ReadAll(ch)));
+        Assert.Null(planned.ProfileName);
+    }
+
+    [Fact]
+    public async Task Send_PlannedProfileNameIsCamelCase()
+    {
+        var ms = new MemoryStream();
+        await using var ch = new MessageChannel(ms, Log);
+        await ch.SendAsync(new Planned([], "Mine"), CancellationToken.None);
+        Assert.Contains("\"profileName\":\"Mine\"", Encoding.UTF8.GetString(ms.ToArray()));
     }
 
     [Fact]

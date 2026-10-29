@@ -138,6 +138,30 @@ public sealed class RunProfileRunTests : IDisposable
     }
 
     [Fact]
+    public async Task Resume_ShowsTheProfileNameFromPlanned()
+    {
+        var vm = Create();
+        Assert.Null(vm.ProfileName);
+        _launcher.Script.Add(new Planned([new PlannedStep("programs.winget", "Install programs", false)], "Resumed"));
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+
+        await vm.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.Equal("Resumed", vm.ProfileName);
+    }
+
+    [Fact]
+    public async Task Planned_WithoutProfileName_KeepsTheReviewedName()
+    {
+        var vm = Reviewed();
+        _launcher.Script.AddRange([PlannedAll(), FinishedWith(RunStatus.Completed)]);
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal("Mine", vm.ProfileName);
+    }
+
+    [Fact]
     public async Task Resume_StepsDoneBefore_FinalResultHasNoPendingRows()
     {
         var vm = Create();

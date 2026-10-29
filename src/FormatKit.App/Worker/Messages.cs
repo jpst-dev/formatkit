@@ -21,7 +21,11 @@ public abstract record WorkerMessage;
 
 public sealed record PlannedStep(string Id, string Title, bool RequiresAdmin, StepOutcome? DoneBefore = null);
 
-public sealed record Planned(IReadOnlyList<PlannedStep> Steps) : WorkerMessage;
+/// <summary>
+/// The steps the run will go through, and the profile's name for the page header (a resumed run was not reviewed in
+/// this window). A missing name keeps the name the window shows.
+/// </summary>
+public sealed record Planned(IReadOnlyList<PlannedStep> Steps, string? ProfileName = null) : WorkerMessage;
 
 public sealed record StepStarted(int Number, int Total, string Id) : WorkerMessage;
 

@@ -80,7 +80,10 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         }
 
         var plan = PlanService.Build(profile.Profile, modules, env.SimulateRebootAfterStep);
-        await TrySendAsync(channel, new Planned(plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin, DoneBefore(done, s.Id))).ToList()), ct).ConfigureAwait(false);
+        var planned = new Planned(
+            plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin, DoneBefore(done, s.Id))).ToList(),
+            profile.Profile.Name);
+        await TrySendAsync(channel, planned, ct).ConfigureAwait(false);
 
         // Steps get the host token, never the stop token, so a stop never interrupts a step mid-work.
         // Every send below waits for the posted progress messages, so the window sees them in order.
