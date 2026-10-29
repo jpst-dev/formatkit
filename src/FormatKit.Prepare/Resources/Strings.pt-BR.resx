@@ -119,4 +119,36 @@
   <data name="DevDrive_Detail_Size" xml:space="preserve"><value>O disco virtual {0} ({1}) será apagado junto com a unidade do Windows.</value></data>
   <data name="DevDrive_Detail" xml:space="preserve"><value>O disco virtual {0} será apagado junto com a unidade do Windows.</value></data>
   <data name="DevDrive_Action" xml:space="preserve"><value>Copie o que precisar de {0} para um disco externo antes de instalar. Os repositórios dentro dela aparecem em itens separados.</value></data>
+  <data name="ProgramsExport_Todo_Title" xml:space="preserve"><value>A lista de programas instalados não foi exportada</value></data>
+  <data name="ProgramsExport_Todo_Detail" xml:space="preserve"><value>Depois da reinstalação, o FormatKit só consegue instalar seus programas de novo a partir de uma lista exportada.</value></data>
+  <data name="ProgramsExport_Action" xml:space="preserve"><value>Execute formatkit programs export E:\programs.json e guarde o arquivo fora do disco do Windows.</value></data>
+  <data name="ProgramsExport_Lost_Title" xml:space="preserve"><value>A lista de programas {0} está em {1} e será apagada</value></data>
+  <data name="ProgramsExport_Lost_Detail" xml:space="preserve"><value>O perfil importa esta lista, mas o arquivo está no disco que o Windows vai formatar.</value></data>
+  <data name="ProgramsExport_Lost_Action" xml:space="preserve"><value>Mova-a para fora de {0} e atualize modules.programs.importFile no perfil.</value></data>
+  <data name="ProgramsExport_Missing_Title" xml:space="preserve"><value>A lista de programas {0} não foi encontrada</value></data>
+  <data name="ProgramsExport_Missing_Detail" xml:space="preserve"><value>O perfil importa esta lista, mas o arquivo não existe.</value></data>
+  <data name="ProgramsExport_Ok_Title" xml:space="preserve"><value>A lista de programas {0} está fora de {1}</value></data>
+  <data name="NetworkDrivers_Todo_Title" xml:space="preserve"><value>O backup dos drivers de rede não foi feito</value></data>
+  <data name="NetworkDrivers_Todo_Detail" xml:space="preserve"><value>Sem um driver de rede, o novo Windows pode não conseguir acessar a internet para baixar os outros.</value></data>
+  <data name="NetworkDrivers_Todo_Action" xml:space="preserve"><value>Execute formatkit drivers backup-network --output E:\netdrivers e guarde a pasta fora do disco do Windows.</value></data>
+  <data name="NetworkDrivers_Lost_Title" xml:space="preserve"><value>O backup dos drivers de rede {0} está em {1} e será apagado</value></data>
+  <data name="NetworkDrivers_Lost_Detail" xml:space="preserve"><value>O perfil usa esta pasta, mas ela está no disco que o Windows vai formatar.</value></data>
+  <data name="NetworkDrivers_Lost_Action" xml:space="preserve"><value>Mova-o para fora de {0}, ou execute formatkit drivers backup-network --output {1} de novo com outra pasta, e atualize modules.drivers.networkDriverBackup no perfil.</value></data>
+  <data name="NetworkDrivers_Empty_Title" xml:space="preserve"><value>O backup dos drivers de rede {0} não existe ou não tem drivers</value></data>
+  <data name="NetworkDrivers_Empty_Detail" xml:space="preserve"><value>A pasta não existe ou não contém nenhum arquivo de driver .inf.</value></data>
+  <data name="NetworkDrivers_Empty_Action" xml:space="preserve"><value>Execute formatkit drivers backup-network --output {0} para preenchê-la.</value></data>
+  <data name="NetworkDrivers_Unreadable_Title" xml:space="preserve"><value>Não foi possível ler o backup dos drivers de rede {0}</value></data>
+  <data name="NetworkDrivers_Unreadable_Detail" xml:space="preserve"><value>Algumas pastas dentro dele não puderam ser listadas.</value></data>
+  <data name="NetworkDrivers_Ok_Title" xml:space="preserve"><value>O backup dos drivers de rede {0} está fora de {1}</value></data>
+  <data name="ProfileInputs_ProfileFile" xml:space="preserve"><value>O arquivo de perfil</value></data>
+  <data name="ProfileInputs_Detail" xml:space="preserve"><value>Caminho: {0}.</value></data>
+  <data name="ProfileInputs_Lost_Title" xml:space="preserve"><value>{0} está em {1} e será apagado</value></data>
+  <data name="ProfileInputs_Lost_Action" xml:space="preserve"><value>Mova-o para fora de {0} e atualize o perfil.</value></data>
+  <data name="ProfileInputs_Missing_Title" xml:space="preserve"><value>{0} não foi encontrado</value></data>
+  <data name="ProfileInputs_Missing_Action" xml:space="preserve"><value>Corrija o caminho no perfil ou restaure o arquivo.</value></data>
+  <data name="ProfileInputs_Ok_One" xml:space="preserve"><value>1 arquivo do perfil está fora de {0}</value></data>
+  <data name="ProfileInputs_Ok_Many" xml:space="preserve"><value>{0} arquivos do perfil estão fora de {1}</value></data>
+  <data name="Browsers_Title" xml:space="preserve"><value>Os dados do navegador {0} serão apagados</value></data>
+  <data name="Browsers_Detail" xml:space="preserve"><value>Favoritos, senhas salvas e extensões ficam em {0}.</value></data>
+  <data name="Browsers_Action" xml:space="preserve"><value>Ative a sincronização ou exporte os favoritos e as senhas.</value></data>
 </root>

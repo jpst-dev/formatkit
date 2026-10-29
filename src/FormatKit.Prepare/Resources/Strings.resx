@@ -119,4 +119,36 @@
   <data name="DevDrive_Detail_Size" xml:space="preserve"><value>The virtual disk {0} ({1}) will be erased with the Windows drive.</value></data>
   <data name="DevDrive_Detail" xml:space="preserve"><value>The virtual disk {0} will be erased with the Windows drive.</value></data>
   <data name="DevDrive_Action" xml:space="preserve"><value>Copy what you need from {0} to an external drive before installing. Repositories inside it are reported separately.</value></data>
+  <data name="ProgramsExport_Todo_Title" xml:space="preserve"><value>The list of installed programs has not been exported</value></data>
+  <data name="ProgramsExport_Todo_Detail" xml:space="preserve"><value>After the reinstall, FormatKit can install your programs again only from an exported list.</value></data>
+  <data name="ProgramsExport_Action" xml:space="preserve"><value>Run formatkit programs export E:\programs.json and keep the file off the Windows drive.</value></data>
+  <data name="ProgramsExport_Lost_Title" xml:space="preserve"><value>The program list {0} is on {1} and will be erased</value></data>
+  <data name="ProgramsExport_Lost_Detail" xml:space="preserve"><value>The profile imports this list, but the file is on the drive Windows will format.</value></data>
+  <data name="ProgramsExport_Lost_Action" xml:space="preserve"><value>Move it off {0} and update modules.programs.importFile in the profile.</value></data>
+  <data name="ProgramsExport_Missing_Title" xml:space="preserve"><value>The program list {0} was not found</value></data>
+  <data name="ProgramsExport_Missing_Detail" xml:space="preserve"><value>The profile imports this list, but the file does not exist.</value></data>
+  <data name="ProgramsExport_Ok_Title" xml:space="preserve"><value>The program list {0} is off {1}</value></data>
+  <data name="NetworkDrivers_Todo_Title" xml:space="preserve"><value>The network drivers have not been backed up</value></data>
+  <data name="NetworkDrivers_Todo_Detail" xml:space="preserve"><value>Without a network driver, the new Windows may not reach the internet to download the others.</value></data>
+  <data name="NetworkDrivers_Todo_Action" xml:space="preserve"><value>Run formatkit drivers backup-network --output E:\netdrivers and keep the folder off the Windows drive.</value></data>
+  <data name="NetworkDrivers_Lost_Title" xml:space="preserve"><value>The network driver backup {0} is on {1} and will be erased</value></data>
+  <data name="NetworkDrivers_Lost_Detail" xml:space="preserve"><value>The profile uses this folder, but it is on the drive Windows will format.</value></data>
+  <data name="NetworkDrivers_Lost_Action" xml:space="preserve"><value>Move it off {0}, or run formatkit drivers backup-network --output {1} again with another folder, and update modules.drivers.networkDriverBackup in the profile.</value></data>
+  <data name="NetworkDrivers_Empty_Title" xml:space="preserve"><value>The network driver backup {0} is missing or has no drivers</value></data>
+  <data name="NetworkDrivers_Empty_Detail" xml:space="preserve"><value>The folder does not exist or holds no .inf driver file.</value></data>
+  <data name="NetworkDrivers_Empty_Action" xml:space="preserve"><value>Run formatkit drivers backup-network --output {0} to fill it.</value></data>
+  <data name="NetworkDrivers_Unreadable_Title" xml:space="preserve"><value>The network driver backup {0} could not be read</value></data>
+  <data name="NetworkDrivers_Unreadable_Detail" xml:space="preserve"><value>Some folders inside it could not be listed.</value></data>
+  <data name="NetworkDrivers_Ok_Title" xml:space="preserve"><value>The network driver backup {0} is off {1}</value></data>
+  <data name="ProfileInputs_ProfileFile" xml:space="preserve"><value>The profile file</value></data>
+  <data name="ProfileInputs_Detail" xml:space="preserve"><value>Path: {0}.</value></data>
+  <data name="ProfileInputs_Lost_Title" xml:space="preserve"><value>{0} is on {1} and will be erased</value></data>
+  <data name="ProfileInputs_Lost_Action" xml:space="preserve"><value>Move it off {0} and update the profile.</value></data>
+  <data name="ProfileInputs_Missing_Title" xml:space="preserve"><value>{0} was not found</value></data>
+  <data name="ProfileInputs_Missing_Action" xml:space="preserve"><value>Fix the path in the profile or restore the file.</value></data>
+  <data name="ProfileInputs_Ok_One" xml:space="preserve"><value>1 profile file is off {0}</value></data>
+  <data name="ProfileInputs_Ok_Many" xml:space="preserve"><value>{0} profile files are off {1}</value></data>
+  <data name="Browsers_Title" xml:space="preserve"><value>The data of the browser {0} will be erased</value></data>
+  <data name="Browsers_Detail" xml:space="preserve"><value>Bookmarks, saved passwords and extensions are stored in {0}.</value></data>
+  <data name="Browsers_Action" xml:space="preserve"><value>Turn on sync or export bookmarks and passwords.</value></data>
 </root>
