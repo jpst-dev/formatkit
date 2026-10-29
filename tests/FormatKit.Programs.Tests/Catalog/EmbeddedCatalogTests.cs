@@ -51,6 +51,7 @@ public class EmbeddedCatalogTests
         ("Node.js LTS", "development.nodejs-lts"),
         ("Docker Desktop", "development.docker-desktop"),
         ("JetBrains Toolbox", "development.jetbrains-toolbox"),
+        ("Oh My Posh", "development.oh-my-posh"),
     ];
 
     // Riot Client: winget has no standalone Riot Client package, only per-game, per-region ones.
@@ -59,10 +60,11 @@ public class EmbeddedCatalogTests
     // Discord, Zoom and Spotify per the spec; Playnite and JetBrains Toolbox because winget offers only a user-scope installer;
     // Telegram because its only machine-scope option is a portable zip, its installer is per-user.
     // Slack and Notion because their machine-scope installer is an MSIX, which winget cannot install device-wide.
+    // Oh My Posh because it ships only as an MSIX (JanDeDobbeleer.OhMyPosh), which installs per user.
     private static readonly string[] PerUser =
     [
         "communication.discord", "communication.telegram", "communication.zoom", "communication.slack", "media.spotify",
-        "games.playnite", "productivity.notion", "development.jetbrains-toolbox",
+        "games.playnite", "productivity.notion", "development.jetbrains-toolbox", "development.oh-my-posh",
     ];
 
     // Machine-context entries whose winget manifests offer both a machine and a user installer.

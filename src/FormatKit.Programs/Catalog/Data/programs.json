@@ -135,6 +135,9 @@
                 "pt-BR": { "name": "Docker Desktop", "description": "Executa contêineres no Windows." } } },
     { "id": "development.jetbrains-toolbox", "category": "development", "wingetId": "JetBrains.Toolbox", "source": "winget", "context": "user", "scope": "user",
       "text": { "en": { "name": "JetBrains Toolbox", "description": "Installs and updates JetBrains IDEs." },
-                "pt-BR": { "name": "JetBrains Toolbox", "description": "Instala e atualiza as IDEs da JetBrains." } } }
+                "pt-BR": { "name": "JetBrains Toolbox", "description": "Instala e atualiza as IDEs da JetBrains." } } },
+    { "id": "development.oh-my-posh", "category": "development", "wingetId": "JanDeDobbeleer.OhMyPosh", "source": "winget", "context": "user", "scope": "user",
+      "text": { "en": { "name": "Oh My Posh", "description": "Prompt theme engine for PowerShell and other shells." },
+                "pt-BR": { "name": "Oh My Posh", "description": "Temas de prompt para o PowerShell e outros terminais." } } }
   ]
 }
