@@ -4,6 +4,7 @@ import { docsLoader, i18nLoader } from '@astrojs/starlight/loaders';
 import { releasesLoader } from './loaders/releases';
 import { knownIssuesLoader } from './loaders/knownIssues';
 import { programsLoader } from './loaders/programs';
+import { cleanupLoader } from './loaders/cleanup';
 import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
 
 export const collections = {
@@ -39,6 +40,24 @@ export const collections = {
       source: z.string(),
       wingetId: z.string().optional(),
       text: z.record(z.string(), z.object({ name: z.string(), description: z.string() })),
+    }),
+  }),
+  cleanup: defineCollection({
+    loader: cleanupLoader(),
+    schema: z.looseObject({
+      id: z.string(),
+      category: z.string(),
+      level: z.string(),
+      scope: z.string(),
+      contested: z.boolean(),
+      requiresReboot: z.boolean(),
+      laptopSensitive: z.boolean(),
+      text: z.record(z.string(), z.looseObject({ title: z.string(), what: z.string(), breaks: z.string() })),
+      actions: z.array(z.looseObject({ type: z.string() })),
+      evidence: z
+        .object({ level: z.string(), sources: z.array(z.object({ title: z.string(), url: z.string() })) })
+        .nullable(),
+      order: z.number(),
     }),
   }),
   i18n: defineCollection({
