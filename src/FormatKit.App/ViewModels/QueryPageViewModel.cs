@@ -31,7 +31,8 @@ public abstract partial class QueryPageViewModel(Serilog.ILogger? log = null) : 
     /// <summary>
     /// Runs a system query guarded against WMI/COM failures. Queries with different <paramref name="slot"/> keys run
     /// independently; a repeat of the same slot replaces the older one. A cancelled or replaced query shows no error
-    /// and applies nothing. <see cref="IsBusy"/> stays true while any query runs.
+    /// and applies nothing. <see cref="IsBusy"/> stays true while any query runs. The query itself runs on the thread
+    /// pool; <paramref name="apply"/> runs on the caller's context.
     /// </summary>
     protected async Task RunQueryAsync<T>(Func<CancellationToken, Task<T>> query, Action<T> apply, object? slot = null)
     {
@@ -44,7 +45,9 @@ public abstract partial class QueryPageViewModel(Serilog.ILogger? log = null) : 
         Error = null;
         try
         {
-            var result = await SystemQuery.GuardAsync(() => query(source.Token));
+            // The query runs on the thread pool, since checks such as the user folders scan are synchronous; the
+            // await comes back to the caller's context (the dispatcher), so apply and the bookkeeping stay on the UI.
+            var result = await SystemQuery.GuardAsync(() => Task.Run(() => query(source.Token)));
             if (source.IsCancellationRequested)
                 return;
 

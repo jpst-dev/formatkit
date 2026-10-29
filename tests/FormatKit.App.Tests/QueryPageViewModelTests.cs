@@ -67,4 +67,39 @@ public class QueryPageViewModelTests
         Assert.Contains("boom", page.Error);
         Assert.False(page.IsBusy);
     }
+
+    [Fact]
+    public async Task QueryBlockingItsThread_DoesNotBlockTheCaller()
+    {
+        // A synchronous check (the user folders scan) must not run on the UI thread.
+        var page = new TestPage();
+        using var gate = new ManualResetEventSlim();
+        var value = 0;
+
+        var run = page.RunAsync(_ => { gate.Wait(TimeSpan.FromSeconds(5)); return Task.FromResult(3); }, v => value = v);
+
+        Assert.False(run.IsCompleted);
+        Assert.True(page.IsBusy);
+        gate.Set();
+        await run;
+        Assert.Equal(3, value);
+        Assert.False(page.IsBusy);
+    }
+
+    [Fact]
+    public async Task BlockingQuery_LeftBeforeItEnds_AppliesNothing()
+    {
+        var page = new TestPage();
+        using var gate = new ManualResetEventSlim();
+        var applied = 0;
+
+        var run = page.RunAsync(_ => { gate.Wait(TimeSpan.FromSeconds(5)); return Task.FromResult(1); }, _ => applied++);
+        page.Leave();
+        gate.Set();
+        await run;
+
+        Assert.Equal(0, applied);
+        Assert.False(page.IsBusy);
+        Assert.False(page.HasError);
+    }
 }
