@@ -14,6 +14,8 @@ public sealed class FileSystem : IFileSystem
 
     public void Move(string source, string destination) => File.Move(source, destination, overwrite: false);
 
+    public void WriteAllBytes(string path, byte[] bytes) => File.WriteAllBytes(path, bytes);
+
     public void WriteAllTextAtomic(string path, string contents)
     {
         var tmp = path + ".tmp";

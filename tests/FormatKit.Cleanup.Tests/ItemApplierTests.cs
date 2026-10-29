@@ -219,6 +219,8 @@ public class ItemApplierTests
         public Stream OpenRead(string path) => inner.OpenRead(path);
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => inner.EnumerateFiles(dir, pattern, recursive);
 
+        public void WriteAllBytes(string path, byte[] bytes) => inner.WriteAllBytes(path, bytes);
+
         public void WriteAllTextAtomic(string path, string contents)
         {
             if (++_writes == failingWrite)

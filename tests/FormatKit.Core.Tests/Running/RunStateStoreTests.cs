@@ -162,6 +162,7 @@ public class RunStateStoreTests
         public byte[] ReadAllBytes(string path) => throw toThrow;
         public void Copy(string source, string destination) { }
         public void Move(string source, string destination) { }
+        public void WriteAllBytes(string path, byte[] bytes) { }
         public void WriteAllTextAtomic(string path, string contents) { }
         public void Delete(string path) { }
         public void CreateDirectory(string path) { }

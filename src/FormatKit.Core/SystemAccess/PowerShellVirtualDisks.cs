@@ -55,10 +55,13 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
             "create partition primary",
             $"assign letter={letter}");
 
+        // A VHDX that was already there is not ours to clean up when creation fails.
+        var existedBefore = files.FileExists(vhdxPath);
         try
         {
             files.CreateDirectory(paths.Root);
-            files.WriteAllTextAtomic(paths.DevDriveScriptFile, script + Environment.NewLine);
+            // diskpart reads the script in the console OEM code page, so non-ASCII paths (João) need it, not UTF-8.
+            files.WriteAllBytes(paths.DevDriveScriptFile, ProcessOutputDecoder.OemEncoding.GetBytes(script + Environment.NewLine));
 
             var diskpart = await processes.RunAsync(
                 new ProcessSpec("diskpart.exe", ["/s", paths.DevDriveScriptFile], Timeouts.Install), ct).ConfigureAwait(false);
@@ -74,12 +77,21 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            if (files.FileExists(vhdxPath))
+            var original = ex as VirtualDiskException ?? new VirtualDiskException($"Creating the Dev Drive failed: {ex.Message}", ex);
+            if (!existedBefore && files.FileExists(vhdxPath))
             {
-                await DetachAndDeleteAsync(vhdxPath, ct).ConfigureAwait(false);
+                try
+                {
+                    await DetachAndDeleteAsync(vhdxPath, ct).ConfigureAwait(false);
+                }
+                catch (Exception cleanup) when (cleanup is not OperationCanceledException)
+                {
+                    throw new VirtualDiskException(
+                        $"{original.Message} (cleanup of '{vhdxPath}' also failed: {cleanup.Message})", original);
+                }
             }
 
-            throw ex as VirtualDiskException ?? new VirtualDiskException($"Creating the Dev Drive failed: {ex.Message}", ex);
+            throw original;
         }
         finally
         {

@@ -238,6 +238,7 @@ public class ProgramsOptionsTests
         public byte[] ReadAllBytes(string path) => throw new NotSupportedException();
         public void Copy(string source, string destination) => throw new NotSupportedException();
         public void Move(string source, string destination) => throw new NotSupportedException();
+        public void WriteAllBytes(string path, byte[] bytes) => throw new NotSupportedException();
         public void WriteAllTextAtomic(string path, string contents) => throw new NotSupportedException();
         public void Delete(string path) => throw new NotSupportedException();
         public void CreateDirectory(string path) => throw new NotSupportedException();

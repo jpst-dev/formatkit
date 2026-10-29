@@ -52,6 +52,18 @@ public sealed class InMemoryFileSystem : IFileSystem
         WriteCount++;
     }
 
+    /// <summary>The exact bytes of every <see cref="WriteAllBytes"/> call, by path.</summary>
+    public Dictionary<string, byte[]> RawBytes { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public void WriteAllBytes(string path, byte[] bytes)
+    {
+        if (FailWrites)
+            throw new IOException($"write refused: {path}");
+        RawBytes[path] = bytes;
+        _files[path] = System.Text.Encoding.UTF8.GetString(bytes);
+        WriteCount++;
+    }
+
     public void WriteAllTextAtomic(string path, string contents)
     {
         if (FailWrites)

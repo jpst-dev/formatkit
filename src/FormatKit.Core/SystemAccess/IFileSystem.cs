@@ -10,6 +10,7 @@ public interface IFileSystem
     void Copy(string source, string destination);
     /// <summary>Moves a file; throws <see cref="IOException"/> when the destination exists.</summary>
     void Move(string source, string destination);
+    void WriteAllBytes(string path, byte[] bytes);
     void WriteAllTextAtomic(string path, string contents);
     void Delete(string path);
     void CreateDirectory(string path);

@@ -72,6 +72,60 @@ public class PowerShellVirtualDisksTests
     }
 
     [Fact]
+    public async Task Create_failure_keeps_preexisting_vhdx()
+    {
+        var (disks, runner, files) = Create();
+        files.Seed(Vhdx, "user data");
+        runner.Enqueue("diskpart.exe", Result(1, stdout: "file exists"));
+
+        await Assert.ThrowsAsync<VirtualDiskException>(
+            () => disks.CreateDevDriveAsync(Vhdx, 50, 'D', "Dev", TestContext.Current.CancellationToken));
+
+        Assert.True(files.FileExists(Vhdx));
+        Assert.Single(runner.Calls);
+    }
+
+    [Fact]
+    public async Task Cleanup_failure_still_reports_original_error()
+    {
+        var (disks, runner, files) = Create();
+        runner.OnRun = spec =>
+        {
+            if (spec.FileName == "diskpart.exe")
+            {
+                files.Seed(Vhdx, "vhdx");
+            }
+        };
+        runner.Enqueue("diskpart.exe", Result(0));
+        runner.Enqueue("powershell.exe", Result(1, stderr: "format failed"));
+        runner.Enqueue("powershell.exe", Result(1, stderr: "dismount failed"));
+
+        var ex = await Assert.ThrowsAsync<VirtualDiskException>(
+            () => disks.CreateDevDriveAsync(Vhdx, 50, 'D', "Dev", TestContext.Current.CancellationToken));
+
+        Assert.Contains("format failed", ex.Message);
+        Assert.Contains("dismount failed", ex.Message);
+        Assert.False(files.FileExists(Paths.DevDriveScriptFile));
+    }
+
+    [Fact]
+    public async Task Script_is_written_in_oem_encoding()
+    {
+        var (disks, runner, files) = Create();
+        const string path = @"C:\Users\João\dev.vhdx";
+        runner.Enqueue("diskpart.exe", Result(1));
+
+        await Assert.ThrowsAsync<VirtualDiskException>(
+            () => disks.CreateDevDriveAsync(path, 50, 'D', "Dev", TestContext.Current.CancellationToken));
+
+        var nl = Environment.NewLine;
+        var expected = ProcessOutputDecoder.OemEncoding.GetBytes(
+            $"create vdisk file=\"{path}\" maximum=51200 type=expandable{nl}select vdisk file=\"{path}\"{nl}" +
+            $"attach vdisk{nl}convert gpt{nl}create partition primary{nl}assign letter=D{nl}");
+        Assert.Equal(expected, files.RawBytes[Paths.DevDriveScriptFile]);
+    }
+
+    [Fact]
     public async Task Script_file_deleted_after_run()
     {
         var (disks, runner, files) = Create();
