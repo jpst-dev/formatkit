@@ -60,7 +60,9 @@ public static class Services
             new WslClient(processes),
             new PowerShellVirtualDisks(processes, files, paths),
             new PowerShellVolumes(processes),
-            new CimLicensing(processes));
+            new CimLicensing(processes),
+            new PowerShellDiskImages(processes),
+            new PowerShellWindowsImages(processes));
 
         return new CliEnvironment(
             services,
