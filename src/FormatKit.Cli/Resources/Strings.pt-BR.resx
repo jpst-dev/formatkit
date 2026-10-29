@@ -111,4 +111,20 @@
   <data name="Undo_Line_Reverted" xml:space="preserve"><value>{0}: revertido</value></data>
   <data name="Undo_Line_Failed" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="Undo_Line_Skipped" xml:space="preserve"><value>{0}: ignorado ({1})</value></data>
+  <data name="Cmd_Programs" xml:space="preserve"><value>Comandos de programas.</value></data>
+  <data name="Cmd_ProgramsList" xml:space="preserve"><value>Lista o catálogo de programas.</value></data>
+  <data name="Cmd_ProgramsSearch" xml:space="preserve"><value>Pesquisa um programa no winget (saída do próprio winget).</value></data>
+  <data name="Cmd_ProgramsExport" xml:space="preserve"><value>Exporta os programas instalados para um arquivo de importação do winget.</value></data>
+  <data name="Opt_ProgramsCategory" xml:space="preserve"><value>Mostra só esta categoria (browsers, communication, games, media, utilities, productivity ou development).</value></data>
+  <data name="Arg_ProgramsTerm" xml:space="preserve"><value>Texto a pesquisar.</value></data>
+  <data name="Arg_ProgramsFile" xml:space="preserve"><value>Arquivo que recebe os programas exportados.</value></data>
+  <data name="Marker_User" xml:space="preserve"><value>usuário</value></data>
+  <data name="Programs_Winget" xml:space="preserve"><value>winget: {0} ({1})</value></data>
+  <data name="Programs_InvalidCategory" xml:space="preserve"><value>Categoria desconhecida '{0}'. Valores válidos: {1}.</value></data>
+  <data name="Programs_SearchEmpty" xml:space="preserve"><value>Informe um termo de pesquisa.</value></data>
+  <data name="Programs_WingetMissing" xml:space="preserve"><value>O winget não foi encontrado. Instale ou repare o Instalador de Aplicativo (winget) e execute novamente.</value></data>
+  <data name="Programs_ExportBadPath" xml:space="preserve"><value>'{0}' não é um caminho de arquivo válido.</value></data>
+  <data name="Programs_ExportFailed" xml:space="preserve"><value>O winget não conseguiu exportar os programas (código de saída {0}).</value></data>
+  <data name="Programs_ExportDone" xml:space="preserve"><value>Programas instalados exportados para {0}</value></data>
+  <data name="Programs_ExportUsage" xml:space="preserve"><value>Para instalá-los em um Windows novo, adicione isto aos módulos do perfil:</value></data>
 </root>

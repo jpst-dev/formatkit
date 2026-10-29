@@ -19,6 +19,9 @@ public sealed class FileSystem : IFileSystem
 
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
+    // Read access, read sharing only: while the stream is open nobody can write, replace or delete the file.
+    public Stream OpenRead(string path) => new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
     public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) =>
         Directory.EnumerateFiles(dir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 }

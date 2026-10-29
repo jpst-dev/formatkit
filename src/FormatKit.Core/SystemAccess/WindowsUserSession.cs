@@ -31,6 +31,15 @@ public sealed class WindowsUserSession : IUserSession
         }
     }
 
+    public bool HasInteractiveUser
+    {
+        get
+        {
+            var sessionId = WTSGetActiveConsoleSessionId();
+            return sessionId != NoSession && !string.IsNullOrEmpty(Query(sessionId, WtsUserName));
+        }
+    }
+
     public string? CurrentUserSid
     {
         get

@@ -24,6 +24,17 @@ public class PlanBuilderTests
     }
 
     [Fact]
+    public void Profile_base_directory_is_passed_to_create_steps()
+    {
+        var a = new FakeModule("a");
+        var profile = ProfileOf(("a", true)) with { BaseDirectory = @"E:\usb" };
+
+        PlanBuilder.Build(profile, [a]);
+
+        Assert.Equal([@"E:\usb"], a.BaseDirectories);
+    }
+
+    [Fact]
     public void Disabled_module_contributes_no_steps()
     {
         var a = new FakeModule("a"); a.Steps.Add(new FakeStep("a1"));

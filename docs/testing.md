@@ -188,6 +188,111 @@ Also check, because earlier reviews could not verify these on a real machine:
 - **(b) Default start types.** Use the `START_TYPE` values recorded at the start of this scenario, on the fresh `clean` checkpoint. The fixes in `known-issues.json` set BITS to Manual (`sc.exe config BITS start= demand`) and AppXSvc to `Start` = 2 (`reg add ... /d 2 /f`). If the recorded default differs, correct that fix, and the "Manual" or "Automatic" wording in [cleanup-not-included.md](cleanup-not-included.md). Result (Windows 11 Pro build 26300, 2026-10-28): BITS `Start` = 3 (Manual), AppXSvc `Start` = 2 (Automatic), both matching the fixes; UsoSvc is 2 with `DelayedAutostart` = 1, matching `start= delayed-auto`.
 - **(c) Windows Home.** If a Windows 11 **Home** VM is available, apply a `level: balanced` profile (as scenario 8, with `"level": "balanced"`) and check whether the policy-based privacy items (`privacy.advertising-id`, `privacy.tailored-experiences`, `privacy.diagnostic-data`) take effect there: after applying, open Settings > Privacy & security > General and Diagnostics & feedback and confirm the settings show the new values (or are greyed out as managed) and stay after a reboot. Otherwise note this check as **pending** (no Home VM yet).
 
+## 10. Programs: mixed profile, run twice
+
+The VM needs internet and `winget` (App Installer). The signed-in user is the local account from OOBE.
+
+1. Restore `clean`. Copy `formatkit.exe` to `C:\fk`.
+2. Download a small `.exe` installer you trust (for example the 7-Zip installer from its official site) to `C:\fk\setups` and compute its hash: `(Get-FileHash C:\fk\setups\<file>.exe -Algorithm SHA256).Hash`. Use it as `sha256` below, with the silent switch of that installer in `args`.
+3. In `C:\fk` create `programs-mixed.json`:
+
+   ```json
+   {
+     "schemaVersion": 1,
+     "name": "Programs mixed",
+     "modules": {
+       "programs": {
+         "enabled": true,
+         "acceptAgreements": true,
+         "catalog": ["browsers.firefox", "communication.slack", "productivity.notion"],
+         "winget": [
+           { "id": "Notepad++.Notepad++" },
+           { "id": "9NKSQGP7F2NH", "source": "msstore" },
+           { "id": "Spotify.Spotify", "context": "user" }
+         ],
+         "direct": [
+           { "name": "Local installer", "path": "C:\\fk\\setups\\<file>.exe", "sha256": "<hash from step 2>", "args": ["/S"] }
+         ]
+       }
+     }
+   }
+   ```
+
+   Run `.\formatkit.exe run --profile programs-mixed.json --dry-run`. **Expected:** the plan lists every program with its key and name (a `[user]` marker for the per-user ones); nothing is installed.
+4. Run `.\formatkit.exe run --profile programs-mixed.json` and accept the UAC prompt.
+
+   **Expected:** exit code **0** (or 1 if the Store is unreachable; the report then names the failed item and the others still install). Firefox, Notepad++ and the direct installer's program appear in Settings > Apps. A reboot, if an installer asks for one, goes through the normal countdown and resume (scenario 4).
+5. In a **non-elevated** PowerShell as the signed-in user, run `winget list --id Spotify.Spotify`.
+
+   **Expected:** Spotify is listed. It was installed with `context: user` (a temporary scheduled task as the signed-in user), so it must not exist only under the administrator account. Also run `winget list --id SlackTechnologies.Slack` and `winget list --id Notion.Notion`: the catalog installs both per user (their machine-wide installer is an MSIX, which winget cannot install device-wide), so both must be listed for the signed-in user.
+6. Run the same command again.
+
+   **Expected:** exit code 0 and nothing is downloaded or run a second time. Steps whose programs are all installed (and the direct step, from `%ProgramData%\FormatKit\programs-direct.json`) are skipped with "Nothing to do: already in place.". `Spotify.Spotify` is a free `winget` entry, so it is in the `programs.other` step (with Notepad++ and the Store app), not in a category step. The `programs.other` step may still run: the elevated check of a per-user package only sees it when the elevated user is the signed-in user (here they are the same account, so it is usually skipped too). If it runs, every item in it reports "already installed" and nothing is installed again.
+7. Sign-in failure. Restore `clean`. While still signed in, let winget set up its package source once (for example `.\formatkit.exe programs search notepad`): with nobody signed in, winget cannot set up its source on an account that never used it, and every winget item then fails with "no network or source unavailable" (winget code 0x8A15000F). Then sign out of the VM console (Start > sign out, or `logoff <session id>`, where the session id is the `SessionId` of `explorer.exe`), so nobody is signed in. From the host, run FormatKit through PowerShell Direct, using the VM credentials kept outside the repo (as in the other scenarios; do not write them in a file of the repo), with `C:\fk\formatkit.exe` and a `programs-signout.json` already copied into the VM beforehand, holding `browsers.firefox` in `catalog` and one `{ "id": "Spotify.Spotify", "context": "user" }` in `winget`:
+
+   ```powershell
+   $cred = Get-Credential   # the VM admin account
+   Invoke-Command -VMName <vm-name> -Credential $cred -ScriptBlock {
+       & C:\fk\formatkit.exe run --profile C:\fk\programs-signout.json
+   }
+   ```
+
+   **Expected:** the Spotify item fails with "Sign in to Windows and run again." as its next action, Firefox installs normally, and the exit code is **1**. Sign in again and run once more: Spotify installs and the run ends with 0.
+
+## 11. Programs: wrong hash on a direct installer
+
+1. Restore `clean`. Copy `formatkit.exe` to `C:\fk`.
+2. Create `programs-badhash.json` with one direct item whose `sha256` is wrong (64 zeros), pointing at a real https installer:
+
+   ```json
+   {
+     "schemaVersion": 1,
+     "name": "Programs bad hash",
+     "modules": {
+       "programs": {
+         "enabled": true,
+         "acceptAgreements": true,
+         "direct": [
+           { "name": "Bad hash", "url": "https://example.com/setup.exe", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "args": ["/S"] }
+         ]
+       }
+     }
+   }
+   ```
+
+   Replace the url with a real, small installer download you trust.
+3. Run `.\formatkit.exe run --profile programs-badhash.json` and accept the UAC prompt.
+
+   **Expected:** the item fails with a hash mismatch message, exit code **1**. `Get-ChildItem C:\ProgramData\FormatKit\downloads` shows no installer file (a wrong hash deletes the downloaded file; a local `path` file would never be deleted). Nothing ran: `Get-Process` shows no process of that installer (check while the run is going on and afterwards), and the program is not in Settings > Apps or in `Get-Package`. `%ProgramData%\FormatKit\programs-direct.json` has no entry for the item.
+4. Change `url` to `http://...`. **Expected:** the profile is rejected before anything runs, exit code **2**, with the JSON path of the error. Remove the `sha256` from a `url` item: same result.
+
+## 12. Programs: export on one VM, import on another
+
+1. On a prepared VM (restore `clean`, then install a few programs with winget, for example `winget install --id Notepad++.Notepad++` and `winget install --id 7zip.7zip`), copy `formatkit.exe` to `C:\fk` and run `.\formatkit.exe programs export C:\fk\old-pc-programs.json`.
+
+   **Expected:** exit code 0, the file exists and holds the installed packages, and the output explains how to use it as `importFile`. No elevation prompt.
+2. Copy the file to the shared folder. Restore `clean` and copy `formatkit.exe` and the file to `C:\fk`.
+3. Create `programs-import.json`:
+
+   ```json
+   {
+     "schemaVersion": 1,
+     "name": "Programs import",
+     "modules": {
+       "programs": {
+         "enabled": true,
+         "acceptAgreements": true,
+         "importFile": "C:\\fk\\old-pc-programs.json"
+       }
+     }
+   }
+   ```
+
+   Run `.\formatkit.exe run --profile programs-import.json --dry-run`. **Expected:** the plan lists the exported packages. Then run it for real and accept the UAC prompt.
+
+   **Expected:** the packages are installed (`winget list`); packages winget cannot find again are reported as failed items without stopping the others. A second run skips the fully installed steps with "Nothing to do: already in place." (items winget cannot reinstall fail again). A missing file, or one that is not a `winget export` JSON, gives exit code 2.
+4. Run `.\formatkit.exe programs search notepad`. **Expected:** winget's own result list is printed as is, exit code 0; a term nothing matches exits with 1.
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:

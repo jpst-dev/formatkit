@@ -13,6 +13,7 @@
     <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
     <ProjectReference Include="..\FormatKit.Cleanup\FormatKit.Cleanup.csproj" />
     <ProjectReference Include="..\FormatKit.Drivers\FormatKit.Drivers.csproj" />
+    <ProjectReference Include="..\FormatKit.Programs\FormatKit.Programs.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="FormatKit.Cli.Tests" />

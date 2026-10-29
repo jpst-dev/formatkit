@@ -9,6 +9,12 @@ public sealed class FakeProcessRunner : IProcessRunner
 
     public List<ProcessSpec> Calls { get; } = [];
 
+    /// <summary>The token passed with each call, in the same order as <see cref="Calls"/>.</summary>
+    public List<CancellationToken> Tokens { get; } = [];
+
+    /// <summary>Runs at the start of every call, for tests that check state while the "process" runs.</summary>
+    public Action<ProcessSpec>? OnRun { get; set; }
+
     public void Enqueue(string fileName, ProcessResult result)
     {
         if (!_results.TryGetValue(fileName, out var queue))
@@ -24,6 +30,8 @@ public sealed class FakeProcessRunner : IProcessRunner
     public Task<ProcessResult> RunAsync(ProcessSpec spec, CancellationToken ct)
     {
         Calls.Add(spec);
+        Tokens.Add(ct);
+        OnRun?.Invoke(spec);
 
         if (_notFound.Contains(spec.FileName))
         {

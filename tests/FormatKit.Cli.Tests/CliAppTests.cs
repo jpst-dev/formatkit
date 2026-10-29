@@ -11,6 +11,8 @@ using FormatKit.Core.Steps;
 using FormatKit.Core.Tests.Fakes;
 using FormatKit.Drivers;
 using FormatKit.Drivers.Catalog;
+using FormatKit.Programs;
+using FormatKit.Programs.Catalog;
 
 namespace FormatKit.Cli.Tests;
 
@@ -562,6 +564,22 @@ public sealed class CliAppTests : IDisposable
         var result = loader.Load(ProfilePath("cleanup-balanced.json"));
 
         Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
+    }
+
+    [Fact]
+    public void Programs_example_profile_is_valid()
+    {
+        var programs = new ProgramsModule(ProgramCatalog.LoadEmbedded(), _paths, _fs);
+        var loader = new ProfileLoader([new DriversModule(VendorCatalog.LoadEmbedded(), TimeSpan.Zero), programs]);
+
+        var result = loader.Load(ProfilePath("programs-example.json"));
+
+        Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
+        var section = result.Value!.Profile.Modules["programs"];
+        Assert.True(programs.IsEnabled(section));
+        var steps = programs.CreateSteps(section);
+        Assert.NotEmpty(steps);
+        Assert.All(steps, step => Assert.StartsWith("programs", step.Id, StringComparison.Ordinal));
     }
 
     [Fact]

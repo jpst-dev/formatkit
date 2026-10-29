@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Programs.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+    <InternalsVisibleTo Include="formatkit" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Catalog\Data\programs.json" LogicalName="FormatKit.Programs.Catalog.Data.programs.json" />
+  </ItemGroup>
+</Project>

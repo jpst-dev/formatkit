@@ -162,6 +162,7 @@ public class RunStateStoreTests
         public void WriteAllTextAtomic(string path, string contents) { }
         public void Delete(string path) { }
         public void CreateDirectory(string path) { }
+        public Stream OpenRead(string path) => throw toThrow;
         public IEnumerable<string> EnumerateFiles(string dir, string pattern, bool recursive) => [];
     }
 

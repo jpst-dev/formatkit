@@ -108,6 +108,9 @@ internal static class RunFlow
                     foreach (var item in cleanup.Items)
                         o.WriteLine($"    {item.Id}  {item.LocalizedText().Title}{CleanupCommands.Markers(item)}");
                 }
+
+                foreach (var line in ProgramsCommands.DryRunLines(step))
+                    o.WriteLine(line);
             }
 
             return ExitCodes.Ok;

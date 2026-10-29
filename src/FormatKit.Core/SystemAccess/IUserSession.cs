@@ -7,4 +7,7 @@ public interface IUserSession
 
     /// <summary>The SID of the user the current process runs as, or null when it cannot be determined.</summary>
     string? CurrentUserSid { get; }
+
+    /// <summary>True when the WTS console session has a signed-in user.</summary>
+    bool HasInteractiveUser { get; }
 }

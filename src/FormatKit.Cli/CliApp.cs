@@ -8,6 +8,8 @@ using FormatKit.Core;
 using FormatKit.Core.Profiles;
 using FormatKit.Drivers;
 using FormatKit.Drivers.Catalog;
+using FormatKit.Programs;
+using FormatKit.Programs.Catalog;
 
 namespace FormatKit.Cli;
 
@@ -21,6 +23,7 @@ public sealed class CliApp
     private readonly VendorCatalog _catalog;
     private readonly CleanupCatalog _cleanup;
     private readonly KnownIssues _issues;
+    private readonly ProgramCatalog _programs;
 
     public CliApp(CliEnvironment env)
         : this(env, VendorCatalog.LoadEmbedded(), null)
@@ -30,16 +33,18 @@ public sealed class CliApp
     /// <summary>Test seam: lets tests plan with fake modules.</summary>
     internal CliApp(
         CliEnvironment env, VendorCatalog catalog, IReadOnlyList<IModule>? modules,
-        CleanupCatalog? cleanup = null, KnownIssues? issues = null)
+        CleanupCatalog? cleanup = null, KnownIssues? issues = null, ProgramCatalog? programs = null)
     {
         _env = env;
         _catalog = catalog;
         _cleanup = cleanup ?? CleanupCatalog.LoadEmbedded();
         _issues = issues ?? KnownIssues.LoadEmbedded();
+        _programs = programs ?? ProgramCatalog.LoadEmbedded();
         _modules = modules ??
         [
             new DriversModule(catalog, env.NetworkRetryDelay),
             new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files, env.Log),
+            new ProgramsModule(_programs, AppPaths.Default, env.Services.Files, env.Log),
         ];
     }
 
@@ -75,11 +80,12 @@ public sealed class CliApp
         var elevatedChild = new Option<bool>(ElevatedChildFlag) { Hidden = true, Recursive = true };
         var waitOnExit = new Option<bool>(WaitOnExitFlag) { Hidden = true, Recursive = true };
         var root = new RootCommand(Strings.Get("Cmd_Root")) { Options = { verbose, elevatedChild, waitOnExit } };
-        var context = new CommandContext(_env, _modules, _catalog, _cleanup, _issues, RelaunchArgs(args));
+        var context = new CommandContext(_env, _modules, _catalog, _cleanup, _issues, _programs, RelaunchArgs(args));
 
         root.Subcommands.Add(HardwareCommand.Create(context));
         root.Subcommands.Add(DriversCommands.Create(context));
         root.Subcommands.Add(CleanupCommands.Create(context));
+        root.Subcommands.Add(ProgramsCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
 
         var parse = root.Parse(args);
@@ -166,6 +172,7 @@ internal sealed record CommandContext(
     VendorCatalog Catalog,
     CleanupCatalog Cleanup,
     KnownIssues Issues,
+    ProgramCatalog Programs,
     string[] RelaunchArgs)
 {
     public TextWriter Out => Env.Out;
