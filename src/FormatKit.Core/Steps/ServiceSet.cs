@@ -22,4 +22,5 @@ public sealed record ServiceSet(
     IUserContextRunner UserContext,
     IInteractiveConsole Console,
     IUserEnvironment UserEnvironment,
-    IToolLocator Tools);
+    IToolLocator Tools,
+    WslClient Wsl);

@@ -55,7 +55,8 @@ public static class Services
             new ToolLocator(
                 files,
                 name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Machine),
-                name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)));
+                name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)),
+            new WslClient(processes));
 
         return new CliEnvironment(
             services,

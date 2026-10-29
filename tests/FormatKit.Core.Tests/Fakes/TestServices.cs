@@ -44,7 +44,8 @@ public static class TestServices
             userContext ?? new FakeUserContextRunner(),
             console ?? new FakeInteractiveConsole(),
             userEnvironment ?? new FakeUserEnvironment(),
-            tools ?? new FakeToolLocator());
+            tools ?? new FakeToolLocator(),
+            new WslClient(processes));
     }
 
     public static StepContext Context(ServiceSet services) =>
