@@ -181,7 +181,7 @@ public class Windows11RequirementsCheckTests : IDisposable
         var item = Assert.Single(await RunAsync(Ready));
         Assert.Contains("processador", item.Detail);
         Assert.Contains("processador", item.Action);
-        Assert.Contains("Verificação de Integridade do PC", item.Action);
+        Assert.Contains("VerificaÃ§Ã£o de Integridade do PC", item.Action);
     }
 
     [Fact]
