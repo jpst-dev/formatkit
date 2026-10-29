@@ -13,7 +13,7 @@ public sealed class DriversModule(VendorCatalog catalog, TimeSpan networkRetryDe
 
     public string Name => "drivers";
 
-    public bool IsEnabled(JsonElement section) => DriversOptions.From(section).Enabled;
+    public bool IsEnabled(JsonElement section) => DriversOptions.From(section, null).Enabled;
 
     public IReadOnlyList<ProfileError> Validate(JsonElement section, string path)
     {
@@ -47,15 +47,19 @@ public sealed class DriversModule(VendorCatalog catalog, TimeSpan networkRetryDe
         return errors;
     }
 
-    /// <remarks>The run uses <c>networkDriverBackup</c> as written, so a relative path resolves against the current directory.</remarks>
+    /// <remarks>A relative <c>networkDriverBackup</c> resolves against the profile folder (<paramref name="baseDirectory"/>),
+    /// like Programs and Dev; without one it resolves against the current directory.</remarks>
     public IReadOnlyList<ExternalInput> ExternalInputs(JsonElement section, string? baseDirectory) =>
-        DriversOptions.From(section).NetworkDriverBackup is { Length: > 0 } backup
+        DriversOptions.From(section, baseDirectory).NetworkDriverBackup is { Length: > 0 } backup
             ? [new ExternalInput("modules.drivers.networkDriverBackup", Path.GetFullPath(backup), ExternalInputKind.Folder)]
             : [];
 
-    public IReadOnlyList<IStep> CreateSteps(JsonElement section)
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section) => CreateSteps(section, null);
+
+    /// <param name="baseDirectory">The profile file's directory; a relative networkDriverBackup resolves against it.</param>
+    public IReadOnlyList<IStep> CreateSteps(JsonElement section, string? baseDirectory)
     {
-        var options = DriversOptions.From(section);
+        var options = DriversOptions.From(section, baseDirectory);
         var steps = new List<IStep> { new NetworkCheckStep(options.NetworkDriverBackup, networkRetryDelay) };
 
         if (options.Sources.Contains(DriverSource.WindowsUpdate))

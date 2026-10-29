@@ -19,9 +19,25 @@ public class ExternalInputsTests
     }
 
     [Fact]
-    public void Relative_backup_resolves_against_the_current_directory_not_the_profile()
+    public void Relative_backup_resolves_against_the_profile_folder()
     {
         var input = Assert.Single(Module.ExternalInputs(Json("""{"enabled":true,"sources":["gpu"],"networkDriverBackup":"net"}"""), @"E:\usb"));
+
+        Assert.Equal(@"E:\usb\net", input.ResolvedPath);
+    }
+
+    [Fact]
+    public void Absolute_backup_ignores_the_profile_folder()
+    {
+        var input = Assert.Single(Module.ExternalInputs(Json("""{"enabled":true,"sources":["gpu"],"networkDriverBackup":"D:\\net"}"""), @"E:\usb"));
+
+        Assert.Equal(@"D:\net", input.ResolvedPath);
+    }
+
+    [Fact]
+    public void Relative_backup_without_a_profile_folder_resolves_against_the_current_directory()
+    {
+        var input = Assert.Single(Module.ExternalInputs(Json("""{"enabled":true,"sources":["gpu"],"networkDriverBackup":"net"}"""), null));
 
         Assert.Equal(Path.GetFullPath("net"), input.ResolvedPath);
     }
