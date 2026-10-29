@@ -71,4 +71,36 @@
   <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
   <data name="Diag_Refresh" xml:space="preserve"><value>Check again</value></data>
+  <data name="Cat_TabCleanup" xml:space="preserve"><value>Cleanup</value></data>
+  <data name="Cat_TabPrograms" xml:space="preserve"><value>Programs</value></data>
+  <data name="Cat_All" xml:space="preserve"><value>All</value></data>
+  <data name="Cat_Level" xml:space="preserve"><value>Level: {0}</value></data>
+  <data name="Cat_LevelFilter" xml:space="preserve"><value>Level</value></data>
+  <data name="Cat_CategoryFilter" xml:space="preserve"><value>Category</value></data>
+  <data name="Cat_Search" xml:space="preserve"><value>Search by id or title</value></data>
+  <data name="Cat_SelectHint" xml:space="preserve"><value>Select an item to see its details.</value></data>
+  <data name="Cat_What" xml:space="preserve"><value>What it does: {0}</value></data>
+  <data name="Cat_Breaks" xml:space="preserve"><value>What it breaks: {0}</value></data>
+  <data name="Cat_Gain" xml:space="preserve"><value>Gain: {0}</value></data>
+  <data name="Cat_Contested" xml:space="preserve"><value>Contested tweak</value></data>
+  <data name="Cat_Laptop" xml:space="preserve"><value>Sensitive on laptops</value></data>
+  <data name="Cat_Winget" xml:space="preserve"><value>winget id: {0}</value></data>
+  <data name="Cat_Source" xml:space="preserve"><value>Source: {0}</value></data>
+  <data name="Cat_Context" xml:space="preserve"><value>Installs for: {0}</value></data>
+  <data name="Cat_Context_Machine" xml:space="preserve"><value>the machine</value></data>
+  <data name="Cat_Context_User" xml:space="preserve"><value>the current user</value></data>
+  <data name="Level_Safe" xml:space="preserve"><value>Safe</value></data>
+  <data name="Level_Balanced" xml:space="preserve"><value>Balanced</value></data>
+  <data name="Level_Aggressive" xml:space="preserve"><value>Aggressive</value></data>
+  <data name="CleanupCategory_Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="CleanupCategory_Privacy" xml:space="preserve"><value>Privacy</value></data>
+  <data name="CleanupCategory_Performance" xml:space="preserve"><value>Performance</value></data>
+  <data name="CleanupCategory_Developer" xml:space="preserve"><value>Developer</value></data>
+  <data name="ProgramCategory_Browsers" xml:space="preserve"><value>Browsers</value></data>
+  <data name="ProgramCategory_Communication" xml:space="preserve"><value>Communication</value></data>
+  <data name="ProgramCategory_Games" xml:space="preserve"><value>Games</value></data>
+  <data name="ProgramCategory_Media" xml:space="preserve"><value>Media</value></data>
+  <data name="ProgramCategory_Utilities" xml:space="preserve"><value>Utilities</value></data>
+  <data name="ProgramCategory_Productivity" xml:space="preserve"><value>Productivity</value></data>
+  <data name="ProgramCategory_Development" xml:space="preserve"><value>Development</value></data>
 </root>

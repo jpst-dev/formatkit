@@ -43,10 +43,7 @@ internal static class CleanupCommands
             var only = parse.GetValue(category) is { } c ? Enum.Parse<CleanupCategory>(c, ignoreCase: true) : (CleanupCategory?)null;
             var verbose = parse.GetValue<bool>("--verbose");
 
-            var items = context.Cleanup.Items
-                .Where(i => maxLevel is null || i.Level <= maxLevel)
-                .Where(i => only is null || i.Category == only)
-                .ToList();
+            var items = context.Cleanup.Filter(maxLevel, only);
 
             var idWidth = items.Count == 0 ? 0 : items.Max(i => i.Id.Length);
             var contested = $"[{Strings.Get("Marker_Contested")}]";

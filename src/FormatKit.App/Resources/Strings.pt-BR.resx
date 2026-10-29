@@ -71,4 +71,36 @@
   <data name="Check_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Correção: {0}</value></data>
   <data name="Diag_Refresh" xml:space="preserve"><value>Verificar novamente</value></data>
+  <data name="Cat_TabCleanup" xml:space="preserve"><value>Limpeza</value></data>
+  <data name="Cat_TabPrograms" xml:space="preserve"><value>Programas</value></data>
+  <data name="Cat_All" xml:space="preserve"><value>Todos</value></data>
+  <data name="Cat_Level" xml:space="preserve"><value>Nível: {0}</value></data>
+  <data name="Cat_LevelFilter" xml:space="preserve"><value>Nível</value></data>
+  <data name="Cat_CategoryFilter" xml:space="preserve"><value>Categoria</value></data>
+  <data name="Cat_Search" xml:space="preserve"><value>Buscar por id ou título</value></data>
+  <data name="Cat_SelectHint" xml:space="preserve"><value>Selecione um item para ver os detalhes.</value></data>
+  <data name="Cat_What" xml:space="preserve"><value>O que faz: {0}</value></data>
+  <data name="Cat_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
+  <data name="Cat_Gain" xml:space="preserve"><value>Ganho: {0}</value></data>
+  <data name="Cat_Contested" xml:space="preserve"><value>Ajuste contestado</value></data>
+  <data name="Cat_Laptop" xml:space="preserve"><value>Sensível em notebooks</value></data>
+  <data name="Cat_Winget" xml:space="preserve"><value>id do winget: {0}</value></data>
+  <data name="Cat_Source" xml:space="preserve"><value>Fonte: {0}</value></data>
+  <data name="Cat_Context" xml:space="preserve"><value>Instala para: {0}</value></data>
+  <data name="Cat_Context_Machine" xml:space="preserve"><value>a máquina</value></data>
+  <data name="Cat_Context_User" xml:space="preserve"><value>o usuário atual</value></data>
+  <data name="Level_Safe" xml:space="preserve"><value>Seguro</value></data>
+  <data name="Level_Balanced" xml:space="preserve"><value>Equilibrado</value></data>
+  <data name="Level_Aggressive" xml:space="preserve"><value>Agressivo</value></data>
+  <data name="CleanupCategory_Apps" xml:space="preserve"><value>Aplicativos</value></data>
+  <data name="CleanupCategory_Privacy" xml:space="preserve"><value>Privacidade</value></data>
+  <data name="CleanupCategory_Performance" xml:space="preserve"><value>Desempenho</value></data>
+  <data name="CleanupCategory_Developer" xml:space="preserve"><value>Desenvolvedor</value></data>
+  <data name="ProgramCategory_Browsers" xml:space="preserve"><value>Navegadores</value></data>
+  <data name="ProgramCategory_Communication" xml:space="preserve"><value>Comunicação</value></data>
+  <data name="ProgramCategory_Games" xml:space="preserve"><value>Jogos</value></data>
+  <data name="ProgramCategory_Media" xml:space="preserve"><value>Mídia</value></data>
+  <data name="ProgramCategory_Utilities" xml:space="preserve"><value>Utilitários</value></data>
+  <data name="ProgramCategory_Productivity" xml:space="preserve"><value>Produtividade</value></data>
+  <data name="ProgramCategory_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
 </root>

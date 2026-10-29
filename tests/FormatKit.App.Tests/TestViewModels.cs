@@ -1,10 +1,12 @@
 using FormatKit.App.Tests.Fakes;
 using FormatKit.App.ViewModels;
+using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Core;
 using FormatKit.Core.Running;
 using FormatKit.Core.Tests.Fakes;
 using FormatKit.Drivers.Catalog;
+using FormatKit.Programs.Catalog;
 
 namespace FormatKit.App.Tests;
 
@@ -19,6 +21,7 @@ internal static class TestViewModels
             new HomeViewModel(store),
             new AboutViewModel(new FakeDialogService()),
             new HardwareViewModel(TestServices.Create(), VendorCatalog.LoadEmbedded()),
-            new CleanupDiagnosisViewModel(TestServices.Create(), new KnownIssues(1, [])));
+            new CleanupDiagnosisViewModel(TestServices.Create(), new KnownIssues(1, [])),
+            new CatalogsViewModel(new CleanupCatalog(1, []), new ProgramCatalog(1, [])));
     }
 }

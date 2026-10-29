@@ -3,9 +3,11 @@ using System.Windows.Threading;
 using FormatKit.App.Localization;
 using FormatKit.App.Services;
 using FormatKit.App.ViewModels;
+using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Drivers.Catalog;
 using FormatKit.Hosting;
+using FormatKit.Programs.Catalog;
 
 namespace FormatKit.App;
 
@@ -54,7 +56,8 @@ public partial class App : Application
             new HomeViewModel(_host.StateStore),
             new AboutViewModel(_dialogs),
             new HardwareViewModel(_host.Services, vendors, _host.Log),
-            new CleanupDiagnosisViewModel(_host.Services, KnownIssues.LoadEmbedded(), _host.Log));
+            new CleanupDiagnosisViewModel(_host.Services, KnownIssues.LoadEmbedded(), _host.Log),
+            new CatalogsViewModel(CleanupCatalog.LoadEmbedded(), ProgramCatalog.LoadEmbedded()));
         if (arguments.Mode == AppMode.Resume)
             main.Navigate(Page.RunProfile);
 
