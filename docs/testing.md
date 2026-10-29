@@ -654,7 +654,7 @@ Record what the scenarios find in the "Found while running" section of the insta
 
 ## 24. Media: profile with `importFile` and `networkDriverBackup`
 
-1. On the host make a profile outside `.vm\media\` with a `programs.importFile` (`formatkit programs export`) and a `drivers.networkDriverBackup` folder (a folder with an `.inf`), using relative paths, plus `"setup": { "account": "local" }`. Build with `artifactsormatkit.exe media build --iso C:\path	o\Win11.iso --profile <profile> --output .vm\media\out` (empty `--output`).
+1. On the host make a profile outside `.vm\media\` with a `programs.importFile` (`formatkit programs export`) and a `drivers.networkDriverBackup` folder (a folder with an `.inf`), using relative paths, plus `"setup": { "account": "local" }`. Build with `artifacts\formatkit.exe media build --iso C:\path\to\Win11.iso --profile <profile> --output .vm\media\out` (empty `--output`).
 
    **Expected:** exit code **0**; `.vm\media\out\sources\$OEM$\$1\FormatKit` holds `formatkit.exe`, `profile.json` and `inputs\1-...`, `inputs\2-...`; in the copied `profile.json` the two paths read `inputs\1-...` and `inputs\2-...`. A path used twice in the profile is copied once.
 2. Create the VM, start it, finish Setup (disk, local account, edition) and sign in.
