@@ -118,14 +118,11 @@ internal static class RunFlow
         if (plan.Any(s => s.RequiresAdmin) && await context.EnsureElevatedAsync() is { } exit)
             return exit;
 
-        var env = context.Env;
-        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log, new ConsoleRunProgress(o));
-        var request = new RunRequest(profile.Path, profile.Hash, plan, new StepContext(env.Services, env.Log), resume);
-
+        var session = new RunSession(context.Env.ToHost());
         RunSummary summary;
         try
         {
-            summary = await engine.RunAsync(request, ct);
+            summary = await session.RunAsync(profile, plan, resume, new ConsoleRunProgress(o), ct);
         }
         catch (OperationCanceledException)
         {
@@ -133,8 +130,8 @@ internal static class RunFlow
             return ExitCodes.Cancelled;
         }
 
-        if (resume && summary.Status is RunStatus.NothingToResume or RunStatus.StateCorrupt or RunStatus.ProfileChanged)
-            await RemoveResumeTaskAsync(context, ct);
+        if (session.ResumeTaskRemoved)
+            o.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
 
         return Report(o, summary);
     }
@@ -142,15 +139,8 @@ internal static class RunFlow
     /// <summary>Best-effort removal of the automatic resume task when a resume ends early.</summary>
     public static async Task RemoveResumeTaskAsync(CommandContext context, CancellationToken ct)
     {
-        try
-        {
-            if (await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct))
-                context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            context.Env.Log.Warning(ex, "Could not remove the resume scheduled task");
-        }
+        if (await new RunSession(context.Env.ToHost()).RemoveResumeTaskAsync(ct))
+            context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
     }
 
     private static int Report(TextWriter o, RunSummary summary)
