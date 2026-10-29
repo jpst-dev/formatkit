@@ -518,3 +518,35 @@ Portuguese UI, 1024x768).
   dry-run word ("administrator" / "administrador").
 - **V5 (resume rows):** on `run --resume` the rows of steps done before the stop or reboot stayed "Pending"; the `planned` message now carries each such step's earlier outcome (`doneBefore`) and the window shows it with "Done before the stop or reboot." (VM scenario 4, 2026-10-29).
 - **V6 (profile changed):** the worker's hash refusal landed on the result page with every row Pending and a Resume offer; it now returns to the review with the message so the user can Reload (VM scenario 6, 2026-10-29).
+
+VM scenarios (section 8.1), 2026-10-29, Windows 11 build 26100 Hyper-V VM with
+nested virtualization, Brazilian Portuguese UI, 1024x768, driven through UI
+Automation and the Hyper-V synthetic keyboard:
+
+- **1 (pages, no UAC): passed.** Home, Hardware, Scan for drivers, Cleanup
+  diagnosis (same result as `cleanup check`), Catalogs, Checklist and About
+  show real data with no UAC prompt. Found V1-V3.
+- **2 (open a profile): passed.** An invalid profile lists each error with its
+  JSON path and message; the example profile's plan has the same ids, titles
+  and order as `run --dry-run`. Found V4.
+- **3 (run, reboot, resume): passed.** One UAC prompt for `FormatKitUI.exe`,
+  progress, the countdown dialog, the resume task `"FormatKitUI.exe" --resume`,
+  the reboot, the window opening by itself at logon, the run finishing with no
+  UAC prompt, the result and the report folder; the resume task is removed at
+  the end. With the elevated resume window open, an unelevated second start
+  exits quietly (I1).
+- **4 (stop, close): passed.** Stop waits for the current step and offers
+  Resume (I5); closing during a resumed run asks "Stop after the current
+  step?", waits for the step and closes with no process left. Found V5.
+- **5 (WSL user): passed.** The WSL platform install rebooted the VM, the
+  window resumed by itself, installed Ubuntu and opened a `wsl.exe` console
+  for `passwd`, where the user typed the password; the run finished with
+  `user fkuser: done` and `passwd -S` reports `P`. The console covered the
+  window, so the "Type in the console window that opened" hint (I4) was not
+  seen on screen; unit tests cover it.
+- **6 (profile changed): passed.** The worker refuses a profile edited after
+  the review. Found V6.
+- V5 and V6 were checked again on the fixed build: a step done before a
+  simulated reboot shows its earlier outcome after the resume, and the hash
+  refusal returns to the review with Reload.
+- **7 (media):** not run; waits for the media phase.
