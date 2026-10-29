@@ -1,7 +1,10 @@
 # FormatKit — Installation Media Design
 
 - **Date:** 2026-10-29
-- **Status:** Draft, awaiting review
+- **Status:** Approved in away mode (2026-10-29): the user approved every
+  design section in conversation, then left with the instruction to follow
+  Claude's recommendations; the written spec itself awaits their morning
+  review (see "Decided in away mode" at the end)
 - **Scope:** Sub-project 5 (installation media): a Windows 11 installation
   folder or USB stick, built from the official ISO, that installs Windows with
   an `autounattend.xml` and starts FormatKit on the first logon
@@ -423,3 +426,15 @@ FormatKit keeps no list of supported CPUs.
 4. Large profile inputs (direct installers, dotfiles with `.git`) and the
    space check.
 5. The first logon on current Windows 11 builds (section 6, items 1-3).
+
+## Decided in away mode
+
+Decisions taken without the user, for review:
+
+- The written spec was approved without the user reading it. Every section
+  had been approved in conversation; two details were added only in the
+  written spec: the `setup` field rules of section 5.3 (`computerName` 1-15
+  characters, unknown fields are errors), and `--countdown` refused with
+  `--resume` or `--dry-run`. Reason: both follow existing conventions (module
+  sections reject unknown fields; the countdown only makes sense for a new
+  run).
