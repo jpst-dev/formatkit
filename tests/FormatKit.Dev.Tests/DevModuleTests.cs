@@ -34,6 +34,14 @@ public class DevModuleTests
     }
 
     [Fact]
+    public void Wsl_section_creates_the_wsl_step()
+    {
+        var steps = Module().CreateSteps(Json("""{ "enabled": true, "wsl": { "user": "joao" } }"""));
+
+        Assert.Equal("dev.wsl", Assert.Single(steps).Id);
+    }
+
+    [Fact]
     public void Empty_or_disabled_section_creates_no_steps()
     {
         Assert.Empty(Module().CreateSteps(Json("""{ "enabled": true }""")));

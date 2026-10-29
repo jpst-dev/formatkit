@@ -2,6 +2,7 @@ using System.Text.Json;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Steps;
 using FormatKit.Core.SystemAccess;
+using FormatKit.Dev.Steps;
 
 namespace FormatKit.Dev;
 
@@ -11,7 +12,6 @@ namespace FormatKit.Dev;
 public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFileSystem? files = null) : IModule
 {
     // Handed to the steps as they are added.
-    internal TimeProvider Time => time;
     internal IFileSystem? Files => files;
 
     public string Name => "dev";
@@ -39,7 +39,12 @@ public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFi
         if (options is null)
             return [];
 
-        // The steps (WSL, Git, SSH, dotfiles, shell, Dev Drive) are added by the tasks that implement them.
-        return [];
+        List<IStep> steps = [];
+
+        // The Git, SSH, dotfiles, shell and Dev Drive steps are added by the tasks that implement them.
+        if (options.Wsl is not null)
+            steps.Add(new WslStep(options.Wsl, env ?? DevEnvironment.Current(), time));
+
+        return steps;
     }
 }
