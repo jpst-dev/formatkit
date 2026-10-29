@@ -103,3 +103,53 @@ test('GITHUB_TOKEN is sent as a bearer token and never logged', async () => {
   expect(seen!.get('authorization')).toBe('Bearer x');
   expect(JSON.stringify(readWarnings())).not.toContain('Bearer');
 });
+
+const noDigestsJson = () => readFileSync(fx('no-digests.json'), 'utf8');
+const withSums = (sumsStatus: number, drop = false) =>
+  (async (url: string) => {
+    if (String(url).endsWith('SHA256SUMS.txt')) {
+      return sumsStatus === 200
+        ? new Response(readFileSync(fx('SHA256SUMS.txt'), 'utf8'))
+        : new Response('x', { status: sumsStatus });
+    }
+    const data = JSON.parse(noDigestsJson());
+    if (drop) data[0].assets = data[0].assets.filter((a: { name: string }) => a.name !== 'SHA256SUMS.txt');
+    return new Response(JSON.stringify(data));
+  }) as unknown as typeof fetch;
+
+test('sums download failure keeps the release with a warning', async () => {
+  const r = await loadReleases({ fetch: withSums(500), env: {} });
+  expect(r.latest?.tag).toBe('v1.1.0');
+  expect(r.latest!.assets.find((a) => a.name === 'formatkit.exe')!.sha256).toBeNull();
+  expect(readWarnings().map((w) => w.code)).toEqual(['releases.hash-missing']);
+});
+
+test('sums download failure fails with FK_REQUIRE_RELEASE', async () => {
+  await expect(loadReleases({ fetch: withSums(500), env: { FK_REQUIRE_RELEASE: '1' } })).rejects.toThrow(
+    /Latest release not readable: no SHA-256/,
+  );
+});
+
+test('no digest and no sums asset fails with FK_REQUIRE_RELEASE', async () => {
+  await expect(
+    loadReleases({ fetch: withSums(200, true), env: { FK_REQUIRE_RELEASE: '1' } }),
+  ).rejects.toThrow(/Latest release not readable: no SHA-256/);
+});
+
+test('sums are fetched for the latest release only', async () => {
+  const data = JSON.parse(noDigestsJson());
+  const old = structuredClone(data[0]);
+  old.tag_name = 'v1.0.0';
+  old.published_at = '2026-09-01T10:00:00Z';
+  const urls: string[] = [];
+  const f = (async (url: string) => {
+    urls.push(String(url));
+    return String(url).endsWith('SHA256SUMS.txt')
+      ? new Response(readFileSync(fx('SHA256SUMS.txt'), 'utf8'))
+      : new Response(JSON.stringify([old, data[0]]));
+  }) as unknown as typeof fetch;
+  const r = await loadReleases({ fetch: f, env: {} });
+  expect(urls.filter((u) => u.endsWith('SHA256SUMS.txt'))).toHaveLength(1);
+  expect(r.releases[1].assets.find((a) => a.name === 'formatkit.exe')!.sha256).toBeNull();
+  expect(readWarnings()).toEqual([]);
+});

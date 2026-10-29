@@ -84,17 +84,20 @@ export async function loadReleases(opts: Opts): Promise<ReleasesResult> {
   let releases: Release[] = [];
   let latest: Release | null = null;
   let reason: string | null = null;
+  let sumsError: string | null = null;
+  let hashReason: string | null = null;
 
   try {
     const { api, sums } = await readApi(opts);
     const kept = api.filter((r) => !r.draft).sort((a, b) => Date.parse(when(b)) - Date.parse(when(a)));
+    const latestTag = kept.find((r) => !r.prerelease)?.tag_name;
 
     for (const r of kept) {
       const assets: ReleaseAsset[] = [];
       let table: Map<string, string> | null = null;
       for (const a of (r.assets ?? []).filter((x) => KEPT_ASSETS.has(x.name))) {
         let sha256 = digestOf(a);
-        if (!sha256 && a.name !== SUMS) {
+        if (!sha256 && a.name !== SUMS && r.tag_name === latestTag) {
           const sumsAsset = (r.assets ?? []).find((x) => x.name === SUMS);
           if (sumsAsset) {
             try {
@@ -102,7 +105,7 @@ export async function loadReleases(opts: Opts): Promise<ReleasesResult> {
               sha256 = table.get(a.name) ?? null;
             } catch (e) {
               table = new Map();
-              warn('releases.unavailable', `${SUMS} of ${r.tag_name}: ${(e as Error).message}`);
+              sumsError = `${SUMS} not readable: ${(e as Error).message}`;
             }
           }
         }
@@ -121,6 +124,14 @@ export async function loadReleases(opts: Opts): Promise<ReleasesResult> {
     }
     latest = releases.find((r) => !r.prerelease) ?? null;
     if (!latest) reason = releases.length ? 'only prereleases published' : 'no release published';
+    else {
+      const missing = ['formatkit.exe', 'FormatKitUI.exe'].filter(
+        (n) => !latest!.assets.find((a) => a.name === n)?.sha256,
+      );
+      if (missing.length) {
+        hashReason = `no SHA-256 for ${missing.join(', ')} in ${latest.tag}${sumsError ? ` (${sumsError})` : ''}`;
+      }
+    }
   } catch (e) {
     reason = (e as Error).message;
     releases = [];
@@ -130,6 +141,10 @@ export async function loadReleases(opts: Opts): Promise<ReleasesResult> {
   if (reason) {
     if (required) throw new Error(`Latest release not readable: ${reason}`);
     warn('releases.unavailable', reason);
+  }
+  if (hashReason) {
+    if (required) throw new Error(`Latest release not readable: ${hashReason}`);
+    warn('releases.hash-missing', hashReason);
   }
   return { releases, latest };
 }
