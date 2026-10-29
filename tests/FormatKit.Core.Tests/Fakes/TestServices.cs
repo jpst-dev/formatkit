@@ -27,7 +27,8 @@ public static class TestServices
         FakeVolumes? volumes = null,
         FakeLicensing? licensing = null,
         FakeDiskImages? diskImages = null,
-        FakeWindowsImages? windowsImages = null)
+        FakeWindowsImages? windowsImages = null,
+        FakeDisks? disks = null)
     {
         processes ??= new FakeProcessRunner();
         files ??= new InMemoryFileSystem();
@@ -55,7 +56,8 @@ public static class TestServices
             volumes ?? new FakeVolumes(new VolumeInfo('C', 0, BitLockerState.Off, null, null)),
             licensing ?? new FakeLicensing(new WindowsActivation(true, "OEM:DM")),
             diskImages ?? new FakeDiskImages(),
-            windowsImages ?? new FakeWindowsImages(files));
+            windowsImages ?? new FakeWindowsImages(files),
+            disks ?? new FakeDisks());
     }
 
     public static StepContext Context(ServiceSet services) =>

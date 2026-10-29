@@ -28,4 +28,5 @@ public sealed record ServiceSet(
     IVolumes Volumes,
     ILicensing Licensing,
     IDiskImages DiskImages,
-    IWindowsImages WindowsImages);
+    IWindowsImages WindowsImages,
+    IDisks Disks);
