@@ -30,6 +30,30 @@ public class ItemSelectorTests
         Assert.Equal(["privacy.safe", "performance.aggressive"], Select(CleanupLevel.Aggressive, exclude: ["apps.balanced"]));
 
     [Fact]
+    public void Developer_items_never_selected_by_any_level()
+    {
+        var catalog = NewCatalog(Item("privacy.safe", CleanupLevel.Safe), Item("developer.long-paths", CleanupLevel.Safe));
+
+        foreach (var level in Enum.GetValues<CleanupLevel>())
+        {
+            var selected = ItemSelector.Select(catalog, new CleanupOptions(true, level, [], [], true)).Select(i => i.Id);
+            Assert.Equal(["privacy.safe"], selected);
+        }
+    }
+
+    [Fact]
+    public void Developer_item_selected_by_include()
+    {
+        var catalog = NewCatalog(Item("privacy.safe", CleanupLevel.Safe), Item("developer.long-paths", CleanupLevel.Safe));
+
+        var selected = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Safe, ["developer.long-paths"], [], false));
+        var withoutLevel = ItemSelector.Select(catalog, new CleanupOptions(true, null, ["developer.long-paths"], [], false));
+
+        Assert.Equal(["privacy.safe", "developer.long-paths"], selected.Select(i => i.Id));
+        Assert.Equal(["developer.long-paths"], withoutLevel.Select(i => i.Id));
+    }
+
+    [Fact]
     public void Only_highest_level_power_scheme_item_is_kept()
     {
         var catalog = NewCatalog(

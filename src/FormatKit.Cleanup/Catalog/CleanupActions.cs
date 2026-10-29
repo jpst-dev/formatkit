@@ -13,7 +13,8 @@ namespace FormatKit.Cleanup.Catalog;
 [JsonDerivedType(typeof(NamedAction), "named")]
 public abstract record CleanupAction;
 
-public sealed record RegistryAction(string Path, string Name, RegistryKind? Kind, JsonElement? Value, bool Delete) : CleanupAction;
+/// <param name="IfFileExists">When set, the action applies only if this file exists; environment variables are expanded. Otherwise the item is not applicable here.</param>
+public sealed record RegistryAction(string Path, string Name, RegistryKind? Kind, JsonElement? Value, bool Delete, string? IfFileExists = null) : CleanupAction;
 
 public sealed record ServiceAction(string Name, ServiceStartType StartType) : CleanupAction;
 

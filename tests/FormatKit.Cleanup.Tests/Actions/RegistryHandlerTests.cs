@@ -35,6 +35,31 @@ public class RegistryHandlerTests
     }
 
     [Fact]
+    public async Task Registry_action_with_missing_ifFileExists_is_not_applicable()
+    {
+        var registry = new FakeRegistry();
+        var files = new InMemoryFileSystem();
+        var ctx = TestServices.Context(TestServices.Create(registry: registry, files: files));
+        var action = Dword("A", "1") with { IfFileExists = @"%SystemRoot%\System32\sudo.exe" };
+
+        await Assert.ThrowsAsync<TargetNotPresentException>(() => Handler.CaptureAsync(action, ctx, Ct));
+        Assert.Null(registry.Read(Path, "A"));
+    }
+
+    [Fact]
+    public async Task Registry_action_with_existing_ifFileExists_is_captured()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed(Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\sudo.exe"), "");
+        var ctx = TestServices.Context(TestServices.Create(files: files));
+        var action = Dword("A", "1") with { IfFileExists = @"%SystemRoot%\System32\sudo.exe" };
+
+        var captured = await Handler.CaptureAsync(action, ctx, Ct);
+
+        Assert.Equal(Path + "|A", captured.Target);
+    }
+
+    [Fact]
     public async Task Capture_records_absent()
     {
         var ctx = TestServices.Context(TestServices.Create());

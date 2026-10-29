@@ -18,7 +18,7 @@ public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileS
     private static readonly string[] KnownProperties = ["enabled", "level", "include", "exclude", "confirmAggressive"];
 
     private static readonly CleanupCategory[] CategoryOrder =
-        [CleanupCategory.Apps, CleanupCategory.Privacy, CleanupCategory.Performance];
+        [CleanupCategory.Apps, CleanupCategory.Privacy, CleanupCategory.Performance, CleanupCategory.Developer];
 
     public string Name => "cleanup";
 
@@ -53,7 +53,7 @@ public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileS
             if (level.ValueKind != JsonValueKind.String || !CleanupOptions.LevelNames.ContainsKey(level.GetString()!))
                 errors.Add(Invalid($"{path}.level", string.Join(" | ", CleanupOptions.LevelNames.Keys)));
         }
-        else if (enabled)
+        else if (enabled && !HasInclude(section))
         {
             errors.Add(Missing($"{path}.level", "level"));
         }
@@ -104,6 +104,10 @@ public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileS
             .Select(items => (IStep)new CleanupCategoryStep(items[0].Category, items, included, applier))
             .ToList();
     }
+
+    /// <summary>Developer items are selected by <c>include</c> alone, so a section that includes something needs no level.</summary>
+    private static bool HasInclude(JsonElement section) =>
+        section.TryGetProperty("include", out var list) && list.ValueKind == JsonValueKind.Array && list.GetArrayLength() > 0;
 
     /// <summary>Checks an optional id list; returns its known ids with their indexes.</summary>
     private List<(string Id, int Index)> ValidateIds(JsonElement section, string name, string path, List<ProfileError> errors)

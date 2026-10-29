@@ -11,6 +11,7 @@
   <data name="Step_Title_Apps" xml:space="preserve"><value>Cleanup: remove apps</value></data>
   <data name="Step_Title_Privacy" xml:space="preserve"><value>Cleanup: privacy settings</value></data>
   <data name="Step_Title_Performance" xml:space="preserve"><value>Cleanup: performance settings</value></data>
+  <data name="Step_Title_Developer" xml:space="preserve"><value>Cleanup: developer settings</value></data>
   <data name="Status_Applied" xml:space="preserve"><value>applied</value></data>
   <data name="Status_AlreadyInPlace" xml:space="preserve"><value>already in place</value></data>
   <data name="Status_Failed" xml:space="preserve"><value>failed: {0}</value></data>

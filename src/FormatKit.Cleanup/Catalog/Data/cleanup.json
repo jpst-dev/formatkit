@@ -921,6 +921,199 @@
           "value": 1
         }
       ]
+    },
+    {
+      "id": "developer.developer-mode",
+      "category": "developer",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn on Developer Mode",
+          "what": "Turns on Windows Developer Mode, which lets you install and test apps without a Store license and enables developer-only settings.",
+          "breaks": "Apps outside the Microsoft Store can be sideloaded, which lowers the protection against installing untrusted apps. Undo turns it back off.",
+          "gain": "Sideloading and debugging your own apps works without extra setup."
+        },
+        "pt-BR": {
+          "title": "Ativar o Modo de Desenvolvedor",
+          "what": "Ativa o Modo de Desenvolvedor do Windows, que permite instalar e testar apps sem licença da Store e libera configurações para desenvolvedores.",
+          "breaks": "Apps de fora da Microsoft Store podem ser instalados, o que reduz a proteção contra apps não confiáveis. Desfazer desativa o modo novamente.",
+          "gain": "Instalar e depurar seus próprios apps funciona sem configuração extra."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock",
+          "name": "AllowDevelopmentWithoutDevLicense",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "developer.long-paths",
+      "category": "developer",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": true,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Allow long file paths",
+          "what": "Lets apps that support it use file paths longer than 260 characters.",
+          "breaks": "Nothing stops working. Apps that do not declare support keep the old limit. A restart is needed.",
+          "gain": "Builds and package managers no longer fail on deep folder trees such as node_modules."
+        },
+        "pt-BR": {
+          "title": "Permitir caminhos de arquivo longos",
+          "what": "Permite que apps compatíveis usem caminhos de arquivo com mais de 260 caracteres.",
+          "breaks": "Nada deixa de funcionar. Apps que não declaram suporte continuam com o limite antigo. É preciso reiniciar o PC.",
+          "gain": "Compilações e gerenciadores de pacotes não falham mais em pastas muito profundas, como node_modules."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+          "name": "LongPathsEnabled",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "developer.show-extensions",
+      "category": "developer",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Show file extensions",
+          "what": "Shows the extension (.txt, .exe) of every file in File Explorer.",
+          "breaks": "Nothing breaks. File names look longer in File Explorer.",
+          "gain": "You can tell file types apart and notice a fake name like report.pdf.exe."
+        },
+        "pt-BR": {
+          "title": "Mostrar extensões de arquivo",
+          "what": "Mostra a extensão (.txt, .exe) de todos os arquivos no Explorador de Arquivos.",
+          "breaks": "Nada deixa de funcionar. Os nomes dos arquivos ficam mais longos no Explorador de Arquivos.",
+          "gain": "Você distingue os tipos de arquivo e percebe nomes falsos como relatorio.pdf.exe."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "HideFileExt",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "developer.show-hidden",
+      "category": "developer",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Show hidden files",
+          "what": "Shows files and folders marked as hidden in File Explorer.",
+          "breaks": "Nothing breaks. Hidden folders such as .git and AppData appear in listings, and deleting them by mistake can break apps.",
+          "gain": "Config folders and files such as .git and .ssh show up without extra steps."
+        },
+        "pt-BR": {
+          "title": "Mostrar arquivos ocultos",
+          "what": "Mostra no Explorador de Arquivos os arquivos e pastas marcados como ocultos.",
+          "breaks": "Nada deixa de funcionar. Pastas ocultas como .git e AppData aparecem nas listas, e apagá-las sem querer pode quebrar apps.",
+          "gain": "Pastas e arquivos de configuração como .git e .ssh aparecem sem passos extras."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Hidden",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "developer.sudo",
+      "category": "developer",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn on sudo for Windows",
+          "what": "Turns on the built-in sudo command, which runs a command as administrator from a normal terminal (inline mode). Skipped on Windows versions before 24H2.",
+          "breaks": "Any process in your terminal session can ask for elevation with sudo, which still shows the UAC prompt. Undo turns it off.",
+          "gain": "You can run one elevated command without opening an administrator terminal."
+        },
+        "pt-BR": {
+          "title": "Ativar o sudo do Windows",
+          "what": "Ativa o comando sudo do Windows, que executa um comando como administrador a partir de um terminal normal (modo inline). Ignorado em versões do Windows anteriores à 24H2.",
+          "breaks": "Qualquer processo do seu terminal pode pedir elevação com o sudo, que continua mostrando o aviso do UAC. Desfazer desativa o recurso.",
+          "gain": "Você executa um comando elevado sem abrir um terminal de administrador."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Sudo",
+          "name": "Enabled",
+          "kind": "dword",
+          "value": 3,
+          "ifFileExists": "%SystemRoot%\\System32\\sudo.exe"
+        }
+      ]
+    },
+    {
+      "id": "developer.ps-execution-policy",
+      "category": "developer",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Allow local PowerShell scripts",
+          "what": "Sets the Windows PowerShell 5.1 execution policy to RemoteSigned, so local scripts run and downloaded ones need a trusted signature.",
+          "breaks": "Scripts you downloaded from the internet and did not sign are blocked until you unblock them. Undo restores the previous policy.",
+          "gain": "Your own scripts and module installs run without a policy error."
+        },
+        "pt-BR": {
+          "title": "Permitir scripts locais do PowerShell",
+          "what": "Define a política de execução do Windows PowerShell 5.1 como RemoteSigned: scripts locais rodam e os baixados precisam de assinatura confiável.",
+          "breaks": "Scripts baixados da internet e sem assinatura ficam bloqueados até você desbloqueá-los. Desfazer restaura a política anterior.",
+          "gain": "Seus próprios scripts e instalações de módulos rodam sem erro de política."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\PowerShell\\1\\ShellIds\\Microsoft.PowerShell",
+          "name": "ExecutionPolicy",
+          "kind": "string",
+          "value": "RemoteSigned"
+        }
+      ]
     }
   ]
 }

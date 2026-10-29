@@ -9,7 +9,7 @@ public static partial class CatalogValidator
 {
     private static readonly string[] Languages = ["en", "pt-BR"];
 
-    [GeneratedRegex("^(apps|privacy|performance)\\.[a-z0-9-]+$")]
+    [GeneratedRegex("^(apps|privacy|performance|developer)\\.[a-z0-9-]+$")]
     private static partial Regex IdPattern();
 
     public static IReadOnlyList<string> Validate(CleanupCatalog catalog)
@@ -107,6 +107,9 @@ public static partial class CatalogValidator
         if (!path.StartsWith("HKLM\\", StringComparison.OrdinalIgnoreCase)
             && !path.StartsWith("HKCU\\", StringComparison.OrdinalIgnoreCase))
             error($"registry path '{path}' must start with HKLM\\ or HKCU\\");
+
+        if (registry.IfFileExists is not null && string.IsNullOrWhiteSpace(registry.IfFileExists))
+            error($"registry value '{registry.Name}' has a blank ifFileExists");
 
         if (registry.Delete)
             return;

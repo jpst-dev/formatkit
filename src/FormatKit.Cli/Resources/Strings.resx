@@ -84,7 +84,7 @@
   <data name="Cmd_CleanupCheck" xml:space="preserve"><value>Check for known problems left by tweaks and list applied cleanup items (read-only).</value></data>
   <data name="Cmd_CleanupUndo" xml:space="preserve"><value>Revert cleanup items recorded in the journal.</value></data>
   <data name="Opt_CleanupLevel" xml:space="preserve"><value>Show items up to this level (safe, balanced or aggressive).</value></data>
-  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Show only this category (apps, privacy or performance).</value></data>
+  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Show only this category (apps, privacy, performance or developer).</value></data>
   <data name="Opt_UndoAll" xml:space="preserve"><value>Revert every applied cleanup item.</value></data>
   <data name="Arg_UndoIds" xml:space="preserve"><value>Ids of the cleanup items to revert.</value></data>
   <data name="Marker_Contested" xml:space="preserve"><value>contested</value></data>

@@ -92,6 +92,17 @@ public class CatalogValidatorTests : IDisposable
             "does not match kind");
 
     [Fact]
+    public void Blank_ifFileExists_is_rejected() =>
+        AssertError(
+            Validate(Item(action: """{ "type": "registry", "path": "HKCU\\Software\\Test", "name": "N", "kind": "dword", "value": 1, "ifFileExists": " " }""")),
+            "ifFileExists");
+
+    [Fact]
+    public void IfFileExists_is_accepted() =>
+        Assert.Empty(Validate(Item(id: "developer.test", category: "developer", scope: "machine",
+            action: """{ "type": "registry", "path": "HKLM\\Software\\Test", "name": "N", "kind": "dword", "value": 1, "ifFileExists": "%SystemRoot%\\System32\\sudo.exe" }""")));
+
+    [Fact]
     public void Dword_max_is_accepted() =>
         Assert.Empty(Validate(Item(action: """{ "type": "registry", "path": "HKCU\\Software\\Test", "name": "N", "kind": "dword", "value": 4294967295 }""")));
 

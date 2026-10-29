@@ -15,7 +15,8 @@ public class CleanupModuleTests
             Item("privacy.balanced", CleanupLevel.Balanced),
             Item("apps.safe", CleanupLevel.Safe),
             Item("performance.aggressive", CleanupLevel.Aggressive),
-            Item("apps.aggressive", CleanupLevel.Aggressive)),
+            Item("apps.aggressive", CleanupLevel.Aggressive),
+            Item("developer.long-paths")),
         new AppPaths(@"C:\FormatKitTest"),
         new InMemoryFileSystem());
 
@@ -38,6 +39,33 @@ public class CleanupModuleTests
         Assert.Equal(ProfileErrorCode.MissingField, error.Code);
         Assert.Equal("modules.cleanup.level", error.Path);
         Assert.Empty(Validate("""{"enabled":false}"""));
+    }
+
+    [Fact]
+    public void Level_optional_when_include_present()
+    {
+        const string section = """{"enabled":true,"include":["developer.long-paths"]}""";
+
+        Assert.Empty(Validate(section));
+        var step = Assert.Single(Module.CreateSteps(Json(section)));
+        Assert.Equal("cleanup.developer", step.Id);
+    }
+
+    [Fact]
+    public void Level_still_required_without_include()
+    {
+        var error = Assert.Single(Validate("""{"enabled":true,"include":[]}"""));
+
+        Assert.Equal(ProfileErrorCode.MissingField, error.Code);
+        Assert.Equal("modules.cleanup.level", error.Path);
+    }
+
+    [Fact]
+    public void Developer_step_runs_after_the_other_categories()
+    {
+        var steps = Module.CreateSteps(Json("""{"enabled":true,"level":"aggressive","confirmAggressive":true,"include":["developer.long-paths"]}"""));
+
+        Assert.Equal(["cleanup.apps", "cleanup.privacy", "cleanup.performance", "cleanup.developer"], steps.Select(s => s.Id));
     }
 
     [Fact]

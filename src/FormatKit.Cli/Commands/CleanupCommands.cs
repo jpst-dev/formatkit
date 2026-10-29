@@ -12,7 +12,7 @@ namespace FormatKit.Cli.Commands;
 internal static class CleanupCommands
 {
     private static readonly string[] Levels = ["safe", "balanced", "aggressive"];
-    private static readonly string[] Categories = ["apps", "privacy", "performance"];
+    private static readonly string[] Categories = ["apps", "privacy", "performance", "developer"];
 
     public static Command Create(CommandContext context)
     {

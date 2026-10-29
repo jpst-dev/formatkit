@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FormatKit.Cleanup.Catalog;
 
-public enum CleanupCategory { Apps, Privacy, Performance }
+public enum CleanupCategory { Apps, Privacy, Performance, Developer }
 
 /// <summary>Declaration order is the level order: each level includes the ones before it.</summary>
 public enum CleanupLevel { Safe, Balanced, Aggressive }

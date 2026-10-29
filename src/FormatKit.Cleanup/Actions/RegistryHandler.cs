@@ -21,6 +21,11 @@ internal sealed class RegistryHandler : IActionHandler
     public Task<JournalAction> CaptureAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
     {
         var a = (RegistryAction)action;
+        if (a.IfFileExists is { } file && !ctx.Services.Files.FileExists(Environment.ExpandEnvironmentVariables(file)))
+        {
+            throw new TargetNotPresentException(file);
+        }
+
         var previous = CapturePrevious(ctx.Services.Registry, a.Path, a.Name);
         ctx.Log.Debug("Registry {Path}|{Name} previous state: {Previous}", a.Path, a.Name, previous);
         return Task.FromResult(new JournalAction(Type, $"{a.Path}|{a.Name}", previous));

@@ -23,6 +23,8 @@ public class EmbeddedContentTests
         "performance.system-responsiveness", "performance.network-throttling",
         "performance.games-task-priority", "performance.priority-separation",
         "performance.power-throttling-off",
+        "developer.developer-mode", "developer.long-paths", "developer.show-extensions",
+        "developer.show-hidden", "developer.sudo", "developer.ps-execution-policy",
     ];
 
     /// <summary>
@@ -73,6 +75,25 @@ public class EmbeddedContentTests
         Assert.Empty(expected.Except(ids));
         Assert.Empty(ids.Except(expected));
         Assert.Empty(Dropped.Intersect(ids));
+    }
+
+    [Fact]
+    public void Developer_items_have_both_languages_and_only_long_paths_needs_a_reboot()
+    {
+        var items = CleanupCatalog.LoadEmbedded().Items.Where(i => i.Category == CleanupCategory.Developer).ToList();
+
+        Assert.Equal(6, items.Count);
+        Assert.All(items, item =>
+        {
+            Assert.Equal(CleanupLevel.Safe, item.Level);
+            Assert.False(item.Contested);
+            Assert.Equal(item.Id == "developer.long-paths", item.RequiresReboot);
+            Assert.Equal(item.Id is "developer.show-extensions" or "developer.show-hidden" ? ItemScope.User : ItemScope.Machine, item.Scope);
+            Assert.False(string.IsNullOrWhiteSpace(item.Text["en"].Title));
+            Assert.False(string.IsNullOrWhiteSpace(item.Text["pt-BR"].Gain));
+        });
+        var sudo = Assert.IsType<RegistryAction>(Assert.Single(items.Single(i => i.Id == "developer.sudo").Actions));
+        Assert.Equal(@"%SystemRoot%\System32\sudo.exe", sudo.IfFileExists);
     }
 
     [Fact]
