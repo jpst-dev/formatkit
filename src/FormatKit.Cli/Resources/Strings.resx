@@ -16,6 +16,7 @@
   <data name="Opt_Output" xml:space="preserve"><value>Folder that receives the exported drivers.</value></data>
   <data name="Opt_Profile" xml:space="preserve"><value>Path to the profile JSON file.</value></data>
   <data name="Opt_Resume" xml:space="preserve"><value>Resume the interrupted run.</value></data>
+  <data name="Opt_Countdown" xml:space="preserve"><value>Seconds to wait before starting; press Esc to cancel (used at first logon).</value></data>
   <data name="Error_Wmi" xml:space="preserve"><value>Could not read the system information: {0}</value></data>
   <data name="Cancelled" xml:space="preserve"><value>Cancelled.</value></data>
   <data name="Cancelled_Run" xml:space="preserve"><value>Cancelled. Run 'formatkit run --resume' to continue the run.</value></data>
@@ -46,6 +47,8 @@
   <data name="Profile_Errors" xml:space="preserve"><value>The profile has {0} problem(s); nothing was run:</value></data>
   <data name="Run_UsageBoth" xml:space="preserve"><value>Use either --profile or --resume, not both.</value></data>
   <data name="Run_UsageNeither" xml:space="preserve"><value>Specify --profile with a file, or --resume.</value></data>
+  <data name="Run_CountdownUsage" xml:space="preserve"><value>--countdown needs a number of seconds (0 or more) and cannot be combined with --resume or --dry-run.</value></data>
+  <data name="Run_CountdownCancelled" xml:space="preserve"><value>Automatic run cancelled. To run it later, use:&#10;  {0}&#10;Press Enter to close.</value></data>
   <data name="Run_NothingToResume" xml:space="preserve"><value>There is no interrupted run to resume.</value></data>
   <data name="Run_StateCorrupt" xml:space="preserve"><value>The saved run state is unreadable ({0}). Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
   <data name="Run_ProfileChanged" xml:space="preserve"><value>The profile changed since the run started, so it cannot be resumed. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>

@@ -14,7 +14,8 @@ internal static class RunCommand
         var profileOption = new Option<string?>("--profile") { Description = Strings.Get("Opt_Profile") };
         var dryRun = new Option<bool>("--dry-run") { Description = Strings.Get("Opt_DryRun") };
         var resume = new Option<bool>("--resume") { Description = Strings.Get("Opt_Resume") };
-        var run = new Command("run", Strings.Get("Cmd_Run")) { Options = { profileOption, dryRun, resume } };
+        var countdown = new Option<int?>("--countdown") { Description = Strings.Get("Opt_Countdown") };
+        var run = new Command("run", Strings.Get("Cmd_Run")) { Options = { profileOption, dryRun, resume, countdown } };
 
         run.SetAction(async (parse, ct) =>
         {
@@ -31,6 +32,13 @@ internal static class RunCommand
             if (path is null && !resuming)
             {
                 o.WriteLine(Strings.Get("Run_UsageNeither"));
+                return ExitCodes.InvalidInput;
+            }
+
+            var wait = parse.GetValue(countdown);
+            if (wait is not null && (resuming || parse.GetValue(dryRun) || wait < 0))
+            {
+                o.WriteLine(Strings.Get("Run_CountdownUsage"));
                 return ExitCodes.InvalidInput;
             }
 
@@ -65,10 +73,27 @@ internal static class RunCommand
             if (profile is null)
                 return ExitCodes.InvalidInput;
 
+            // Before RunFlow, so before elevation: the UAC prompt appears only after the countdown.
+            if (wait is > 0 && context.Env.Services.Console.CanPrompt)
+            {
+                var starter = context.Env.Countdown ?? new StartCountdown();
+                if (!await starter.WaitAsync(profile.Profile.Name, TimeSpan.FromSeconds(wait.Value), ct))
+                {
+                    o.WriteLine(Strings.Format("Run_CountdownCancelled", CommandLine(path!)));
+                    MediaCommands.ReadLine();
+                    return ExitCodes.Ok;
+                }
+            }
+
             return await RunFlow.ExecuteAsync(context, profile, resuming, parse.GetValue(dryRun), ct);
         });
         return run;
     }
+
+    private static string CommandLine(string profilePath) =>
+        $"{Quote(MediaCommands.ExePath())} run --profile {Quote(Path.GetFullPath(profilePath))}";
+
+    private static string Quote(string path) => path.Contains(' ') ? $"\"{path}\"" : path;
 
     internal static LoadedProfile? LoadProfile(CommandContext context, string path)
     {

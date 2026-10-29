@@ -21,7 +21,8 @@ public sealed record CliEnvironment(
     TimeSpan RebootCountdown,
     TimeSpan NetworkRetryDelay,
     string? SimulateRebootAfterStep = null,
-    FormatKit.Dev.DevEnvironment? Dev = null);
+    FormatKit.Dev.DevEnvironment? Dev = null,
+    StartCountdown? Countdown = null);
 
 /// <summary>The composition root: the only place that builds real adapters.</summary>
 public static class Services

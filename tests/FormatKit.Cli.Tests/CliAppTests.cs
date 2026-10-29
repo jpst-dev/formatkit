@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Management;
 using FormatKit.Cleanup;
 using FormatKit.Cleanup.Catalog;
+using FormatKit.Cli.Commands;
 using FormatKit.Cli.Tests.Fakes;
 using FormatKit.Core;
 using FormatKit.Core.Hardware;
@@ -31,18 +32,33 @@ public sealed class CliAppTests : IDisposable
     private readonly FakeModule _module = new("fake");
     private readonly StringWriter _out = new();
     private FakeHardwareInfo _hardware = new(FakeHardwareInfo.Sample());
+    private readonly FakeInteractiveConsole _console = new();
+    private readonly List<string> _countdownLines = [];
+    private readonly List<string?> _typed = [];
+    private bool _escPressed;
+    private const string ExePathWithSpaces = @"C:\Program Files\FormatKit\formatkit.exe";
 
-    public CliAppTests() => CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+    public CliAppTests()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+        MediaCommands.ReadLine = () =>
+        {
+            _typed.Add(null);
+            return "";
+        };
+    }
 
     public void Dispose()
     {
+        MediaCommands.ReadLine = Console.ReadLine;
+        MediaCommands.ExePath = () => Environment.ProcessPath!;
         CultureInfo.CurrentUICulture = _original;
         Directory.Delete(_tempDir, recursive: true);
     }
 
     private CliApp App(IHardwareInfo? hardware = null)
     {
-        var services = TestServices.Create(files: _fs);
+        var services = TestServices.Create(files: _fs, console: _console);
         if (hardware is not null)
             services = services with { Hardware = hardware };
         else
@@ -51,7 +67,8 @@ public sealed class CliAppTests : IDisposable
         var env = new CliEnvironment(
             services, _elevation, _tasks, _rebooter, _reports,
             new RunStateStore(_fs, _paths), Serilog.Core.Logger.None, _out,
-            TimeSpan.Zero, TimeSpan.Zero, _simulateRebootAfter);
+            TimeSpan.Zero, TimeSpan.Zero, _simulateRebootAfter,
+            Countdown: new StartCountdown(() => _escPressed, (_, _) => Task.CompletedTask, _countdownLines.Add));
         return new CliApp(env, VendorCatalog.LoadEmbedded(), [_module]);
     }
 
@@ -87,6 +104,110 @@ public sealed class CliAppTests : IDisposable
 
         Assert.Equal(ExitCodes.Ok, exit);
         Assert.Empty(_rebooter.Calls);
+    }
+
+    [Fact]
+    public async Task Run_countdown_cancelled_prints_the_command_waits_for_enter_and_runs_nothing()
+    {
+        var step = new FakeStep("a") { RequiresAdmin = true, CheckResult = false };
+        _module.Steps.Add(step);
+        _elevation.IsElevated = false;
+        _escPressed = true;
+        MediaCommands.ExePath = () => ExePathWithSpaces;
+        var profile = Path.Combine(_tempDir, "my profile.json");
+        File.WriteAllText(profile, """{"schemaVersion":1,"name":"T","modules":{"fake":{"enabled":true}}}""");
+
+        var exit = await Run("run", "--profile", profile, "--countdown", "60");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Single(_typed);
+        Assert.Contains("Automatic run cancelled", _out.ToString());
+        Assert.Contains($"\"{ExePathWithSpaces}\" run --profile \"{profile}\"", _out.ToString());
+        Assert.Equal(0, step.ExecuteCalls);
+        Assert.Equal(0, _elevation.RelaunchCalls);
+        Assert.Equal(0, _fs.WriteCount);
+    }
+
+    [Fact]
+    public async Task Run_countdown_leaves_paths_without_spaces_unquoted()
+    {
+        _escPressed = true;
+        MediaCommands.ExePath = () => @"C:\fk\formatkit.exe";
+        var profile = WriteProfile();
+
+        await Run("run", "--profile", profile, "--countdown", "60");
+
+        Assert.Contains($@"C:\fk\formatkit.exe run --profile {profile}", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Run_countdown_not_cancelled_runs_like_without_the_option()
+    {
+        var step = new FakeStep("a") { CheckResult = false };
+        _module.Steps.Add(step);
+        _elevation.IsElevated = true;
+
+        var exit = await Run("run", "--profile", WriteProfile(), "--countdown", "60");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Equal(1, step.ExecuteCalls);
+        Assert.Empty(_typed);
+        Assert.Contains(_countdownLines, l => l.Contains("60 s"));
+        Assert.DoesNotContain("Automatic run cancelled", _out.ToString());
+    }
+
+    [Theory]
+    [InlineData("--resume")]
+    [InlineData("--dry-run")]
+    public async Task Run_countdown_with_resume_or_dry_run_is_a_usage_error(string other)
+    {
+        string[] args = other == "--resume"
+            ? ["run", "--resume", "--countdown", "60"]
+            : ["run", "--profile", WriteProfile(), "--dry-run", "--countdown", "60"];
+
+        var exit = await Run(args);
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("--countdown needs a number of seconds", _out.ToString());
+        Assert.Empty(_countdownLines);
+    }
+
+    [Fact]
+    public async Task Run_countdown_negative_is_a_usage_error()
+    {
+        var exit = await Run("run", "--profile", WriteProfile(), "--countdown", "-1");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("--countdown needs a number of seconds", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Run_countdown_zero_does_not_wait()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        _escPressed = true;
+
+        var exit = await Run("run", "--profile", WriteProfile(), "--countdown", "0");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Empty(_countdownLines);
+        Assert.Empty(_typed);
+    }
+
+    [Fact]
+    public async Task Run_countdown_is_skipped_when_no_console_can_prompt()
+    {
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        _escPressed = true;
+        _console.CanPrompt = false;
+
+        var exit = await Run("run", "--profile", WriteProfile(), "--countdown", "60");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Empty(_countdownLines);
+        Assert.Empty(_typed);
     }
 
     private Task<int> Run(params string[] args) => App().RunAsync(args, CancellationToken.None);
