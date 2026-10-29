@@ -430,6 +430,25 @@ public sealed class MediaCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task Usb_refuses_a_disk_that_holds_the_running_exe()
+    {
+        // formatkit.exe started from the stick it is about to erase.
+        const string exe = @"H:\tools\formatkit.exe";
+        _fs.Seed(exe, "EXE");
+        MediaCommands.ExePath = () => exe;
+        _disks.Disks.Add(Stick(volumes: new DiskVolume('H', "STICK")));
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Copy them to another drive first", _out.ToString());
+        Assert.Contains(exe, _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal(0, _readLineCalls);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
     public async Task Usb_with_an_unknown_disk_number_exits_2()
     {
         _disks.Disks.Add(Stick());

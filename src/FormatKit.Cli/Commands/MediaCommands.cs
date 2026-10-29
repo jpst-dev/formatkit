@@ -80,7 +80,8 @@ internal static class MediaCommands
 
             await using (prepared)
             {
-                var sources = new List<string> { request!.IsoPath };
+                // The running exe counts too: started from the target stick, the erase would remove it.
+                var sources = new List<string> { request!.IsoPath, request.ExePath };
                 if (profilePath is not null)
                     sources.Add(profilePath);
                 if (request.Bundle is { } bundle)
