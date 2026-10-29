@@ -189,5 +189,6 @@
   <data name="Media_UsbDiskChanged" xml:space="preserve"><value>O disco {0} mudou ou foi removido desde que foi escolhido. Nada foi apagado. Execute o comando de novo.</value></data>
   <data name="Media_UsbIncomplete" xml:space="preserve"><value>O pendrive está incompleto ({0}). Execute o comando de novo para corrigir.</value></data>
   <data name="Media_UsbDone" xml:space="preserve"><value>O pendrive está pronto. Inicie o PC por ele para formatar.</value></data>
+  <data name="Media_UsbEraseFailed" xml:space="preserve"><value>O apagamento não foi concluído</value></data>
   <data name="Media_UsbInterrupted" xml:space="preserve"><value>A gravação no pendrive foi interrompida</value></data>
 </root>

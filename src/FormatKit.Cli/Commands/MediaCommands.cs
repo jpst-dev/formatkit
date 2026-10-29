@@ -152,6 +152,18 @@ internal static class MediaCommands
             o.WriteLine(Strings.Format("Media_UsbDiskChanged", number));
             return ExitCodes.InvalidInput;
         }
+        catch (OperationCanceledException)
+        {
+            o.WriteLine(Strings.Format("Media_UsbIncomplete", Strings.Get("Media_UsbInterrupted")));
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // The erase may have started: the stick must be treated as incomplete. The text stays in the log only.
+            context.Env.Log.Error(ex, "Erasing disk {Number} failed", number);
+            o.WriteLine(Strings.Format("Media_UsbIncomplete", Strings.Get("Media_UsbEraseFailed")));
+            return ExitCodes.CompletedWithFailures;
+        }
 
         var builder = new MediaBuilder(context.Env.Services, context.Env.Log);
         try
@@ -177,24 +189,26 @@ internal static class MediaCommands
 
     private static void PrintUsbDisks(TextWriter o, IReadOnlyList<UsbCandidate> candidates)
     {
-        var usb = candidates.Where(c => string.Equals(c.Disk.BusType, "USB", StringComparison.OrdinalIgnoreCase)).ToList();
+        var allUsb = candidates.Where(c => string.Equals(c.Disk.BusType, "USB", StringComparison.OrdinalIgnoreCase)).ToList();
+        var hidden = allUsb.Count(c => c.Refusal == UsbRefusal.HardDisk);
+        var usb = allUsb.Where(c => c.Refusal != UsbRefusal.HardDisk).ToList();
         if (usb.Count == 0)
         {
             o.WriteLine(Strings.Get("Media_UsbNoDisks"));
-            return;
         }
-
-        o.WriteLine(Strings.Get("Media_UsbListHeader"));
-        foreach (var c in usb)
+        else
         {
-            o.WriteLine(DiskTitle(c.Disk));
-            PrintVolumes(o, c.Disk);
-            o.WriteLine(c.Refusal == UsbRefusal.None
-                ? Strings.Get("Media_UsbEligible")
-                : Strings.Format("Media_UsbNotUsable", RefusalText(c)));
+            o.WriteLine(Strings.Get("Media_UsbListHeader"));
+            foreach (var c in usb)
+            {
+                o.WriteLine(DiskTitle(c.Disk));
+                PrintVolumes(o, c.Disk);
+                o.WriteLine(c.Refusal == UsbRefusal.None
+                    ? Strings.Get("Media_UsbEligible")
+                    : Strings.Format("Media_UsbNotUsable", RefusalText(c)));
+            }
         }
 
-        var hidden = usb.Count(c => c.Refusal == UsbRefusal.HardDisk);
         if (hidden > 0)
             o.WriteLine(Strings.Format("Media_UsbHardDisksHidden", hidden));
     }

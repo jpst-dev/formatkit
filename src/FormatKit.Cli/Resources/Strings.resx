@@ -189,5 +189,6 @@
   <data name="Media_UsbDiskChanged" xml:space="preserve"><value>Disk {0} changed or was unplugged since it was chosen. Nothing was erased. Run the command again.</value></data>
   <data name="Media_UsbIncomplete" xml:space="preserve"><value>The USB stick is incomplete ({0}). Run the command again to fix it.</value></data>
   <data name="Media_UsbDone" xml:space="preserve"><value>The USB stick is ready. Boot the PC to format from it.</value></data>
+  <data name="Media_UsbEraseFailed" xml:space="preserve"><value>The erase did not complete</value></data>
   <data name="Media_UsbInterrupted" xml:space="preserve"><value>The USB write was interrupted</value></data>
 </root>

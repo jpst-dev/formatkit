@@ -355,7 +355,7 @@ public sealed class MediaCommandsTests : IDisposable
         var text = _out.ToString();
         Assert.Contains($"Disk 3 - SanDisk Ultra {Size32}", text);
         Assert.Contains("F: BACKUP", text);
-        Assert.Contains("Disk 5 - WD Elements", text);
+        Assert.DoesNotContain("WD Elements", text);
         Assert.Contains("external hard disk", text);
         Assert.Contains("--allow-hard-disk", text);
         Assert.Contains("too small", text);
@@ -569,6 +569,108 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Contains("dism failed", _out.ToString());
         Assert.Single(_disks.Prepared);
         Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_listing_with_only_an_external_hard_disk_says_no_disks_and_keeps_the_hint()
+    {
+        _disks.Disks.Add(Stick(5, "UID-5", removable: false, name: "WD Elements"));
+
+        var exit = await RunUsb([]);
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        var text = _out.ToString();
+        Assert.Contains("No USB disk", text);
+        Assert.Contains("hidden", text);
+        Assert.Contains("--allow-hard-disk", text);
+        Assert.DoesNotContain("WD Elements", text);
+    }
+
+    [Fact]
+    public async Task Usb_listing_with_the_flag_shows_the_external_hard_disk()
+    {
+        _disks.Disks.Add(Stick(5, "UID-5", removable: false, name: "WD Elements"));
+
+        var exit = await RunUsb([], "--allow-hard-disk");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Disk 5 - WD Elements", _out.ToString());
+        Assert.DoesNotContain("hidden", _out.ToString());
+    }
+
+    [Fact]
+    public async Task A_failure_while_erasing_says_the_stick_is_incomplete_and_exits_1()
+    {
+        _disks.Disks.Add(Stick());
+        _disks.ThrowOnPrepare = new InvalidOperationException("diskpart exploded");
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.CompletedWithFailures, exit);
+        Assert.Contains("is incomplete", _out.ToString());
+        Assert.Contains("Run the command again", _out.ToString());
+        Assert.DoesNotContain("diskpart exploded", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Ctrl_c_while_erasing_says_incomplete_interrupted_and_exits_130()
+    {
+        _disks.Disks.Add(Stick());
+        _disks.ThrowOnPrepare = new OperationCanceledException();
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.Cancelled, exit);
+        Assert.Contains("is incomplete", _out.ToString());
+        Assert.Contains("interrupted", _out.ToString());
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Ctrl_c_while_writing_after_the_erase_says_incomplete_interrupted_and_exits_130()
+    {
+        _disks.Disks.Add(Stick());
+        _fs.SeedEntry(@"E:\sources\install.wim", 5_000_000_000);
+        _images.ThrowOnSplit = new OperationCanceledException();
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.Cancelled, exit);
+        Assert.Contains("is incomplete", _out.ToString());
+        Assert.Contains("interrupted", _out.ToString());
+        Assert.Single(_disks.Prepared);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_with_declined_elevation_exits_5_without_mounting_or_erasing()
+    {
+        _elevation.IsElevated = false;
+        _elevation.RelaunchResult = null;
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.ElevationDeclined, exit);
+        Assert.Empty(_disk.Mounted);
+        Assert.Empty(_disks.Prepared);
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("pt-BR")]
+    public void Every_usb_refusal_has_a_localized_string(string culture)
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo(culture);
+        foreach (var refusal in Enum.GetValues<FormatKit.Media.Usb.UsbRefusal>().Where(r => r != FormatKit.Media.Usb.UsbRefusal.None))
+        {
+            var key = "Media_UsbRefusal_" + refusal;
+            var text = FormatKit.Cli.Localization.Strings.Get(key);
+            Assert.NotEqual(key, text);
+            Assert.False(string.IsNullOrWhiteSpace(text));
+        }
     }
 
     [Fact]
