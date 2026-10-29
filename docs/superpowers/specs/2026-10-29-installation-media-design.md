@@ -159,7 +159,8 @@ formatkit media usb   --iso <win11.iso> [--profile <file>] [--disk <n>] [--allow
 - Both relaunch through UAC when not elevated, as `run` does (`Mount-DiskImage`
   and the image cmdlets need administrator rights).
 - `media build`: `--output` must not exist or be empty. It may be on any
-  drive, including `C:`.
+  drive, including `C:`. At a drive root, `System Volume Information` and
+  `$RECYCLE.BIN` do not count (see "Decided in away mode").
 - `media usb` without `--disk` lists the eligible disks (number, model, size,
   bus, current letters and labels) and exits 2. With no eligible disk it says
   so, mentioning `--allow-hard-disk` when an external hard disk was hidden.
@@ -194,11 +195,13 @@ A disk is eligible when all hold:
 
 1. Bus type USB, and neither the boot nor the system disk.
 2. Removable media, unless `--allow-hard-disk`.
-3. None of its volumes holds the ISO, the profile file or any input. The
+3. None of its volumes holds the ISO, the profile file, any input or the
+   running `formatkit.exe`. The
    message tells the user to copy them elsewhere first (the profile often lives
    on the stick; copying it to a temporary folder and erasing would lose it if
    the write failed).
 4. Its size fits the needed size (with the 32 GiB partition cap, measured on the usable size: disk size − 1 MiB).
+5. Windows reports a `UniqueId` for it (see "Decided in away mode").
 
 With `--disk <n>`:
 
@@ -208,7 +211,7 @@ With `--disk <n>`:
    add "This is an external hard disk."
 3. Ask the user to type the disk number. Anything else cancels (exit 2). No
    console attached: refuse (exit 2).
-4. List the disks again and re-check rules 1-4 for the disk with the same
+4. List the disks again and re-check rules 1-5 for the disk with the same
    `UniqueId` and number; any difference stops without erasing.
 5. `IDisks.PrepareUsbAsync`, then write the media to its root.
 
@@ -342,16 +345,17 @@ its fallback:
   for Enter and exits 0. Cancelling is not an error.
 - Otherwise the run proceeds unchanged: elevation, reboots and resume through
   the existing scheduled task, logs and report in `%ProgramData%\FormatKit`.
+  The elevated child does not count down again.
 - Not valid with `--resume` or `--dry-run` (exit 2). With no console attached
   the countdown is skipped.
-- `C:\FormatKit` stays after the run; the report adds a line saying it can be
-  deleted when the run came from it.
+- `C:\FormatKit` stays after the run. The report line saying it can be deleted
+  was dropped (see "Decided in away mode").
 
 ## 9. `prepare check`: `security.windows11-requirements`
 
 | Reads | Result |
 |---|---|
-| Windows build (`IRegistry`, `CurrentBuild`), RAM (`Win32_ComputerSystem`), UEFI and Secure Boot (`HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`, `UEFISecureBootEnabled`), TPM version when elevated (`Win32_Tpm`). | Already Windows 11 (build 22000 or later): `Ok`. Windows 10: `Attention` for each requirement read as failed (RAM below 3.5 GiB, since `TotalPhysicalMemory` reads under the installed 4 GB; not UEFI, Secure Boot off), "Windows 11 will not install on this PC as is"; TPM not readable without elevation: `NotChecked` with "run `tpm.msc`"; always a pointer to the PC Health Check app for the CPU. All readable requirements met: `Ok`. |
+| One PowerShell script (`IWindowsReadiness`, R2) reads the Windows build (`CurrentBuild`), RAM (`Win32_ComputerSystem`), the firmware type (`$env:firmware_type`), Secure Boot (`Confirm-SecureBootUEFI`, falling back to `UEFISecureBootEnabled` under `HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`) and, only when elevated, the TPM version (`Win32_Tpm`). | Already Windows 11 (build 22000 or later): `Ok`. Windows 10: `Attention` for each requirement read as failed (RAM below 3.5 GiB, since `TotalPhysicalMemory` reads under the installed 4 GB; not UEFI, Secure Boot off), "Windows 11 will not install on this PC as is"; TPM not readable without elevation: `NotChecked` with "run `tpm.msc`"; always a pointer to the PC Health Check app for the CPU. All readable requirements met: `Ok`. |
 
 FormatKit keeps no list of supported CPUs.
 
@@ -488,6 +492,23 @@ Decisions taken without the user, for review:
   is the image's `DefaultLanguageIndex` (not its first language), and inputs
   are numbered in the order the distinct existing inputs are found (not
   "profile order").
+- The report does not say that `C:\FormatKit` can be deleted (section 8): it
+  was not implemented and is dropped. The README says the folder stays and can
+  be deleted by hand once the run succeeds.
+- The elevated child of `run --countdown` does not count down again: the
+  parent counted down before the UAC prompt, and the child gets the same
+  arguments (`--elevated-child` skips the countdown). Without it the user
+  waited twice.
+- The running `formatkit.exe` counts as a source file for rule 3 of section
+  5.2: started from the target stick, the erase would remove it.
+- A disk whose `UniqueId` is blank is refused (rule 5 of section 5.2, before
+  the prompt), `UsbTarget` refuses a blank confirmed id, and the prepare
+  script exits 4 on a blank id and compares ids case-sensitively (`-cne`)
+  before any destructive cmdlet. Reason: two blank ids match, which defeats
+  the swap check.
+- `--output` at a drive root ignores `System Volume Information` and
+  `$RECYCLE.BIN` (section 5, D1), so `--output E:\` works on a freshly
+  formatted stick. Elsewhere a folder with those names still counts.
 
 ## Found while running
 
