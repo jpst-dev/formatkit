@@ -205,8 +205,9 @@ second banner says so with a **Resume** button (section 7).
    words (the same texts as the CLI's run summary), and **Open report folder**.
 6. **Reboot:** a dialog with a 60-second countdown, **Restart now** and
    **Cancel**. Cancel leaves the run to resume at the next logon, as in the CLI.
-   When the resume task could not be registered, the dialog says so as the CLI
-   does.
+   When the reboot does not happen (cancelled, or `shutdown.exe` failed), the
+   result shows the CLI's reboot-pending text, or its "resume not scheduled"
+   text when `RunSummary.ResumeScheduleFailed` is set.
 
 ### 5.4 Hardware
 
@@ -301,7 +302,7 @@ Worker → window:
 | `planned` | steps: id, title, requiresAdmin |
 | `stepStarted` | number, total, id |
 | `stepFinished` | id, outcome, messages, nextAction |
-| `rebootCountdown` | seconds, resumeScheduleFailed |
+| `rebootCountdown` | seconds |
 | `finished` | the `RunSummary` (status, step reports, report directory, error) |
 | `failed` | a localized message (worker error before or outside the engine) |
 | `disks`, `mediaProgress`, `mediaFinished` | media phase only |
