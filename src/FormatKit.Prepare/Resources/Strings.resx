@@ -14,4 +14,30 @@
   <data name="Status_Ok" xml:space="preserve"><value>Ok</value></data>
   <data name="Item_NotChecked_Title" xml:space="preserve"><value>Could not be checked</value></data>
   <data name="Item_NotChecked_Detail" xml:space="preserve"><value>See the log for details.</value></data>
+  <data name="BitLocker_WindowsVolume_Title" xml:space="preserve"><value>{0}: (Windows) is encrypted with BitLocker</value></data>
+  <data name="BitLocker_WindowsVolume_Detail" xml:space="preserve"><value>Reinstalling Windows turns device encryption on again by itself.</value></data>
+  <data name="BitLocker_OtherVolume_Title" xml:space="preserve"><value>{0}: is encrypted with BitLocker</value></data>
+  <data name="BitLocker_OtherVolume_Detail" xml:space="preserve"><value>Without the recovery key, {0}: does not open after the reinstall.</value></data>
+  <data name="BitLocker_OtherVolume_Action" xml:space="preserve"><value>Save the recovery key of {0}: (aka.ms/myrecoverykey, or run manage-bde -protectors -get {0}: in an administrator terminal) and keep it off this PC.</value></data>
+  <data name="BitLocker_OtherVolumeNoProtector_Action" xml:space="preserve"><value>{0}: has no recovery password. Add one with manage-bde -protectors -add {0}: -RecoveryPassword in an administrator terminal, then save it off this PC.</value></data>
+  <data name="BitLocker_NotElevated_Title" xml:space="preserve"><value>Recovery key of {0}: not checked</value></data>
+  <data name="BitLocker_NotElevated_Detail" xml:space="preserve"><value>Reading the recovery protectors needs an administrator terminal, and this command never asks for elevation.</value></data>
+  <data name="BitLocker_NotElevated_Action" xml:space="preserve"><value>In an administrator terminal, run manage-bde -protectors -get {0}:</value></data>
+  <data name="BitLocker_Unknown_Title" xml:space="preserve"><value>BitLocker state of {0}: not checked</value></data>
+  <data name="BitLocker_Unknown_Detail" xml:space="preserve"><value>Windows did not report whether this volume is encrypted.</value></data>
+  <data name="BitLocker_Unknown_Action" xml:space="preserve"><value>Check it with manage-bde -status {0}: in an administrator terminal.</value></data>
+  <data name="Activation_Firmware_Title" xml:space="preserve"><value>Windows is activated with the key in the firmware</value></data>
+  <data name="Activation_Firmware_Detail" xml:space="preserve"><value>It reactivates by itself after the reinstall.</value></data>
+  <data name="Activation_Retail_Title" xml:space="preserve"><value>Windows is activated with a retail license</value></data>
+  <data name="Activation_Retail_Detail" xml:space="preserve"><value>After the reinstall, Windows needs the license linked to your Microsoft account or the product key.</value></data>
+  <data name="Activation_Retail_Action" xml:space="preserve"><value>Link the license to your Microsoft account in Settings &gt; System &gt; Activation, or keep your product key.</value></data>
+  <data name="Activation_Organization_Title" xml:space="preserve"><value>Windows is licensed by an organization</value></data>
+  <data name="Activation_Organization_Detail" xml:space="preserve"><value>A volume license does not reactivate on its own outside the organization's network.</value></data>
+  <data name="Activation_Organization_Action" xml:space="preserve"><value>Ask the organization's IT department how to reactivate after the reinstall.</value></data>
+  <data name="Activation_NotActivated_Title" xml:space="preserve"><value>Windows is not activated</value></data>
+  <data name="Activation_NotActivated_Detail" xml:space="preserve"><value>After the reinstall, Windows stays not activated unless you have a license.</value></data>
+  <data name="Activation_NotActivated_Action" xml:space="preserve"><value>You will need a product key to activate Windows after the reinstall.</value></data>
+  <data name="Activation_Unknown_Title" xml:space="preserve"><value>Windows activation not checked</value></data>
+  <data name="Activation_Unknown_Detail" xml:space="preserve"><value>Windows did not report its activation state.</value></data>
+  <data name="Activation_Unknown_Action" xml:space="preserve"><value>Open Settings &gt; System &gt; Activation to see the state.</value></data>
 </root>

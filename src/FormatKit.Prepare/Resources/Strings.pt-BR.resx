@@ -14,4 +14,30 @@
   <data name="Status_Ok" xml:space="preserve"><value>Ok</value></data>
   <data name="Item_NotChecked_Title" xml:space="preserve"><value>Não foi possível verificar</value></data>
   <data name="Item_NotChecked_Detail" xml:space="preserve"><value>Veja o log para detalhes.</value></data>
+  <data name="BitLocker_WindowsVolume_Title" xml:space="preserve"><value>{0}: (Windows) está criptografado com BitLocker</value></data>
+  <data name="BitLocker_WindowsVolume_Detail" xml:space="preserve"><value>Ao reinstalar o Windows, a criptografia do dispositivo é ligada novamente sozinha.</value></data>
+  <data name="BitLocker_OtherVolume_Title" xml:space="preserve"><value>{0}: está criptografado com BitLocker</value></data>
+  <data name="BitLocker_OtherVolume_Detail" xml:space="preserve"><value>Sem a chave de recuperação, {0}: não abre depois da reinstalação.</value></data>
+  <data name="BitLocker_OtherVolume_Action" xml:space="preserve"><value>Guarde a chave de recuperação de {0}: (aka.ms/myrecoverykey, ou execute manage-bde -protectors -get {0}: em um terminal de administrador) fora deste PC.</value></data>
+  <data name="BitLocker_OtherVolumeNoProtector_Action" xml:space="preserve"><value>{0}: não tem senha de recuperação. Adicione uma com manage-bde -protectors -add {0}: -RecoveryPassword em um terminal de administrador e guarde-a fora deste PC.</value></data>
+  <data name="BitLocker_NotElevated_Title" xml:space="preserve"><value>Chave de recuperação de {0}: não verificada</value></data>
+  <data name="BitLocker_NotElevated_Detail" xml:space="preserve"><value>Ler os protetores de recuperação exige um terminal de administrador, e este comando nunca pede elevação.</value></data>
+  <data name="BitLocker_NotElevated_Action" xml:space="preserve"><value>Em um terminal de administrador, execute manage-bde -protectors -get {0}:</value></data>
+  <data name="BitLocker_Unknown_Title" xml:space="preserve"><value>Estado do BitLocker de {0}: não verificado</value></data>
+  <data name="BitLocker_Unknown_Detail" xml:space="preserve"><value>O Windows não informou se este volume está criptografado.</value></data>
+  <data name="BitLocker_Unknown_Action" xml:space="preserve"><value>Confira com manage-bde -status {0}: em um terminal de administrador.</value></data>
+  <data name="Activation_Firmware_Title" xml:space="preserve"><value>O Windows está ativado com a chave do firmware</value></data>
+  <data name="Activation_Firmware_Detail" xml:space="preserve"><value>Ele se reativa sozinho depois da reinstalação.</value></data>
+  <data name="Activation_Retail_Title" xml:space="preserve"><value>O Windows está ativado com uma licença Retail</value></data>
+  <data name="Activation_Retail_Detail" xml:space="preserve"><value>Depois da reinstalação, o Windows precisa da licença vinculada à sua conta Microsoft ou da chave do produto.</value></data>
+  <data name="Activation_Retail_Action" xml:space="preserve"><value>Vincule a licença à sua conta Microsoft em Configurações &gt; Sistema &gt; Ativação, ou guarde a chave do produto.</value></data>
+  <data name="Activation_Organization_Title" xml:space="preserve"><value>O Windows é licenciado por uma organização</value></data>
+  <data name="Activation_Organization_Detail" xml:space="preserve"><value>Uma licença por volume não se reativa sozinha fora da rede da organização.</value></data>
+  <data name="Activation_Organization_Action" xml:space="preserve"><value>Pergunte ao setor de TI da organização como reativar depois da reinstalação.</value></data>
+  <data name="Activation_NotActivated_Title" xml:space="preserve"><value>O Windows não está ativado</value></data>
+  <data name="Activation_NotActivated_Detail" xml:space="preserve"><value>Depois da reinstalação, o Windows continua sem ativação, a menos que você tenha uma licença.</value></data>
+  <data name="Activation_NotActivated_Action" xml:space="preserve"><value>Você vai precisar de uma chave do produto para ativar o Windows depois da reinstalação.</value></data>
+  <data name="Activation_Unknown_Title" xml:space="preserve"><value>Ativação do Windows não verificada</value></data>
+  <data name="Activation_Unknown_Detail" xml:space="preserve"><value>O Windows não informou o estado da ativação.</value></data>
+  <data name="Activation_Unknown_Action" xml:space="preserve"><value>Abra Configurações &gt; Sistema &gt; Ativação para ver o estado.</value></data>
 </root>
