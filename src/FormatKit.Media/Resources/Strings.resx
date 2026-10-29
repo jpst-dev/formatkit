@@ -6,4 +6,5 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Setup_UnknownProperty" xml:space="preserve"><value>Unknown property &apos;{0}&apos; in the setup section.</value></data>
   <data name="Setup_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
+  <data name="Setup_LanguageNotInImage" xml:space="preserve"><value>The image has no language &apos;{1}&apos; for {0}. Available languages: {2}.</value></data>
 </root>
