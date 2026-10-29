@@ -4,10 +4,10 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Group_Security" xml:space="preserve"><value>Segurança</value></data>
-  <data name="Group_Data" xml:space="preserve"><value>Dados</value></data>
+  <data name="Group_Security" xml:space="preserve"><value>Segurança e licenças</value></data>
+  <data name="Group_Data" xml:space="preserve"><value>Dados pessoais</value></data>
   <data name="Group_Developer" xml:space="preserve"><value>Desenvolvimento</value></data>
-  <data name="Group_Apps" xml:space="preserve"><value>Aplicativos e licenças</value></data>
+  <data name="Group_Apps" xml:space="preserve"><value>Aplicativos e FormatKit</value></data>
   <data name="Status_Blocker" xml:space="preserve"><value>Bloqueio</value></data>
   <data name="Status_Attention" xml:space="preserve"><value>Atenção</value></data>
   <data name="Status_NotChecked" xml:space="preserve"><value>Não verificado</value></data>
@@ -151,4 +151,9 @@
   <data name="Browsers_Title" xml:space="preserve"><value>Os dados do navegador {0} serão apagados</value></data>
   <data name="Browsers_Detail" xml:space="preserve"><value>Favoritos, senhas salvas e extensões ficam em {0}.</value></data>
   <data name="Browsers_Action" xml:space="preserve"><value>Ative a sincronização ou exporte os favoritos e as senhas.</value></data>
+  <data name="Summary_Safe" xml:space="preserve"><value>Seguro formatar.</value></data>
+  <data name="Summary_Blocked_One" xml:space="preserve"><value>1 item impede a formatação.</value></data>
+  <data name="Summary_Blocked_Many" xml:space="preserve"><value>{0} itens impedem a formatação.</value></data>
+  <data name="Markdown_Title" xml:space="preserve"><value>Checklist de preparação do FormatKit — {0}</value></data>
+  <data name="Markdown_Date" xml:space="preserve"><value>Data: {0}</value></data>
 </root>
