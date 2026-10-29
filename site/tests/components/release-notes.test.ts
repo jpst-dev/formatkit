@@ -34,3 +34,11 @@ test('no releases shows the empty string', async () => {
   const html = await render({ releases: [], locale: 'en' });
   expect(html).toContain('No releases published yet');
 });
+
+test('notes are wrapped in lang="en" and headings sit one level below the release heading', async () => {
+  const html = await render({ releases: [mk('v1.0.0', '## Changes\n\n# Top\n\ntext')], locale: 'pt-BR' });
+  expect(html).toContain('<div lang="en">');
+  expect(html).toContain('<h3>Changes</h3>');
+  expect(html).toContain('<h3>Top</h3>');
+  expect(html).not.toContain('<h1>');
+});

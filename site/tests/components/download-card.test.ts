@@ -25,7 +25,12 @@ test('renders both files, hashes, Get-FileHash command and SmartScreen note', as
   expect(html).toContain('formatkit.exe');
   expect(html).toContain(H1);
   expect(html).toContain(H2);
-  expect(html).toContain('Get-FileHash .' + String.fromCharCode(92) + 'formatkit.exe -Algorithm SHA256');
+  const plain = html.replaceAll('&quot;', '"');
+  for (const name of ['FormatKitUI.exe', 'formatkit.exe']) {
+    expect(plain).toContain(`(Get-FileHash "$HOME\\Downloads\\${name}" -Algorithm SHA256).Hash.ToLower()`);
+  }
+  expect(html).toContain('5.0 MiB');
+  expect(html).not.toContain(' MB');
   expect(html).toContain('SmartScreen');
   expect(html).toContain('v1.0.0');
 });

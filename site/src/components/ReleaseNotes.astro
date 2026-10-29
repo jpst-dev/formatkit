@@ -31,7 +31,7 @@ const notesHtml = (r: Release) => (r.body.trim() ? renderNotes(r.body) : '');
           {r.date.slice(0, 10)}
           {r.prerelease && <> · {t(locale, 'notes.prerelease')}</>} · <a href={r.url}>{t(locale, 'notes.github')}</a>
         </p>
-        {notesHtml(r) ? <div set:html={notesHtml(r)} /> : <p>{t(locale, 'notes.none')}</p>}
+        {notesHtml(r) ? <div lang="en" set:html={notesHtml(r)} /> : <p>{t(locale, 'notes.none')}</p>}
       </section>
     ))
   )

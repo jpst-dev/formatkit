@@ -52,7 +52,7 @@ const undoCommand = `formatkit cleanup undo ${item.id}`;
           <ul>
             {item.evidence.sources.map((s) => (
               <li>
-                <a href={s.url}>{s.title}</a>
+                {/^https?:\/\//i.test(s.url) ? <a href={s.url}>{s.title}</a> : s.title}
               </li>
             ))}
           </ul>
@@ -65,13 +65,19 @@ const undoCommand = `formatkit cleanup undo ${item.id}`;
 
   <h2>{t(locale, 'item.undo')}</h2>
   <pre><code>{undoCommand}</code></pre>
-  <p><a href={siteHref(base, locale, 'safety')}>{t(locale, 'item.undo.journal')}</a></p>
+  <p><a href={siteHref(base, locale, 'safety') + (locale === 'en' ? '#undo' : '#desfazer')}>{t(locale, 'item.undo.journal')}</a></p>
 
   <h2>{t(locale, 'item.technical')}</h2>
-  <details>
-    <summary>{t(locale, 'item.technical.show')}</summary>
-    {item.actions.map((a) => <ActionDetails action={a} />)}
-  </details>
+  {
+    item.actions.length > 0 ? (
+      <details>
+        <summary>{t(locale, 'item.technical.show')}</summary>
+        {item.actions.map((a) => <ActionDetails action={a} />)}
+      </details>
+    ) : (
+      <p>{t(locale, 'item.technical.none')}</p>
+    )
+  }
 
   <p><a href={siteHref(base, locale, 'catalog')}>{t(locale, 'item.back')}</a></p>
 </div>

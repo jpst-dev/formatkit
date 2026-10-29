@@ -13,3 +13,9 @@ test('unknown level uses when.unknown; flags off add nothing', () => {
   expect(whenToUse({ ...base, level: 'weird', contested: false, laptopSensitive: false }, tt)).toEqual(['T:when.unknown']);
   expect(whenToUse({ ...base, level: 'safe', contested: false, laptopSensitive: false }, tt)).toEqual(['T:when.safe']);
 });
+
+test('developer items say they are opt-in through include, instead of the level sentence', () => {
+  const dev = { ...base, category: 'developer', level: 'safe', contested: false, laptopSensitive: false } as CleanupItem;
+  expect(whenToUse(dev, tt)).toEqual(['T:when.developer']);
+  expect(whenToUse({ ...dev, contested: true }, tt)).toEqual(['T:when.developer', 'T:when.contested']);
+});

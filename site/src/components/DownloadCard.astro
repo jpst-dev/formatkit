@@ -13,14 +13,15 @@ const props = Astro.props;
 const release = props.release !== undefined ? props.release : await getLatestRelease();
 const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
 
-const HASH_COMMAND = String.raw`Get-FileHash .\formatkit.exe -Algorithm SHA256`;
+const hashCommand = (name: string) =>
+  `(Get-FileHash "$HOME\\Downloads\\${name}" -Algorithm SHA256).Hash.ToLower()`;
 const RELEASES = 'https://github.com/jpst-dev/formatkit/releases';
 const FILES = [
   { name: 'FormatKitUI.exe', what: 'dl.ui.desc' },
   { name: 'formatkit.exe', what: 'dl.cli.desc' },
 ];
 
-const size = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+const size = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MiB`;
 const rows = release
   ? FILES.map((f) => ({ ...f, asset: release.assets.find((a) => a.name === f.name) })).filter((r) => r.asset)
   : [];
@@ -61,7 +62,9 @@ const rows = release
         </ul>
         <h3>{t(locale, 'dl.verify.title')}</h3>
         <p>{t(locale, 'dl.verify.text')}</p>
-        <pre><code>{HASH_COMMAND}</code></pre>
+        {rows.map(({ name }) => (
+          <pre><code>{hashCommand(name)}</code></pre>
+        ))}
         <h3>{t(locale, 'dl.smartscreen.title')}</h3>
         <p>{t(locale, 'dl.smartscreen.text')}</p>
       </>

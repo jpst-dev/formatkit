@@ -15,7 +15,7 @@
   "dl.hash-missing": "SHA-256 not available for this file",
   "dl.button": "Download",
   "dl.verify.title": "Check the file",
-  "dl.verify.text": "Compare the SHA-256 above with the one PowerShell prints for your download:",
+  "dl.verify.text": "Run the command below for each file you downloaded, in PowerShell. The result must be exactly equal to the SHA-256 shown next to that file:",
   "dl.smartscreen.title": "Windows SmartScreen",
   "dl.smartscreen.text": "The files are not code-signed, so SmartScreen may show \"Windows protected your PC\". Click More info, then Run anyway, if you trust the source.",
   "dl.none": "No release has been published yet. See the releases on GitHub:",
@@ -42,6 +42,7 @@
   "programs.source.msstore": "Microsoft Store (through winget)",
   "programs.none": "No programs in the catalog.",
   "when.safe": "Fine for everyone.",
+  "when.developer": "Applied only if you list it in `include` in your profile; meant for software developers.",
   "when.balanced": "Use it when you do not use the feature.",
   "when.aggressive": "Only if you understand the trade-off.",
   "when.unknown": "Check what it does before using it.",
@@ -61,5 +62,6 @@
   "item.undo.journal": "How the undo journal works",
   "item.technical": "Technical details",
   "item.technical.show": "Show the actions",
+  "item.technical.none": "No technical actions for this item.",
   "item.back": "Back to the catalog"
 }

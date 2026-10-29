@@ -76,3 +76,33 @@ test('index groups by category and links with the base', async () => {
   const pt = await render(CatalogIndex, { items: [item], locale: 'pt-BR' });
   expect(pt).toMatch(/href="(\/formatkit)?\/catalog\/apps\.x\/"/);
 });
+
+test('evidence source links only for http(s) URLs', async () => {
+  const withEvidence: CleanupItem = {
+    ...item,
+    evidence: {
+      level: 'documented',
+      sources: [
+        { title: 'Good', url: 'https://example.test/a' },
+        { title: 'Plain', url: 'javascript:alert(1)' },
+      ],
+    },
+  } as CleanupItem;
+  const html = await render(CatalogItem, { item: withEvidence, locale: 'en' });
+  expect(html).toContain('href="https://example.test/a"');
+  expect(html).toContain('Plain');
+  expect(html).not.toContain('javascript:');
+});
+
+test('item without actions shows a line instead of an empty details', async () => {
+  const html = await render(CatalogItem, { item: { ...item, actions: [] }, locale: 'en' });
+  expect(html).toContain('No technical actions');
+  expect(html).not.toContain('<details');
+});
+
+test('undo journal link points at the Undo section of the safety page', async () => {
+  const en = await render(CatalogItem, { item, locale: 'en' });
+  expect(en).toContain('/safety/#undo"');
+  const pt = await render(CatalogItem, { item, locale: 'pt-BR' });
+  expect(pt).toContain('/safety/#desfazer"');
+});
