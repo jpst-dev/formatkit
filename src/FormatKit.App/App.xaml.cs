@@ -36,7 +36,11 @@ public partial class App : Application
 
         // Before the host exists, so a failure while building it is reported too; the handler tolerates a null host.
         DispatcherUnhandledException += OnUnhandledException;
+        StartupGuard.Run(() => StartWindow(e, arguments), ReportFatal, Shutdown);
+    }
 
+    private void StartWindow(StartupEventArgs e, AppArguments arguments)
+    {
         _instance = SingleInstance.TryAcquire(InstanceName);
         if (_instance is null)
         {
@@ -67,7 +71,7 @@ public partial class App : Application
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatKit", "app.json")),
                 _host));
         _window = new MainWindow(main);
-        _instance.Activated += (_, _) => Dispatcher.BeginInvoke(() => _window.BringToFront());
+        _instance.Activated += (_, _) => Dispatcher.BeginInvoke(() => _window?.BringToFront());
         _window.Show();
         if (arguments.Mode == AppMode.Resume)
         {
@@ -145,8 +149,40 @@ public partial class App : Application
 
     private void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
+        e.Handled = true;
+        if (StartupGuard.ShutsDownAfterUnhandled(_window?.IsLoaded == true))
+        {
+            // No usable window (a XAML or startup failure): never stay alive hidden, holding the instance mutex.
+            ReportFatal(e.Exception);
+            Shutdown(1);
+            return;
+        }
+
         _host?.Log.Error(e.Exception, "Unhandled exception");
         _dialogs.ShowError(Strings.Format("Error_Unhandled", e.Exception.Message));
-        e.Handled = true;
+    }
+
+    /// <summary>Logs a failure that ends the app (through a logger of its own when there is no host) and shows it.</summary>
+    private void ReportFatal(Exception ex)
+    {
+        try
+        {
+            if (_host is not null)
+            {
+                _host.Log.Fatal(ex, "Window: startup failed");
+            }
+            else
+            {
+                var log = LogSetup.Create(AppPaths.Default, TimeProvider.System, verbose: false, console: false);
+                log.Fatal(ex, "Window: startup failed before the host was built");
+                (log as IDisposable)?.Dispose();
+            }
+        }
+        catch (Exception)
+        {
+            // Not even a log file can be written; the dialog below still tells the user.
+        }
+
+        _dialogs.ShowError(Strings.Format("Error_Unhandled", ex.Message));
     }
 }
