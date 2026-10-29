@@ -503,6 +503,125 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
 8. Undo: `.\formatkit.exe cleanup undo --all` and accept the UAC prompt. **Expected:** the six values return to what they were before the run (Developer Mode off, `LongPathsEnabled` 0, extensions and hidden files hidden again, `sudo` as before, execution policy as before). The Dev Drive is **not** touched by undo (the `dev` module has no undo): remove it by hand if needed with `Dismount-DiskImage -ImagePath C:\DevDrive\dev.vhdx`, `Unregister-ScheduledTask FormatKit-DevDrive` and by deleting the file.
 9. Cache already set: on a restored `clean`, set `NUGET_PACKAGES` to another folder first (`[Environment]::SetEnvironmentVariable('NUGET_PACKAGES', 'C:\nuget', 'User')`) and run the profile. **Expected:** the other three caches are set, `NUGET_PACKAGES` keeps its value and the run reports a warning for it.
 
+## Preparation checklist scenarios (17-22)
+
+`formatkit prepare check` only reads, but these scenarios build the situations it looks for (repositories, BitLocker, a WSL distro, files on `C:`), so they run in the VM like the others. Restore the `clean` checkpoint before each one (`nested` for scenario 21) and copy `formatkit.exe` into `C:\fk`:
+
+```powershell
+.\tools\vm\vm.ps1 restore
+.\tools\vm\vm.ps1 copy -File artifacts\formatkit.exe
+```
+
+`vm.ps1 run` shows the exit code only if you ask for it, so end each command with `; "exit=$LASTEXITCODE"`. The VM blocks `.ps1` files (execution policy): a script copied into it runs as `& ([scriptblock]::Create((Get-Content C:\fk\x.ps1 -Raw)))`. Scenario 18 needs Git (through winget) and internet access. Scenarios 19, 20 and 22 use the extra data disk `F:`, which restoring `clean` detaches: attach the data VHDX to the VM again (`Add-VMHardDiskDrive` on the host) and check that `F:` is online (`Get-Volume -DriveLetter F`).
+
+Record what the scenarios find in the "Found while running" section of the [preparation checklist spec](superpowers/specs/2026-10-29-preparation-checklist-design.md).
+
+## 17. Prepare: clean VM, no profile
+
+1. Restore `clean`, copy `formatkit.exe`.
+2. Run:
+
+   ```powershell
+   .\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check; "exit=$LASTEXITCODE"'
+   ```
+
+**Expected:** exit code **0** and the last line `Safe to format.`. There is no Blocker. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: the user folders (empty or not on the Windows drive). No Git, WSL or key item appears. Nothing in the output holds a product key.
+
+## 18. Prepare: Git repositories with unpushed work
+
+1. Restore `clean`, copy `formatkit.exe`, and install Git: `.\tools\vm\vm.ps1 run -Command 'winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements'`.
+2. Copy this script to `C:\fk\repos.ps1` and run it (`vm.ps1 run -Command '& ([scriptblock]::Create((Get-Content C:\fk\repos.ps1 -Raw)))'`). It uses the `Documents` folder of the account that runs it, which must be the signed-in user, and the bare repository stands in for GitHub:
+
+   ```powershell
+   $git = 'C:\Program Files\Git\cmd\git.exe'
+   $docs = "$env:USERPROFILE\Documents"
+   & $git init --bare C:\remote.git
+   foreach ($name in 'app-a', 'app-b') {
+       & $git init -b $name "$docs\$name"
+       Set-Content "$docs\$name\readme.txt" $name
+       & $git -C "$docs\$name" add .
+       & $git -C "$docs\$name" -c user.name=Test -c user.email=t@example.com commit -m first
+       & $git -C "$docs\$name" remote add origin C:/remote.git
+       & $git -C "$docs\$name" push -u origin $name
+   }
+   # app-a: a commit that is not pushed
+   Add-Content "$docs\app-a\readme.txt" more
+   & $git -C "$docs\app-a" -c user.name=Test -c user.email=t@example.com commit -am second
+   # app-b: an uncommitted change
+   Add-Content "$docs\app-b\readme.txt" more
+   ```
+
+3. Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check --verbose; "exit=$LASTEXITCODE"'`.
+
+   **Expected:** exit code **1**, last line `2 items block formatting.`. Under Blocker (group Developer), one item per repository: `Repository ...\app-a has work that exists only on this PC` with `Branch app-a has 1 commit not pushed.`, and `Repository ...\app-b ...` with `1 uncommitted change.`, both with the action "Commit and push, or copy the folder ... to an external drive.". The text `remote.git` appears nowhere in the output or the log (`--verbose` prints the log): FormatKit never prints a remote URL.
+4. Commit and push both: in `app-b` run `git -c user.name=Test -c user.email=t@example.com commit -am third`, then `git push` in both repositories. Run the check again.
+
+   **Expected:** exit code **0**, `2 repositories, all pushed` under Ok, `Safe to format.`.
+5. A repository with no remote at all is a Blocker too: `git init` a third folder in `Documents` with one commit and no `origin`. **Expected:** exit code **1** and the item says `The repository has no remote.`.
+
+## 19. Prepare: profile inputs on C: and off C:
+
+1. Restore `clean`, copy `formatkit.exe`, attach the data disk so `F:` exists.
+2. In the VM create the two inputs on `C:`: `.\formatkit.exe programs export C:\fk\programs.json` and `New-Item C:\fk\netdrivers -ItemType Directory; Set-Content C:\fk\netdrivers\net.inf '; test'` (the check only looks for a `.inf` file).
+3. Create `C:\fk\prepare.json`:
+
+   ```json
+   {
+     "schemaVersion": 1,
+     "name": "Prepare inputs",
+     "modules": {
+       "drivers": { "enabled": true, "sources": ["windowsUpdate"], "networkDriverBackup": "C:\\fk\\netdrivers" },
+       "programs": { "enabled": true, "acceptAgreements": true, "importFile": "C:\\fk\\programs.json" }
+     }
+   }
+   ```
+
+4. Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check --profile C:\fk\prepare.json; "exit=$LASTEXITCODE"'`.
+
+   **Expected:** exit code **1**. Under Blocker (group Apps and FormatKit): `The program list C:\fk\programs.json is on C: and will be erased` and `The network driver backup C:\fk\netdrivers is on C: and will be erased`, each with the action to move it off `C:` and update the JSON path named in it, and `The profile file is on C: and will be erased` (the profile itself lives on `C:`). No path is reported twice.
+5. Move everything to `F:`: `Copy-Item C:\fk\programs.json, C:\fk\prepare.json F:\; Copy-Item C:\fk\netdrivers F:\ -Recurse`, then edit `F:\prepare.json` so the two paths are `F:\\netdrivers` and `F:\\programs.json`. Run `.\formatkit.exe prepare check --profile F:\prepare.json`.
+
+   **Expected:** exit code **0**. `The program list F:\programs.json is off C:` and `The network driver backup F:\netdrivers is off C:` under Ok, plus `1 profile file is off C:` (the profile).
+6. Also check: a `networkDriverBackup` folder on `F:` without any `.inf` file is a Blocker (`... is missing or has no drivers`, action `Run formatkit drivers backup-network --output ...`); an invalid profile (for example `"schemaVersion": 9`) prints its errors and exits with **2** without running any check.
+
+## 20. Prepare: BitLocker on the data disk
+
+1. On the host check whether the VM has a virtual TPM: `Get-VMSecurity -VMName <vm name>` and read `TpmEnabled`. **If it is `False`, the scenario is not covered:** do not enable BitLocker, and record "scenario 20: not covered (no vTPM)" in the "Found while running" section of the spec. If it is `True`, continue.
+2. Restore `clean`, copy `formatkit.exe`, attach the data disk (`F:`). In the VM, in an elevated PowerShell (`vm.ps1 run` is elevated), turn BitLocker on for `F:` and wait until `Get-BitLockerVolume F:` shows `ProtectionStatus` `On`:
+
+   ```powershell
+   Enable-BitLocker -MountPoint F: -RecoveryPasswordProtector -UsedSpaceOnly -SkipHardwareTest
+   ```
+
+3. **Not elevated.** In the VM console open a normal (not "Run as administrator") PowerShell and run `C:\fk\formatkit.exe prepare check`. To be sure it is not elevated: `([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')` must print `False`.
+
+   **Expected:** under Attention `F: is encrypted with BitLocker`, with the action to save the recovery key (`aka.ms/myrecoverykey` or `manage-bde -protectors -get F:`); under Not checked `Recovery key of F: not checked`, with the action `manage-bde -protectors -get F:`. No UAC prompt appears. The recovery password never appears in the output.
+4. **Elevated.** Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check; "exit=$LASTEXITCODE"'` (confirm with the `IsInRole` line that the session prints `True`).
+
+   **Expected:** `F: is encrypted with BitLocker` stays under Attention and the Not checked item for F: is gone, because the recovery password protector was read. Remove the protector (`manage-bde -protectors -delete F: -Type RecoveryPassword`) and run again: the Attention action now says `F: has no recovery password` and gives the `manage-bde -protectors -add F: -RecoveryPassword` command. Exit code **0** in every case (no Blocker).
+
+## 21. Prepare: WSL distribution
+
+1. Restore the **`nested`** checkpoint (`.\tools\vm\vm.ps1 nested`), copy `formatkit.exe`, and install one distro by running scenario 13 up to step 5. Keep the user signed in and connected.
+2. WSL is registered per user, so run the check on that user's desktop: write `C:\fk\prepare-wsl.ps1` with `C:\fk\formatkit.exe prepare check *> C:\fk\prepare.txt; "exit=$LASTEXITCODE" | Add-Content C:\fk\prepare.txt` and run `.\tools\vm\vm.ps1 job -File prepare-wsl.ps1`, then read `C:\fk\prepare.txt`. (Running the command in a console of the signed-in user works too.)
+
+   **Expected:** under Attention (group Developer) `The WSL distribution Ubuntu will be erased` with the action `Export it with wsl --export Ubuntu E:\Ubuntu.tar ...`. Docker's own distros are never listed. Exit code **0**. On the plain `clean` checkpoint (no WSL) there is no WSL item.
+
+## 22. Prepare: `--output` on and off the Windows drive
+
+1. Restore `clean`, copy `formatkit.exe`, attach the data disk so `F:` exists. To see a Blocker box too, you can first do scenario 18 steps 1 and 2.
+2. Run:
+
+   ```powershell
+   .\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check --output F:\checklist.md; "exit=$LASTEXITCODE"; Get-Content F:\checklist.md'
+   ```
+
+   **Expected:** the report is printed, then `Checklist saved to F:\checklist.md`, with no warning. The file starts with the title `FormatKit preparation checklist` and the computer name, has the date, a heading per status, `- [ ]` before every Blocker and Attention item and a plain `-` bullet for the Not checked and Ok items. Exit code **0** (or **1** if a Blocker exists). Running it again overwrites the file.
+3. Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check --output C:\fk\c.md; "exit=$LASTEXITCODE"'`.
+
+   **Expected:** the console prints `Warning: C:\fk\c.md is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.` and the file is written anyway. Then run it with `--output Z:\nope\c.md` (a drive that does not exist): the report is printed first, then `Could not write ...`, and the exit code is **2**.
+4. Switch the VM display language to Brazilian Portuguese and repeat step 2. **Expected:** the console and the Markdown file are in Portuguese.
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:

@@ -8,7 +8,7 @@ A clean install beats a cloned or "migrated" one. FormatKit does not restore an 
 
 ## Status
 
-Current release: **core + drivers + cleanup + programs + dev environment**.
+Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist**.
 
 Implemented:
 
@@ -18,7 +18,9 @@ Implemented:
 - Programs module: installs your apps from a built-in catalog, free winget ids, a `winget export` file and direct installers with a mandatory hash check.
 - Dev module: WSL with a distro and user, Git settings, an SSH key and ssh-agent, dotfiles, zsh and Oh My Zsh in WSL, Oh My Posh with a Nerd Font on Windows, and a Dev Drive with package caches. Windows developer settings (Developer Mode, long paths and others) are the `developer` cleanup category.
 
-Planned (not available yet): installation media, preparation checklist, WPF UI.
+- Preparation checklist: `formatkit prepare check` lists what a reinstall would lose and what to save first (read-only, no elevation).
+
+Planned (not available yet): installation media, WPF UI.
 
 ## **WARNING: this tool changes your system**
 
@@ -48,6 +50,7 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit programs export <file>` | Runs `winget export` on this PC and prints how to use the file as `importFile`. |
 | `formatkit dev wsl-user [--profile <file>]` | Creates the WSL Linux user, lets you type its password and makes it the default user. Finishes an item a run left pending. |
 | `formatkit dev ssh-key [--profile <file>]` | Creates the SSH key (you type the passphrase), starts ssh-agent and loads the key. Asks for elevation to set ssh-agent to Automatic. |
+| `formatkit prepare check [--profile <file>] [--output <file.md>]` | Answers "is it safe to format?": lists what a reinstall would lose and what to save first. Changes nothing, needs no elevation. See [Before you format](#before-you-format). |
 | `--verbose` (global) | Shows detailed logging. |
 
 Output language follows the Windows UI language (English and Brazilian Portuguese).
@@ -323,6 +326,72 @@ formatkit dev ssh-key --profile profiles\dev-example.json
 
 Both read the profile's `dev.wsl` or `dev.ssh` section. Without `--profile` they use `Ubuntu` with your Windows user name in lowercase (exit code 2 if that is not a valid Linux user name) and `ed25519`. They need a console where you can type (exit code 2 otherwise). Exit code 0 means every item is done, already in order or not applicable, 1 that an item failed or is pending, 2 an invalid profile. `dev ssh-key` relaunches elevated (like `run`) because it sets ssh-agent to Automatic, and exits with code 5 when you decline the UAC prompt. The `dev` commands write no report.
 
+## Before you format
+
+Run `formatkit prepare check` on the **old** Windows, before the reinstall. It inspects the PC and lists what must still be saved or exported, with a plain action for each item. It only reads: it copies and exports nothing, never asks for elevation and is safe to run on any PC. It points to the commands that do the backups, `formatkit programs export` and `formatkit drivers backup-network`, instead of running them.
+
+```powershell
+formatkit prepare check
+formatkit prepare check --profile profiles\my-profile.json --output E:\checklist.md
+```
+
+- `--profile <file>` also checks the files and folders the profile needs after the format: `programs.importFile`, `programs.direct[].path`, `drivers.networkDriverBackup` and `dev.dotfiles.path`, plus the profile file itself. An invalid profile prints its errors and exits with code 2 before any check runs.
+- `--output <file.md>` also writes the checklist as Markdown, with a `- [ ]` box before every Blocker and Attention item. Write it to another drive: if the file is on the Windows drive, the command warns that it will be erased (it is written anyway). An existing file is overwritten.
+
+Example output (abridged):
+
+```text
+Blocker
+  Developer
+  Repository C:\Users\joao\Documents\app has work that exists only on this PC
+    1 uncommitted change. Branch main has 2 commits not pushed.
+    Commit and push, or copy the folder C:\Users\joao\Documents\app to an external drive.
+
+Attention
+  Security and licenses
+  D: is encrypted with BitLocker
+    Without the recovery key, D: does not open after the reinstall.
+    Save the recovery key of D: (aka.ms/myrecoverykey, or run manage-bde -protectors -get D: in an administrator terminal) and keep it off this PC.
+  Apps and FormatKit
+  The list of installed programs has not been exported
+    Run formatkit programs export E:\programs.json and keep the file off the Windows drive.
+
+Ok
+  Security and licenses
+  Windows is activated with the key in the firmware
+
+1 item blocks formatting.
+```
+
+| Status | Meaning |
+| --- | --- |
+| Blocker | FormatKit can prove something is lost: for example a Git repository with uncommitted or unpushed work, or a file the profile needs that is on the Windows drive. Fix it before formatting. |
+| Attention | Something may be lost or needs a step only you can confirm, such as saving a BitLocker recovery key, exporting a WSL distribution or backing up a user folder. |
+| Not checked | The check could not run (for example it needs an administrator terminal, or Git is missing). The item gives the command to check by hand. |
+| Ok | Nothing to do. |
+
+"Lost" means the path is on the Windows drive (`%SystemDrive%`) or on a volume whose virtual disk (VHDX) file is on the Windows drive, such as a Dev Drive at `C:\DevDrive\dev.vhdx` mounted as `D:`. UNC paths are never lost. A Blocker is reported only for loss FormatKit can prove; what only you can confirm (a saved recovery key, for example) is an Attention item, so "Safe to format." means no provable loss, not that every Attention item is done.
+
+The checks, by group:
+
+- **Security and licenses:** `security.bitlocker`, `security.activation`.
+- **Personal data:** `data.user-folders`, `data.other-users`, `data.volumes`.
+- **Developer:** `dev.git-repos`, `dev.wsl`, `dev.keys`, `dev.devdrive`.
+- **Apps and FormatKit:** `apps.programs-export`, `apps.network-drivers`, `apps.profile-inputs`, `apps.browsers`.
+
+In an elevated terminal the command also reads the BitLocker recovery protectors; otherwise it reports them as Not checked with the `manage-bde` command to run. It never elevates by itself.
+
+| Exit code | Meaning |
+| --- | --- |
+| 0 | No Blocker. |
+| 1 | At least one Blocker. |
+| 2 | Invalid arguments, invalid profile or failed `--output` write (the report is printed first). |
+| 130 | Cancelled with Ctrl+C. |
+
+**Privacy:** the output and the log never contain Git remote URLs (only whether a remote exists), Windows product keys, BitLocker recovery keys or passwords. Only names, paths, sizes and counts are printed.
+
+**Known limitation:** on a PC whose Windows Storage provider is broken, a Dev Drive VHDX is not detected (disk numbers still come from a Win32 fallback), so `dev.devdrive` does not list it. Check any virtual disk stored on `C:` by hand.
+
 ## Building
 
 ```powershell
@@ -339,6 +408,6 @@ Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes an
 
 ## Resumo em português
 
-O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash) e ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive). Mídia de instalação, checklist e interface WPF são planejados.
+O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). Mídia de instalação e interface WPF são planejadas.
 
 **Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. Códigos de saída: veja a tabela acima. Licença MIT.
