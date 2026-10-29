@@ -88,7 +88,7 @@ public static void Save(object comStream, string path) {
 '@
     }
     $image = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
-    $image.FileSystemsToCreate = 6 # Joliet + UDF (long names and deep trees)
+    $image.FileSystemsToCreate = 4 # UDF only: IMAPI2 refuses Joliet without ISO9660, and ISO9660 rejects the Setup tree
     $image.VolumeName = $Label
     $image.FreeMediaBlocks = 0 # no size limit (the default is about 650 MB, too small for Windows media)
     $image.Root.AddTree($SourceDir, $false)
