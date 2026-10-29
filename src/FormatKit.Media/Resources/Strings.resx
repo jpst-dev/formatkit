@@ -15,6 +15,7 @@
   <data name="Media_NotWindows11" xml:space="preserve"><value>Edition &apos;{0}&apos; is version {1}; Windows 11 (build 22000 or later) is required.</value></data>
   <data name="Media_NoLanguages" xml:space="preserve"><value>Edition &apos;{0}&apos; reports no languages.</value></data>
   <data name="Media_EditionNotInImage" xml:space="preserve"><value>The image has no edition &apos;{1}&apos; for {0}. Available editions: {2}.</value></data>
+  <data name="Media_EditionHasNoGenericKey" xml:space="preserve"><value>Edition &apos;{1}&apos; for {0} has no generic installation key, so the answer file cannot select it. Editions of this image that can be selected: {2}.</value></data>
   <data name="Media_EsdTooLarge" xml:space="preserve"><value>install.esd is larger than 4 GiB minus 1 byte and cannot be split; it does not fit a FAT32 stick.</value></data>
   <data name="Media_MountFailed" xml:space="preserve"><value>Could not mount the ISO: {0}</value></data>
   <data name="Media_UnreadableFolder" xml:space="preserve"><value>Could not read the folder {0} of the ISO.</value></data>

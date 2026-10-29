@@ -40,7 +40,16 @@ public sealed class MediaBuilder(ServiceSet services, ILogger log)
                 : image.Editions.FirstOrDefault(e => string.Equals(e.Name, request.Setup.Edition, StringComparison.OrdinalIgnoreCase))
                     ?? throw new MediaException(Strings.Format("Media_EditionNotInImage", "setup.edition", request.Setup.Edition, string.Join(", ", names)));
 
-            var (setup, error) = SetupDefaults.Resolve(request.Setup, request.Machine, edition);
+            // Spec 5.3: the edition must also have a generic key, or the answer file cannot select it.
+            if (request.Setup.Edition is not null && GenericKeys.For(edition.Name) is null)
+            {
+                var supported = names.Where(n => GenericKeys.For(n) is not null);
+                throw new MediaException(Strings.Format("Media_EditionHasNoGenericKey", "setup.edition", edition.Name, string.Join(", ", supported)));
+            }
+
+            // /IMAGE/NAME gets the image's own spelling of the name, not the profile's casing.
+            var options = request.Setup.Edition is null ? request.Setup : request.Setup with { Edition = edition.Name };
+            var (setup, error) = SetupDefaults.Resolve(options, request.Machine, edition);
             if (setup is null)
                 throw new MediaException(error!);
 

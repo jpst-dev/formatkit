@@ -64,6 +64,33 @@ public class MediaBuilderTests
     }
 
     [Fact]
+    public async Task Prepare_edition_without_a_generic_key_is_a_media_exception_and_dismounts()
+    {
+        // Spec 5.3: setup.edition must be in the ISO and in GenericKeys.
+        var rig = new Rig(editions:
+        [
+            InstallMediaTests.Edition("Windows 11 Pro"),
+            InstallMediaTests.Edition("Windows 11 IoT Enterprise"),
+        ]);
+        var ex = await Assert.ThrowsAsync<MediaException>(() =>
+            rig.Builder.PrepareAsync(Request(setup: new SetupOptions(Edition: "Windows 11 IoT Enterprise")), CancellationToken.None));
+        Assert.Contains("setup.edition", ex.Message);
+        Assert.Contains("Windows 11 IoT Enterprise", ex.Message);
+        Assert.DoesNotContain("Media_EditionHasNoGenericKey", ex.Message);
+        Assert.Contains("Windows 11 Pro", ex.Message);
+        Assert.Equal([Iso], rig.Disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Prepare_uses_the_image_casing_of_the_edition_name()
+    {
+        var rig = new Rig();
+        await using var media = await rig.Builder.PrepareAsync(
+            Request(setup: new SetupOptions(Edition: "windows 11 PRO")), CancellationToken.None);
+        Assert.Equal("Windows 11 Pro", media.Setup.Edition);
+    }
+
+    [Fact]
     public async Task Prepare_language_error_dismounts()
     {
         var rig = new Rig();
