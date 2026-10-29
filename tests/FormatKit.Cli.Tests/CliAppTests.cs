@@ -107,7 +107,7 @@ public sealed class CliAppTests : IDisposable
     }
 
     [Fact]
-    public async Task Run_countdown_cancelled_prints_the_command_waits_for_enter_and_runs_nothing()
+    public async Task Run_countdown_cancelled_prints_the_command_and_runs_nothing()
     {
         var step = new FakeStep("a") { RequiresAdmin = true, CheckResult = false };
         _module.Steps.Add(step);
@@ -120,12 +120,33 @@ public sealed class CliAppTests : IDisposable
         var exit = await Run("run", "--profile", profile, "--countdown", "60");
 
         Assert.Equal(ExitCodes.Ok, exit);
-        Assert.Single(_typed);
+        Assert.Empty(_typed);
         Assert.Contains("Automatic run cancelled", _out.ToString());
         Assert.Contains($"\"{ExePathWithSpaces}\" run --profile \"{profile}\"", _out.ToString());
         Assert.Equal(0, step.ExecuteCalls);
         Assert.Equal(0, _elevation.RelaunchCalls);
         Assert.Equal(0, _fs.WriteCount);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task First_logon_run_waits_once_for_enter_at_the_end(bool cancelled)
+    {
+        // The answer file passes --wait-on-exit so the window stays open; a cancel must not ask for Enter twice.
+        _module.Steps.Add(new FakeStep("a") { CheckResult = false });
+        _elevation.IsElevated = true;
+        _escPressed = cancelled;
+        var closes = 0;
+        var app = App();
+        app.WaitForClose = () => { closes++; return Task.CompletedTask; };
+
+        var exit = await app.RunAsync(["run", "--profile", WriteProfile(), "--countdown", "60", "--wait-on-exit"], CancellationToken.None);
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Equal(1, closes);
+        Assert.Empty(_typed);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(_out.ToString(), "Press Enter"));
     }
 
     [Fact]

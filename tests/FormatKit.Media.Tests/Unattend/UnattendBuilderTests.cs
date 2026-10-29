@@ -134,6 +134,13 @@ public class UnattendBuilderTests
     }
 
     [Fact]
+    public void First_logon_command_keeps_the_window_open_at_the_end()
+    {
+        // Found in scenario 24: the window closed as soon as the run ended, before the summary could be read.
+        Assert.EndsWith("--countdown 60 --wait-on-exit", UnattendBuilder.FirstLogonCommand);
+    }
+
+    [Fact]
     public void No_profile_means_no_first_logon_commands()
     {
         var shell = Component(Parse(Setup(), withProfile: false), "oobeSystem", "Microsoft-Windows-Shell-Setup");

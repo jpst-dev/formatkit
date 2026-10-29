@@ -81,8 +81,8 @@ internal static class RunCommand
                 var starter = context.Env.Countdown ?? new StartCountdown();
                 if (!await starter.WaitAsync(profile.Profile.Name, TimeSpan.FromSeconds(wait.Value), ct))
                 {
+                    // The answer file passes --wait-on-exit, so the window waits for Enter once, in CliApp.
                     o.WriteLine(Strings.Format("Run_CountdownCancelled", CommandLine(path!)));
-                    MediaCommands.ReadLine();
                     return ExitCodes.Ok;
                 }
             }

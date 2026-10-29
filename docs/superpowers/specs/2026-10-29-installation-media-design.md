@@ -283,7 +283,7 @@ only when set.
 - Only with a profile: `FirstLogonCommands` with one `SynchronousCommand`:
 
   ```
-  cmd /c start "FormatKit" "%SystemDrive%\FormatKit\formatkit.exe" run --profile "%SystemDrive%\FormatKit\profile.json" --countdown 60
+  cmd /c start "FormatKit" "%SystemDrive%\FormatKit\formatkit.exe" run --profile "%SystemDrive%\FormatKit\profile.json" --countdown 60 --wait-on-exit
   ```
 
   `start` detaches FormatKit, so the desktop finishes loading. Windows runs

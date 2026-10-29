@@ -10,7 +10,7 @@ namespace FormatKit.Media.Unattend;
 public static class UnattendBuilder
 {
     public const string FirstLogonCommand =
-        "cmd /c start \"FormatKit\" \"%SystemDrive%\\FormatKit\\formatkit.exe\" run --profile \"%SystemDrive%\\FormatKit\\profile.json\" --countdown 60";
+        "cmd /c start \"FormatKit\" \"%SystemDrive%\\FormatKit\\formatkit.exe\" run --profile \"%SystemDrive%\\FormatKit\\profile.json\" --countdown 60 --wait-on-exit";
 
     private static readonly XNamespace Ns = "urn:schemas-microsoft-com:unattend";
     private static readonly XNamespace Wcm = "http://schemas.microsoft.com/WMIConfig/2002/State";

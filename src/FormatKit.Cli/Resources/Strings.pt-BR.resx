@@ -48,7 +48,7 @@
   <data name="Run_UsageBoth" xml:space="preserve"><value>Use --profile ou --resume, não ambos.</value></data>
   <data name="Run_UsageNeither" xml:space="preserve"><value>Informe --profile com um arquivo, ou --resume.</value></data>
   <data name="Run_CountdownUsage" xml:space="preserve"><value>--countdown exige um número de segundos (0 ou mais) e não pode ser usado com --resume ou --dry-run.</value></data>
-  <data name="Run_CountdownCancelled" xml:space="preserve"><value>Execução automática cancelada. Para executar depois, use:&#10;  {0}&#10;Pressione Enter para fechar.</value></data>
+  <data name="Run_CountdownCancelled" xml:space="preserve"><value>Execução automática cancelada. Para executar depois, use:&#10;  {0}</value></data>
   <data name="Run_NothingToResume" xml:space="preserve"><value>Não há execução interrompida para retomar.</value></data>
   <data name="Run_StateCorrupt" xml:space="preserve"><value>O estado salvo da execução está ilegível ({0}). Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
   <data name="Run_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde o início da execução, então ela não pode ser retomada. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
