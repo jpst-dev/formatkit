@@ -351,9 +351,9 @@ A run started from the UI registers the resume task with `FormatKitUI.exe
 window opens on Run profile and starts the worker with `run --resume` without
 `runas`. When a window is already open, the task's start signals it to resume
 instead (section 4); that window uses UAC when it is not elevated. The `planned`
-message carries the profile name, so the header shows it. Resume errors (nothing to resume, corrupt state, profile changed or
-invalid) are shown with the CLI's texts, and the task is removed as the CLI
-removes it.
+message carries the profile name, so the header shows it. Resume errors
+(nothing to resume, corrupt state, profile changed or invalid) are shown with
+the CLI's texts, and the task is removed as the CLI removes it.
 
 ### 6.5 Passwords and passphrases
 
@@ -560,10 +560,10 @@ Automation and the Hyper-V synthetic keyboard:
   refusal returns to the review with Reload.
 - **7 (media):** not run; waits for the media phase.
 
-Polish after merge, 2026-10-29 (unit-tested, not yet run in the VM):
+Polish after merge, 2026-10-29 (unit-tested; P1 and P3 also run in the VM, the others only unit-tested):
 
-- **P1 (resume with a window open):** a `--resume` start that found a window open only brought it forward; it now signals `Local\FormatKit.App.Resume` and that window opens Run profile and resumes (section 4).
+- **P1 (resume with a window open):** a `--resume` start that found a window open only brought it forward; it now signals `Local\FormatKit.App.Resume` and that window opens Run profile and resumes (section 4). In the VM the window, left on Hardware, went back to Run profile, asked for UAC and finished the run. The window also starts listening only after it subscribes, so a request sent while it is still starting waits on the event.
 - **P2 (close during the start):** closing during the UAC prompt or the worker's connection closed at once; it now asks "Stop after the current step?" and on yes cancels the start (section 7).
-- **P3 (resumed profile name):** a resumed run showed no profile name; `planned` now carries `profileName` (section 6.2).
+- **P3 (resumed profile name):** a resumed run showed no profile name; `planned` now carries `profileName` (section 6.2); the VM showed "Reboot test" after a real reboot and after a resume in the open window.
 - **P4 (console hint):** the hint showed for consoles that ask nothing; it now reads "If the console window that opened asks for something, type it there." (section 6.5).
 - **P5 (refusal by text):** the window recognized the profile-changed refusal by its localized text; `failed` now carries a `reason` code (section 6.2).
