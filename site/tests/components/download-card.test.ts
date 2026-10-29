@@ -25,7 +25,7 @@ test('renders both files, hashes, Get-FileHash command and SmartScreen note', as
   expect(html).toContain('formatkit.exe');
   expect(html).toContain(H1);
   expect(html).toContain(H2);
-  expect(html).toContain('Get-FileHash .\formatkit.exe -Algorithm SHA256');
+  expect(html).toContain('Get-FileHash .' + String.fromCharCode(92) + 'formatkit.exe -Algorithm SHA256');
   expect(html).toContain('SmartScreen');
   expect(html).toContain('v1.0.0');
 });
