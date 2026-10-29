@@ -1,0 +1,23 @@
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+import starlightLinksValidator from 'starlight-links-validator';
+import { fkWarnings } from './src/integrations/warnings';
+
+export default defineConfig({
+  site: 'https://jpst-dev.github.io',
+  base: '/formatkit',
+  integrations: [
+    starlight({
+      title: 'FormatKit',
+      defaultLocale: 'root',
+      locales: {
+        root: { label: 'Português', lang: 'pt-BR' },
+        en: { label: 'English', lang: 'en' },
+      },
+      // Pages are added to the sidebar by the task that writes them.
+      sidebar: [],
+      plugins: [starlightLinksValidator()],
+    }),
+    fkWarnings(),
+  ],
+});
