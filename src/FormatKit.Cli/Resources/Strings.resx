@@ -163,4 +163,31 @@
   <data name="Media_BuildDone" xml:space="preserve"><value>The installation media is ready in {0}.</value></data>
   <data name="Media_BuildIncomplete" xml:space="preserve"><value>The media in {0} is incomplete ({1}). Delete the folder and run the command again.</value></data>
   <data name="Media_PrepareReminder" xml:space="preserve"><value>Before formatting a PC from this media, run 'formatkit prepare check' on that PC.</value></data>
+  <data name="Media_UsbListHeader" xml:space="preserve"><value>USB disks (choose one with --disk &lt;number&gt;):</value></data>
+  <data name="Media_UsbDiskTitle" xml:space="preserve"><value>Disk {0} - {1} {2} ({3}, {4})</value></data>
+  <data name="Media_UsbRemovable" xml:space="preserve"><value>removable</value></data>
+  <data name="Media_UsbFixed" xml:space="preserve"><value>not removable</value></data>
+  <data name="Media_UsbVolume" xml:space="preserve"><value>    {0}: {1}</value></data>
+  <data name="Media_UsbVolumeNoLetter" xml:space="preserve"><value>    (no letter) {0}</value></data>
+  <data name="Media_UsbNoVolumes" xml:space="preserve"><value>    (no volumes)</value></data>
+  <data name="Media_UsbEligible" xml:space="preserve"><value>    Can be used.</value></data>
+  <data name="Media_UsbNotUsable" xml:space="preserve"><value>    Cannot be used: {0}</value></data>
+  <data name="Media_UsbNoDisks" xml:space="preserve"><value>No USB disk was found.</value></data>
+  <data name="Media_UsbHardDisksHidden" xml:space="preserve"><value>{0} external hard disk(s) are hidden. Use --allow-hard-disk to include them.</value></data>
+  <data name="Media_UsbDiskNotFound" xml:space="preserve"><value>Disk {0} was not found.</value></data>
+  <data name="Media_UsbRefused" xml:space="preserve"><value>Disk {0} cannot be used: {1}</value></data>
+  <data name="Media_UsbRefusal_NotUsb" xml:space="preserve"><value>it is not on the USB bus.</value></data>
+  <data name="Media_UsbRefusal_BootOrSystem" xml:space="preserve"><value>it is the boot or system disk.</value></data>
+  <data name="Media_UsbRefusal_HardDisk" xml:space="preserve"><value>it is an external hard disk (use --allow-hard-disk to allow it).</value></data>
+  <data name="Media_UsbRefusal_HoldsSourceFiles" xml:space="preserve"><value>it holds files the media needs ({0}). Copy them to another drive first.</value></data>
+  <data name="Media_UsbRefusal_TooSmall" xml:space="preserve"><value>it is too small for the media.</value></data>
+  <data name="Media_UsbEraseWarning" xml:space="preserve"><value>EVERYTHING on it will be erased.</value></data>
+  <data name="Media_UsbIsHardDisk" xml:space="preserve"><value>This is an external hard disk.</value></data>
+  <data name="Media_UsbTypeNumber" xml:space="preserve"><value>Type the disk number ({0}) to erase it and write the media. Anything else cancels: </value></data>
+  <data name="Media_UsbCancelled" xml:space="preserve"><value>Cancelled. Nothing was erased.</value></data>
+  <data name="Media_UsbNoConsole" xml:space="preserve"><value>Erasing a USB stick needs a console to type the confirmation. Nothing was erased.</value></data>
+  <data name="Media_UsbDiskChanged" xml:space="preserve"><value>Disk {0} changed or was unplugged since it was chosen. Nothing was erased. Run the command again.</value></data>
+  <data name="Media_UsbIncomplete" xml:space="preserve"><value>The USB stick is incomplete ({0}). Run the command again to fix it.</value></data>
+  <data name="Media_UsbDone" xml:space="preserve"><value>The USB stick is ready. Boot the PC to format from it.</value></data>
+  <data name="Media_UsbInterrupted" xml:space="preserve"><value>The USB write was interrupted</value></data>
 </root>

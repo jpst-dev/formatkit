@@ -30,6 +30,11 @@ public sealed class MediaCommandsTests : IDisposable
     private readonly FakeModule _disabled = new("off");
     private readonly StringWriter _out = new();
     private readonly CollectingSink _log = new();
+    private readonly FakeDisks _disks = new();
+    private readonly FakeInteractiveConsole _console = new();
+    private readonly List<string?> _typed = [];
+    private Queue<string?> _answers = new();
+    private int _readLineCalls;
     private IDiskImages _diskImages;
 
     public MediaCommandsTests()
@@ -47,6 +52,13 @@ public sealed class MediaCommandsTests : IDisposable
         _images.Images[@"E:\sources\install.wim"] =
             [new WindowsImageInfo(1, "Windows 11 Pro", 9, "10.0.26100.1742", ["en-US"], 0)];
         _diskImages = _disk;
+        MediaCommands.ReadLine = () =>
+        {
+            _readLineCalls++;
+            var answer = _answers.Count > 0 ? _answers.Dequeue() : null;
+            _typed.Add(answer);
+            return answer;
+        };
     }
 
     public void Dispose()
@@ -54,18 +66,22 @@ public sealed class MediaCommandsTests : IDisposable
         CultureInfo.CurrentUICulture = _original;
         MediaCommands.Machine = null;
         MediaCommands.ExePath = () => Environment.ProcessPath!;
+        MediaCommands.ReadLine = Console.ReadLine;
         Directory.Delete(_tempDir, recursive: true);
     }
 
-    private Task<int> Run(CancellationToken ct, params string[] args)
+    private Task<int> Run(CancellationToken ct, params string[] args) => RunVerb("build", ct, args);
+
+    private Task<int> RunVerb(string verb, CancellationToken ct, params string[] args)
     {
-        var services = TestServices.Create(files: _fs, diskImages: _disk, windowsImages: _images, virtualDisks: _virtualDisks) with { DiskImages = _diskImages };
+        var services = TestServices.Create(files: _fs, diskImages: _disk, windowsImages: _images, virtualDisks: _virtualDisks,
+            disks: _disks, console: _console) with { DiskImages = _diskImages };
         var env = new CliEnvironment(
             services, _elevation, new FakeScheduledTasks(), new FakeRebooter(), new FakeReportWriter(),
             new RunStateStore(_fs, new AppPaths("data")),
             new Serilog.LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_log).CreateLogger(), _out, TimeSpan.Zero, TimeSpan.Zero);
         return new CliApp(env, VendorCatalog.LoadEmbedded(), [_enabled, _disabled])
-            .RunAsync(["media", "build", .. args], ct);
+            .RunAsync(["media", verb, .. args], ct);
     }
 
     private Task<int> Run(params string[] args) => Run(CancellationToken.None, args);
@@ -304,6 +320,270 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Equal(ExitCodes.InvalidInput, exit);
         Assert.Contains("Windows 11 Pro", _out.ToString());
         Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    // ---- media usb ----
+
+    private static readonly string Size32 = string.Create(CultureInfo.CurrentCulture, $"{32.0:0.0} GB");
+
+    private static DiskInfo Stick(int number = 3, string uniqueId = "UID-3", long size = 32L << 30, bool removable = true,
+        string bus = "USB", bool boot = false, string name = "SanDisk Ultra", params DiskVolume[] volumes) =>
+        new(number, uniqueId, name, size, bus, removable, boot, false,
+            volumes.Length > 0 ? volumes : [new DiskVolume('F', "BACKUP"), new DiskVolume('G', "DATA")]);
+
+    /// <summary>Runs media usb and enforces Review Focus 2 on every case: a disk is prepared only after the typed number.</summary>
+    private async Task<int> RunUsb(string?[] answers, params string[] args)
+    {
+        _answers = new Queue<string?>(answers);
+        var exit = await RunVerb("usb", CancellationToken.None, ["--iso", Iso, .. args]);
+        if (_disks.Prepared.Count > 0)
+            Assert.Contains(_typed, a => a is not null && a.Trim() == "3");
+        return exit;
+    }
+
+    [Fact]
+    public async Task Usb_without_disk_lists_the_usb_disks_with_their_reasons_and_exits_2()
+    {
+        _disks.Disks.Add(Stick());
+        _disks.Disks.Add(Stick(0, "UID-0", bus: "NVMe", boot: true, name: "Samsung 990"));
+        _disks.Disks.Add(Stick(5, "UID-5", removable: false, name: "WD Elements"));
+        _disks.Disks.Add(Stick(6, "UID-6", size: 100, name: "Tiny Stick"));
+
+        var exit = await RunUsb([]);
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        var text = _out.ToString();
+        Assert.Contains($"Disk 3 - SanDisk Ultra {Size32}", text);
+        Assert.Contains("F: BACKUP", text);
+        Assert.Contains("Disk 5 - WD Elements", text);
+        Assert.Contains("external hard disk", text);
+        Assert.Contains("--allow-hard-disk", text);
+        Assert.Contains("too small", text);
+        Assert.DoesNotContain("Samsung 990", text);
+        Assert.DoesNotContain("HardDisk", text);
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal(0, _readLineCalls);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_without_disk_and_no_usb_disks_says_so()
+    {
+        _disks.Disks.Add(Stick(0, "UID-0", bus: "NVMe", boot: true));
+
+        var exit = await RunUsb([]);
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("No USB disk", _out.ToString());
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Theory]
+    [InlineData("NVMe", false, true, 32L << 30, "not on the USB bus")]
+    [InlineData("USB", true, true, 32L << 30, "boot or system disk")]
+    [InlineData("USB", false, false, 32L << 30, "--allow-hard-disk")]
+    [InlineData("USB", false, true, 100L, "too small")]
+    public async Task Usb_with_an_ineligible_disk_prints_the_localized_reason_and_exits_2(
+        string bus, bool boot, bool removable, long size, string expected)
+    {
+        _disks.Disks.Add(Stick(bus: bus, boot: boot, removable: removable, size: size));
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Disk 3 cannot be used", _out.ToString());
+        Assert.Contains(expected, _out.ToString());
+        Assert.DoesNotContain("NotUsb", _out.ToString());
+        Assert.DoesNotContain("BootOrSystem", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal(0, _readLineCalls);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_refuses_a_disk_that_holds_the_iso()
+    {
+        _disks.Disks.Add(Stick(volumes: new DiskVolume('C', "ISOS")));
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Copy them to another drive first", _out.ToString());
+        Assert.Contains(Iso, _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal(0, _readLineCalls);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_refuses_a_disk_that_holds_the_profile()
+    {
+        var profile = WriteProfile();
+        _disks.Disks.Add(Stick(volumes: new DiskVolume(char.ToUpperInvariant(profile[0]), "PROFILE")));
+
+        var exit = await RunUsb(["3"], "--disk", "3", "--profile", profile);
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains(profile, _out.ToString());
+        Assert.Empty(_disks.Prepared);
+    }
+
+    [Fact]
+    public async Task Usb_with_an_unknown_disk_number_exits_2()
+    {
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb(["9"], "--disk", "9");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Disk 9 was not found", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_shows_the_disk_and_the_warning_and_writes_after_the_typed_number()
+    {
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.True(exit == ExitCodes.Ok, _out.ToString());
+        var text = _out.ToString();
+        Assert.Contains($"Disk 3 - SanDisk Ultra {Size32} (USB, removable)", text);
+        Assert.Contains("F: BACKUP", text);
+        Assert.Contains("G: DATA", text);
+        Assert.Contains("EVERYTHING on it will be erased", text);
+        Assert.DoesNotContain("external hard disk", text);
+        Assert.Contains("The USB stick is ready", text);
+        Assert.Equal([(3, "UID-3")], _disks.Prepared);
+        Assert.True(_fs.FileExists(@"F:\autounattend.xml"));
+        Assert.True(_fs.FileExists(@"F:\sources\boot.wim"));
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Theory]
+    [InlineData(" 3 ")]
+    [InlineData("3\t")]
+    public async Task Usb_trims_whitespace_around_the_typed_number(string answer)
+    {
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb([answer], "--disk", "3");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Single(_disks.Prepared);
+    }
+
+    [Theory]
+    [InlineData("y")]
+    [InlineData("")]
+    [InlineData(null)]
+    [InlineData("03")]
+    [InlineData("disk 3")]
+    [InlineData("3 3")]
+    [InlineData("4")]
+    public async Task Never_prepares_without_typed_number(string? answer)
+    {
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb([answer], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Cancelled", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal(1, _readLineCalls);
+        Assert.False(_fs.FileExists(@"F:\autounattend.xml"));
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_for_an_external_hard_disk_with_the_flag_adds_the_hard_disk_warning()
+    {
+        _disks.Disks.Add(Stick(removable: false));
+
+        var exit = await RunUsb(["3"], "--disk", "3", "--allow-hard-disk");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("This is an external hard disk.", _out.ToString());
+        Assert.Single(_disks.Prepared);
+    }
+
+    [Fact]
+    public async Task Usb_without_a_console_refuses_without_reading_a_line()
+    {
+        _console.CanPrompt = false;
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("needs a console", _out.ToString());
+        Assert.Equal(0, _readLineCalls);
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task A_disk_swapped_after_the_listing_is_not_erased_and_the_message_is_localized()
+    {
+        _disks.Disks.Add(Stick());
+        _disks.BeforeSecondList = () => _disks.Disks[0] = Stick(uniqueId: "OTHER");
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Nothing was erased", _out.ToString());
+        Assert.DoesNotContain("confirmed", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.False(_fs.FileExists(@"F:\autounattend.xml"));
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task A_disk_unplugged_after_the_listing_is_not_erased()
+    {
+        _disks.Disks.Add(Stick());
+        _disks.BeforeSecondList = () => _disks.Disks.Clear();
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Nothing was erased", _out.ToString());
+        Assert.DoesNotContain("no longer connected", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+    }
+
+    [Fact]
+    public async Task A_write_failure_after_the_erase_says_the_stick_is_incomplete_and_exits_1()
+    {
+        _disks.Disks.Add(Stick());
+        _fs.SeedEntry(@"E:\sources\install.wim", 5_000_000_000);
+        _images.ThrowOnSplit = new InvalidOperationException("dism failed");
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.CompletedWithFailures, exit);
+        Assert.Contains("incomplete", _out.ToString());
+        Assert.Contains("Run the command again", _out.ToString());
+        Assert.Contains("dism failed", _out.ToString());
+        Assert.Single(_disks.Prepared);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
+    public async Task Usb_not_elevated_relaunches_before_mounting()
+    {
+        _elevation.IsElevated = false;
+        _elevation.RelaunchResult = 0;
+        _disks.Disks.Add(Stick());
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Equal(1, _elevation.RelaunchCalls);
+        Assert.Empty(_disk.Mounted);
+        Assert.Empty(_disks.Prepared);
     }
 
     [Fact]

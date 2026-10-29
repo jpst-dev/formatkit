@@ -1,10 +1,12 @@
 using System.CommandLine;
 using System.Globalization;
 using FormatKit.Cli.Localization;
+using FormatKit.Core.SystemAccess;
 using FormatKit.Core.Profiles;
 using FormatKit.Media.Building;
 using FormatKit.Media.Bundle;
 using FormatKit.Media.Setup;
+using FormatKit.Media.Usb;
 
 namespace FormatKit.Cli.Commands;
 
@@ -16,10 +18,14 @@ internal static class MediaCommands
     /// <summary>Test seam: the executable copied into the media.</summary>
     internal static Func<string> ExePath { get; set; } = () => Environment.ProcessPath!;
 
+    /// <summary>Test seam: reads the typed confirmation.</summary>
+    internal static Func<string?> ReadLine { get; set; } = Console.ReadLine;
+
     public static Command Create(CommandContext context)
     {
         var media = new Command("media", Strings.Get("Cmd_Media"));
         media.Subcommands.Add(CreateBuild(context));
+        media.Subcommands.Add(CreateUsb(context));
         return media;
     }
 
@@ -52,6 +58,168 @@ internal static class MediaCommands
         });
         return build;
     }
+
+    private static Command CreateUsb(CommandContext context)
+    {
+        var isoOption = new Option<string>("--iso") { Description = Strings.Get("Opt_MediaIso"), Required = true };
+        var profileOption = new Option<string?>("--profile") { Description = Strings.Get("Opt_MediaProfile") };
+        var diskOption = new Option<int?>("--disk") { Description = Strings.Get("Opt_MediaDisk") };
+        var hardDiskOption = new Option<bool>("--allow-hard-disk") { Description = Strings.Get("Opt_MediaAllowHardDisk") };
+        var usb = new Command("usb", Strings.Get("Cmd_MediaUsb")) { Options = { isoOption, profileOption, diskOption, hardDiskOption } };
+
+        usb.SetAction(async (parse, ct) =>
+        {
+            // R4: elevate first, so the listing, the confirmation and the work run in the elevated window.
+            if (await context.EnsureElevatedAsync() is { } elevated)
+                return elevated;
+
+            var profilePath = parse.GetValue(profileOption);
+            var (exit, request, prepared) = await PrepareAsync(context, parse.GetValue(isoOption)!, profilePath, ct);
+            if (prepared is null)
+                return exit;
+
+            await using (prepared)
+            {
+                var sources = new List<string> { request!.IsoPath };
+                if (profilePath is not null)
+                    sources.Add(profilePath);
+                if (request.Bundle is { } bundle)
+                    sources.AddRange(bundle.Items.Select(i => i.Input.ResolvedPath));
+
+                return await UsbAsync(context, request, prepared, sources, parse.GetValue(diskOption),
+                    parse.GetValue(hardDiskOption), ct);
+            }
+        });
+        return usb;
+    }
+
+    private static async Task<int> UsbAsync(CommandContext context, MediaRequest request, PreparedMedia prepared,
+        IReadOnlyList<string> sources, int? diskNumber, bool allowHardDisk, CancellationToken ct)
+    {
+        var o = context.Out;
+        var target = new UsbTarget(context.Env.Services.Disks);
+        var candidates = await target.ListAsync(allowHardDisk, sources, prepared.RequiredBytes, ct);
+
+        if (diskNumber is null)
+        {
+            PrintUsbDisks(o, candidates);
+            return ExitCodes.InvalidInput;
+        }
+
+        var number = diskNumber.Value;
+        var candidate = candidates.FirstOrDefault(c => c.Disk.Number == number);
+        if (candidate is null)
+        {
+            o.WriteLine(Strings.Format("Media_UsbDiskNotFound", number));
+            return ExitCodes.InvalidInput;
+        }
+
+        if (candidate.Refusal != UsbRefusal.None)
+        {
+            o.WriteLine(Strings.Format("Media_UsbRefused", number, RefusalText(candidate)));
+            return ExitCodes.InvalidInput;
+        }
+
+        if (!context.Env.Services.Console.CanPrompt)
+        {
+            o.WriteLine(Strings.Get("Media_UsbNoConsole"));
+            return ExitCodes.InvalidInput;
+        }
+
+        o.WriteLine(DiskTitle(candidate.Disk) + " - " + Strings.Get("Media_UsbEraseWarning"));
+        PrintVolumes(o, candidate.Disk);
+        if (!candidate.Disk.IsRemovable)
+            o.WriteLine(Strings.Get("Media_UsbIsHardDisk"));
+
+        var expected = number.ToString(CultureInfo.InvariantCulture);
+        o.Write(Strings.Format("Media_UsbTypeNumber", expected));
+        var answer = ReadLine();
+        if (answer is null || !string.Equals(answer.Trim(), expected, StringComparison.Ordinal))
+        {
+            o.WriteLine(Strings.Get("Media_UsbCancelled"));
+            return ExitCodes.InvalidInput;
+        }
+
+        string root;
+        try
+        {
+            root = await target.PrepareAsync(candidate, allowHardDisk, sources, prepared.RequiredBytes, ct);
+        }
+        catch (DiskChangedException ex)
+        {
+            // The exception text is English; the user sees the localized message.
+            context.Env.Log.Warning(ex, "Disk {Number} changed before the erase", number);
+            o.WriteLine(Strings.Format("Media_UsbDiskChanged", number));
+            return ExitCodes.InvalidInput;
+        }
+
+        var builder = new MediaBuilder(context.Env.Services, context.Env.Log);
+        try
+        {
+            await builder.WriteAsync(prepared, request, root, new ConsoleProgress(o), ct);
+        }
+        catch (MediaWriteException ex)
+        {
+            context.Env.Log.Error(ex, "Writing the media to the USB stick {Root} failed", root);
+            o.WriteLine(Strings.Format("Media_UsbIncomplete", ex.Message));
+            return ExitCodes.CompletedWithFailures;
+        }
+        catch (OperationCanceledException)
+        {
+            o.WriteLine(Strings.Format("Media_UsbIncomplete", Strings.Get("Media_UsbInterrupted")));
+            throw;
+        }
+
+        o.WriteLine(Strings.Get("Media_UsbDone"));
+        o.WriteLine(Strings.Get("Media_PrepareReminder"));
+        return ExitCodes.Ok;
+    }
+
+    private static void PrintUsbDisks(TextWriter o, IReadOnlyList<UsbCandidate> candidates)
+    {
+        var usb = candidates.Where(c => string.Equals(c.Disk.BusType, "USB", StringComparison.OrdinalIgnoreCase)).ToList();
+        if (usb.Count == 0)
+        {
+            o.WriteLine(Strings.Get("Media_UsbNoDisks"));
+            return;
+        }
+
+        o.WriteLine(Strings.Get("Media_UsbListHeader"));
+        foreach (var c in usb)
+        {
+            o.WriteLine(DiskTitle(c.Disk));
+            PrintVolumes(o, c.Disk);
+            o.WriteLine(c.Refusal == UsbRefusal.None
+                ? Strings.Get("Media_UsbEligible")
+                : Strings.Format("Media_UsbNotUsable", RefusalText(c)));
+        }
+
+        var hidden = usb.Count(c => c.Refusal == UsbRefusal.HardDisk);
+        if (hidden > 0)
+            o.WriteLine(Strings.Format("Media_UsbHardDisksHidden", hidden));
+    }
+
+    private static string DiskTitle(DiskInfo d) => Strings.Format("Media_UsbDiskTitle", d.Number, d.FriendlyName,
+        FormatSize(d.SizeBytes), d.BusType, Strings.Get(d.IsRemovable ? "Media_UsbRemovable" : "Media_UsbFixed"));
+
+    private static void PrintVolumes(TextWriter o, DiskInfo d)
+    {
+        if (d.Volumes.Count == 0)
+        {
+            o.WriteLine(Strings.Get("Media_UsbNoVolumes"));
+            return;
+        }
+
+        foreach (var v in d.Volumes)
+        {
+            o.WriteLine(v.Letter is { } letter
+                ? Strings.Format("Media_UsbVolume", char.ToUpperInvariant(letter), v.Label ?? string.Empty)
+                : Strings.Format("Media_UsbVolumeNoLetter", v.Label ?? string.Empty));
+        }
+    }
+
+    private static string RefusalText(UsbCandidate c) =>
+        Strings.Format("Media_UsbRefusal_" + c.Refusal, string.Join(", ", c.SourcesOnDisk));
 
     private static async Task<int> BuildAsync(
         CommandContext context, MediaRequest request, PreparedMedia prepared, string output, CancellationToken ct)

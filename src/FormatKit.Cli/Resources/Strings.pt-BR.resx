@@ -163,4 +163,31 @@
   <data name="Media_BuildDone" xml:space="preserve"><value>A mídia de instalação está pronta em {0}.</value></data>
   <data name="Media_BuildIncomplete" xml:space="preserve"><value>A mídia em {0} está incompleta ({1}). Apague a pasta e execute o comando de novo.</value></data>
   <data name="Media_PrepareReminder" xml:space="preserve"><value>Antes de formatar um PC com esta mídia, execute 'formatkit prepare check' nesse PC.</value></data>
+  <data name="Media_UsbListHeader" xml:space="preserve"><value>Discos USB (escolha um com --disk &lt;número&gt;):</value></data>
+  <data name="Media_UsbDiskTitle" xml:space="preserve"><value>Disco {0} - {1} {2} ({3}, {4})</value></data>
+  <data name="Media_UsbRemovable" xml:space="preserve"><value>removível</value></data>
+  <data name="Media_UsbFixed" xml:space="preserve"><value>não removível</value></data>
+  <data name="Media_UsbVolume" xml:space="preserve"><value>    {0}: {1}</value></data>
+  <data name="Media_UsbVolumeNoLetter" xml:space="preserve"><value>    (sem letra) {0}</value></data>
+  <data name="Media_UsbNoVolumes" xml:space="preserve"><value>    (sem volumes)</value></data>
+  <data name="Media_UsbEligible" xml:space="preserve"><value>    Pode ser usado.</value></data>
+  <data name="Media_UsbNotUsable" xml:space="preserve"><value>    Não pode ser usado: {0}</value></data>
+  <data name="Media_UsbNoDisks" xml:space="preserve"><value>Nenhum disco USB foi encontrado.</value></data>
+  <data name="Media_UsbHardDisksHidden" xml:space="preserve"><value>{0} HD(s) externo(s) estão ocultos. Use --allow-hard-disk para incluí-los.</value></data>
+  <data name="Media_UsbDiskNotFound" xml:space="preserve"><value>O disco {0} não foi encontrado.</value></data>
+  <data name="Media_UsbRefused" xml:space="preserve"><value>O disco {0} não pode ser usado: {1}</value></data>
+  <data name="Media_UsbRefusal_NotUsb" xml:space="preserve"><value>ele não está no barramento USB.</value></data>
+  <data name="Media_UsbRefusal_BootOrSystem" xml:space="preserve"><value>é o disco de inicialização ou do sistema.</value></data>
+  <data name="Media_UsbRefusal_HardDisk" xml:space="preserve"><value>é um HD externo (use --allow-hard-disk para permitir).</value></data>
+  <data name="Media_UsbRefusal_HoldsSourceFiles" xml:space="preserve"><value>ele guarda arquivos que a mídia precisa ({0}). Copie-os para outra unidade primeiro.</value></data>
+  <data name="Media_UsbRefusal_TooSmall" xml:space="preserve"><value>ele é pequeno demais para a mídia.</value></data>
+  <data name="Media_UsbEraseWarning" xml:space="preserve"><value>TUDO nele será apagado.</value></data>
+  <data name="Media_UsbIsHardDisk" xml:space="preserve"><value>Este é um HD externo.</value></data>
+  <data name="Media_UsbTypeNumber" xml:space="preserve"><value>Digite o número do disco ({0}) para apagá-lo e gravar a mídia. Qualquer outra coisa cancela: </value></data>
+  <data name="Media_UsbCancelled" xml:space="preserve"><value>Cancelado. Nada foi apagado.</value></data>
+  <data name="Media_UsbNoConsole" xml:space="preserve"><value>Apagar um pendrive exige um console para digitar a confirmação. Nada foi apagado.</value></data>
+  <data name="Media_UsbDiskChanged" xml:space="preserve"><value>O disco {0} mudou ou foi removido desde que foi escolhido. Nada foi apagado. Execute o comando de novo.</value></data>
+  <data name="Media_UsbIncomplete" xml:space="preserve"><value>O pendrive está incompleto ({0}). Execute o comando de novo para corrigir.</value></data>
+  <data name="Media_UsbDone" xml:space="preserve"><value>O pendrive está pronto. Inicie o PC por ele para formatar.</value></data>
+  <data name="Media_UsbInterrupted" xml:space="preserve"><value>A gravação no pendrive foi interrompida</value></data>
 </root>
