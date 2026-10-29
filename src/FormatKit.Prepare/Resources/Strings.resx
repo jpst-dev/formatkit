@@ -142,7 +142,7 @@
   <data name="NetworkDrivers_Todo_Action" xml:space="preserve"><value>Run formatkit drivers backup-network --output E:\netdrivers and keep the folder off the Windows drive.</value></data>
   <data name="NetworkDrivers_Lost_Title" xml:space="preserve"><value>The network driver backup {0} is on {1} and will be erased</value></data>
   <data name="NetworkDrivers_Lost_Detail" xml:space="preserve"><value>The profile uses this folder, but it is on the drive Windows will format.</value></data>
-  <data name="NetworkDrivers_Lost_Action" xml:space="preserve"><value>Move it off {0}, or run formatkit drivers backup-network --output {1} again with another folder, and update modules.drivers.networkDriverBackup in the profile.</value></data>
+  <data name="NetworkDrivers_Lost_Action" xml:space="preserve"><value>Back the drivers up to a folder that is not on {0} (formatkit drivers backup-network --output E:\netdrivers), or move this backup off {0}; then set modules.drivers.networkDriverBackup in the profile to the new folder.</value></data>
   <data name="NetworkDrivers_Empty_Title" xml:space="preserve"><value>The network driver backup {0} is missing or has no drivers</value></data>
   <data name="NetworkDrivers_Empty_Detail" xml:space="preserve"><value>The folder does not exist or holds no .inf driver file.</value></data>
   <data name="NetworkDrivers_Empty_Action" xml:space="preserve"><value>Run formatkit drivers backup-network --output {0} to fill it.</value></data>

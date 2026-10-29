@@ -142,7 +142,7 @@
   <data name="NetworkDrivers_Todo_Action" xml:space="preserve"><value>Execute formatkit drivers backup-network --output E:\netdrivers e guarde a pasta fora do disco do Windows.</value></data>
   <data name="NetworkDrivers_Lost_Title" xml:space="preserve"><value>O backup dos drivers de rede {0} está em {1} e será apagado</value></data>
   <data name="NetworkDrivers_Lost_Detail" xml:space="preserve"><value>O perfil usa esta pasta, mas ela está no disco que o Windows vai formatar.</value></data>
-  <data name="NetworkDrivers_Lost_Action" xml:space="preserve"><value>Mova-o para fora de {0}, ou execute formatkit drivers backup-network --output {1} de novo com outra pasta, e atualize modules.drivers.networkDriverBackup no perfil.</value></data>
+  <data name="NetworkDrivers_Lost_Action" xml:space="preserve"><value>Faça o backup dos drivers em uma pasta que não esteja em {0} (formatkit drivers backup-network --output E:\netdrivers), ou mova este backup para fora de {0}; depois aponte modules.drivers.networkDriverBackup no perfil para a nova pasta.</value></data>
   <data name="NetworkDrivers_Empty_Title" xml:space="preserve"><value>O backup dos drivers de rede {0} não existe ou não tem drivers</value></data>
   <data name="NetworkDrivers_Empty_Detail" xml:space="preserve"><value>A pasta não existe ou não contém nenhum arquivo de driver .inf.</value></data>
   <data name="NetworkDrivers_Empty_Action" xml:space="preserve"><value>Execute formatkit drivers backup-network --output {0} para preenchê-la.</value></data>

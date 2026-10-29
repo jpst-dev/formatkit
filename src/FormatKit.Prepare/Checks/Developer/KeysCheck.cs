@@ -3,12 +3,15 @@ using FormatKit.Prepare.Localization;
 
 namespace FormatKit.Prepare.Checks.Developer;
 
-/// <summary>Finds SSH private keys and GPG secret keys that a reinstall would erase. Reports file names and counts only; a file is read no further than its first line.</summary>
+/// <summary>Finds SSH private keys (OpenSSH, PEM and PuTTY .ppk) and GPG secret keys that a reinstall would erase. Reports file names and counts only; a file is read no further than its first line.</summary>
 public sealed class KeysCheck : IPrepareCheck
 {
     public const string CheckId = "dev.keys";
 
     private const string PrivateKeyMarker = "PRIVATE KEY";
+
+    /// <summary>First line of a PuTTY private key (.ppk), versions 2 and 3.</summary>
+    private const string PuttyKeyMarker = "PuTTY-User-Key-File-";
 
     /// <summary>A PEM header is far shorter; this bounds what is read from a file that has no line break.</summary>
     private const int FirstLineLimit = 128;
@@ -73,7 +76,8 @@ public sealed class KeysCheck : IPrepareCheck
     private static bool IsPrivateKey(PrepareContext context, string path, Tally unreadable)
     {
         var name = Path.GetFileName(path);
-        if (name.StartsWith("id_", StringComparison.OrdinalIgnoreCase))
+        if (name.StartsWith("id_", StringComparison.OrdinalIgnoreCase)
+            || name.EndsWith(".ppk", StringComparison.OrdinalIgnoreCase))
             return true;
 
         try
@@ -83,7 +87,8 @@ public sealed class KeysCheck : IPrepareCheck
             var buffer = new char[FirstLineLimit];
             var read = reader.Read(buffer, 0, buffer.Length);
             var firstLine = new string(buffer, 0, read).Split('\n')[0];
-            return firstLine.Contains(PrivateKeyMarker, StringComparison.Ordinal);
+            return firstLine.Contains(PrivateKeyMarker, StringComparison.Ordinal)
+                || firstLine.StartsWith(PuttyKeyMarker, StringComparison.Ordinal);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {

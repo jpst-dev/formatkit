@@ -151,4 +151,20 @@ public class KeysCheckTests : IDisposable
 
         Assert.Equal(PrepareStatus.NotChecked, item.Status);
     }
+
+    [Fact]
+    public async Task PuTTY_private_keys_are_detected_by_extension_or_first_line()
+    {
+        var files = new InMemoryFileSystem();
+        files.Seed($@"{Ssh}\work.ppk", "PuTTY-User-Key-File-3: ssh-ed25519\nEncryption: none\n");
+        files.Seed($@"{Ssh}\server", "PuTTY-User-Key-File-2: ssh-rsa\nEncryption: none\n");
+        files.Seed($@"{Ssh}\config", "Host github.com\n");
+
+        var item = Assert.Single(await RunAsync(files));
+
+        Assert.Equal(PrepareStatus.Attention, item.Status);
+        Assert.Contains("work.ppk", item.Detail);
+        Assert.Contains("server", item.Detail);
+        Assert.DoesNotContain("config", item.Detail);
+    }
 }

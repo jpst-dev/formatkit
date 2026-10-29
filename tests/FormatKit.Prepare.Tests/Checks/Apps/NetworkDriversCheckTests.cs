@@ -61,6 +61,20 @@ public class NetworkDriversCheckTests : InvariantCultureTests
 
         Assert.Equal(PrepareStatus.Blocker, item.Status);
         Assert.Contains(@"C:\net", item.Title);
+        // The action must point to a folder off C:, never back to the lost one.
+        Assert.DoesNotContain(@"C:\net", item.Action);
+        Assert.Contains(@"formatkit drivers backup-network --output E:\netdrivers", item.Action);
+        Assert.Contains("not on C:", item.Action);
+        Assert.Contains("modules.drivers.networkDriverBackup", item.Action);
+    }
+
+    [Fact]
+    public async Task The_backup_command_quotes_a_folder_with_spaces()
+    {
+        var item = Assert.Single(await RunAsync(new InMemoryFileSystem(), Enabled(), null,
+            new ExternalInput(Path, @"E:\My Drivers", ExternalInputKind.Folder)));
+
+        Assert.Contains(@"--output ""E:\My Drivers""", item.Action);
     }
 
     [Fact]

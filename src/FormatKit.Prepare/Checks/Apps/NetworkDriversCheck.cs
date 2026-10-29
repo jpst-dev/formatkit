@@ -31,7 +31,7 @@ public sealed class NetworkDriversCheck : IPrepareCheck
         {
             item = new PrepareItem(Id, Group, PrepareStatus.Blocker,
                 Strings.Format("NetworkDrivers_Lost_Title", folder, drive),
-                Strings.Get("NetworkDrivers_Lost_Detail"), Strings.Format("NetworkDrivers_Lost_Action", drive, folder));
+                Strings.Get("NetworkDrivers_Lost_Detail"), Strings.Format("NetworkDrivers_Lost_Action", drive));
         }
         else
         {
@@ -43,11 +43,11 @@ public sealed class NetworkDriversCheck : IPrepareCheck
             else if (unreadable)
                 item = new PrepareItem(Id, Group, PrepareStatus.NotChecked,
                     Strings.Format("NetworkDrivers_Unreadable_Title", folder),
-                    Strings.Get("NetworkDrivers_Unreadable_Detail"), Strings.Format("NetworkDrivers_Empty_Action", folder));
+                    Strings.Get("NetworkDrivers_Unreadable_Detail"), Strings.Format("NetworkDrivers_Empty_Action", Quoted(folder)));
             else
                 item = new PrepareItem(Id, Group, PrepareStatus.Blocker,
                     Strings.Format("NetworkDrivers_Empty_Title", folder),
-                    Strings.Get("NetworkDrivers_Empty_Detail"), Strings.Format("NetworkDrivers_Empty_Action", folder));
+                    Strings.Get("NetworkDrivers_Empty_Detail"), Strings.Format("NetworkDrivers_Empty_Action", Quoted(folder)));
         }
 
         return Task.FromResult<IReadOnlyList<PrepareItem>>([item]);
@@ -64,6 +64,9 @@ public sealed class NetworkDriversCheck : IPrepareCheck
             .Any(f => f.Path.EndsWith(".inf", StringComparison.OrdinalIgnoreCase));
         return (hasInf, unreadable);
     }
+
+    /// <summary>A path inside a suggested command, quoted when it has a space so it can be pasted as is.</summary>
+    private static string Quoted(string path) => path.Contains(' ') ? $"\"{path}\"" : path;
 
     private PrepareItem Backup() =>
         new(Id, Group, PrepareStatus.Attention, Strings.Get("NetworkDrivers_Todo_Title"),
