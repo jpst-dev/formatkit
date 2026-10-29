@@ -44,9 +44,10 @@ public partial class App : Application
         _instance = SingleInstance.TryAcquire(InstanceName);
         if (_instance is null)
         {
-            // Lets the first process take the foreground, which this one does not own.
+            // Lets the first process take the foreground, which this one does not own. A --resume start (the resume
+            // task after a reboot) asks the open window to resume the run, which would otherwise never happen.
             NativeMethods.AllowSetForegroundWindow(NativeMethods.AsfwAny);
-            SingleInstance.SignalExisting(InstanceName);
+            SingleInstance.SignalExisting(InstanceName, resume: arguments.Mode == AppMode.Resume);
             Shutdown(0);
             return;
         }
@@ -72,12 +73,17 @@ public partial class App : Application
                 _host));
         _window = new MainWindow(main);
         _instance.Activated += (_, _) => Dispatcher.BeginInvoke(() => _window?.BringToFront());
+        _instance.ResumeRequested += (_, _) => Dispatcher.BeginInvoke(() =>
+        {
+            _window?.BringToFront();
+            _ = main.ResumeAsync();
+        });
+        _instance.Start();
         _window.Show();
         if (arguments.Mode == AppMode.Resume)
         {
             // Started by the resume scheduled task after a reboot: open on Run profile and continue the run.
-            main.Navigate(Page.RunProfile);
-            _ = main.RunProfile.ResumeAsync();
+            _ = main.ResumeAsync();
         }
     }
 

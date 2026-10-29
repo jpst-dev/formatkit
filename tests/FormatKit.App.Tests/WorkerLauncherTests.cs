@@ -99,6 +99,26 @@ public class WorkerLauncherTests
         Assert.Contains("7", ex.Message);
     }
 
+    [Fact]
+    public async Task StartAsync_CancelledWhileConnecting_ThrowsOperationCanceled()
+    {
+        // Closing the window while the worker has not connected yet cancels the start (the worker then times out).
+        var launcher = new WorkerLauncher(new SilentStarter(), Log, Exe, connectTimeout: TimeSpan.FromSeconds(30));
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Ct);
+
+        var start = launcher.StartAsync(["run", "--resume"], false, cts.Token);
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => start.WaitAsync(TimeSpan.FromSeconds(5), Ct));
+    }
+
+    /// <summary>A worker that neither creates the pipe nor exits.</summary>
+    private sealed class SilentStarter : IElevationStarter
+    {
+        public Task<IStartedProcess?> StartAsync(string exe, IReadOnlyList<string> args, bool runas) =>
+            Task.FromResult<IStartedProcess?>(new FakeStartedProcess());
+    }
+
     /// <summary>A worker that exits with 7 without ever creating the pipe.</summary>
     private sealed class NeverListeningStarter : IElevationStarter
     {

@@ -67,6 +67,22 @@ public sealed class ResumeTests
     }
 
     [Fact]
+    public async Task MainResume_OpensRunProfileAndResumes()
+    {
+        // A resume signalled to the open window by the resume task after a reboot.
+        SeedState();
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+        var (main, _, run) = Create();
+        main.Navigate(Page.About);
+
+        await main.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.Equal(Page.RunProfile, main.Current);
+        Assert.Equal([["run", "--resume"]], _launcher.Jobs);
+        Assert.Equal(RunPhase.Result, run.Phase);
+    }
+
+    [Fact]
     public async Task HomeResume_NotElevated_UsesRunas()
     {
         SeedState();
@@ -149,7 +165,7 @@ public sealed class ResumeTests
         // The worker's stop text says "Use Resume": the result page offers it.
         var (_, _, run) = Create();
         _launcher.Script.Add(new Do(SeedState));
-        _launcher.Script.Add(new Failed(Strings.Get("Worker_Stopped")));
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped));
         await run.ResumeAsync().WaitAsync(Timeout, Ct);
         Assert.Equal(RunPhase.Result, run.Phase);
         Assert.True(run.HasInterruptedRun);

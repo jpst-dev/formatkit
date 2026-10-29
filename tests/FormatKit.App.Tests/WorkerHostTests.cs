@@ -93,6 +93,7 @@ public sealed class WorkerHostTests : IAsyncDisposable
         Assert.Equal(6, messages.Count);
         var planned = Assert.IsType<Planned>(messages[0]);
         Assert.Equal([new PlannedStep("a", "Step A", true), new PlannedStep("b", "Step B", false)], planned.Steps);
+        Assert.Equal("Mine", planned.ProfileName);
         Assert.Equal(new StepStarted(1, 2, "a"), messages[1]);
         var a = Assert.IsType<StepFinished>(messages[2]);
         Assert.Equal(("a", StepOutcome.Succeeded), (a.Id, a.Outcome));
@@ -116,6 +117,7 @@ public sealed class WorkerHostTests : IAsyncDisposable
         Assert.Equal(2, exit);
         var failed = Assert.IsType<Failed>(Assert.Single(await WindowMessages()));
         Assert.Equal(Strings.Get("Worker_ProfileChanged"), failed.Message);
+        Assert.Equal(FailureReason.ProfileChanged, failed.Reason);
         var manager = new ResourceManager("FormatKit.App.Resources.Strings", typeof(Strings).Assembly);
         Assert.Equal(
             "The profile changed since you reviewed it. Review it again.",
@@ -137,6 +139,7 @@ public sealed class WorkerHostTests : IAsyncDisposable
         Assert.Equal(2, exit);
         var failed = Assert.IsType<Failed>(Assert.Single(await WindowMessages()));
         Assert.StartsWith(Strings.Format("Worker_ProfileErrors", errors.Count), failed.Message);
+        Assert.Equal(FailureReason.Other, failed.Reason);
         Assert.All(errors, e => Assert.Contains(e.Message, failed.Message));
     }
 
@@ -161,7 +164,8 @@ public sealed class WorkerHostTests : IAsyncDisposable
         var messages = await WindowMessages();
         Assert.DoesNotContain(messages, m => m is StepStarted { Id: "b" });
         Assert.Contains(messages, m => m is StepFinished { Id: "a", Outcome: StepOutcome.Succeeded });
-        Assert.Equal(Strings.Get("Worker_Stopped"), Assert.IsType<Failed>(messages[^1]).Message);
+        var stopped = Assert.IsType<Failed>(messages[^1]);
+        Assert.Equal((Strings.Get("Worker_Stopped"), FailureReason.Stopped), (stopped.Message, stopped.Reason));
         // The run stays saved for Resume.
         var state = Store.Load();
         Assert.Equal(StateLoadStatus.Loaded, state.Status);
@@ -275,6 +279,8 @@ public sealed class WorkerHostTests : IAsyncDisposable
         Assert.Equal(
             [StepOutcome.Succeeded, StepOutcome.Skipped, null],
             planned.Steps.Select(s => s.DoneBefore));
+        // The window has not reviewed this profile: the resumed run shows its name from here.
+        Assert.Equal("Mine", planned.ProfileName);
     }
 
     [Fact]
@@ -341,7 +347,7 @@ public sealed class WorkerHostTests : IAsyncDisposable
         var exit = await _host.RunAsync(_worker, job.Split(' ', StringSplitOptions.RemoveEmptyEntries), Ct);
 
         Assert.Equal(2, exit);
-        Assert.IsType<Failed>(Assert.Single(await WindowMessages()));
+        Assert.Equal(FailureReason.Other, Assert.IsType<Failed>(Assert.Single(await WindowMessages())).Reason);
     }
 
     /// <summary>A step that blocks in Execute until released, ignoring its token like a step mid-work.</summary>

@@ -138,6 +138,30 @@ public sealed class RunProfileRunTests : IDisposable
     }
 
     [Fact]
+    public async Task Resume_ShowsTheProfileNameFromPlanned()
+    {
+        var vm = Create();
+        Assert.Null(vm.ProfileName);
+        _launcher.Script.Add(new Planned([new PlannedStep("programs.winget", "Install programs", false)], "Resumed"));
+        _launcher.Script.Add(FinishedWith(RunStatus.Completed));
+
+        await vm.ResumeAsync().WaitAsync(Timeout, Ct);
+
+        Assert.Equal("Resumed", vm.ProfileName);
+    }
+
+    [Fact]
+    public async Task Planned_WithoutProfileName_KeepsTheReviewedName()
+    {
+        var vm = Reviewed();
+        _launcher.Script.AddRange([PlannedAll(), FinishedWith(RunStatus.Completed)]);
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal("Mine", vm.ProfileName);
+    }
+
+    [Fact]
     public async Task Resume_StepsDoneBefore_FinalResultHasNoPendingRows()
     {
         var vm = Create();
@@ -159,7 +183,7 @@ public sealed class RunProfileRunTests : IDisposable
     {
         var vm = Reviewed();
         SeedState();
-        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged")));
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged"), FailureReason.ProfileChanged));
 
         await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
 
@@ -169,6 +193,32 @@ public sealed class RunProfileRunTests : IDisposable
         Assert.Null(vm.FinalStatus);
         Assert.False(vm.IsRunning);
         Assert.False(vm.ResumeCommand.CanExecute(null) && vm.IsResult);
+    }
+
+    [Fact]
+    public async Task Run_ProfileChangedRefusal_RecognizedByItsReasonInAnotherLanguage()
+    {
+        // A worker running under another UI culture sends the text in its own language.
+        var vm = Reviewed();
+        _launcher.Script.Add(new Failed("Das Profil wurde geändert.", FailureReason.ProfileChanged));
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal(RunPhase.Review, vm.Phase);
+        Assert.Equal("Das Profil wurde geändert.", vm.RunMessage);
+        Assert.Null(vm.FinalStatus);
+    }
+
+    [Fact]
+    public async Task Run_FailureWithTheProfileChangedTextButNoReason_IsNotARefusal()
+    {
+        var vm = Reviewed();
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged")));
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal(RunPhase.Result, vm.Phase);
+        Assert.Equal(Strings.Get("Worker_ProfileChanged"), vm.FinalStatus);
     }
 
     [Fact]
@@ -264,6 +314,21 @@ public sealed class RunProfileRunTests : IDisposable
         Assert.Equal(["done"], vm.Steps[0].Messages);
     }
 
+    [Theory]
+    [InlineData("Strings.resx", "If the console window that opened asks for something, type it there.")]
+    [InlineData("Strings.pt-BR.resx", "Se a janela de console que abriu pedir algo, digite lá.")]
+    public void ConsoleHint_IsConditional(string file, string expected)
+    {
+        // Every attached console sends consoleOpened, also one that normally asks nothing (the dotfiles git clone).
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (!File.Exists(Path.Combine(root.FullName, "src", "FormatKit.App", "Resources", file)))
+            root = root.Parent ?? throw new InvalidOperationException("repository root not found");
+        var text = XDocument.Load(Path.Combine(root.FullName, "src", "FormatKit.App", "Resources", file)).Root!
+            .Elements("data").Single(d => (string?)d.Attribute("name") == "RunProfile_TypeInConsole").Element("value")!.Value;
+
+        Assert.Equal(expected, text);
+    }
+
     [Fact]
     public async Task StepFinished_ClearsAConsoleHintLeftOpen()
     {
@@ -353,7 +418,7 @@ public sealed class RunProfileRunTests : IDisposable
             new Expect<Cancel>(),
             new StepFinished("drivers.scan", StepOutcome.Succeeded, [], null),
             new Do(SeedState),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
 
         var run = vm.RunCommand.ExecuteAsync(null);
@@ -440,7 +505,7 @@ public sealed class RunProfileRunTests : IDisposable
             new StepStarted(1, 3, "drivers.scan"),
             new Expect<Cancel>(),
             new Do(() => release.Task),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
         var run = vm.RunCommand.ExecuteAsync(null);
         await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].State == StepState.Running);
@@ -591,6 +656,98 @@ public sealed class RunProfileRunTests : IDisposable
     }
 
     [Fact]
+    public async Task StartPending_CountsAsARunInProgressForClosing()
+    {
+        // The UAC prompt or the worker's connection is pending: closing must ask, not close at once.
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.StartGate = gate.Task;
+        _launcher.Declines = true;
+        Assert.False(vm.IsRunInProgress);
+
+        var run = vm.RunCommand.ExecuteAsync(null);
+        Assert.True(vm.IsRunInProgress);
+        Assert.False(vm.IsRunning);
+
+        gate.SetResult();
+        await run.WaitAsync(Timeout, Ct);
+        Assert.False(vm.IsRunInProgress);
+    }
+
+    [Fact]
+    public async Task ConfirmClose_StartPendingAndYes_CancelsTheStart()
+    {
+        var vm = Reviewed();
+        _launcher.StartGate = new TaskCompletionSource().Task;
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => _launcher.Jobs.Count == 1);
+        _dialogs.Confirmations.Clear();
+
+        Assert.True(await vm.ConfirmCloseAsync().WaitAsync(Timeout, Ct));
+        await run.WaitAsync(Timeout, Ct);
+
+        Assert.Equal(Strings.Get("RunProfile_StopQuestion"), Assert.Single(_dialogs.Confirmations).Message);
+        Assert.True(_launcher.StartToken.IsCancellationRequested);
+        Assert.False(vm.IsRunning);
+        Assert.False(vm.IsBusy);
+        Assert.Null(vm.RunMessage);
+    }
+
+    [Fact]
+    public async Task ConfirmClose_StartPendingAndYes_WorkerConnectsAnyway_SendsCancelAndWaits()
+    {
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.StartGate = gate.Task;
+        _launcher.IgnoresCancellation = true;
+        _launcher.Script.AddRange([
+            PlannedAll(),
+            new Expect<Cancel>(),
+            new Do(() => release.Task),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
+        ]);
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => _launcher.Jobs.Count == 1);
+        _dialogs.Confirmations.Clear();
+
+        var close = vm.ConfirmCloseAsync();
+        await Task.Delay(50, Ct);
+        Assert.False(close.IsCompleted);
+        gate.SetResult();
+        await _launcher.WaitForAsync<Cancel>().WaitAsync(Timeout, Ct);
+        await Task.Delay(50, Ct);
+        Assert.False(close.IsCompleted);
+
+        release.SetResult();
+        Assert.True(await close.WaitAsync(Timeout, Ct));
+        await run.WaitAsync(Timeout, Ct);
+        Assert.Single(_dialogs.Confirmations);
+        Assert.Single(_launcher.Received.OfType<Cancel>());
+        Assert.False(vm.IsRunning);
+    }
+
+    [Fact]
+    public async Task ConfirmClose_StartPendingAndNo_StaysOpenAndKeepsStarting()
+    {
+        var vm = Reviewed();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _launcher.StartGate = gate.Task;
+        _launcher.Script.AddRange([PlannedAll(), FinishedWith(RunStatus.Completed)]);
+        var run = vm.RunCommand.ExecuteAsync(null);
+        await WaitUntil(() => _launcher.Jobs.Count == 1);
+        _dialogs.ConfirmResult = false;
+
+        Assert.False(await vm.ConfirmCloseAsync().WaitAsync(Timeout, Ct));
+        Assert.False(_launcher.StartToken.IsCancellationRequested);
+
+        gate.SetResult();
+        await run.WaitAsync(Timeout, Ct);
+        Assert.Empty(_launcher.Received.OfType<Cancel>());
+        Assert.Equal(Strings.Get("Run_Status_Completed"), vm.FinalStatus);
+    }
+
+    [Fact]
     public async Task ConfirmClose_AfterStop_WaitsWithoutAskingAgain()
     {
         var vm = Reviewed();
@@ -600,7 +757,7 @@ public sealed class RunProfileRunTests : IDisposable
             new StepStarted(1, 3, "drivers.scan"),
             new Expect<Cancel>(),
             new Do(() => release.Task),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
         var run = vm.RunCommand.ExecuteAsync(null);
         await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].State == StepState.Running);

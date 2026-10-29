@@ -30,11 +30,7 @@ public sealed partial class MainViewModel : ObservableObject
         RunProfile = runProfile;
         NavigateCommand = new RelayCommand<Page>(Navigate);
         home.NavigationRequested += Navigate;
-        home.ResumeRequested += () =>
-        {
-            Navigate(Page.RunProfile);
-            _ = runProfile.ResumeAsync();
-        };
+        home.ResumeRequested += () => _ = ResumeAsync();
         // Home's banner follows the saved run state when a run ends too (the page is not shown during a run).
         runProfile.PropertyChanged += (_, e) =>
         {
@@ -75,6 +71,17 @@ public sealed partial class MainViewModel : ObservableObject
             hardware.LoadCommand.Execute(null);
         else if (_pages[newValue] is CleanupDiagnosisViewModel diagnosis)
             diagnosis.LoadCommand.Execute(null);
+    }
+
+    /// <summary>
+    /// Opens Run profile and resumes the interrupted run: Home's Resume, the <c>--resume</c> start after a reboot, and
+    /// a <c>--resume</c> start signalled to this window while it was already open. Nothing new starts while a run is
+    /// going on (<see cref="RunProfileViewModel.ResumeAsync"/>).
+    /// </summary>
+    public Task ResumeAsync()
+    {
+        Navigate(Page.RunProfile);
+        return RunProfile.ResumeAsync();
     }
 
     public void Navigate(Page page)

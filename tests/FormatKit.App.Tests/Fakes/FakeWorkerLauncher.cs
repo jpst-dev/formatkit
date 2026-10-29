@@ -55,12 +55,22 @@ public sealed class FakeWorkerLauncher : IWorkerLauncher
     /// <summary>When set, the start waits for it (a pending UAC prompt).</summary>
     public Task? StartGate { get; set; }
 
+    /// <summary>
+    /// When false (the default) a cancelled start token ends the wait on <see cref="StartGate"/> with an
+    /// <see cref="OperationCanceledException"/>; when true the start ignores it (a worker that connects anyway).
+    /// </summary>
+    public bool IgnoresCancellation { get; set; }
+
+    /// <summary>The token of the last start.</summary>
+    public CancellationToken StartToken { get; private set; }
+
     public async Task<WorkerConnection?> StartAsync(IReadOnlyList<string> job, bool elevate, CancellationToken ct)
     {
         Jobs.Add(job);
         Elevations.Add(elevate);
+        StartToken = ct;
         if (StartGate is { } gate)
-            await gate;
+            await (IgnoresCancellation ? gate : gate.WaitAsync(ct));
         if (Declines)
             return null;
 

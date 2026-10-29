@@ -76,11 +76,14 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         if (!resume && !string.Equals(profile.Hash, hash, StringComparison.Ordinal))
         {
             env.Log.Warning("Worker: profile {Path} changed since it was reviewed", path);
-            return await FailAsync(channel, Strings.Get("Worker_ProfileChanged"), ct).ConfigureAwait(false);
+            return await FailAsync(channel, Strings.Get("Worker_ProfileChanged"), ct, FailureReason.ProfileChanged).ConfigureAwait(false);
         }
 
         var plan = PlanService.Build(profile.Profile, modules, env.SimulateRebootAfterStep);
-        await TrySendAsync(channel, new Planned(plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin, DoneBefore(done, s.Id))).ToList()), ct).ConfigureAwait(false);
+        var planned = new Planned(
+            plan.Select(s => new PlannedStep(s.Id, s.Title, s.RequiresAdmin, DoneBefore(done, s.Id))).ToList(),
+            profile.Profile.Name);
+        await TrySendAsync(channel, planned, ct).ConfigureAwait(false);
 
         // Steps get the host token, never the stop token, so a stop never interrupts a step mid-work.
         // Every send below waits for the posted progress messages, so the window sees them in order.
@@ -97,7 +100,7 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         catch (OperationCanceledException) when (stop.IsCancellationRequested)
         {
             env.Log.Information("Worker: run stopped after the current step");
-            return await FailAsync(channel, Strings.Get("Worker_Stopped"), ct).ConfigureAwait(false);
+            return await FailAsync(channel, Strings.Get("Worker_Stopped"), ct, FailureReason.Stopped).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -127,9 +130,10 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         return ExitFinished;
     }
 
-    private async Task<int> FailAsync(MessageChannel channel, string message, CancellationToken ct)
+    private async Task<int> FailAsync(
+        MessageChannel channel, string message, CancellationToken ct, FailureReason reason = FailureReason.Other)
     {
-        await TrySendAsync(channel, new Failed(message), ct).ConfigureAwait(false);
+        await TrySendAsync(channel, new Failed(message, reason), ct).ConfigureAwait(false);
         return ExitFailed;
     }
 
