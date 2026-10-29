@@ -31,7 +31,7 @@ public static class UsbEligibility
         var letters = disk.Volumes.Where(v => v.Letter is not null)
             .Select(v => char.ToUpperInvariant(v.Letter!.Value)).ToHashSet();
         var onDisk = sourcePaths
-            .Where(p => p.Length >= 2 && p[1] == ':' && char.IsAsciiLetter(p[0]) && letters.Contains(char.ToUpperInvariant(p[0])))
+            .Where(p => DriveLetterOf(p) is { } l && letters.Contains(l))
             .ToList();
         if (onDisk.Count > 0)
         {
@@ -44,5 +44,33 @@ public static class UsbEligibility
         }
 
         return new(disk, UsbRefusal.None, []);
+    }
+
+    /// <summary>
+    /// The upper-case drive letter a path ends up on, or null for a UNC path. Extended prefixes are stripped and relative
+    /// paths are resolved against the current directory, so no spelling of a path on the stick escapes rule 3.
+    /// </summary>
+    private static char? DriveLetterOf(string path)
+    {
+        var p = path;
+        if (p.StartsWith(@"\\?\", StringComparison.Ordinal) || p.StartsWith(@"\\.\", StringComparison.Ordinal))
+        {
+            p = p[4..];
+            if (p.StartsWith(@"UNC\", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+        }
+
+        try
+        {
+            p = Path.GetFullPath(p);
+        }
+        catch (Exception e) when (e is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            // Keep the raw string.
+        }
+
+        return p.Length >= 2 && p[1] == ':' && char.IsAsciiLetter(p[0]) ? char.ToUpperInvariant(p[0]) : null;
     }
 }

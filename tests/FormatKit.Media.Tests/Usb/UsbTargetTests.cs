@@ -43,6 +43,32 @@ public class UsbTargetTests
         Assert.Equal([path], c.SourcesOnDisk);
     }
 
+    [Theory]
+    [InlineData(@"\\?\E:\win.iso")]
+    [InlineData(@"\\.\E:\profile.json")]
+    [InlineData(@"E:profile.json")]
+    public void Extended_and_drive_relative_paths_on_the_stick_are_refused(string path)
+    {
+        var c = UsbEligibility.Check(Stick(), false, [path], 9 * Gb);
+        Assert.Equal(UsbRefusal.HoldsSourceFiles, c.Refusal);
+        Assert.Equal([path], c.SourcesOnDisk);
+    }
+
+    [Theory]
+    [InlineData(@"profile.json")]
+    [InlineData(@"..\iso\win.iso")]
+    public void Relative_path_resolves_against_the_current_directory(string path)
+    {
+        var cwdLetter = Directory.GetCurrentDirectory()[0];
+        var c = UsbEligibility.Check(Stick(letter: cwdLetter), false, [path], 9 * Gb);
+        Assert.Equal(UsbRefusal.HoldsSourceFiles, c.Refusal);
+        Assert.Equal([path], c.SourcesOnDisk);
+    }
+
+    [Fact]
+    public void Extended_unc_never_matches() =>
+        Assert.Equal(UsbRefusal.None, Refusal(Stick(), sources: [@"\\?\UNC\nas\iso\win.iso"]));
+
     [Fact]
     public void Unc_source_never_matches() =>
         Assert.Equal(UsbRefusal.None, Refusal(Stick(), sources: [@"\\nas\iso\win.iso"]));
