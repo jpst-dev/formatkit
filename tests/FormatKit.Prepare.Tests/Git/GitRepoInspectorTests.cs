@@ -20,7 +20,7 @@ public class GitRepoInspectorTests
     }
 
     [Fact]
-    public void Find_returns_repositories_with_a_git_folder_or_file_and_skips_the_rest()
+    public void Find_returns_repositories_with_a_git_folder_or_file_including_nested_ones_and_skips_the_rest()
     {
         var files = new InMemoryFileSystem();
         files.SeedDirectory(@"C:\Users\joao\src\a\.git", FileAttributes.Directory | FileAttributes.Hidden);
@@ -32,9 +32,9 @@ public class GitRepoInspectorTests
         files.SeedDirectory(@"C:\Users\joao\1\2\3\4\5\deep\.git", FileAttributes.Directory | FileAttributes.Hidden);
         var inspector = new GitRepoInspector(new FakeProcessRunner(), files, Git);
 
-        var found = inspector.Find(@"C:\Users\joao", 5, _ => { });
+        var found = inspector.Find(@"C:\Users\joao", 5, _ => { }, CancellationToken.None);
 
-        Assert.Equal([@"C:\Users\joao\src\a", @"C:\Users\joao\src\b"], found.OrderBy(p => p).ToArray());
+        Assert.Equal([@"C:\Users\joao\src\a", @"C:\Users\joao\src\a\inner", @"C:\Users\joao\src\b"], found.OrderBy(p => p).ToArray());
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class GitRepoInspectorTests
         files.SeedDirectory(@"C:\Users\joao\ok\.git", FileAttributes.Directory | FileAttributes.Hidden);
         var unreadable = new List<string>();
 
-        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"C:\Users\joao", 5, unreadable.Add);
+        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"C:\Users\joao", 5, unreadable.Add, CancellationToken.None);
 
         Assert.Equal([@"C:\Users\joao\ok"], found);
         Assert.Equal([@"C:\Users\joao\locked"], unreadable);
@@ -58,9 +58,61 @@ public class GitRepoInspectorTests
         var files = new InMemoryFileSystem();
         files.SeedDirectory(@"D:\code\app\.git", FileAttributes.Directory | FileAttributes.Hidden);
 
-        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"D:\", 5, _ => { });
+        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"D:\", 5, _ => { }, CancellationToken.None);
 
         Assert.Equal([@"D:\code\app"], found);
+    }
+
+    [Fact]
+    public void Find_keeps_descending_from_a_repository_at_the_root()
+    {
+        // The home-dotfiles idiom: a repository at the profile root must not hide the ones below it.
+        var files = new InMemoryFileSystem();
+        files.SeedDirectory(@"C:\Users\joao\.git", FileAttributes.Directory | FileAttributes.Hidden);
+        files.SeedDirectory(@"C:\Users\joao\src\app\.git", FileAttributes.Directory | FileAttributes.Hidden);
+
+        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"C:\Users\joao", 5, _ => { }, CancellationToken.None);
+
+        Assert.Equal([@"C:\Users\joao", @"C:\Users\joao\src\app"], found.OrderBy(p => p).ToArray());
+    }
+
+    [Fact]
+    public void Find_reports_submodules_and_nested_worktrees_inside_a_repository()
+    {
+        var files = new InMemoryFileSystem();
+        files.SeedDirectory(@"C:\Users\joao\src\app\.git", FileAttributes.Directory | FileAttributes.Hidden);
+        files.Seed(@"C:\Users\joao\src\app\libs\sub\.git", "gitdir: ../../.git/modules/sub");
+        files.Seed(@"C:\Users\joao\src\app\.worktrees\feat\.git", "gitdir: ../../.git/worktrees/feat");
+
+        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"C:\Users\joao", 5, _ => { }, CancellationToken.None);
+
+        Assert.Equal(
+            [@"C:\Users\joao\src\app", @"C:\Users\joao\src\app\.worktrees\feat", @"C:\Users\joao\src\app\libs\sub"],
+            found.OrderBy(p => p, StringComparer.Ordinal).ToArray());
+    }
+
+    [Fact]
+    public void Find_never_walks_into_a_git_folder_even_when_it_is_not_hidden()
+    {
+        var files = new InMemoryFileSystem();
+        files.SeedDirectory(@"C:\Users\joao\app\.git");
+        files.SeedDirectory(@"C:\Users\joao\app\.git\modules\sub\.git");
+
+        var found = new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"C:\Users\joao", 5, _ => { }, CancellationToken.None);
+
+        Assert.Equal([@"C:\Users\joao\app"], found);
+    }
+
+    [Fact]
+    public void Find_stops_when_cancelled()
+    {
+        var files = new InMemoryFileSystem();
+        files.SeedDirectory(@"C:\Users\joao\app\.git", FileAttributes.Directory | FileAttributes.Hidden);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        Assert.Throws<OperationCanceledException>(() =>
+            new GitRepoInspector(new FakeProcessRunner(), files, Git).Find(@"C:\Users\joao", 5, _ => { }, cts.Token));
     }
 
     [Fact]
@@ -75,7 +127,8 @@ public class GitRepoInspectorTests
         Assert.All(runner.Calls, c =>
         {
             Assert.Equal(Git, c.FileName);
-            Assert.Equal(["-C", Repo], c.Arguments.Take(2));
+            // fsmonitor would start a hook or a daemon: a side effect on a read-only command.
+            Assert.Equal(["-C", Repo, "-c", "core.fsmonitor=false"], c.Arguments.Take(4));
             Assert.Equal(FormatKit.Core.Timeouts.Query, c.Timeout);
             Assert.Equal("C", c.Environment!["LC_ALL"]);
             Assert.Equal("0", c.Environment["GIT_TERMINAL_PROMPT"]);
@@ -83,12 +136,15 @@ public class GitRepoInspectorTests
             Assert.DoesNotContain("-v", c.Arguments);
             Assert.DoesNotContain(c.Arguments, a => a.Contains("get-url") || a.Contains("remote."));
         });
-        Assert.Equal(["status", "--porcelain=v2", "--branch"], runner.Calls[0].Arguments.Skip(2));
+        // The user's config must not hide untracked files or submodule changes.
+        Assert.Equal(
+            ["status", "--porcelain=v2", "--branch", "--untracked-files=normal", "--ignore-submodules=none"],
+            runner.Calls[0].Arguments.Skip(4));
         Assert.Equal(
             ["for-each-ref", "--format=%(refname:short)%09%(upstream:short)%09%(upstream:track,nobracket)", "refs/heads"],
-            runner.Calls[1].Arguments.Skip(2));
-        Assert.Equal(["stash", "list"], runner.Calls[2].Arguments.Skip(2));
-        Assert.Equal(["remote"], runner.Calls[3].Arguments.Skip(2));
+            runner.Calls[1].Arguments.Skip(4));
+        Assert.Equal(["stash", "list"], runner.Calls[2].Arguments.Skip(4));
+        Assert.Equal(["remote"], runner.Calls[3].Arguments.Skip(4));
     }
 
     [Fact]
@@ -187,7 +243,7 @@ public class GitRepoInspectorTests
         Assert.False(state.IsSafe);
         Assert.Equal(5, runner.Calls.Count);
         var call = runner.Calls[4];
-        Assert.Equal(["-C", Repo, "for-each-ref", "--contains", "HEAD", "--format=%(refname)", "refs/remotes"], call.Arguments);
+        Assert.Equal(["-C", Repo, "-c", "core.fsmonitor=false", "for-each-ref", "--contains", "HEAD", "--format=%(refname)", "refs/remotes"], call.Arguments);
         Assert.Equal("C", call.Environment!["LC_ALL"]);
         Assert.Equal(FormatKit.Core.Timeouts.Query, call.Timeout);
     }

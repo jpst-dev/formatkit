@@ -85,7 +85,7 @@
   <data name="GitRepos_NoRemote" xml:space="preserve"><value>The repository has no remote.</value></data>
   <data name="GitRepos_Ok_Title_One" xml:space="preserve"><value>{0} repository, all pushed</value></data>
   <data name="GitRepos_Ok_Title_Many" xml:space="preserve"><value>{0} repositories, all pushed</value></data>
-  <data name="GitRepos_Ok_Detail" xml:space="preserve"><value>No uncommitted changes, unpushed commits, stashes or branches without an upstream.</value></data>
+  <data name="GitRepos_Ok_Detail" xml:space="preserve"><value>No uncommitted changes, unpushed commits, stashes or branches without an upstream. Files ignored by Git (such as .env) are not in the remote; copy them if you need them.</value></data>
   <data name="GitRepos_NoGit_Title" xml:space="preserve"><value>Git repositories not checked</value></data>
   <data name="GitRepos_NoGit_Detail_One" xml:space="preserve"><value>Git was not found, so the repository {0} could not be inspected.</value></data>
   <data name="GitRepos_NoGit_Detail_Many" xml:space="preserve"><value>Git was not found, so these repositories could not be inspected: {0}</value></data>

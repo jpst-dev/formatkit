@@ -12,7 +12,7 @@ public sealed class GitInspectionException(string message, bool isDubiousOwnersh
 /// <summary>Finds repositories and reads their state with read-only git queries. Never asks for remote URLs.</summary>
 public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files, string gitExe)
 {
-    private static readonly string[] SkippedFolders = ["AppData", "node_modules"];
+    private static readonly string[] SkippedFolders = [".git", "AppData", "node_modules"];
 
     private static readonly IReadOnlyDictionary<string, string> GitEnvironment = new Dictionary<string, string>
     {
@@ -21,8 +21,11 @@ public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files
         ["GIT_OPTIONAL_LOCKS"] = "0",
     };
 
-    /// <summary>Folders under <paramref name="root"/> (depth 0) holding a <c>.git</c> folder or file; does not look inside a repository it found.</summary>
-    public IReadOnlyList<string> Find(string root, int maxDepth, Action<string> onUnreadable)
+    /// <summary>
+    /// Folders under <paramref name="root"/> (depth 0) holding a <c>.git</c> folder or file. A repository it found is
+    /// still walked (never its <c>.git</c>), so nested repositories, submodules and linked worktrees are reported too.
+    /// </summary>
+    public IReadOnlyList<string> Find(string root, int maxDepth, Action<string> onUnreadable, CancellationToken ct)
     {
         var found = new List<string>();
         Walk(root, 0);
@@ -30,12 +33,10 @@ public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files
 
         void Walk(string dir, int depth)
         {
+            ct.ThrowIfCancellationRequested();
             var git = Path.Combine(dir, ".git");
             if (files.DirectoryExists(git) || files.FileExists(git))
-            {
                 found.Add(dir);
-                return;
-            }
 
             if (depth >= maxDepth)
                 return;
@@ -50,7 +51,7 @@ public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files
 
     public async Task<RepoState> InspectAsync(string repo, CancellationToken ct)
     {
-        var status = await GitAsync(repo, ["status", "--porcelain=v2", "--branch"], ct);
+        var status = await GitAsync(repo, ["status", "--porcelain=v2", "--branch", "--untracked-files=normal", "--ignore-submodules=none"], ct);
         var refs = await GitAsync(repo, ["for-each-ref", "--format=%(refname:short)%09%(upstream:short)%09%(upstream:track,nobracket)", "refs/heads"], ct);
         var stash = await GitAsync(repo, ["stash", "list"], ct);
         var remote = await GitAsync(repo, ["remote"], ct);
@@ -99,7 +100,8 @@ public sealed class GitRepoInspector(IProcessRunner processes, IFileSystem files
 
     private async Task<string> GitAsync(string repo, string[] args, CancellationToken ct)
     {
-        var spec = new ProcessSpec(gitExe, ["-C", repo, .. args], Timeouts.Query, GitEnvironment);
+        // The user's config could start an fsmonitor hook or daemon; a read-only query must not.
+        var spec = new ProcessSpec(gitExe, ["-C", repo, "-c", "core.fsmonitor=false", .. args], Timeouts.Query, GitEnvironment);
         var result = await processes.RunAsync(spec, ct);
         if (result.TimedOut)
             throw new GitInspectionException($"git {args[0]} timed out");

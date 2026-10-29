@@ -22,7 +22,7 @@ public sealed class GitReposCheck : IPrepareCheck
         roots.AddRange(context.Windows.LostVhdxVolumes.Select(v => $@"{char.ToUpperInvariant(v.Letter)}:\"));
 
         var repos = roots
-            .SelectMany(root => scanner.Find(root, MaxDepth, _ => unreadable++))
+            .SelectMany(root => scanner.Find(root, MaxDepth, _ => unreadable++, ct))
             .Where(context.Windows.IsLost)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
@@ -38,7 +38,6 @@ public sealed class GitReposCheck : IPrepareCheck
 
     private async Task<List<PrepareItem>> InspectAllAsync(PrepareContext context, List<string> repos, CancellationToken ct)
     {
-
         var git = context.Services.Tools.Find("git.exe", [context.Env.Expand(@"%ProgramFiles%\Git\cmd\git.exe")]);
         if (git is null)
             return [GitMissing(repos)];

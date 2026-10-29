@@ -89,6 +89,8 @@ public class GitReposCheckTests : IDisposable
 
         Assert.Equal(PrepareStatus.Ok, item.Status);
         Assert.Equal("1 repository, all pushed", item.Title);
+        // Pushed is not everything: ignored files never reach the remote.
+        Assert.Contains("Files ignored by Git (such as .env) are not in the remote", item.Detail);
     }
 
     [Fact]
@@ -301,6 +303,24 @@ public class GitReposCheckTests : IDisposable
 
         Assert.Equal(PrepareStatus.Blocker, item.Status);
         Assert.Contains("HEAD is detached", item.Detail);
+    }
+
+    [Fact]
+    public async Task A_repository_at_the_profile_root_and_one_nested_below_it_are_both_inspected()
+    {
+        var files = new InMemoryFileSystem();
+        Repo(files, @"C:\Users\joao");
+        Repo(files, @"C:\Users\joao\src\app");
+        var runner = new FakeProcessRunner();
+        Clean(runner);
+        Queue(runner, status: "? notes.txt\n");
+
+        var items = await RunAsync(files, runner);
+
+        var blocker = Assert.Single(items, i => i.Status == PrepareStatus.Blocker);
+        Assert.Contains(@"C:\Users\joao\src\app", blocker.Title);
+        Assert.Equal("1 repository, all pushed", Assert.Single(items, i => i.Status == PrepareStatus.Ok).Title);
+        Assert.Equal(8, runner.Calls.Count);
     }
 
     [Fact]
