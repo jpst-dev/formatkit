@@ -1,0 +1,91 @@
+---
+import type { CleanupItem } from '../loaders/cleanup';
+import { labelFor } from '../lib/labels';
+import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+import { siteHref } from '../lib/catalogPaths';
+import { whenToUse } from '../lib/whenToUse';
+import ActionDetails from './ActionDetails.astro';
+
+interface Props {
+  item: CleanupItem;
+  locale?: SiteLocale;
+}
+
+const { item, locale: given } = Astro.props;
+const locale = given ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+const text = pickText(item.text, locale);
+const base = import.meta.env.BASE_URL;
+const when = whenToUse(item, (k) => t(locale, k));
+const scopeKey = item.scope === 'user' ? 'badge.scope.user' : item.scope === 'machine' ? 'badge.scope.machine' : '';
+const badges = [
+  labelFor('level', item.level, labels),
+  labelFor('category', item.category, labels),
+  ...(item.contested ? [t(locale, 'badge.contested')] : []),
+  ...(item.laptopSensitive ? [t(locale, 'badge.laptopSensitive')] : []),
+  ...(item.requiresReboot ? [t(locale, 'badge.reboot')] : []),
+  ...(scopeKey ? [t(locale, scopeKey)] : item.scope ? [item.scope] : []),
+];
+const undoCommand = `formatkit cleanup undo ${item.id}`;
+---
+
+<div class="fk-item">
+  <p class="fk-badges">{badges.map((b) => <span class="fk-badge">{b}</span>)}</p>
+
+  <h2>{t(locale, 'item.what')}</h2>
+  <p>{text.what}</p>
+
+  <h2>{t(locale, 'item.breaks')}</h2>
+  <p>{text.breaks}</p>
+
+  <h2>{t(locale, 'item.when')}</h2>
+  <p>{when.join(' ')}</p>
+  {text.gain && <p>{text.gain}</p>}
+
+  <h2>{t(locale, 'item.evidence')}</h2>
+  {
+    item.evidence ? (
+      <>
+        <p>{item.evidence.level}</p>
+        {item.evidence.sources.length > 0 && (
+          <ul>
+            {item.evidence.sources.map((s) => (
+              <li>
+                <a href={s.url}>{s.title}</a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
+    ) : (
+      <p>{t(locale, 'item.evidence.none')}</p>
+    )
+  }
+
+  <h2>{t(locale, 'item.undo')}</h2>
+  <pre><code>{undoCommand}</code></pre>
+  <p><a href={siteHref(base, locale, 'safety')}>{t(locale, 'item.undo.journal')}</a></p>
+
+  <h2>{t(locale, 'item.technical')}</h2>
+  <details>
+    <summary>{t(locale, 'item.technical.show')}</summary>
+    {item.actions.map((a) => <ActionDetails action={a} />)}
+  </details>
+
+  <p><a href={siteHref(base, locale, 'catalog')}>{t(locale, 'item.back')}</a></p>
+</div>
+
+<style>
+  .fk-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .fk-badge {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 999px;
+    padding: 0 0.6rem;
+    font-size: var(--sl-text-sm);
+  }
+</style>

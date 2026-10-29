@@ -1,0 +1,41 @@
+---
+import type { CleanupAction } from '../loaders/cleanup';
+
+interface Props {
+  action: CleanupAction;
+}
+
+const { action } = Astro.props;
+const { type, ...rest } = action;
+const show = (v: unknown) => (typeof v === 'string' ? v : JSON.stringify(v));
+const rows = [['type', type || '?'], ...Object.entries(rest).map(([k, v]) => [k, show(v)])];
+---
+
+<dl class="fk-action">
+  {
+    rows.map(([k, v]) => (
+      <>
+        <dt>{k}</dt>
+        <dd>
+          <code>{v}</code>
+        </dd>
+      </>
+    ))
+  }
+</dl>
+
+<style>
+  .fk-action {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0 0 1rem;
+  }
+  .fk-action dt {
+    font-weight: 600;
+  }
+  .fk-action dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+</style>

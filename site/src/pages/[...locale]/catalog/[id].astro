@@ -1,0 +1,20 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection } from 'astro:content';
+import CatalogItem from '../../../components/CatalogItem.astro';
+import { pathsFor } from '../../../lib/catalogPaths';
+import { localeFromAstro, pickText } from '../../../lib/text';
+import type { CleanupItem } from '../../../loaders/cleanup';
+
+export async function getStaticPaths() {
+  const items = (await getCollection('cleanup')).map((e) => e.data as CleanupItem);
+  return pathsFor(items);
+}
+
+const { item } = Astro.props;
+const locale = localeFromAstro(Astro.params.locale);
+---
+
+<StarlightPage frontmatter={{ title: pickText(item.text, locale).title }}>
+  <CatalogItem item={item} locale={locale} />
+</StarlightPage>

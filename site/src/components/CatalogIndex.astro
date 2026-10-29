@@ -1,0 +1,70 @@
+---
+import type { CleanupItem } from '../loaders/cleanup';
+import { sortForIndex } from '../loaders/cleanup';
+import { labelFor } from '../lib/labels';
+import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+import { siteHref } from '../lib/catalogPaths';
+
+interface Props {
+  items?: CleanupItem[];
+  locale?: SiteLocale;
+}
+
+const props = Astro.props;
+let items = props.items;
+if (!items) {
+  const { getCollection } = await import('astro:content');
+  items = (await getCollection('cleanup')).map((e) => e.data as CleanupItem);
+}
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+const base = import.meta.env.BASE_URL;
+const groups = [...sortForIndex(items)];
+---
+
+<div class="fk-catalog">
+  {
+    groups.map(([category, list]) => (
+      <section>
+        <h2>{labelFor('category', category, labels)}</h2>
+        <ul>
+          {list.map((i) => {
+            const flags = [
+              labelFor('level', i.level, labels),
+              ...(i.contested ? [t(locale, 'badge.contested')] : []),
+              ...(i.laptopSensitive ? [t(locale, 'badge.laptopSensitive')] : []),
+              ...(i.requiresReboot ? [t(locale, 'badge.reboot')] : []),
+            ];
+            return (
+              <li>
+                <a href={siteHref(base, locale, `catalog/${i.id}`)}>{pickText(i.text, locale).title}</a>
+                {flags.map((f) => <span class="fk-badge">{f}</span>)}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .fk-catalog ul {
+    list-style: none;
+    padding: 0;
+  }
+  .fk-catalog li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+    margin: 0.4rem 0;
+  }
+  .fk-badge {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 999px;
+    padding: 0 0.6rem;
+    font-size: var(--sl-text-sm);
+  }
+</style>
