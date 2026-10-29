@@ -1,8 +1,13 @@
+using System.Security.AccessControl;
+using System.Security.Principal;
+
 namespace FormatKit.App;
 
 /// <summary>
 /// Keeps one window per user session: the first instance owns a named mutex and listens on a named event that
-/// later instances signal before they exit.
+/// later instances signal before they exit. Both objects grant only the current user, so an elevated owner (the
+/// resume task) and an unelevated later start still see each other: the elevated default DACL would admit only
+/// Administrators and SYSTEM.
 /// </summary>
 public sealed class SingleInstance : IDisposable
 {
@@ -22,29 +27,50 @@ public sealed class SingleInstance : IDisposable
     /// <summary>Raised on a background thread when a later instance asks the first one to come forward.</summary>
     public event EventHandler? Activated;
 
-    /// <summary>Returns the owner, or null when another instance already owns <paramref name="name"/>.</summary>
+    /// <summary>
+    /// Returns the owner, or null when another instance already owns <paramref name="name"/>, including one whose
+    /// objects this process may not open.
+    /// </summary>
     public static SingleInstance? TryAcquire(string name)
     {
-        // The event exists before the mutex is taken, so a second start can always signal an owner.
-        var activate = new EventWaitHandle(false, EventResetMode.AutoReset, ActivateName(name));
-        var mutex = new Mutex(initiallyOwned: true, name, out var createdNew);
-        if (!createdNew)
+        var user = CurrentUser();
+        EventWaitHandle? activate = null;
+        try
         {
-            mutex.Dispose();
-            activate.Dispose();
+            // The event exists before the mutex is taken, so a second start can always signal an owner.
+            activate = EventWaitHandleAcl.Create(
+                false, EventResetMode.AutoReset, ActivateName(name), out _, EventSecurity(user));
+            var mutex = MutexAcl.Create(initiallyOwned: true, name, out var createdNew, MutexSecurity(user));
+            if (!createdNew)
+            {
+                mutex.Dispose();
+                activate.Dispose();
+                return null;
+            }
+
+            return new SingleInstance(mutex, activate);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            activate?.Dispose();
             return null;
         }
-
-        return new SingleInstance(mutex, activate);
     }
 
     /// <summary>Asks the instance that owns <paramref name="name"/> to come to the front, if there is one.</summary>
     public static void SignalExisting(string name)
     {
-        if (EventWaitHandle.TryOpenExisting(ActivateName(name), out var handle))
+        try
         {
-            using (handle)
-                handle.Set();
+            if (EventWaitHandle.TryOpenExisting(ActivateName(name), out var handle))
+            {
+                using (handle)
+                    handle.Set();
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // An owner this process may not signal: it stays where it is, and this start still exits quietly.
         }
     }
 
@@ -59,6 +85,29 @@ public sealed class SingleInstance : IDisposable
     }
 
     private static string ActivateName(string name) => name + ".Activate";
+
+    private static SecurityIdentifier CurrentUser()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        return identity.User ?? throw new InvalidOperationException("The current token has no user SID.");
+    }
+
+    private static EventWaitHandleSecurity EventSecurity(SecurityIdentifier user)
+    {
+        var security = new EventWaitHandleSecurity();
+        security.SetOwner(user);
+        security.AddAccessRule(new EventWaitHandleAccessRule(
+            user, EventWaitHandleRights.FullControl, AccessControlType.Allow));
+        return security;
+    }
+
+    private static MutexSecurity MutexSecurity(SecurityIdentifier user)
+    {
+        var security = new MutexSecurity();
+        security.SetOwner(user);
+        security.AddAccessRule(new MutexAccessRule(user, MutexRights.FullControl, AccessControlType.Allow));
+        return security;
+    }
 
     private void Listen()
     {
