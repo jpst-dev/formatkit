@@ -350,6 +350,8 @@ public sealed partial record DevOptions(
         var drivePath = ReadString(el, "path", p, errors, required: true);
         if (drivePath is not null && !IsDriveLetterPath(drivePath, ".vhdx"))
             errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.path", Strings.Get("Validation_VhdxPath")));
+        else if (drivePath is not null && !IsPlainFilePath(drivePath))
+            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{p}.path", Strings.Get("Validation_VhdxPathChars")));
 
         var size = 0;
         if (!el.TryGetProperty("sizeGB", out var sizeEl))
@@ -402,6 +404,21 @@ public sealed partial record DevOptions(
         value.Length > 3
         && char.IsAsciiLetter(value[0]) && value[1] == ':' && (value[2] is '\\' or '/')
         && value.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
+
+    private static readonly char[] ForbiddenPathChars = [.. System.IO.Path.GetInvalidPathChars(), '"', '*', '?', '<', '>', '|'];
+
+    /// <summary>
+    /// False for a path with characters Windows rejects (and PowerShell quoting should never have to cope with),
+    /// or one naming a file straight in a drive root with an empty name before the extension, such as <c>C:\.vhdx</c>.
+    /// </summary>
+    private static bool IsPlainFilePath(string value)
+    {
+        if (value.IndexOfAny(ForbiddenPathChars) >= 0)
+            return false;
+        var lastSeparator = value.LastIndexOfAny(['\\', '/']);
+        var inRoot = lastSeparator == 2; // "X:\" is the only thing before the file name
+        return !(inRoot && string.IsNullOrWhiteSpace(System.IO.Path.GetFileNameWithoutExtension(value[(lastSeparator + 1)..])));
+    }
 
     private static string? TryNormalize(string path)
     {

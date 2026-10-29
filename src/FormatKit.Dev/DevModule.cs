@@ -41,7 +41,6 @@ public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFi
 
         List<IStep> steps = [];
 
-        // The Dev Drive step is added by the task that implements it.
         if (options.Wsl is not null)
             steps.Add(new WslStep(options.Wsl, env ?? DevEnvironment.Current(), time));
         if (options.Git is not null)
@@ -52,6 +51,8 @@ public sealed class DevModule(TimeProvider time, DevEnvironment? env = null, IFi
             steps.Add(new DotfilesStep(options.Dotfiles, env ?? DevEnvironment.Current(), time));
         if (options.Shell is not null)
             steps.Add(new ShellStep(options.Shell, options.Wsl, env ?? DevEnvironment.Current()));
+        if (options.DevDrive is not null)
+            steps.Add(new DevDriveStep(options.DevDrive));
 
         return steps;
     }

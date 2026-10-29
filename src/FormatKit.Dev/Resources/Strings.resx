@@ -50,6 +50,10 @@
   <data name="Validation_OhMyZshNeedsZsh" xml:space="preserve"><value>ohMyZsh requires zsh to be true.</value></data>
   <data name="Validation_Plugin" xml:space="preserve"><value>A plugin must be an Oh My Zsh plugin name (letters, digits, . _ -); the only external plugins allowed are {0}.</value></data>
   <data name="Validation_VhdxPath" xml:space="preserve"><value>The path must be absolute, start with a drive letter and end in .vhdx.</value></data>
+  <data name="Validation_VhdxPathChars" xml:space="preserve"><value>The path has characters Windows does not allow in a path, or names a file directly in a drive root with no name.</value></data>
+  <data name="Detail_LetterInUse" xml:space="preserve"><value>drive {0}: is already in use</value></data>
+  <data name="Detail_LowSpace" xml:space="preserve"><value>{0} GiB free, {1} GiB needed</value></data>
+  <data name="Detail_Kept" xml:space="preserve"><value>kept {0}</value></data>
   <data name="Validation_SizeMin" xml:space="preserve"><value>sizeGB must be at least 50.</value></data>
   <data name="Validation_Letter" xml:space="preserve"><value>The letter must be a single letter other than C.</value></data>
 </root>

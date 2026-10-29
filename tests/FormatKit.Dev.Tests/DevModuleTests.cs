@@ -47,10 +47,11 @@ public class DevModuleTests
         var steps = Module().CreateSteps(Json("""
             { "enabled": true, "dotfiles": { "path": "D:\\d", "files": [ { "from": "x", "to": "%USERPROFILE%\\x" } ] },
               "ssh": {}, "git": { "name": "Joao" }, "wsl": { "user": "joao" },
-              "shell": { "windows": { "ohMyPosh": true } } }
+              "shell": { "windows": { "ohMyPosh": true } },
+              "devDrive": { "path": "C:\\DevDrive\\dev.vhdx", "sizeGB": 100, "letter": "D" } }
             """));
 
-        Assert.Equal(["dev.wsl", "dev.git", "dev.ssh", "dev.dotfiles", "dev.shell"], steps.Select(s => s.Id));
+        Assert.Equal(["dev.wsl", "dev.git", "dev.ssh", "dev.dotfiles", "dev.shell", "dev.devdrive"], steps.Select(s => s.Id));
     }
 
     [Fact]

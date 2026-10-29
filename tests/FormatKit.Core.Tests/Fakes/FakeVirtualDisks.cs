@@ -12,6 +12,9 @@ public sealed class FakeVirtualDisks : IVirtualDisks
     /// <summary>When set, <see cref="CreateDevDriveAsync"/> throws it instead of creating the disk.</summary>
     public Exception? CreateFailure { get; set; }
 
+    /// <summary>When set, <see cref="RegisterRemountTaskAsync"/> throws it instead of registering.</summary>
+    public Exception? RemountFailure { get; set; }
+
     public Task<VirtualDiskState?> GetAsync(string vhdxPath, CancellationToken ct)
     {
         Calls.Add($"Get {vhdxPath}");
@@ -55,6 +58,11 @@ public sealed class FakeVirtualDisks : IVirtualDisks
     public Task RegisterRemountTaskAsync(string vhdxPath, CancellationToken ct)
     {
         Calls.Add($"RegisterRemount {vhdxPath}");
+        if (RemountFailure is not null)
+        {
+            throw RemountFailure;
+        }
+
         return Task.CompletedTask;
     }
 }

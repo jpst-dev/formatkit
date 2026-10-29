@@ -345,6 +345,32 @@ public class DevOptionsTests
     [InlineData("C:d.vhdx")]
     public void DevDrive_path_must_be_vhdx(string path) => AssertError(DriveWith(path), "modules.dev.devDrive.path");
 
+    [Theory]
+    [InlineData(@"C:\.vhdx")]
+    [InlineData(@"C:\ .vhdx")]
+    [InlineData(@"C:/.vhdx")]
+    [InlineData(@"C:\a*b.vhdx")]
+    [InlineData(@"C:\a?b.vhdx")]
+    [InlineData(@"C:\a<b.vhdx")]
+    [InlineData(@"C:\a>b.vhdx")]
+    [InlineData(@"C:\a|b.vhdx")]
+    public void DevDrive_path_rejects_invalid_characters_and_bare_root_file(string path) =>
+        AssertError(DriveWith(path), "modules.dev.devDrive.path");
+
+    /// <summary>The JSON escapes <c>\"</c> and <c>\u0001</c> decode to a quote and a control character.</summary>
+    [Theory]
+    [InlineData(@"\""")]
+    [InlineData(@"\u0001")]
+    public void DevDrive_path_rejects_quote_and_control_characters(string jsonEscape)
+    {
+        var json = Drive($$""" "path": "{{J(@"C:\a")}}{{jsonEscape}}b.vhdx", "sizeGB": 50, "letter": "D" """);
+
+        AssertError(json, "modules.dev.devDrive.path");
+    }
+
+    [Fact]
+    public void DevDrive_name_may_start_with_a_dot_inside_a_folder() => Valid(DriveWith(@"C:\DevDrive\.dev.vhdx"));
+
     [Fact]
     public void DevDrive_vhdx_extension_ignores_case() => Valid(DriveWith(@"c:\DevDrive\DEV.VHDX"));
 
