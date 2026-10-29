@@ -71,7 +71,7 @@ internal static class PrepareCommands
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            context.Env.Log.Warning(ex, "Could not list the volumes; the volume checks report them as not checked");
+            context.Env.Log.Information(ex, "Could not list the volumes; the volume checks report them as not checked");
             return null;
         }
     }
@@ -108,7 +108,7 @@ internal static class PrepareCommands
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException
                                        or ArgumentException or SecurityException)
         {
-            context.Env.Log.Warning(ex, "Could not write the checklist to {Path}", path);
+            context.Env.Log.Information(ex, "Could not write the checklist to {Path}", path);
             o.WriteLine(Strings.Format("Prepare_OutputFailed", path, ex.Message));
             return false;
         }

@@ -26,6 +26,7 @@ public sealed class PrepareCommandsTests : IDisposable
     private readonly FakeModule _disabled = new("off");
     private readonly RecordingCheck _check = new();
     private readonly StringWriter _out = new();
+    private readonly CollectingSink _log = new();
 
     public PrepareCommandsTests()
     {
@@ -48,7 +49,8 @@ public sealed class PrepareCommandsTests : IDisposable
         var services = TestServices.Create(files: _fs, volumes: _volumes);
         var env = new CliEnvironment(
             services, _elevation, new FakeScheduledTasks(), new FakeRebooter(), new FakeReportWriter(),
-            new RunStateStore(_fs, new AppPaths("data")), Serilog.Core.Logger.None, _out, TimeSpan.Zero, TimeSpan.Zero);
+            new RunStateStore(_fs, new AppPaths("data")),
+            new Serilog.LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_log).CreateLogger(), _out, TimeSpan.Zero, TimeSpan.Zero);
         return new CliApp(env, VendorCatalog.LoadEmbedded(), [_enabled, _disabled])
             .RunAsync(["prepare", "check", .. args], CancellationToken.None);
     }
@@ -167,6 +169,8 @@ public sealed class PrepareCommandsTests : IDisposable
         Assert.False(_check.Context!.Windows.VolumesKnown);
         Assert.True(_check.Context.Windows.IsLost(@"C:\x"));
         Assert.Equal(PathLocation.Unknown, _check.Context.Windows.Locate(@"D:\x"));
+        // Warnings reach the console in English; the report already says what was not checked.
+        Assert.DoesNotContain(_log.Events, e => e.Level >= Serilog.Events.LogEventLevel.Warning);
     }
 
     [Fact]
@@ -211,6 +215,8 @@ public sealed class PrepareCommandsTests : IDisposable
         Assert.Equal(ExitCodes.InvalidInput, exit);
         Assert.Contains("Some title", _out.ToString());
         Assert.Contains("Could not write", _out.ToString());
+        // The localized line is the only console message; a warning would repeat it in English.
+        Assert.DoesNotContain(_log.Events, e => e.Level >= Serilog.Events.LogEventLevel.Warning);
     }
 
     [Theory]
@@ -299,5 +305,12 @@ public sealed class PrepareCommandsTests : IDisposable
                 throw Throw;
             return Task.FromResult(Items);
         }
+    }
+
+    private sealed class CollectingSink : Serilog.Core.ILogEventSink
+    {
+        public List<Serilog.Events.LogEvent> Events { get; } = [];
+
+        public void Emit(Serilog.Events.LogEvent logEvent) => Events.Add(logEvent);
     }
 }
