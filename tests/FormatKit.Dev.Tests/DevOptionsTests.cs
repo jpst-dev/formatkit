@@ -262,6 +262,26 @@ public class DevOptionsTests
                 """),
             "modules.dev.dotfiles.files[1].to");
 
+    private static string DotfileTo(string to, string others) =>
+        $$"""{ "enabled": true, "dotfiles": { "path": "D:\\d", "files": [ { "from": "a", "to": "{{J(to)}}" } ] }, {{others}} }""";
+
+    [Theory]
+    [InlineData(@"""git"": { ""name"": ""A"" }", @"%USERPROFILE%\.gitconfig")]
+    [InlineData(@"""ssh"": { }", @"%USERPROFILE%\x\..\.GITCONFIG")]
+    [InlineData(@"""wsl"": { ""user"": ""joao"", ""wslconfig"": { ""memory"": ""8GB"" } }", @"%USERPROFILE%\.wslconfig")]
+    [InlineData(@"""shell"": { ""windows"": { ""ohMyPosh"": true } }", @"%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1")]
+    [InlineData(@"""shell"": { ""windows"": { ""ohMyPosh"": true } }", @"%USERPROFILE%\documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1")]
+    public void Dotfiles_target_owned_by_another_step_rejected(string others, string to) =>
+        AssertError(DotfileTo(to, others), "modules.dev.dotfiles.files[0].to", ProfileErrorCode.InvalidValue);
+
+    [Theory]
+    [InlineData(@"""wsl"": { ""user"": ""joao"" }", @"%USERPROFILE%\.wslconfig")]
+    [InlineData(@"""shell"": { ""windows"": { ""ohMyPosh"": false } }", @"%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1")]
+    [InlineData(@"""git"": { ""name"": ""A"" }", @"%USERPROFILE%\.gitconfig.local")]
+    [InlineData(@"""shell"": { ""windows"": { ""ohMyPosh"": true } }", @"%USERPROFILE%\Documents\PowerShell\dotfiles.ps1")]
+    public void Dotfiles_target_not_owned_is_allowed(string others, string to) =>
+        Valid(DotfileTo(to, others));
+
     [Fact]
     public void Dotfiles_relative_path_resolves_against_profile()
     {

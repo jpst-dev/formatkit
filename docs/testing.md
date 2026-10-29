@@ -416,7 +416,7 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
            "repo": "https://github.com/<you>/<repo>.git",
            "cloneTo": "%USERPROFILE%\\dotfiles",
            "files": [
-             { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1" },
+             { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\dotfiles.ps1" },
              { "from": "git/.gitconfig.local", "to": "%USERPROFILE%\\.gitconfig.local" }
            ]
          },
@@ -433,7 +433,7 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
 3. Before running, create a **differing** target: `Set-Content $env:USERPROFILE\.gitconfig.local "[user]", "name = Old"`.
 4. Run `.\formatkit.exe run --profile dev-shell.json` and accept the UAC prompt.
 
-   **Expected:** `repository: done` (cloned to `%USERPROFILE%\dotfiles`); the differing `.gitconfig.local` is renamed to `.gitconfig.local.formatkit-<yyyyMMdd-HHmmss>.bak` and replaced by the repository's file; the PowerShell profile file is created. In `Dev: terminal`: `zsh`, `Oh My Zsh`, `.zshrc` and `login shell` are done; `font Meslo` is done; the PowerShell profile gets the `# >>> FormatKit oh-my-posh >>>` block. Exit code 0.
+   **Expected:** `repository: done` (cloned to `%USERPROFILE%\dotfiles`); the differing `.gitconfig.local` is renamed to `.gitconfig.local.formatkit-<yyyyMMdd-HHmmss>.bak` and replaced by the repository's file; `%USERPROFILE%\Documents\PowerShell\dotfiles.ps1` is copied. In `Dev: terminal`: `zsh`, `Oh My Zsh`, `.zshrc` and `login shell` are done; `font Meslo` is done; the PowerShell profile gets the `# >>> FormatKit oh-my-posh >>>` block. Exit code 0.
 5. Check:
 
    ```powershell
@@ -444,7 +444,7 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
    ```
 
    **Expected:** the file and its `.bak`; a JSON fragment that updates the Windows PowerShell and PowerShell 7 profiles with `font.face` `MesloLGM Nerd Font`; the passwd line ends in `/usr/bin/zsh` (or `/bin/zsh`); the first `.zshrc` line is `# Managed by FormatKit`, and the file lists the three plugins and `ZSH_THEME="robbyrussell"`.
-6. **By hand:** open a **new** Windows Terminal window (close all existing ones first), start a Windows PowerShell tab and a PowerShell 7 tab. **Expected:** the dotfiles profile message and the Oh My Posh `paradox` prompt appear, and the prompt glyphs render correctly, which means the fragment font (`MesloLGM Nerd Font`) is applied. Look at Settings > Profiles > Windows PowerShell > Appearance to confirm the font face. If the glyphs are boxes, the fragment did not take effect: note it in the issue tracker. Then start the Ubuntu tab: `zsh` with the Oh My Zsh prompt, autosuggestions and syntax highlighting.
+6. **By hand:** open a **new** Windows Terminal window (close all existing ones first), start a Windows PowerShell tab and a PowerShell 7 tab. **Expected:** the Oh My Posh `paradox` prompt appears, and the prompt glyphs render correctly, which means the fragment font (`MesloLGM Nerd Font`) is applied. Look at Settings > Profiles > Windows PowerShell > Appearance to confirm the font face. If the glyphs are boxes, the fragment did not take effect: note it in the issue tracker. Then start the Ubuntu tab: `zsh` with the Oh My Zsh prompt, autosuggestions and syntax highlighting.
 7. Run the profile again. **Expected:** every item is `already in order`, no new `.bak` file, the PowerShell profile has exactly one FormatKit block, `.zshrc` is unchanged, exit code 0.
 8. Blocked scripts check: on a restored state without the `cleanup` line (Windows PowerShell's policy is `Restricted` on a clean Windows), run the profile. **Expected:** the Windows PowerShell profile item is `pending - Restricted`, its next action says to add `developer.ps-execution-policy` to the cleanup include list, and the exit code is 1. With the line back, the item is `already in order` and the exit code is 0.
 9. Keep-user-file check: in the distro replace `.zshrc` with your own (`wsl -d Ubuntu --exec /bin/sh -c "echo '# mine' > /home/joao/.zshrc"`) and run again. **Expected:** `.zshrc` is reported with a warning and kept as is.

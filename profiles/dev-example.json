@@ -31,7 +31,7 @@
         "repo": "https://github.com/joao/dotfiles.git",
         "cloneTo": "%USERPROFILE%\\dotfiles",
         "files": [
-          { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1" },
+          { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\dotfiles.ps1" },
           { "from": "git/.gitconfig.local", "to": "%USERPROFILE%\\.gitconfig.local" }
         ]
       },

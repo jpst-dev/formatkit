@@ -45,6 +45,7 @@
   <data name="Validation_ToInsideProfile" xml:space="preserve"><value>O destino deve ser um caminho absoluto dentro de {0}.</value></data>
   <data name="Validation_NeedsFile" xml:space="preserve"><value>Informe ao menos um arquivo.</value></data>
   <data name="Validation_DuplicateTo" xml:space="preserve"><value>Dois arquivos têm o mesmo destino.</value></data>
+  <data name="Validation_DotfileOwned" xml:space="preserve"><value>A etapa dev &apos;{0}&apos; já grava este arquivo, então um dotfile não pode substituí-lo. Coloque essas configurações no perfil ou escolha outro destino.</value></data>
   <data name="Validation_CloneToAbsolute" xml:space="preserve"><value>A pasta de clone deve ser um caminho local completo (não de rede).</value></data>
   <data name="Validation_RepoCredentials" xml:space="preserve"><value>O endereço do repo não pode conter credenciais; use o Git Credential Manager ou SSH.</value></data>
   <data name="Validation_ShellWslNeedsWsl" xml:space="preserve"><value>shell.wsl exige a subseção wsl.</value></data>

@@ -101,7 +101,7 @@ arguments to `wsl.exe --exec`, so no shell parses them.
     "repo": "https://github.com/joao/dotfiles.git",
     "cloneTo": "%USERPROFILE%\\dotfiles",
     "files": [
-      { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1" },
+      { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\dotfiles.ps1" },
       { "from": "git/.gitconfig.local", "to": "%USERPROFILE%\\.gitconfig.local" }
     ]
   },
@@ -448,3 +448,11 @@ override the sections above where they differ.
   Extensions.
 - **Per-user installs need the user connected:** with the VM user's session
   disconnected, Oh My Posh (MSIX, per user) fails with "no user signed in".
+
+### 12.1 Final review: dotfiles targets
+
+A dotfile `to` cannot be a file another present dev subsection writes
+(validation error at `dotfiles.files[i].to`): `%USERPROFILE%\.gitconfig` with
+`git` or `ssh`, `%USERPROFILE%\.wslconfig` with `wsl.wslconfig`, and both
+`Microsoft.PowerShell_profile.ps1` files with `shell.windows.ohMyPosh`.
+Otherwise the dotfile and the step replace each other on every run.

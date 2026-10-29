@@ -81,8 +81,8 @@ public sealed partial record DevOptions(
         var wsl = ReadWsl(section, path, env, errors);
         var git = ReadGit(section, path, errors);
         var ssh = ReadSsh(section, path, env, errors);
-        var dotfiles = ReadDotfiles(section, path, baseDirectory, env, errors);
         var shell = ReadShell(section, path, section.TryGetProperty("wsl", out _), errors);
+        var dotfiles = ReadDotfiles(section, path, baseDirectory, env, errors, OwnedFiles(env, wsl, git, ssh, shell));
         var devDrive = ReadDevDrive(section, path, errors);
 
         if (errors.Count > 0)
@@ -182,8 +182,30 @@ public sealed partial record DevOptions(
         return safe.Length > 100 ? safe[..100] : safe;
     }
 
+    /// <summary>The files other present subsections write, by full path (ignoring case), with the subsection that owns each.</summary>
+    private static Dictionary<string, string> OwnedFiles(
+        DevEnvironment env, WslOptions? wsl, GitOptions? git, SshOptions? ssh, ShellOptions? shell)
+    {
+        var owned = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (git is not null)
+            owned[System.IO.Path.Combine(env.UserProfile, ".gitconfig")] = "modules.dev.git";
+        if (ssh is not null)
+            owned.TryAdd(System.IO.Path.Combine(env.UserProfile, ".gitconfig"), "modules.dev.ssh");
+        if (wsl?.Config is not null)
+            owned[System.IO.Path.Combine(env.UserProfile, ".wslconfig")] = "modules.dev.wsl.wslconfig";
+        if (shell?.Windows is { OhMyPosh: true })
+        {
+            foreach (var documents in new[] { env.Documents, System.IO.Path.Combine(env.UserProfile, "Documents") })
+            foreach (var folder in new[] { "PowerShell", "WindowsPowerShell" })
+                owned[System.IO.Path.Combine(documents, folder, "Microsoft.PowerShell_profile.ps1")] = "modules.dev.shell.windows.ohMyPosh";
+        }
+
+        return owned;
+    }
+
     private static DotfilesOptions? ReadDotfiles(
-        JsonElement section, string parent, string? baseDirectory, DevEnvironment env, List<ProfileError> errors)
+        JsonElement section, string parent, string? baseDirectory, DevEnvironment env, List<ProfileError> errors,
+        IReadOnlyDictionary<string, string> ownedFiles)
     {
         if (!TryObject(section, "dotfiles", parent, errors, out var el, out var p))
             return null;
@@ -256,6 +278,12 @@ public sealed partial record DevOptions(
                         if (!seenTargets.Add(to))
                         {
                             errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{fp}.to", Strings.Get("Validation_DuplicateTo")));
+                            ok = false;
+                        }
+                        else if (ownedFiles.TryGetValue(to, out var owner))
+                        {
+                            errors.Add(new ProfileError(ProfileErrorCode.InvalidValue, $"{fp}.to",
+                                Strings.Format("Validation_DotfileOwned", owner)));
                             ok = false;
                         }
                     }
