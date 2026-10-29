@@ -14,8 +14,8 @@ const item: CleanupItem = {
   requiresReboot: true,
   laptopSensitive: true,
   text: {
-    en: { title: 'Remove X', what: 'Use <b> & HKLM:\SOFTWARE\X', breaks: 'Nothing & more', gain: 'Frees space' },
-    'pt-BR': { title: 'Remover X', what: 'Usa <b> & HKLM:\SOFTWARE\X', breaks: 'Nada' },
+    en: { title: 'Remove X', what: String.raw`Use <b> & HKLM:\SOFTWARE\X`, breaks: 'Nothing & more', gain: 'Frees space' },
+    'pt-BR': { title: 'Remover X', what: String.raw`Usa <b> & HKLM:\SOFTWARE\X`, breaks: 'Nada' },
   },
   actions: [{ type: 'appx', package: 'P.X', storeId: 'S1' }],
   evidence: null,
@@ -45,7 +45,8 @@ test('en item shows gain and english headings', async () => {
 
 test('catalog text is escaped and backslashes kept', async () => {
   const html = await render(CatalogItem, { item, locale: 'en' });
-  expect(html).toContain('Use &lt;b&gt; &amp; HKLM:\SOFTWARE\X');
+  expect(html).toContain(String.raw`Use &lt;b&gt; &amp; HKLM:\SOFTWARE\X`);
+  expect(html).toContain(String.raw`\SOFTWARE\X`);
   expect(html).not.toContain('<b>');
 });
 

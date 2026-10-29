@@ -12,3 +12,13 @@ test('two paths per item, root locale undefined and en', () => {
   expect(paths.map((p) => p.params)).toContainEqual({ locale: undefined, id: 'apps.clipchamp' });
   expect(paths[0].props.item.id).toBe(paths[0].params.id);
 });
+
+import { siteHref } from '../src/lib/catalogPaths';
+
+test('siteHref keeps the base and has single slashes', () => {
+  expect(siteHref('/formatkit/', 'en', 'catalog/x')).toBe('/formatkit/en/catalog/x/');
+  expect(siteHref('/formatkit/', 'pt-BR', 'catalog/x')).toBe('/formatkit/catalog/x/');
+  expect(siteHref('/formatkit', 'en', 'catalog/x')).toBe('/formatkit/en/catalog/x/');
+  expect(siteHref('/formatkit', 'pt-BR', 'catalog/x')).toBe('/formatkit/catalog/x/');
+  expect(siteHref('/', 'pt-BR', 'catalog/x')).toBe('/catalog/x/');
+});
