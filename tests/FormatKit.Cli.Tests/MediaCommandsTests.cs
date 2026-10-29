@@ -145,6 +145,62 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Empty(_disk.Mounted);
     }
 
+    private void SeedStickRoot()
+    {
+        _fs.SeedDirectory(@"G:\");
+        _fs.Seed(@"G:\System Volume Information\IndexerVolumeGuid", "x");
+        _fs.Seed(@"G:\$RECYCLE.BIN\S-1-5-21\desktop.ini", "x");
+    }
+
+    [Fact]
+    public async Task A_drive_root_holding_only_system_folders_is_accepted_as_output()
+    {
+        // D1: --output E:\ on a freshly formatted stick.
+        SeedStickRoot();
+
+        var exit = await Run("--iso", Iso, "--output", @"G:\");
+
+        Assert.True(exit == ExitCodes.Ok, _out.ToString());
+        Assert.True(_fs.FileExists(@"G:\autounattend.xml"));
+    }
+
+    [Fact]
+    public async Task A_drive_root_holding_any_other_entry_is_refused()
+    {
+        SeedStickRoot();
+        _fs.Seed(@"G:\old.txt", "x");
+
+        var exit = await Run("--iso", Iso, "--output", @"G:\");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains(@"G:\ already holds files", _out.ToString());
+        Assert.Empty(_disk.Mounted);
+    }
+
+    [Fact]
+    public async Task A_drive_root_holding_another_folder_is_refused()
+    {
+        SeedStickRoot();
+        _fs.SeedDirectory(@"G:\photos");
+
+        var exit = await Run("--iso", Iso, "--output", @"G:\");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Empty(_disk.Mounted);
+    }
+
+    [Fact]
+    public async Task A_folder_that_is_not_a_root_holding_system_volume_information_is_refused()
+    {
+        _fs.Seed(Output + @"\System Volume Information\IndexerVolumeGuid", "x");
+
+        var exit = await RunBuild();
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains(@"C:\out already holds files", _out.ToString());
+        Assert.Empty(_disk.Mounted);
+    }
+
     [Fact]
     public async Task Not_enough_free_space_exits_2_dismounts_and_writes_nothing()
     {

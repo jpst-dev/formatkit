@@ -344,8 +344,21 @@ internal static class MediaCommands
             return false;
         if (!files.DirectoryExists(path))
             return true;
-        return !files.EnumerateFileEntries(path, recursive: true).Any() && !files.EnumerateDirectories(path).Any();
+
+        // D1: a freshly formatted stick's root already holds these Windows folders; only at a drive root are they ignored.
+        var full = Path.GetFullPath(path);
+        var isRoot = string.Equals(Path.GetPathRoot(full), full, StringComparison.OrdinalIgnoreCase);
+        bool Counts(string entry) => !isRoot || !RootSystemFolders.Contains(TopLevelName(full, entry));
+
+        return !files.EnumerateFileEntries(path, recursive: true).Any(e => Counts(e.Path))
+            && !files.EnumerateDirectories(path).Any(Counts);
     }
+
+    private static readonly HashSet<string> RootSystemFolders =
+        new(["System Volume Information", "$RECYCLE.BIN"], StringComparer.OrdinalIgnoreCase);
+
+    private static string TopLevelName(string root, string entry) =>
+        Path.GetRelativePath(root, entry).Split(Path.DirectorySeparatorChar, 2)[0];
 
     private static string FormatSize(long bytes) => bytes >= 1L << 30
         ? string.Create(CultureInfo.CurrentCulture, $"{bytes / (double)(1L << 30):0.0} GB")
