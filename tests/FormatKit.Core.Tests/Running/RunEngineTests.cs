@@ -205,6 +205,42 @@ public class RunEngineTests
     }
 
     [Fact]
+    public async Task Step_that_asks_to_run_again_runs_again_after_the_reboot()
+    {
+        var h = new Harness();
+        var a = new FakeStep("a") { CheckResult = false, ExecuteResult = StepResult.RebootAndRunAgain("platform") };
+
+        await h.Engine.RunAsync(Harness.Request(false, a, Work("b")), TestContext.Current.CancellationToken);
+        Assert.True(h.Store.Load().State!.Results["a"].RunAgain);
+
+        h.LastBoot = DateTimeOffset.UtcNow.AddSeconds(1);
+        a.ExecuteResult = StepResult.Success("distro");
+        var summary = await h.Engine.RunAsync(Harness.Request(true, a, Work("b")), TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, a.ExecuteCalls);
+        Assert.Equal(StepOutcome.Succeeded, summary.Steps[0].Outcome);
+        Assert.Equal(["distro"], summary.Steps[0].Messages);
+        Assert.Equal(RunStatus.Completed, summary.Status);
+    }
+
+    [Fact]
+    public async Task Step_runs_again_only_once_so_reboots_cannot_loop()
+    {
+        var h = new Harness();
+        var a = new FakeStep("a") { CheckResult = false, ExecuteResult = StepResult.RebootAndRunAgain("platform") };
+
+        await h.Engine.RunAsync(Harness.Request(false, a), TestContext.Current.CancellationToken);
+        h.LastBoot = DateTimeOffset.UtcNow.AddSeconds(1);
+        await h.Engine.RunAsync(Harness.Request(true, a), TestContext.Current.CancellationToken);
+        h.LastBoot = DateTimeOffset.UtcNow.AddSeconds(2);
+        var summary = await h.Engine.RunAsync(Harness.Request(true, a), TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, a.ExecuteCalls);
+        Assert.Equal(StepOutcome.Succeeded, summary.Steps[0].Outcome);
+        Assert.Equal(RunStatus.Completed, summary.Status);
+    }
+
+    [Fact]
     public async Task Resume_without_a_reboot_keeps_the_step_as_reboot_required()
     {
         var h = new Harness();

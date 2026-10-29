@@ -59,7 +59,10 @@ public sealed class RunEngine(
             progress?.StepStarted(step, i + 1, request.Plan.Count);
             var result = await RunStepAsync(step, request.Context, ct).ConfigureAwait(false);
             progress?.StepFinished(step, result);
-            state.Results[step.Id] = new StepRecord(result.Outcome, DateTimeOffset.UtcNow, result.Messages, result.NextAction);
+            state.Results[step.Id] = new StepRecord(result.Outcome, DateTimeOffset.UtcNow, result.Messages, result.NextAction)
+            {
+                RunAgain = result.RunAgainAfterReboot,
+            };
             store.Save(state);
 
             if (result.Outcome == StepOutcome.Failed && step.IsCritical)
@@ -121,13 +124,24 @@ public sealed class RunEngine(
         }
     }
 
-    /// <summary>A step that asked for a reboot is done once the machine has actually restarted since it finished.</summary>
+    /// <summary>
+    /// A step that asked for a reboot is done once the machine has actually restarted since it finished,
+    /// unless it asked to run again: then it is executed again, once.
+    /// </summary>
     private void MarkRebootedSteps(RunState state)
     {
         var lastBoot = _lastBootTime();
         foreach (var (id, record) in state.Results.ToList())
         {
-            if (record.Outcome == StepOutcome.RebootRequired && record.FinishedAt < lastBoot)
+            if (record.Outcome != StepOutcome.RebootRequired || record.FinishedAt >= lastBoot)
+                continue;
+
+            if (record.RunAgain && !state.RanAgain.Contains(id))
+            {
+                state.Results.Remove(id);
+                state.RanAgain.Add(id);
+            }
+            else
                 state.Results[id] = record with
                 {
                     Outcome = StepOutcome.Succeeded,

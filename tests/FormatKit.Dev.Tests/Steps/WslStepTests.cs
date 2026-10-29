@@ -55,6 +55,7 @@ public class WslStepTests
         var result = await Step().ExecuteAsync(rig.Context(), TestContext.Current.CancellationToken);
 
         Assert.Equal(StepOutcome.RebootRequired, result.Outcome);
+        Assert.True(result.RunAgainAfterReboot);
         Assert.Contains("WSL: " + Strings.Get("Outcome_Done"), result.Messages);
         Assert.Equal(2, rig.Processes.Calls.Count);
     }

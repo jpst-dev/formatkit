@@ -11,7 +11,7 @@ public sealed record DevItem(string Label, DevItemOutcome Outcome, string? NextA
 
 internal static class DevStepResult
 {
-    /// <summary>One message per item; any Pending or Failed item fails the step, otherwise a reboot is reported if asked for.</summary>
+    /// <summary>One message per item; any Pending or Failed item fails the step, otherwise a reboot (after which the step runs again) is reported if asked for.</summary>
     public static StepResult From(IReadOnlyList<DevItem> items, bool reboot = false)
     {
         var messages = items.Select(Message).ToArray();
@@ -26,7 +26,7 @@ internal static class DevStepResult
             return StepResult.Fail(next.Length == 0 ? null : next, messages);
         }
 
-        return reboot ? StepResult.Reboot(messages) : StepResult.Success(messages);
+        return reboot ? StepResult.RebootAndRunAgain(messages) : StepResult.Success(messages);
     }
 
     private static string Message(DevItem item)
