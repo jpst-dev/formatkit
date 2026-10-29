@@ -1,0 +1,28 @@
+---
+title: Instalar o Windows
+description: Iniciar pelo pendrive, instalar o Windows 11 e chegar ao primeiro logon.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Inicie o computador pelo pendrive.** Com o pendrive conectado, ligue o PC e abra o menu de boot (a tecla varia por fabricante; costuma ser F12, F11, F10, F8 ou Esc, e aparece na tela inicial). Escolha o pendrive. Se preferir, entre na configuração da BIOS/UEFI e mude a ordem de boot.
+
+2. **Siga o instalador do Windows.** Escolha o idioma, aceite os termos e, quando perguntar o tipo de instalação, escolha **Personalizada**.
+
+3. **Escolha onde instalar.** Selecione a partição do Windows antigo e apague-a, ou use o espaço não alocado. Os dados dessa partição são perdidos de verdade; confira duas vezes que você salvou tudo.
+
+4. **Espere a instalação.** O computador reinicia algumas vezes. Tire o pendrive quando o instalador pedir o primeiro reinício, para não iniciar pelo pendrive de novo.
+
+5. **Faça a configuração inicial.** Região, teclado, conta e rede. Se o Windows ainda não reconhecer a sua placa de rede, siga assim mesmo: o FormatKit usa o backup de drivers de rede que você fez.
+
+6. **Chegue à área de trabalho** e entre com o seu usuário. Esse é o primeiro logon.
+
+</Steps>
+
+<Aside type="tip">
+Rode o FormatKit com o mesmo usuário que vai usar no dia a dia. Algumas coisas, como o WSL, são registradas por usuário do Windows.
+</Aside>
+
+Próximo passo: [escolher o perfil e rodar o FormatKit](/formatkit/guide/profile/).

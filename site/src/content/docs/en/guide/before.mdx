@@ -1,0 +1,55 @@
+---
+title: Before you format
+description: What to save and check on the old Windows before you reinstall.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Do all of this on the **old** Windows, before you format. After the format, anything that lived only on the Windows drive (`C:`) is gone.
+
+<Steps>
+
+1. **Copy your files somewhere else.** Documents, photos, downloads and any folder of yours on the Windows drive. Use an external drive, another disk or the cloud.
+
+2. **Run the preparation checklist.** It inspects the PC and lists what a reinstall would erase and what you need to save first. It only reads: it copies and exports nothing, never asks for administrator rights and is safe on any PC.
+
+   <Tabs>
+     <TabItem label="Window">
+       Open `FormatKitUI.exe`, go to **Checklist**, optionally pick a profile, and use **Save as Markdown** to keep the result on another drive.
+     </TabItem>
+     <TabItem label="Command line">
+       ```powershell
+       formatkit prepare check
+       formatkit prepare check --profile profiles\my-profile.json --output E:\checklist.md
+       ```
+       With `--profile`, the checklist also checks the files the profile needs after the format. With `--output`, it also writes the result as a Markdown file: write it to **another drive**, not the Windows one.
+     </TabItem>
+   </Tabs>
+
+3. **Fix the items marked Blocker.** A Blocker is something FormatKit can prove would be lost, such as a Git repository with work that was not pushed. Attention items are things only you can confirm, such as saving the BitLocker recovery key.
+
+4. **Export the list of your programs.** This lets you reinstall them later.
+
+   ```powershell
+   formatkit programs export E:\programs.json
+   ```
+
+   Keep the file off the Windows drive.
+
+5. **Save the network drivers.** If the fresh Windows has no driver for your network card, you have no internet to download the rest. This command exports the network drivers that work today.
+
+   ```powershell
+   formatkit drivers backup-network --output E:\network-drivers
+   ```
+
+6. **Write down the licenses the checklist cannot see.** Keys for paid software, accounts, activation codes and anything that exists only in your head or on paper.
+
+</Steps>
+
+<Aside type="caution" title="What the checklist does not cover">
+It looks at the user folders (Desktop, Documents, Pictures, Videos, Music and Downloads), Git repositories, BitLocker, WSL and a few other items. A folder such as `C:\src`, or a folder directly in your user profile, is not inspected: check it yourself.
+</Aside>
+
+The last line of the checklist sums it up. "Safe to format" appears only when there is no Blocker and no Attention item.
+
+Next step: [prepare the USB stick](/formatkit/en/guide/media/).

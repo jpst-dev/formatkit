@@ -1,0 +1,85 @@
+---
+title: Profile and run
+description: Pick or write a profile, preview the plan, run it and follow reboots and resume.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+A **profile** is a small JSON file that says what to set up. FormatKit does not restore an old image: it starts from a fresh Windows and builds the environment from the profile. Every step is logged and can be previewed first with `--dry-run`.
+
+## Minimal example
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "Example",
+  "modules": {
+    "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] }
+  }
+}
+```
+
+This profile only handles drivers. The other modules (cleanup, programs and the dev environment) come in when you add their sections. If you backed up the network drivers, point `networkDriverBackup` at the folder; without it, a run with no internet stops with exit code 3. In JSON, backslashes must be doubled:
+
+```json
+"drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"], "networkDriverBackup": "D:\\netdrivers" }
+```
+
+## Step by step
+
+<Steps>
+
+1. **Download** FormatKit from the [Download page](/formatkit/en/download/). The program is not code-signed, so SmartScreen may warn you; see the [FAQ](/formatkit/en/faq/).
+
+2. **Pick or write the profile.** The example profiles in the repository are a good starting point.
+
+3. **Preview the plan before anything changes.**
+
+   <Tabs>
+     <TabItem label="Window">
+       Open **Run profile**, open your file (or the built-in "Drivers only" profile) and review the plan. Nothing is changed until you confirm.
+     </TabItem>
+     <TabItem label="Command line">
+       ```powershell
+       formatkit run --profile profiles\example.json --dry-run
+       ```
+       With `--dry-run`, the command only prints the plan.
+     </TabItem>
+   </Tabs>
+
+4. **Run it.**
+
+   <Tabs>
+     <TabItem label="Window">
+       Confirm the plan and follow each step, with its result and a **Stop** button. The window asks for administrator rights (UAC) only when the plan has a step that needs them. If the profile file changes after you reviewed it, the run is refused and you review it again.
+     </TabItem>
+     <TabItem label="Command line">
+       ```powershell
+       formatkit run --profile profiles\example.json
+       ```
+     </TabItem>
+   </Tabs>
+
+5. **Follow the reboots.** See the section below.
+
+6. **Read the result.** Exit code 0 means everything worked; 1 means it finished with failures; 4 means a reboot is pending. The run report lists what failed.
+
+</Steps>
+
+## Reboots and resume
+
+- Steps that need administrator rights show a UAC prompt. On the command line, the elevated run opens a **second window** that waits for **Enter** at the end, so you have time to read the result.
+- If a step needs a reboot, FormatKit shows a countdown and creates a scheduled task that resumes the run at the next logon. Pressing **Esc** cancels the countdown; the run is then left to resume at your next logon.
+- After the reboot the run continues by itself. In the window, it continues in the same window. To continue by hand:
+
+  ```powershell
+  formatkit run --resume
+  ```
+
+- If the network is down, the run falls back to the backed-up network driver. A critical failure stops the run.
+
+<Aside type="caution">
+Installing WSL always requires a reboot. Passwords, such as the Linux user's password and the SSH key passphrase, are typed by you in the console; FormatKit never sees them.
+</Aside>
+
+Next step: [after the install](/formatkit/en/guide/after/).

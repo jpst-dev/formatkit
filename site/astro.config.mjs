@@ -17,6 +17,18 @@ export default defineConfig({
       // Pages are added to the sidebar by the task that writes them.
       sidebar: [
         { label: 'Download', translations: { 'pt-BR': 'Baixar' }, slug: 'download' },
+        {
+          label: 'Guide',
+          translations: { 'pt-BR': 'Guia' },
+          items: [
+            { slug: 'guide/before' },
+            { slug: 'guide/media' },
+            { slug: 'guide/install' },
+            { slug: 'guide/profile' },
+            { slug: 'guide/after' },
+          ],
+        },
+        { label: 'FAQ', translations: { 'pt-BR': 'Perguntas frequentes' }, slug: 'faq' },
         { label: 'Changelog', translations: { 'pt-BR': 'Novidades' }, slug: 'changelog' },
       ],
       plugins: [starlightLinksValidator()],

@@ -1,0 +1,43 @@
+---
+title: Depois de instalar
+description: Conferir drivers, ajustar apps padrão e teclado, e diagnosticar o sistema.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Quando a execução termina, ainda há alguns ajustes para fazer.
+
+<Steps>
+
+1. **Procure dispositivos sem driver.**
+
+   ```powershell
+   formatkit drivers scan
+   ```
+
+   Se sobrar algum dispositivo sem driver, rode o plano de drivers de novo ou procure o driver no site do fabricante.
+
+2. **Defina os aplicativos padrão à mão.** Navegador, leitor de PDF, player de vídeo e outros são escolhidos em **Configurações → Aplicativos → Aplicativos padrão**. O Windows não permite que ferramentas definam isso por você.
+
+3. **Ajuste o teclado** (veja abaixo).
+
+4. **Diagnostique o sistema.**
+
+   ```powershell
+   formatkit cleanup check
+   ```
+
+   Ele aponta ajustes que já quebram ou enfraquecem este PC e mostra a correção. Não muda nada e não pede administrador. Termina com código 1 se achar algo em "Breaks Windows features" ou "Security risks", e 0 caso contrário.
+
+</Steps>
+
+## Teclado
+
+- **Teclado físico ABNT** (o brasileiro, com a tecla Ç): use **Português (Brasil ABNT)**.
+- **Teclado americano** digitando em português: use **Estados Unidos-Internacional**.
+
+Para trocar, vá em **Configurações → Hora e idioma → Idioma e região → Português (Brasil) → Opções de idioma → Teclados**.
+
+<Aside type="tip">
+Se algo da limpeza não agradou, `formatkit cleanup undo` desfaz o que o FormatKit aplicou.
+</Aside>

@@ -1,0 +1,28 @@
+---
+title: Install Windows
+description: Boot from the stick, install Windows 11 and reach the first logon.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Boot the computer from the USB stick.** With the stick plugged in, power on the PC and open the boot menu (the key varies by maker; usually F12, F11, F10, F8 or Esc, shown on the first screen). Pick the stick. Alternatively, enter the BIOS/UEFI setup and change the boot order.
+
+2. **Follow the Windows installer.** Choose the language, accept the terms and, when asked for the type of installation, choose **Custom**.
+
+3. **Choose where to install.** Select the old Windows partition and delete it, or use unallocated space. The data on that partition is really lost; double-check that you saved everything.
+
+4. **Wait for the installation.** The computer restarts a few times. Unplug the stick when the installer asks for the first restart, so the PC does not boot from it again.
+
+5. **Do the initial setup.** Region, keyboard, account and network. If Windows does not recognize your network card yet, carry on anyway: FormatKit uses the network driver backup you made.
+
+6. **Reach the desktop** and sign in with your user. That is the first logon.
+
+</Steps>
+
+<Aside type="tip">
+Run FormatKit with the same user you will use every day. Some things, such as WSL, are registered per Windows user.
+</Aside>
+
+Next step: [pick a profile and run FormatKit](/formatkit/en/guide/profile/).

@@ -1,0 +1,43 @@
+---
+title: After the install
+description: Check drivers, set default apps and the keyboard, and diagnose the system.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+When the run finishes, a few things are left to do.
+
+<Steps>
+
+1. **Look for devices without a driver.**
+
+   ```powershell
+   formatkit drivers scan
+   ```
+
+   If a device is still without a driver, run the drivers plan again or look for the driver on the maker's website.
+
+2. **Set default apps by hand.** Browser, PDF reader, video player and the rest are chosen in **Settings → Apps → Default apps**. Windows does not let tools set these for you.
+
+3. **Adjust the keyboard** (see below).
+
+4. **Diagnose the system.**
+
+   ```powershell
+   formatkit cleanup check
+   ```
+
+   It points out tweaks that already break or weaken this PC and shows the fix. It changes nothing and needs no administrator rights. It exits with code 1 if it finds something under "Breaks Windows features" or "Security risks", and 0 otherwise.
+
+</Steps>
+
+## Keyboard
+
+- **Physical ABNT keyboard** (the Brazilian one, with the Ç key): use **Portuguese (Brazil ABNT)**.
+- **US keyboard** typing Portuguese: use **United States-International**.
+
+To change it, go to **Settings → Time & language → Language & region → Portuguese (Brazil) → Language options → Keyboards**.
+
+<Aside type="tip">
+If you do not like something the cleanup did, `formatkit cleanup undo` reverts what FormatKit applied.
+</Aside>

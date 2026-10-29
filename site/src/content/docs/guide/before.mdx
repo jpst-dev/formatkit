@@ -1,0 +1,55 @@
+---
+title: Antes de formatar
+description: O que salvar e conferir no Windows antigo antes de reinstalar.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Faça tudo isto no Windows **antigo**, antes de formatar. Depois da formatação, o que estava só no disco do Windows (`C:`) se perde.
+
+<Steps>
+
+1. **Copie seus arquivos para outro lugar.** Documentos, fotos, downloads e qualquer pasta sua que esteja no disco do Windows. Use um HD externo, outro disco ou a nuvem.
+
+2. **Rode o checklist de preparação.** Ele olha o computador e lista o que a reinstalação apagaria e o que você precisa salvar antes. Ele só lê: não copia nem exporta nada, não pede permissão de administrador e é seguro em qualquer PC.
+
+   <Tabs>
+     <TabItem label="Janela">
+       Abra o `FormatKitUI.exe`, vá em **Checklist**, escolha um perfil (opcional) e use **Salvar como Markdown** para guardar o resultado em outro disco.
+     </TabItem>
+     <TabItem label="Linha de comando">
+       ```powershell
+       formatkit prepare check
+       formatkit prepare check --profile profiles\meu-perfil.json --output E:\checklist.md
+       ```
+       Com `--profile`, o checklist também confere os arquivos de que o perfil precisa depois da formatação. Com `--output`, ele grava o resultado em um arquivo Markdown: grave em **outro disco**, não no do Windows.
+     </TabItem>
+   </Tabs>
+
+3. **Resolva os itens marcados como Bloqueio.** Um Bloqueio é algo que o FormatKit consegue provar que se perderia, como um repositório Git com trabalho que não foi enviado. Os itens de Atenção são coisas que só você pode confirmar, como guardar a chave de recuperação do BitLocker.
+
+4. **Exporte a lista dos seus programas.** Isso permite reinstalá-los depois.
+
+   ```powershell
+   formatkit programs export E:\programas.json
+   ```
+
+   Guarde o arquivo fora do disco do Windows.
+
+5. **Salve os drivers de rede.** Se o Windows novo não tiver driver para a sua placa de rede, você fica sem internet para baixar o resto. Este comando exporta os drivers de rede que funcionam hoje.
+
+   ```powershell
+   formatkit drivers backup-network --output E:\drivers-rede
+   ```
+
+6. **Anote as licenças que o checklist não vê.** Chaves de programas pagos, contas, códigos de ativação e qualquer coisa que só exista na sua cabeça ou em um papel.
+
+</Steps>
+
+<Aside type="caution" title="O que o checklist não cobre">
+Ele olha as pastas do usuário (Desktop, Documentos, Imagens, Vídeos, Músicas e Downloads), os repositórios Git, o BitLocker, o WSL e alguns outros itens. Uma pasta como `C:\src`, ou uma pasta direto no seu perfil de usuário, não é inspecionada: confira você mesmo.
+</Aside>
+
+A última linha do checklist resume tudo. "Seguro para formatar" só aparece quando não há Bloqueio nem Atenção.
+
+Próximo passo: [preparar o pendrive](/formatkit/guide/media/).

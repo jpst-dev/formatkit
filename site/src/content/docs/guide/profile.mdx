@@ -1,0 +1,85 @@
+---
+title: Perfil e execução
+description: Escolher ou escrever um perfil, ver o plano, rodar e acompanhar os reinícios.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Um **perfil** é um arquivo JSON pequeno que diz o que configurar. O FormatKit não restaura uma imagem antiga: ele parte de um Windows novo e monta o ambiente a partir do perfil. Todo passo vai para o log e pode ser visto antes, com `--dry-run`.
+
+## Exemplo mínimo
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "Exemplo",
+  "modules": {
+    "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] }
+  }
+}
+```
+
+Esse perfil só cuida dos drivers. Os outros módulos (limpeza, programas e ambiente de desenvolvimento) entram quando você acrescenta as suas seções. Se você fez o backup dos drivers de rede, indique a pasta em `networkDriverBackup`; sem isso, uma execução sem internet para com o código de saída 3. No JSON, as barras invertidas são duplas:
+
+```json
+"drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"], "networkDriverBackup": "D:\\netdrivers" }
+```
+
+## Passo a passo
+
+<Steps>
+
+1. **Baixe** o FormatKit na [página Baixar](/formatkit/download/). O programa não é assinado, então o SmartScreen pode avisar; veja a [FAQ](/formatkit/faq/).
+
+2. **Escolha ou escreva o perfil.** Os perfis de exemplo do repositório servem de ponto de partida.
+
+3. **Veja o plano antes de mudar qualquer coisa.**
+
+   <Tabs>
+     <TabItem label="Janela">
+       Abra **Executar perfil**, abra o seu arquivo (ou o perfil embutido "Drivers only") e revise o plano. Nada é alterado até você confirmar.
+     </TabItem>
+     <TabItem label="Linha de comando">
+       ```powershell
+       formatkit run --profile profiles\exemplo.json --dry-run
+       ```
+       Com `--dry-run`, o comando só mostra o plano.
+     </TabItem>
+   </Tabs>
+
+4. **Execute.**
+
+   <Tabs>
+     <TabItem label="Janela">
+       Confirme o plano e acompanhe cada passo, com o resultado e um botão **Parar**. A janela só pede permissão de administrador (UAC) quando o plano tem um passo que precisa dela. Se o arquivo do perfil mudar depois da sua revisão, a execução é recusada e você revisa de novo.
+     </TabItem>
+     <TabItem label="Linha de comando">
+       ```powershell
+       formatkit run --profile profiles\exemplo.json
+       ```
+     </TabItem>
+   </Tabs>
+
+5. **Acompanhe os reinícios.** Veja a seção abaixo.
+
+6. **Leia o resultado.** O código de saída 0 significa que tudo deu certo; 1, que terminou com falhas; 4, que falta reiniciar. O relatório da execução lista o que falhou.
+
+</Steps>
+
+## Reinícios e retomada
+
+- Passos que precisam de administrador mostram o aviso do UAC. Na linha de comando, a execução elevada abre uma **segunda janela** que espera você apertar **Enter** no final, para dar tempo de ler o resultado.
+- Se um passo exige reiniciar, o FormatKit mostra uma contagem regressiva e cria uma tarefa agendada que continua a execução no próximo logon. Apertar **Esc** cancela a contagem; a execução fica para continuar no seu próximo logon.
+- Depois do reinício, a execução continua sozinha. Na janela, ela segue na mesma janela. Para continuar à mão:
+
+  ```powershell
+  formatkit run --resume
+  ```
+
+- Se a rede estiver fora, a execução usa o driver de rede do backup. Uma falha crítica interrompe a execução.
+
+<Aside type="caution">
+Instalar o WSL sempre exige um reinício. Senhas, como a do usuário Linux e a frase-senha da chave SSH, são digitadas por você no console; o FormatKit nunca as vê.
+</Aside>
+
+Próximo passo: [depois da instalação](/formatkit/guide/after/).

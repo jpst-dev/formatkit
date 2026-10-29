@@ -1,0 +1,32 @@
+---
+title: Create the installation media
+description: How to make the Windows 11 installation USB stick.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+To reinstall Windows you need an installation USB stick. Today the official way is Microsoft's **Media Creation Tool**.
+
+<Aside type="note" title="Coming soon">
+FormatKit will have its own command to create installation media, but it is not in any published release yet. This page will be updated when it ships.
+</Aside>
+
+## With the Media Creation Tool
+
+<Steps>
+
+1. Get a USB stick of **8 GB or more**. Everything on it will be erased.
+
+2. Open the [official Windows 11 download page](https://www.microsoft.com/software-download/windows11) and download the **Media Creation Tool**, in the "Create Windows 11 Installation Media" section.
+
+3. Run the tool, accept the terms and choose the language and edition (the recommended options usually work).
+
+4. Choose **USB flash drive**, select your stick and wait for it to finish.
+
+5. Keep what you gathered in [Before you format](/formatkit/en/guide/before/) on **another** stick or disk: the network drivers folder, the program list and your profile.
+
+6. Also download `FormatKitUI.exe` (or `formatkit.exe`) from the [Download page](/formatkit/en/download/) and keep it with the files above.
+
+</Steps>
+
+Next step: [install Windows](/formatkit/en/guide/install/).
