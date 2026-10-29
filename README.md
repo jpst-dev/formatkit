@@ -8,7 +8,7 @@ A clean install beats a cloned or "migrated" one. FormatKit does not restore an 
 
 ## Status
 
-Current release: **core + drivers + cleanup + programs**.
+Current release: **core + drivers + cleanup + programs + dev environment**.
 
 Implemented:
 
@@ -16,8 +16,9 @@ Implemented:
 - Drivers module: Windows Update drivers, OEM tool (Dell, HP, Lenovo), GPU driver, leftover-device report, network driver backup.
 - Cleanup module: removes preinstalled apps and applies privacy and performance tweaks by level, with undo and a diagnosis of tweaks that break Windows.
 - Programs module: installs your apps from a built-in catalog, free winget ids, a `winget export` file and direct installers with a mandatory hash check.
+- Dev module: WSL with a distro and user, Git settings, an SSH key and ssh-agent, dotfiles, zsh and Oh My Zsh in WSL, Oh My Posh with a Nerd Font on Windows, and a Dev Drive with package caches. Windows developer settings (Developer Mode, long paths and others) are the `developer` cleanup category.
 
-Planned (not available yet): dev environment, installation media, preparation checklist, WPF UI.
+Planned (not available yet): installation media, preparation checklist, WPF UI.
 
 ## **WARNING: this tool changes your system**
 
@@ -45,6 +46,8 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit programs list [--category <c>] [--verbose]` | Lists the program catalog (`--verbose` adds the description and winget id). |
 | `formatkit programs search <term>` | Runs `winget search` and prints its output as is. Exits 1 when winget finds nothing or is missing. |
 | `formatkit programs export <file>` | Runs `winget export` on this PC and prints how to use the file as `importFile`. |
+| `formatkit dev wsl-user [--profile <file>]` | Creates the WSL Linux user, lets you type its password and makes it the default user. Finishes an item a run left pending. |
+| `formatkit dev ssh-key [--profile <file>]` | Creates the SSH key (you type the passphrase), starts ssh-agent and loads the key. Asks for elevation to set ssh-agent to Automatic. |
 | `--verbose` (global) | Shows detailed logging. |
 
 Output language follows the Windows UI language (English and Brazilian Portuguese).
@@ -140,7 +143,7 @@ formatkit cleanup undo --all
 
 ## Programs
 
-The `programs` module installs your apps through winget. Modules run in this order: drivers, cleanup, programs. `formatkit run --dry-run` lists the programs it would install.
+The `programs` module installs your apps through winget. Modules run in this order: drivers, cleanup, programs, dev. `formatkit run --dry-run` lists the programs it would install.
 
 Items come from four sources. If the same package appears more than once, it is installed once (catalog, then `winget`, then `importFile`; the first wins).
 
@@ -201,6 +204,125 @@ None of the three commands needs elevation.
 
 The catalog only lists official packages with a reliable silent install. It leaves out optimizers and "cleaners", driver updaters, third-party antivirus (Windows Defender is enough), installers that bundle adware and anything that needs a crack. Edge and Windows Terminal ship with Windows 11. Riot Client is not in the catalog because winget has no single package for it; add the game launcher you need as a `winget` or `direct` item. AMD and Intel GPU software stays out for the reason given under Driver sources.
 
+## Dev environment
+
+The `dev` module sets up a development machine after the `programs` module has installed the tools. It never installs programs itself: a missing Git or Oh My Posh fails with a hint to add `development.git` or `development.oh-my-posh` to `programs`. Every subsection is optional (a missing one adds no step) and every step can be run again: what is already in order is reported as such. One failed item does not stop the others.
+
+Steps run in this order: `dev.wsl`, `dev.git`, `dev.ssh`, `dev.dotfiles`, `dev.shell`, `dev.devdrive`. A ready profile is in `profiles/dev-example.json`; preview it with `formatkit run --profile profiles\dev-example.json --dry-run`.
+
+Profile section:
+
+```json
+"dev": {
+  "enabled": true,
+  "wsl": {
+    "distro": "Ubuntu",
+    "user": "joao",
+    "wslconfig": { "memory": "8GB", "processors": 4, "swap": "2GB" }
+  },
+  "git": {
+    "name": "Joao Silva",
+    "email": "joao@example.com",
+    "defaultBranch": "main",
+    "editor": "code --wait",
+    "autocrlf": "input"
+  },
+  "ssh": { "keyType": "ed25519", "comment": "joao@new-pc" },
+  "dotfiles": {
+    "repo": "https://github.com/joao/dotfiles.git",
+    "cloneTo": "%USERPROFILE%\\dotfiles",
+    "files": [
+      { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1" },
+      { "from": "git/.gitconfig.local", "to": "%USERPROFILE%\\.gitconfig.local" }
+    ]
+  },
+  "shell": {
+    "wsl": { "zsh": true, "ohMyZsh": true, "theme": "robbyrussell",
+             "plugins": ["git", "zsh-autosuggestions", "zsh-syntax-highlighting"] },
+    "windows": { "ohMyPosh": true, "theme": "paradox", "font": "Meslo" }
+  },
+  "devDrive": {
+    "path": "C:\\DevDrive\\dev.vhdx",
+    "sizeGB": 100,
+    "letter": "D",
+    "label": "Dev",
+    "caches": ["npm", "nuget", "pip", "cargo"]
+  }
+}
+```
+
+Validation errors carry the JSON path and fail the profile (exit code 2) before anything runs:
+
+- `wsl.distro`: `Ubuntu` (default), `Ubuntu-24.04`, `Ubuntu-22.04` or `Debian`. `wsl.user` is required, matches `^[a-z_][a-z0-9_-]{0,31}$` and is not `root`. In `wslconfig`, `memory` and `swap` look like `8GB` or `512MB` and `processors` is from 1 to the PC's logical processor count.
+- `git`: at least one key. `defaultBranch` matches `^[A-Za-z0-9._/-]+$`; `autocrlf` is `true`, `false` or `input`; `email` contains `@`.
+- `ssh.keyType`: `ed25519` (default) or `rsa` (4096 bits). `comment` defaults to `<user>@<computer name>`.
+- `dotfiles`: exactly one of `repo` (`https://...` or `git@host:path`, no credentials in the address) or `path` (a folder; a relative path is relative to the profile file). `files[].from` is relative with no `..`; `files[].to` must resolve inside your user profile. At least one file.
+- `shell.wsl` requires `wsl`; `ohMyZsh` requires `zsh`. Plugins are Oh My Zsh's own plugin names plus the two external ones, `zsh-autosuggestions` and `zsh-syntax-highlighting`. `shell.windows.font` is a Nerd Font name for `oh-my-posh font install` (default `Meslo`).
+- `devDrive.path` is absolute, ends in `.vhdx` and is on a local fixed drive; `sizeGB` is at least 50; `letter` is not `C`; `caches` items are `npm`, `nuget`, `pip` or `cargo`.
+
+### Suggested shell setup
+
+Copy-ready subsections. In WSL, zsh with Oh My Zsh and the two usual plugins (needs a `wsl` subsection):
+
+```json
+"shell": {
+  "wsl": { "zsh": true, "ohMyZsh": true, "theme": "robbyrussell",
+           "plugins": ["git", "zsh-autosuggestions", "zsh-syntax-highlighting"] }
+}
+```
+
+On Windows, Oh My Posh with the `paradox` theme and the Meslo Nerd Font (add `development.oh-my-posh` to `programs`):
+
+```json
+"shell": {
+  "windows": { "ohMyPosh": true, "theme": "paradox", "font": "Meslo" }
+}
+```
+
+Oh My Posh is installed per user (an MSIX package). FormatKit installs the font, adds a marked block to your PowerShell 7 and Windows PowerShell profiles (only when they do not already call `oh-my-posh init`), and writes a Windows Terminal fragment at `%LOCALAPPDATA%\Microsoft\Windows Terminal\Fragments\FormatKit\formatkit.json` that sets the font (`MesloLGM Nerd Font` for Meslo) on the Windows PowerShell and PowerShell 7 profiles. Your Windows Terminal `settings.json` is never edited. In WSL, a `~/.zshrc` that FormatKit wrote (first line `# Managed by FormatKit`) is rewritten on later runs; one you wrote yourself is never replaced.
+
+### WSL, passwords and reboots
+
+- After the WSL platform is installed a **reboot is always required**; the run resumes after it, like any other reboot.
+- Passwords are typed live in the console: the Linux user's password (`passwd`) and the SSH key passphrase (`ssh-keygen`, `ssh-add`). FormatKit never sees them and never logs them. When nobody can type (input redirected or nobody signed in) the item stays **pending** and its next action names `formatkit dev wsl-user` or `formatkit dev ssh-key`. A pending item makes the step fail, so the run exits with code 1 and the report lists it.
+- WSL is registered per Windows user. Run FormatKit from the account that will use WSL, or the step fails instead of installing for the wrong account.
+- Virtualization must be on in the firmware (and, in a VM, nested virtualization), or WSL 2 cannot start.
+
+### Dotfiles and line endings
+
+Dotfiles are copied, never linked. A target that differs is first renamed to `<target>.formatkit-<yyyyMMdd-HHmmss>.bak`; an identical one is left alone. Files are compared byte by byte as checked out, so a repository that Git checks out with CRLF (`core.autocrlf=true`) differs from an LF copy and is replaced, with a backup, on every run. Keep dotfiles as LF (for example a `.gitattributes` with `* text=auto eol=lf`) or set `git.autocrlf` to `input`. A private repository relies on Git Credential Manager prompting you.
+
+### Dev Drive
+
+`devDrive` creates a dynamic VHDX formatted as a Dev Drive (ReFS) and assigns it the letter. It never resizes partitions, and it needs Windows 11 build 22621.2338 or newer (older builds report "not applicable"). Windows does not re-attach the VHDX after a reboot, so FormatKit registers a SYSTEM scheduled task, `FormatKit-DevDrive`, that mounts it at startup with the same letter. For each cache it creates `<letter>:\packages\<name>` and sets the user variable (`npm_config_cache`, `NUGET_PACKAGES`, `PIP_CACHE_DIR`, `CARGO_HOME`) unless it already points elsewhere; existing cache contents are not moved.
+
+### Developer settings (cleanup category)
+
+Windows developer settings are items of the `developer` cleanup category (`formatkit cleanup list --category developer`). They are never selected by a level; list them in `include`. The `cleanup` module applies them, so they are journaled and `cleanup undo` reverts them.
+
+| Id | Change |
+| --- | --- |
+| `developer.developer-mode` | Developer Mode on. |
+| `developer.long-paths` | Win32 long paths on. |
+| `developer.show-extensions` | Shows file name extensions in Explorer. |
+| `developer.show-hidden` | Shows hidden files in Explorer. |
+| `developer.sudo` | `sudo` for Windows in inline mode (not applicable before Windows 11 24H2, when `sudo.exe` is missing). |
+| `developer.ps-execution-policy` | Windows PowerShell 5.1 execution policy `RemoteSigned`. |
+
+```json
+"cleanup": { "enabled": true, "level": "safe",
+             "include": ["developer.developer-mode", "developer.long-paths"] }
+```
+
+### Finishing pending items
+
+```powershell
+formatkit dev wsl-user --profile profiles\dev-example.json
+formatkit dev ssh-key --profile profiles\dev-example.json
+```
+
+Both read the profile's `dev.wsl` or `dev.ssh` section. Without `--profile` they use `Ubuntu` with your Windows user name in lowercase (exit code 2 if that is not a valid Linux user name) and `ed25519`. They need a console where you can type (exit code 2 otherwise). Exit code 0 means every item is done or already in order, 1 that an item failed or is pending, 2 an invalid profile. Only `dev ssh-key` asks for elevation, to set ssh-agent to Automatic.
+
 ## Building
 
 ```powershell
@@ -217,6 +339,6 @@ Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes an
 
 ## Resumo em português
 
-O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema e instalação de programas (winget, catálogo e instaladores diretos com verificação de hash). Ambiente de desenvolvimento, mídia de instalação, checklist e interface WPF são planejados.
+O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash) e ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive). Mídia de instalação, checklist e interface WPF são planejados.
 
 **Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. Códigos de saída: veja a tabela acima. Licença MIT.
