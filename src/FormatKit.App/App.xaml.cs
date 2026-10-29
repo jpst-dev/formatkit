@@ -3,11 +3,8 @@ using System.Windows.Threading;
 using FormatKit.App.Localization;
 using FormatKit.App.Services;
 using FormatKit.App.ViewModels;
-using FormatKit.Cleanup.Catalog;
-using FormatKit.Cleanup.Diagnosis;
-using FormatKit.Drivers.Catalog;
 using FormatKit.Hosting;
-using FormatKit.Programs.Catalog;
+using FormatKit.Prepare;
 
 namespace FormatKit.App;
 
@@ -51,13 +48,15 @@ public partial class App : Application
         if (e.Args.Length > 0 && arguments.Mode == AppMode.Window)
             _host.Log.Warning("Unrecognized arguments, opening the window: {Arguments}", e.Args);
 
-        var vendors = VendorCatalog.LoadEmbedded();
+        var set = ModuleSet.CreateReal(_host.Services, _host.Log, _host.NetworkRetryDelay, _host.Dev);
+        var runner = new PrepareRunner(_host, set.Modules, PrepareChecks.All, PrepareEnvironment.Current);
         var main = new MainViewModel(
             new HomeViewModel(_host.StateStore),
             new AboutViewModel(_dialogs),
-            new HardwareViewModel(_host.Services, vendors, _host.Log),
-            new CleanupDiagnosisViewModel(_host.Services, KnownIssues.LoadEmbedded(), _host.Log),
-            new CatalogsViewModel(CleanupCatalog.LoadEmbedded(), ProgramCatalog.LoadEmbedded()));
+            new HardwareViewModel(_host.Services, set.Vendors, _host.Log),
+            new CleanupDiagnosisViewModel(_host.Services, set.Issues, _host.Log),
+            new ChecklistViewModel(runner, new ProfileService(set.Modules), _dialogs, _host.Log),
+            new CatalogsViewModel(set.Cleanup, set.Programs));
         if (arguments.Mode == AppMode.Resume)
             main.Navigate(Page.RunProfile);
 

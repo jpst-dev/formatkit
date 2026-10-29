@@ -71,6 +71,17 @@
   <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
   <data name="Diag_Refresh" xml:space="preserve"><value>Check again</value></data>
+  <data name="Checklist_Intro" xml:space="preserve"><value>Checks what a format would erase or break. Pick a profile to also check the files it needs.</value></data>
+  <data name="Checklist_Profile" xml:space="preserve"><value>Profile (optional)</value></data>
+  <data name="Checklist_NoProfile" xml:space="preserve"><value>No profile selected</value></data>
+  <data name="Checklist_Browse" xml:space="preserve"><value>Choose profile...</value></data>
+  <data name="Checklist_Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Checklist_Check" xml:space="preserve"><value>Check</value></data>
+  <data name="Checklist_Save" xml:space="preserve"><value>Save as Markdown...</value></data>
+  <data name="Checklist_ProfileErrors" xml:space="preserve"><value>The profile is not valid:</value></data>
+  <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Warning: {0} is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.</value></data>
+  <data name="Prepare_OutputFailed" xml:space="preserve"><value>Could not write {0}: {1}</value></data>
+  <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist saved to {0}</value></data>
   <data name="Cat_TabCleanup" xml:space="preserve"><value>Cleanup</value></data>
   <data name="Cat_TabPrograms" xml:space="preserve"><value>Programs</value></data>
   <data name="Cat_All" xml:space="preserve"><value>All</value></data>

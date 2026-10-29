@@ -71,6 +71,17 @@
   <data name="Check_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Correção: {0}</value></data>
   <data name="Diag_Refresh" xml:space="preserve"><value>Verificar novamente</value></data>
+  <data name="Checklist_Intro" xml:space="preserve"><value>Verifica o que a formatação apagaria ou quebraria. Escolha um perfil para verificar também os arquivos que ele usa.</value></data>
+  <data name="Checklist_Profile" xml:space="preserve"><value>Perfil (opcional)</value></data>
+  <data name="Checklist_NoProfile" xml:space="preserve"><value>Nenhum perfil selecionado</value></data>
+  <data name="Checklist_Browse" xml:space="preserve"><value>Escolher perfil...</value></data>
+  <data name="Checklist_Clear" xml:space="preserve"><value>Limpar</value></data>
+  <data name="Checklist_Check" xml:space="preserve"><value>Verificar</value></data>
+  <data name="Checklist_Save" xml:space="preserve"><value>Salvar como Markdown...</value></data>
+  <data name="Checklist_ProfileErrors" xml:space="preserve"><value>O perfil não é válido:</value></data>
+  <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Aviso: {0} está em uma unidade que a formatação vai apagar, então o checklist será perdido. Copie-o para outro lugar.</value></data>
+  <data name="Prepare_OutputFailed" xml:space="preserve"><value>Não foi possível gravar {0}: {1}</value></data>
+  <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist salvo em {0}</value></data>
   <data name="Cat_TabCleanup" xml:space="preserve"><value>Limpeza</value></data>
   <data name="Cat_TabPrograms" xml:space="preserve"><value>Programas</value></data>
   <data name="Cat_All" xml:space="preserve"><value>Todos</value></data>

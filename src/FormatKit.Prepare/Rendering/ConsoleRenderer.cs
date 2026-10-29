@@ -12,10 +12,10 @@ public static class ConsoleRenderer
     {
         foreach (var status in report.Items.Select(i => i.Status).Distinct().Order())
         {
-            output.WriteLine(Strings.Get("Status_" + status));
+            output.WriteLine(StatusTitle(status));
             foreach (var group in report.Items.Where(i => i.Status == status).Select(i => i.Group).Distinct().Order())
             {
-                output.WriteLine("  " + Strings.Get("Group_" + group) + ":");
+                output.WriteLine("  " + GroupTitle(group) + ":");
                 foreach (var item in report.Items.Where(i => i.Status == status && i.Group == group))
                 {
                     output.WriteLine("    " + item.Title);
@@ -28,8 +28,12 @@ public static class ConsoleRenderer
         output.WriteLine(Summary(report));
     }
 
+    public static string StatusTitle(PrepareStatus status) => Strings.Get("Status_" + status);
+
+    public static string GroupTitle(PrepareGroup group) => Strings.Get("Group_" + group);
+
     /// <summary>Blockers first; without them, Attention items are named so "safe" never sits under a warning.</summary>
-    internal static string Summary(PrepareReport report)
+    public static string Summary(PrepareReport report)
     {
         var blockers = report.Items.Count(i => i.Status == PrepareStatus.Blocker);
         var attention = report.Items.Count(i => i.Status == PrepareStatus.Attention);

@@ -9,7 +9,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly Dictionary<Page, object> _pages;
 
     public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware,
-        CleanupDiagnosisViewModel diagnosis,
+        CleanupDiagnosisViewModel diagnosis, ChecklistViewModel checklist,
         CatalogsViewModel catalogs)
     {
         _pages = new Dictionary<Page, object>
@@ -18,6 +18,7 @@ public sealed partial class MainViewModel : ObservableObject
             [Page.About] = about,
             [Page.Hardware] = hardware,
             [Page.CleanupDiagnosis] = diagnosis,
+            [Page.Checklist] = checklist,
             [Page.Catalogs] = catalogs,
         };
         foreach (var page in Enum.GetValues<Page>().Where(p => !_pages.ContainsKey(p)))
