@@ -14,6 +14,12 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
     /// <summary>The largest partition created on a stick (32 GB).</summary>
     public const long MaxPartitionBytes = 32L * 1024 * 1024 * 1024;
 
+    /// <summary>One MiB is left free: a partition as large as the whole disk does not fit after the MBR and alignment.</summary>
+    public const long ReservedBytes = 1024 * 1024;
+
+    /// <summary>The size of the partition created on a disk of <paramref name="diskSizeBytes"/>: min(size - 1 MiB, 32 GiB).</summary>
+    public static long UsableBytes(long diskSizeBytes) => Math.Min(diskSizeBytes - ReservedBytes, MaxPartitionBytes);
+
     internal const string ListScript =
         "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; " +
         "$cim = @{}; try { foreach ($c in @(Get-CimInstance -ClassName Win32_DiskDrive -ErrorAction Stop)) { $cim[[int]$c.Index] = $c } } catch { }; " +
@@ -97,7 +103,7 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
             $"$d = $null; try {{ $d = Get-Disk -Number {n} }} catch {{ exit 4 }}; " +
             $"if ($null -eq $d -or [string]$d.UniqueId -ne {id}) {{ exit 4 }}; " +
             // One MiB is left free: a partition as large as the whole disk does not fit after the MBR and alignment.
-            $"$size = [Math]::Min([int64]$d.Size - 1048576, {max}L); " +
+            $"$size = [Math]::Min([int64]$d.Size - {ReservedBytes.ToString(CultureInfo.InvariantCulture)}, {max}L); " +
             // Clear-Disk fails on a disk that was never initialized (RAW), for example one an earlier run already cleared.
             $"if ($d.PartitionStyle -ne 'RAW') {{ Clear-Disk -Number {n} -RemoveData -RemoveOEM -Confirm:$false }}; " +
             $"$d = Get-Disk -Number {n}; " +
