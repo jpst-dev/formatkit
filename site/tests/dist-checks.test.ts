@@ -1,5 +1,4 @@
 import { expect, test } from 'vitest';
-// @ts-expect-error plain ESM module without types
 import * as checks from '../scripts/dist-checks.mjs';
 
 const { checkLocaleParity, findExternalRefs, findUnbasedLinks, commandTokens, findUnknownCommands, assertBuilt } = checks as {

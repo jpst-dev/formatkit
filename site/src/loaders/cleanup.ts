@@ -52,7 +52,7 @@ export function loadCleanup(json: unknown): CleanupItem[] {
   if (typeof doc.schemaVersion === 'number' && doc.schemaVersion > 1) warn('schema.version', String(doc.schemaVersion));
   const seen = new Map<string, string>();
   return doc.items.map((r, order) => {
-    if (typeof r.id !== 'string' || !r.id) throw new Error(`cleanup.json entry #${order} has no id`);
+    if (!r || typeof r !== 'object' || typeof r.id !== 'string' || !r.id) throw new Error(`cleanup.json entry #${order} has no id`);
     const id = r.id;
     const prior = seen.get(id.toLowerCase());
     if (prior !== undefined) {
@@ -71,11 +71,18 @@ export function loadCleanup(json: unknown): CleanupItem[] {
           throw new Error(`cleanup.json: item ${id} has no ${field} in ${lang}`);
         }
       }
-      text[lang] = { ...t, title: t!.title as string, what: t!.what as string, breaks: t!.breaks as string } as ItemText;
+      const { gain, ...rest } = t as Record<string, unknown>;
+      text[lang] = { ...rest, title: t!.title, what: t!.what, breaks: t!.breaks, ...(typeof gain === 'string' ? { gain } : {}) } as ItemText;
     }
-    const actions = (Array.isArray(r.actions) ? r.actions : []) as CleanupAction[];
-    for (const a of actions) {
-      if (!KNOWN_ACTIONS.includes(String(a?.type))) warn('action.unknown', `${id}: ${String(a?.type)}`);
+    const actions: CleanupAction[] = [];
+    for (const a of Array.isArray(r.actions) ? r.actions : []) {
+      if (!a || typeof a !== 'object' || Array.isArray(a)) {
+        warn('action.invalid', id);
+        continue;
+      }
+      const type = typeof a.type === 'string' ? a.type : '';
+      if (!KNOWN_ACTIONS.includes(type)) warn('action.unknown', `${id}: ${type}`);
+      actions.push({ ...a, type });
     }
     return {
       ...r,

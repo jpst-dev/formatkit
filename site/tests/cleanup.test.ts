@@ -77,3 +77,23 @@ test('sortForIndex orders categories and levels', () => {
   expect([...sorted.keys()]).toEqual(['apps', 'windowsSettings']);
   expect(sorted.get('apps')!.map((i) => i.id)).toEqual(['a.1', 'a.2', 'a.3']);
 });
+
+test('malformed actions are tolerated', () => {
+  const [i] = loadCleanup(doc(item({ actions: [null, {}, { type: 5 }, 'x', { type: 'registry' }] })));
+  expect(i.actions).toEqual([{}, {}, { type: 'registry' }].map((a, n) => (n < 2 ? { type: '' } : a)));
+  const w = readWarnings();
+  expect(w).toContainEqual({ code: 'action.invalid', detail: 'a.b' });
+  expect(w).toContainEqual({ code: 'action.unknown', detail: 'a.b: ' });
+});
+
+test('non-object item entry throws the no-id message', () => {
+  expect(() => loadCleanup(doc(null))).toThrow(/entry #0 has no id/);
+  expect(() => loadCleanup(doc('x'))).toThrow(/entry #0 has no id/);
+});
+
+test('non-string gain is dropped', () => {
+  const t = { en: { title: 'T', what: 'W', breaks: 'B', gain: 5 }, 'pt-BR': { title: 'Tp', what: 'Wp', breaks: 'Bp', gain: 'G' } };
+  const [i] = loadCleanup(doc(item({ text: t })));
+  expect('gain' in i.text.en).toBe(false);
+  expect(i.text['pt-BR'].gain).toBe('G');
+});
