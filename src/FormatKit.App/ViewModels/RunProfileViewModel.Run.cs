@@ -124,6 +124,28 @@ public sealed partial class RunProfileViewModel
         return true;
     }
 
+    /// <summary>
+    /// Resumes the interrupted run saved in the run state: the worker reads the profile and the steps from it, so the
+    /// step rows come from its <c>planned</c> message. No confirmation: Resume is its own deliberate action, and the
+    /// scheduled task starts it unattended. Does nothing while a run is going on.
+    /// </summary>
+    public async Task ResumeAsync()
+    {
+        if (IsBusy || IsRunning)
+            return;
+
+        IsBusy = true;
+        try
+        {
+            if (!await StartAndFollowAsync(["run", "--resume"], !Elevation.IsElevated, []))
+                Phase = RunPhase.Choose;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task RunAsync()
     {
         if (!_dialogs.Confirm(Strings.Get("RunProfile_ConfirmTitle"), Strings.Get("RunProfile_ConfirmRun")))
@@ -132,7 +154,11 @@ public sealed partial class RunProfileViewModel
         IsBusy = true;
         try
         {
-            await StartAndFollowAsync();
+            await StartAndFollowAsync(
+                // The worker parses exactly this job (WorkerHost.TryParse).
+                ["run", "--profile", ProfilePath!, "--profile-hash", ReviewedHash!],
+                PlanNeedsAdmin && !Elevation.IsElevated,
+                Plan.Select(r => new StepRow(r.Id, r.Title)));
         }
         finally
         {
@@ -140,12 +166,10 @@ public sealed partial class RunProfileViewModel
         }
     }
 
-    private async Task StartAndFollowAsync()
+    /// <summary>Starts the worker and follows it; false when it did not start (the reason is in <see cref="RunMessage"/>).</summary>
+    private async Task<bool> StartAndFollowAsync(string[] job, bool elevate, IEnumerable<StepRow> initialRows)
     {
         RunMessage = null;
-        // The worker parses exactly this job (WorkerHost.TryParse).
-        string[] job = ["run", "--profile", ProfilePath!, "--profile-hash", ReviewedHash!];
-        var elevate = PlanNeedsAdmin && !Elevation.IsElevated;
         WorkerConnection? connection;
         try
         {
@@ -155,20 +179,21 @@ public sealed partial class RunProfileViewModel
         {
             _env.Log.Error(ex, "Run: the worker could not start");
             RunMessage = Strings.Format("RunProfile_StartFailed", ex.Message);
-            return;
+            return false;
         }
 
         if (connection is null)
         {
             RunMessage = Strings.Get("RunProfile_UacDeclined");
-            return;
+            return false;
         }
 
-        await FollowAsync(connection);
+        await FollowAsync(connection, initialRows);
+        return true;
     }
 
     /// <summary>Reads the worker's messages until the run ends, then shows the result.</summary>
-    private async Task FollowAsync(WorkerConnection connection)
+    private async Task FollowAsync(WorkerConnection connection, IEnumerable<StepRow> initialRows)
     {
         _connection = connection;
         _stopSent = false;
@@ -176,7 +201,7 @@ public sealed partial class RunProfileViewModel
         FinalStatus = null;
         ReportDirectory = null;
         EndedWithoutResult = false;
-        ShowSteps(Plan.Select(r => new StepRow(r.Id, r.Title)));
+        ShowSteps(initialRows);
         IsRunning = true;
         Phase = RunPhase.Running;
 

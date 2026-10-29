@@ -66,12 +66,15 @@ public partial class App : Application
                 new AppSettings(_host.Services.Files, Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatKit", "app.json")),
                 _host));
-        if (arguments.Mode == AppMode.Resume)
-            main.Navigate(Page.RunProfile);
-
         _window = new MainWindow(main);
         _instance.Activated += (_, _) => Dispatcher.BeginInvoke(() => _window.BringToFront());
         _window.Show();
+        if (arguments.Mode == AppMode.Resume)
+        {
+            // Started by the resume scheduled task after a reboot: open on Run profile and continue the run.
+            main.Navigate(Page.RunProfile);
+            _ = main.RunProfile.ResumeAsync();
+        }
     }
 
     /// <summary>

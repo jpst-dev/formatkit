@@ -7,11 +7,13 @@ namespace FormatKit.App.ViewModels;
 public sealed partial class MainViewModel : ObservableObject
 {
     private readonly Dictionary<Page, object> _pages;
+    private readonly HomeViewModel _home;
 
     public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware,
         CleanupDiagnosisViewModel diagnosis, ChecklistViewModel checklist,
         CatalogsViewModel catalogs, RunProfileViewModel runProfile)
     {
+        _home = home;
         _pages = new Dictionary<Page, object>
         {
             [Page.Home] = home,
@@ -28,6 +30,17 @@ public sealed partial class MainViewModel : ObservableObject
         RunProfile = runProfile;
         NavigateCommand = new RelayCommand<Page>(Navigate);
         home.NavigationRequested += Navigate;
+        home.ResumeRequested += () =>
+        {
+            Navigate(Page.RunProfile);
+            _ = runProfile.ResumeAsync();
+        };
+        // Home's banner follows the saved run state when a run ends too (the page is not shown during a run).
+        runProfile.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(RunProfileViewModel.HasInterruptedRun))
+                home.Refresh();
+        };
         NavItems = Enum.GetValues<Page>()
             .Where(p => p != Page.Media || IsMediaAvailable)
             .Select(p => new NavItem(p, Strings.Get($"Nav_{p}")))
@@ -56,6 +69,8 @@ public sealed partial class MainViewModel : ObservableObject
         // A page that queries the system stops its query when the user leaves it, and reads again when it opens.
         if (_pages[oldValue] is QueryPageViewModel left)
             left.Leave();
+        if (newValue == Page.Home)
+            _home.Refresh();
         if (_pages[newValue] is HardwareViewModel hardware)
             hardware.LoadCommand.Execute(null);
         else if (_pages[newValue] is CleanupDiagnosisViewModel diagnosis)

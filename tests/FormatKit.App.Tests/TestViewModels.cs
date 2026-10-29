@@ -17,6 +17,16 @@ internal static class TestViewModels
 {
     public static RunStateStore Store(InMemoryFileSystem files) => new(files, new AppPaths(@"C:\FormatKitTest"));
 
+    public static MainViewModel CreateMain(HomeViewModel home, RunProfileViewModel run) =>
+        new(home,
+            new AboutViewModel(new FakeDialogService()),
+            new HardwareViewModel(TestServices.Create(), VendorCatalog.LoadEmbedded()),
+            new CleanupDiagnosisViewModel(TestServices.Create(), new KnownIssues(1, [])),
+            new ChecklistViewModel(
+                new PrepareRunner(null!, [], () => [], () => null!), new ProfileService([]), new FakeDialogService()),
+            new CatalogsViewModel(new CleanupCatalog(1, []), new ProgramCatalog(1, [])),
+            run);
+
     public static MainViewModel CreateMain(InMemoryFileSystem? files = null)
     {
         files ??= new InMemoryFileSystem();

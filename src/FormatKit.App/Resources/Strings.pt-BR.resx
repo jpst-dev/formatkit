@@ -158,6 +158,7 @@
   <data name="Run_NothingToResume" xml:space="preserve"><value>Não há execução interrompida para retomar.</value></data>
   <data name="Run_StateCorrupt" xml:space="preserve"><value>O estado salvo da execução está ilegível ({0}). Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
   <data name="Run_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde o início da execução, então ela não pode ser retomada. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>Não foi possível usar o perfil registrado para a execução interrompida. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
   <data name="Run_Status_Completed" xml:space="preserve"><value>Execução concluída.</value></data>
   <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Execução concluída com falhas.</value></data>
   <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Execução interrompida por uma falha crítica.</value></data>

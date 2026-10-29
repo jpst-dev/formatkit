@@ -12,6 +12,10 @@
             <!-- Choose -->
             <StackPanel Visibility="{Binding IsChoosing, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock Text="{loc:Loc RunProfile_Intro}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange"
+                        Visibility="{Binding HasRunMessage, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding RunMessage}" TextWrapping="Wrap" />
+                </Border>
                 <Button Content="{loc:Loc RunProfile_Open}" Command="{Binding OpenCommand}"
                         HorizontalAlignment="Left" Padding="24,6" Margin="0,16,0,0" />
                 <StackPanel Margin="0,16,0,0" Visibility="{Binding HasLastProfile, Converter={StaticResource BoolToVisibility}}">

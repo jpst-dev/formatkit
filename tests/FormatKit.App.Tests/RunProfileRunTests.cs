@@ -206,7 +206,7 @@ public sealed class RunProfileRunTests : IDisposable
         [
             "Run_Status_Completed", "Run_Status_CompletedWithFailures", "Run_Status_StoppedOnCriticalFailure",
             "Run_RebootPending", "Run_ResumeNotScheduled", "Run_ProfileChanged", "Run_NothingToResume",
-            "Run_StateCorrupt", "Run_NextAction",
+            "Run_StateCorrupt", "Run_ResumeProfileInvalid", "Run_NextAction",
         ];
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (!File.Exists(Path.Combine(root.FullName, "src", "FormatKit.Cli", "Resources", "Strings.resx")))
