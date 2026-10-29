@@ -4,7 +4,7 @@ namespace FormatKit.Core.SystemAccess;
 
 /// <summary>
 /// Reads image facts with Get-WindowsImage (numeric architecture, version string, language codes), never from dism.exe
-/// text, and splits with Split-WindowsImage.
+/// text, and splits with dism.exe /Split-Image (exit code only).
 /// </summary>
 public sealed class PowerShellWindowsImages(IProcessRunner processes) : IWindowsImages
 {
@@ -65,13 +65,15 @@ public sealed class PowerShellWindowsImages(IProcessRunner processes) : IWindows
 
     public async Task SplitAsync(string wimPath, string swmPath, int partSizeMb, CancellationToken ct)
     {
-        var script = "$ErrorActionPreference = 'Stop'; " +
-            $"Split-WindowsImage -ImagePath {PowerShellText.SingleQuote(wimPath)} " +
-            $"-SplitImagePath {PowerShellText.SingleQuote(swmPath)} -FileSize {partSizeMb} | Out-Null";
+        // Split-WindowsImage opens the source for writing, which a mounted ISO refuses (access denied);
+        // dism.exe /Split-Image reads it read-only. Only the exit code is used, never the text.
+        var arguments = new[]
+        {
+            "/English", "/Split-Image", $"/ImageFile:{wimPath}", $"/SWMFile:{swmPath}",
+            $"/FileSize:{partSizeMb.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
+        };
 
-        var result = await processes.RunAsync(
-            new ProcessSpec("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], Timeouts.Media),
-            ct).ConfigureAwait(false);
+        var result = await processes.RunAsync(new ProcessSpec("dism.exe", arguments, Timeouts.Media), ct).ConfigureAwait(false);
 
         if (result.ExitCode != 0 || result.TimedOut)
         {

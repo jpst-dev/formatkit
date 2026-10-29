@@ -12,6 +12,7 @@ public class PowerShellWindowsImagesTests
     {
         var runner = new FakeProcessRunner();
         runner.Enqueue("powershell.exe", result);
+        runner.Enqueue("dism.exe", result);
         return (new PowerShellWindowsImages(runner), runner);
     }
 
@@ -84,18 +85,20 @@ public class PowerShellWindowsImagesTests
     }
 
     [Fact]
-    public async Task Split_RunsSplitWindowImage()
+    public async Task Split_RunsDismSplitImage()
     {
+        // Split-WindowsImage opens the source for writing and fails with access denied on a mounted ISO
+        // (found while running scenario 26); dism.exe /Split-Image reads it read-only.
         var (images, runner) = Create(Result(0));
 
-        await images.SplitAsync(@"E:\sources\install.wim", @"F:\sources\install.swm", 3800, TestContext.Current.CancellationToken);
+        await images.SplitAsync(@"E:\sources\install.wim", @"F:\my media\sources\install.swm", 3800, TestContext.Current.CancellationToken);
 
-        var script = runner.Calls[0].Arguments[^1];
-        Assert.Contains(@"Split-WindowsImage -ImagePath 'E:\sources\install.wim'", script);
-        Assert.Contains(@"-SplitImagePath 'F:\sources\install.swm'", script);
-        Assert.Contains("-FileSize 3800", script);
-        Assert.DoesNotContain("-CheckIntegrity", script);
-        Assert.Equal(Timeouts.Media, runner.Calls[0].Timeout);
+        var call = runner.Calls[0];
+        Assert.Equal("dism.exe", call.FileName);
+        Assert.Equal(
+            ["/English", "/Split-Image", @"/ImageFile:E:\sources\install.wim", @"/SWMFile:F:\my media\sources\install.swm", "/FileSize:3800"],
+            call.Arguments);
+        Assert.Equal(Timeouts.Media, call.Timeout);
     }
 
     [Fact]
