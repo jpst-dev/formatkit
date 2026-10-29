@@ -41,6 +41,8 @@ jobs:
             artifacts/FormatKitUI.exe
             artifacts/SHA256SUMS.txt
 
+  # Deploys the site from the tag ref. Needs a tag rule `v*` under Settings >
+  # Environments > github-pages > Deployment branches and tags, or the deploy is rejected.
   site:
     needs: release
     uses: ./.github/workflows/pages.yml

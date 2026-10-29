@@ -285,7 +285,9 @@ Each phase is a pull request and can be deployed on its own.
   `src/FormatKit.Programs/Catalog/Data/**`, `.github/workflows/site.yml`,
   `.github/workflows/pages.yml`; runs check and build without deploying.
 - One-time manual step for the user: repository Settings → Pages → Source
-  "GitHub Actions". The plan stops for it.
+  "GitHub Actions". Also Settings → Environments → github-pages → Deployment
+  branches and tags → add a tag rule `v*` (so tagged releases may deploy). The
+  plan stops for it.
 - Custom domain later: set `site` and `base` in `astro.config.mjs`, add
   `site/public/CNAME`, configure DNS. Nothing else depends on the URL.
 
