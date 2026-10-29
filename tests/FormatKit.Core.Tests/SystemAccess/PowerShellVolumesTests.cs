@@ -74,6 +74,17 @@ public class PowerShellVolumesTests
     }
 
     [Fact]
+    public void Script_FallsBackToWin32ForDiskNumber_WithoutLocalizedNames()
+    {
+        var script = PowerShellVolumes.Script;
+
+        Assert.Contains("Win32_LogicalDiskToPartition", script);
+        Assert.Contains("Disk #", script);
+        Assert.DoesNotContain("Antecedent.Name", script);
+        Assert.Contains("[int]$d.BusType -eq 15", script);
+    }
+
+    [Fact]
     public async Task EmptyOutput_IsNoVolumes()
     {
         var volumes = await Create(Result(0, "")).ListAsync(TestContext.Current.CancellationToken);

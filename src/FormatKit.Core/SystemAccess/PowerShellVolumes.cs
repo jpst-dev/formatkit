@@ -5,6 +5,9 @@ namespace FormatKit.Core.SystemAccess;
 /// <summary>
 /// Lists fixed volumes with a letter, their disk, BitLocker state and backing VHDX. Read-only. BitLocker is read as the
 /// numeric shell property System.Volume.BitLockerProtection, so no display text (language dependent) is parsed.
+/// The disk number falls back to Win32_LogicalDiskToPartition (DeviceID "Disk #N", not localized) when the Storage
+/// provider is broken. Known limitation: the backing VHDX comes from Get-Disk (BusType 15 = File Backed Virtual), so
+/// on a PC with a broken Storage provider the VHDX is not detected.
 /// </summary>
 public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
 {
@@ -15,8 +18,9 @@ public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
         "$items = @(Get-Volume | Where-Object { $_.DriveType -eq 'Fixed' -and $_.DriveLetter } | ForEach-Object { " +
         "$l = [string]$_.DriveLetter; " +
         "$disk = $null; try { $disk = (Get-Partition -DriveLetter $l -ErrorAction Stop | Select-Object -First 1).DiskNumber } catch { $disk = $null }; " +
+        "if ($null -eq $disk) { try { $m = Get-CimInstance -ClassName Win32_LogicalDiskToPartition -ErrorAction Stop | Where-Object { $_.Dependent.DeviceID -eq ($l + ':') } | Select-Object -First 1; if ($m -and $m.Antecedent.DeviceID -match 'Disk #(\\d+)') { $disk = [int]$Matches[1] } } catch { $disk = $null } }; " +
         "$bl = $null; try { $bl = $shell.NameSpace($l + ':').Self.ExtendedProperty('System.Volume.BitLockerProtection') } catch { $bl = $null }; " +
-        "$vhdx = $null; try { $d = Get-Disk -Number $disk -ErrorAction Stop; if ($d.BusType -eq 'File Backed Virtual') { $vhdx = $d.Location } } catch { $vhdx = $null }; " +
+        "$vhdx = $null; try { $d = Get-Disk -Number $disk -ErrorAction Stop; if ([int]$d.BusType -eq 15) { $vhdx = $d.Location } } catch { $vhdx = $null }; " +
         "$rec = $null; if ($elevated) { try { $v = Get-CimInstance -Namespace 'root\\cimv2\\Security\\MicrosoftVolumeEncryption' -ClassName Win32_EncryptableVolume -Filter (\"DriveLetter='\" + $l + \":'\") -ErrorAction Stop; " +
         "$kp = Invoke-CimMethod -InputObject $v -MethodName GetKeyProtectors -Arguments @{ KeyProtectorType = 3 } -ErrorAction Stop; $rec = (@($kp.VolumeKeyProtectorID).Count -gt 0) } catch { $rec = $null } }; " +
         "[pscustomobject]@{ Letter = $l; Disk = $disk; BitLocker = $bl; Vhdx = $vhdx; Recovery = $rec } }); " +
