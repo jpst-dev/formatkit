@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>FormatKit</AssemblyName>
+    <RootNamespace>FormatKit.App</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained Condition="'$(_IsPublishing)' == 'true'">true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
+    <ProjectReference Include="..\FormatKit.Hosting\FormatKit.Hosting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.App.Tests" />
+  </ItemGroup>
+</Project>
