@@ -516,3 +516,5 @@ Portuguese UI, 1024x768).
   centered, clamped to the work area.
 - **V4 (admin badge):** the plan badge read "admin"; it now uses the CLI's
   dry-run word ("administrator" / "administrador").
+- **V5 (resume rows):** on `run --resume` the rows of steps done before the stop or reboot stayed "Pending"; the `planned` message now carries each such step's earlier outcome (`doneBefore`) and the window shows it with "Done before the stop or reboot." (VM scenario 4, 2026-10-29).
+- **V6 (profile changed):** the worker's hash refusal landed on the result page with every row Pending and a Resume offer; it now returns to the review with the message so the user can Reload (VM scenario 6, 2026-10-29).
