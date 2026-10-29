@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Prepare.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+    <InternalsVisibleTo Include="formatkit" />
+  </ItemGroup>
+</Project>
