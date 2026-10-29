@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:FormatKit.App.ViewModels"
         xmlns:views="clr-namespace:FormatKit.App.Views"
-        Title="FormatKit" Width="1000" Height="650" MinWidth="720" MinHeight="480">
+        Title="FormatKit" Width="1000" Height="650" MinWidth="720" MinHeight="480"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:HomeViewModel}"><views:HomePage /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:AboutViewModel}"><views:AboutPage /></DataTemplate>

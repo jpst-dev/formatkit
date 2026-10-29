@@ -11,6 +11,10 @@ public partial class MainWindow : Window
     public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        // A 1000x650 window does not fit a 1024x768 screen with the taskbar; CenterScreen then keeps it whole.
+        var size = WindowPlacement.Fit(new Size(Width, Height), SystemParameters.WorkArea, new Size(MinWidth, MinHeight));
+        Width = size.Width;
+        Height = size.Height;
         DataContext = viewModel;
         _closeGuard = new CloseGuard(() => viewModel.RunProfile.IsRunning, viewModel.RunProfile.ConfirmCloseAsync);
     }
