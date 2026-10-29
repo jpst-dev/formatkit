@@ -285,3 +285,59 @@ The input classes most likely to bite users that unit tests can miss:
    user.
 5. Volumes without a letter, removable drives reported as fixed, and BitLocker
    states during encryption or suspension.
+
+## Found while running
+
+VM run of scenarios 17-22 on 2026-10-29 (Windows 11 build 26100, Brazilian
+Portuguese UI, virtual TPM, data disk attached as `D:`). All six pass after the
+fixes below.
+
+- **17 (clean VM, no profile):** every user folder was reported as holding
+  files: Windows puts a hidden system `desktop.ini` in each one. A hidden
+  system file named `desktop.ini` no longer counts (a visible one still does).
+  `C:` showed "BitLocker not checked": Windows 11 device encryption had
+  encrypted it with no protectors ("waiting for activation"), which the shell
+  property reports as `8`, a value the mapping did not know. `8` is now read
+  like a suspended volume (encrypted with a clear key). After both fixes: exit
+  0, the user folders under Ok, `C:` encrypted under Ok, and the summary names
+  the Attention items (activation, `defaultuser0`, Edge, program list, network
+  drivers).
+- **18 (Git):** passed as written. Ahead and dirty repositories are Blockers,
+  all pushed gives "2 repositories, all pushed", a repository without a remote
+  and a nested repository (`app-a\vendor\lib`) are Blockers, and a repository
+  at the profile root with `status.showUntrackedFiles=no` is a Blocker while the
+  repositories below it are still listed (decision C1 and I2 of the final
+  review confirmed). `remote.git` never appears, not even with `--verbose`.
+- **19 (profile inputs):** passed as written (with `D:` for `F:`). Inputs on
+  `C:` are three Blockers naming their JSON paths, inputs off `C:` are Ok, a
+  backup folder without `.inf` is a Blocker, `schemaVersion` 9 exits 2.
+- **20 (BitLocker on the data disk):** covered (the VM has a vTPM). The data
+  disk was already "waiting for activation" from device encryption, so the
+  check showed it as encrypted before the scenario began; adding the recovery
+  password protector left protection off until `Resume-BitLocker`. Not
+  elevated (a limited-token scheduled task on the user's desktop): Attention
+  plus "recovery key not checked", no UAC prompt. Elevated: the Not checked
+  item is gone; with the protector deleted the action gives the `-add`
+  command. The recovery password never appears. Exit 0 throughout. The
+  scenario's `IsInRole('Administrator')` check always prints `False` (no such
+  group); `docs/testing.md` now uses `WindowsBuiltInRole::Administrator`.
+- **21 (WSL):** passed. With no WSL there is no item; with Ubuntu installed
+  (`wsl --install` through `job`, no profile) the Attention item gives the
+  `wsl --export` command, from the user's desktop and from `vm.ps1 run` alike.
+- **22 (`--output`):** the file, the overwrite, the warning for a path on `C:`
+  and exit 2 for `Z:\nope` and for an invalid character all behave as
+  written, in Portuguese. A failed write printed its localized message and
+  then the same failure as an English log warning (the console log sink shows
+  warnings); the two prepare log calls are now Information, so they stay in
+  the log file and `--verbose`.
+
+Left as they are:
+
+- A volume that is suspended or "waiting for activation" opens without its key
+  after a reinstall, yet it gets the same Attention text as a protected one
+  ("D: will not open without the recovery key"). The advice is still safe.
+- In the Markdown file an item's detail and action lines are indented
+  continuation lines, so a Markdown viewer joins them with the title into one
+  paragraph (the text is complete; only the line breaks are lost).
+- `vm.ps1 restore` sometimes drops the first `copy` ("Hyper-V socket target
+  process ended"); waiting and copying again works.

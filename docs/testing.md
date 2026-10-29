@@ -512,7 +512,11 @@ Needs scenario 13 done on the same VM (WSL with the user) plus Git and Oh My Pos
 .\tools\vm\vm.ps1 copy -File artifacts\formatkit.exe
 ```
 
-`vm.ps1 run` shows the exit code only if you ask for it, so end each command with `; "exit=$LASTEXITCODE"`. The VM blocks `.ps1` files (execution policy): a script copied into it runs as `& ([scriptblock]::Create((Get-Content C:\fk\x.ps1 -Raw)))`. Scenario 18 needs Git (through winget) and internet access. Scenarios 19, 20 and 22 use the extra data disk `F:`, which restoring `clean` detaches: attach the data VHDX to the VM again (`Add-VMHardDiskDrive` on the host) and check that `F:` is online (`Get-Volume -DriveLetter F`).
+`vm.ps1 run` shows the exit code only if you ask for it, so end each command with `; "exit=$LASTEXITCODE"`. The VM blocks `.ps1` files (execution policy): a script copied into it runs as `& ([scriptblock]::Create((Get-Content C:\fk\x.ps1 -Raw)))`. Scenario 18 needs Git (through winget) and internet access. Scenarios 19, 20 and 22 use the extra data disk `F:`, which restoring `clean` detaches: attach the data VHDX to the VM again (`Add-VMHardDiskDrive` on the host) and check that it is online (`Get-Partition | Select DiskNumber, DriveLetter`). These scenarios call it `F:`; it can come back with another letter (in the 2026-10-29 run it was `D:`), so use the letter it got. The data VHDX is not part of the checkpoint: what a scenario does to it (BitLocker, files) stays for the next one.
+
+To check whether a PowerShell session is elevated, use `([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)`; `IsInRole('Administrator')` (a group name that does not exist) always prints `False`.
+
+Last run in a VM (2026-10-29, Windows 11 build 26100, Brazilian Portuguese UI, virtual TPM): scenarios 17-22 passed after these fixes, each found by these scenarios: the hidden `desktop.ini` in every user folder no longer counts as the user's files, device encryption "waiting for activation" is read as encrypted instead of not checked, and a failed `--output` (or volume listing) no longer repeats its message as an English log warning.
 
 Record what the scenarios find in the "Found while running" section of the [preparation checklist spec](superpowers/specs/2026-10-29-preparation-checklist-design.md).
 
@@ -525,7 +529,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
    .\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check; "exit=$LASTEXITCODE"'
    ```
 
-**Expected:** exit code **0** and the last line `No blockers. Review the N items marked Attention before formatting.` (N is the number of Attention items listed). There is no Blocker. Group headings end with `:` and the items are indented below them. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: usually the user folders (empty or not on the Windows drive; a folder on `C:` that holds files is an Attention item). No Git, WSL or key item appears. Nothing in the output holds a product key.
+**Expected:** exit code **0** and the last line `No blockers. Review the N items marked Attention before formatting.` (N is the number of Attention items listed). There is no Blocker. Group headings end with `:` and the items are indented below them. Under Attention: `The list of installed programs has not been exported` (`formatkit programs export E:\programs.json`) and `The network drivers have not been backed up` (`formatkit drivers backup-network --output E:\netdrivers`); possibly also the account `defaultuser0` left by the unattended install (`data.other-users`), a Windows activation item (the VM is usually not activated) and a browser item if Edge was ever started. Under Ok: usually the user folders (empty or not on the Windows drive; a folder on `C:` that holds files is an Attention item; the hidden `desktop.ini` Windows puts in each one does not count), and `C: (Windows) is encrypted with BitLocker` when device encryption is on (the VM's `C:` usually is, even "waiting for activation"). No Git, WSL or key item appears. Nothing in the output holds a product key.
 
 ## 18. Prepare: Git repositories with unpushed work
 
@@ -594,7 +598,9 @@ Record what the scenarios find in the "Found while running" section of the [prep
    Enable-BitLocker -MountPoint F: -RecoveryPasswordProtector -UsedSpaceOnly -SkipHardwareTest
    ```
 
-3. **Not elevated.** In the VM console open a normal (not "Run as administrator") PowerShell and run `C:\fk\formatkit.exe prepare check`. To be sure it is not elevated: `([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')` must print `False`.
+   If Windows device encryption already encrypted the disk ("waiting for activation", no protectors), adding the protector leaves `ProtectionStatus` `Off`; run `Resume-BitLocker -MountPoint F:` to turn it on.
+
+3. **Not elevated.** In the VM console open a normal (not "Run as administrator") PowerShell and run `C:\fk\formatkit.exe prepare check`. To be sure it is not elevated: `([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)` must print `False`. (Without going to the console: a `vm.ps1 job` script can register a scheduled task for the signed-in user with `New-ScheduledTaskPrincipal -LogonType Interactive -RunLevel Limited` that runs the check with its output redirected to a file.)
 
    **Expected:** under Attention `F: is encrypted with BitLocker`, with the action to save the recovery key (`aka.ms/myrecoverykey` or `manage-bde -protectors -get F:`); under Not checked `Recovery key of F: not checked`, with the action `manage-bde -protectors -get F:`. No UAC prompt appears. The recovery password never appears in the output.
 4. **Elevated.** Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check; "exit=$LASTEXITCODE"'` (confirm with the `IsInRole` line that the session prints `True`).
@@ -604,7 +610,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
 ## 21. Prepare: WSL distribution
 
 1. Restore the **`nested`** checkpoint (`.\tools\vm\vm.ps1 nested`), copy `formatkit.exe`, and install one distro by running scenario 13 up to step 5. Keep the user signed in and connected.
-2. WSL is registered per user, so run the check on that user's desktop: create `prepare-wsl.ps1` on the host (in the repo working directory; `job -File` takes a host path and copies it into the VM) with `C:\fk\formatkit.exe prepare check *> C:\fk\prepare.txt; "exit=$LASTEXITCODE" | Add-Content C:\fk\prepare.txt` and run `.\tools\vm\vm.ps1 job -File prepare-wsl.ps1`, then read `C:\fk\prepare.txt`. (Running the command in a console of the signed-in user works too.)
+2. WSL is registered per user, so run the check on that user's desktop: create `prepare-wsl.ps1` on the host (in the repo working directory; `job -File` takes a host path and copies it into the VM) with `C:\fk\formatkit.exe prepare check *> C:\fk\prepare.txt; "exit=$LASTEXITCODE" | Add-Content C:\fk\prepare.txt` and run `.\tools\vm\vm.ps1 job -File prepare-wsl.ps1`, then read `C:\fk\prepare.txt`. (Running the command in a console of the signed-in user works too. On the 2026-10-29 run `vm.ps1 run`, which uses the same account, also listed the distro; the job is the safe default.) To make the distro without scenario 13's profile and its live `passwd`, run `wsl --install --no-distribution` through `job`, restart the VM, then `wsl --install Ubuntu --no-launch` through `job`.
 
    **Expected:** under Attention (group Developer) `The WSL distribution Ubuntu will be erased` with the action `Export it with wsl --export Ubuntu E:\Ubuntu.tar ...`. Docker's own distros are never listed. Exit code **0**. On the plain `clean` checkpoint (no WSL) there is no WSL item.
 
@@ -621,7 +627,7 @@ Record what the scenarios find in the "Found while running" section of the [prep
 3. Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe prepare check --output C:\fk\c.md; "exit=$LASTEXITCODE"'`.
 
    **Expected:** the console prints `Warning: C:\fk\c.md is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.` and the file is written anyway. Then run it with `--output Z:\nope\c.md` (a drive that does not exist): the report is printed first, then `Could not write ...`, and the exit code is **2**.
-4. Switch the VM display language to Brazilian Portuguese and repeat step 2. **Expected:** the console and the Markdown file are in Portuguese.
+4. Switch the VM display language to Brazilian Portuguese (skip if it already is, as the test VM made from a Portuguese ISO) and repeat step 2. **Expected:** the console and the Markdown file are in Portuguese.
 
 ## Hardware-only checklist (cannot be verified in a VM)
 
