@@ -1,6 +1,6 @@
 # FormatKit
 
-FormatKit is a Windows command-line tool (.NET 10, a single `formatkit.exe`) that automates the tedious part of a clean Windows reinstall: after you format and install Windows, it detects your hardware and gets the machine to a fully working state with minimal clicking.
+FormatKit is a Windows tool (.NET 10: a command-line `formatkit.exe` and a graphical `FormatKitUI.exe`) that automates the tedious part of a clean Windows reinstall: after you format and install Windows, it detects your hardware and gets the machine to a fully working state with minimal clicking.
 
 ## Philosophy
 
@@ -120,7 +120,7 @@ The window runs without administrator rights. It asks for UAC only when you star
 | Run profile | Open a profile (or the built-in "Drivers only"), review the plan, confirm, then follow each step with a **Stop** button, the result and a reboot countdown. A run resumes in this same window after a reboot. |
 | Hardware | The detected hardware, as `formatkit hardware`. |
 | Cleanup diagnosis | `cleanup check`: tweaks that break or weaken this PC, with the fix. |
-| Catalogs | The cleanup, programs and dev catalogs. |
+| Catalogs | The cleanup and programs catalogs. |
 | About | Version, repository, **Open log folder** and the CLI-only commands. |
 
 Profiles are opened and shown, not edited. The window runs the profile you reviewed: if the file changes before the run starts, it is refused and you review it again. Installation media is not in the window yet.
