@@ -2,12 +2,14 @@ using FormatKit.Core.SystemAccess;
 
 namespace FormatKit.Media.Usb;
 
-public enum UsbRefusal { None, NotUsb, BootOrSystem, HardDisk, HoldsSourceFiles, TooSmall }
+public enum UsbRefusal { None, NotUsb, BootOrSystem, HardDisk, HoldsSourceFiles, TooSmall, NoUniqueId }
 
 /// <summary>A disk with the verdict of the stick rules; <see cref="SourcesOnDisk"/> lists the paths that sit on it.</summary>
 public sealed record UsbCandidate(DiskInfo Disk, UsbRefusal Refusal, IReadOnlyList<string> SourcesOnDisk);
 
-/// <summary>Rules 1-4 of spec section 5.2, applied in order; the first failing rule is the refusal.</summary>
+/// <summary>
+/// Rules 1-4 of spec section 5.2, applied in order, then a disk without a UniqueId; the first failing rule is the refusal.
+/// </summary>
 public static class UsbEligibility
 {
     public static UsbCandidate Check(DiskInfo disk, bool allowHardDisk, IReadOnlyList<string> sourcePaths, long requiredBytes)
@@ -41,6 +43,12 @@ public static class UsbEligibility
         if (PowerShellDisks.UsableBytes(disk.SizeBytes) < requiredBytes)
         {
             return new(disk, UsbRefusal.TooSmall, []);
+        }
+
+        // Without a UniqueId the check after the confirmation cannot tell a swapped stick from the chosen one.
+        if (string.IsNullOrWhiteSpace(disk.UniqueId))
+        {
+            return new(disk, UsbRefusal.NoUniqueId, []);
         }
 
         return new(disk, UsbRefusal.None, []);

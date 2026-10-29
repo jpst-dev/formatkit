@@ -83,6 +83,26 @@ public class UsbTargetTests
         Assert.Equal(UsbRefusal.TooSmall, Refusal(Stick(size: 64 * Gb), required: 40 * Gb));
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Disk_without_a_unique_id_is_refused(string id) =>
+        Assert.Equal(UsbRefusal.NoUniqueId, Refusal(Stick(id: id)));
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task Confirmed_disk_without_a_unique_id_is_never_prepared(string id)
+    {
+        // Without an id the swap check cannot tell two sticks apart: refuse even a candidate that claims no refusal.
+        var fake = new FakeDisks(Stick(id: id));
+        var target = new UsbTarget(fake);
+        var confirmed = new UsbCandidate(Stick(id: id), UsbRefusal.None, []);
+
+        await Assert.ThrowsAsync<DiskChangedException>(() => target.PrepareAsync(confirmed, false, NoSources, 9 * Gb, TestContext.Current.CancellationToken));
+        Assert.Empty(fake.Prepared);
+    }
+
     [Fact]
     public async Task Unchanged_disk_is_prepared()
     {

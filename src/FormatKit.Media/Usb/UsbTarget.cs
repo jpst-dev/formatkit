@@ -18,6 +18,12 @@ public sealed class UsbTarget(IDisks disks)
     {
         var number = confirmed.Disk.Number;
         var uniqueId = confirmed.Disk.UniqueId;
+        if (string.IsNullOrWhiteSpace(uniqueId))
+        {
+            // The swap check below compares ids: a blank one would match any other blank disk.
+            throw new DiskChangedException($"Disk {number} has no UniqueId to check against.");
+        }
+
         var again = (await ListAsync(allowHardDisk, sourcePaths, requiredBytes, ct)).FirstOrDefault(c => c.Disk.Number == number);
         if (again is null)
         {

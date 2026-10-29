@@ -449,6 +449,21 @@ public sealed class MediaCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task Usb_refuses_a_disk_without_a_unique_id_before_the_prompt()
+    {
+        _disks.Disks.Add(Stick(uniqueId: " "));
+
+        var exit = await RunUsb(["3"], "--disk", "3");
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        Assert.Contains("Disk 3 cannot be used", _out.ToString());
+        Assert.Contains("cannot be told apart", _out.ToString());
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal(0, _readLineCalls);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
+    [Fact]
     public async Task Usb_with_an_unknown_disk_number_exits_2()
     {
         _disks.Disks.Add(Stick());

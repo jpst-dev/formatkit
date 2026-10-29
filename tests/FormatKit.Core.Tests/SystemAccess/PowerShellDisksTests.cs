@@ -118,7 +118,8 @@ public class PowerShellDisksTests
         var steps = new[]
         {
             "Get-Disk -Number 3",
-            "-ne 'ab''cd') { exit 4 }",
+            "[string]::IsNullOrWhiteSpace([string]$d.UniqueId)",
+            "-cne 'ab''cd') { exit 4 }",
             "if ($d.PartitionStyle -ne 'RAW') { Clear-Disk -Number 3 -RemoveData -RemoveOEM -Confirm:$false }",
             "if ($d.PartitionStyle -eq 'RAW')",
             "Initialize-Disk -Number 3 -PartitionStyle MBR",
@@ -137,6 +138,21 @@ public class PowerShellDisksTests
         Assert.Contains("$ProgressPreference = 'SilentlyContinue'", script);
         Assert.Equal(Timeouts.Media, runner.Calls[0].Timeout);
         Assert.Single(runner.Calls);
+    }
+
+    [Fact]
+    public async Task Prepare_ScriptExits4WhenTheDiskHasNoUniqueId()
+    {
+        // An empty id on both sides would match: the script must refuse it before any destructive cmdlet.
+        var (disks, runner) = Create(Result(0, "F\r\n"));
+
+        await disks.PrepareUsbAsync(3, "", TestContext.Current.CancellationToken);
+
+        var script = Script(runner);
+        var guard = script.IndexOf("if ($null -eq $d -or [string]::IsNullOrWhiteSpace([string]$d.UniqueId) -or", StringComparison.Ordinal);
+        Assert.True(guard >= 0, script);
+        Assert.True(guard < script.IndexOf("Clear-Disk", StringComparison.Ordinal), script);
+        Assert.True(guard < script.IndexOf("Initialize-Disk", StringComparison.Ordinal), script);
     }
 
     [Fact]

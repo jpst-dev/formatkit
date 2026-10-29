@@ -184,6 +184,7 @@
   <data name="Media_UsbRefusal_HardDisk" xml:space="preserve"><value>é um HD externo (use --allow-hard-disk para permitir).</value></data>
   <data name="Media_UsbRefusal_HoldsSourceFiles" xml:space="preserve"><value>ele guarda arquivos que a mídia precisa ({0}). Copie-os para outra unidade primeiro.</value></data>
   <data name="Media_UsbRefusal_TooSmall" xml:space="preserve"><value>ele é pequeno demais para a mídia.</value></data>
+  <data name="Media_UsbRefusal_NoUniqueId" xml:space="preserve"><value>o Windows não informa um ID único dele, então ele não pode ser diferenciado de outro pendrive conectado depois. Tente outro pendrive ou outra porta USB.</value></data>
   <data name="Media_UsbEraseWarning" xml:space="preserve"><value>TUDO nele será apagado.</value></data>
   <data name="Media_UsbIsHardDisk" xml:space="preserve"><value>Este é um HD externo.</value></data>
   <data name="Media_UsbTypeNumber" xml:space="preserve"><value>Digite o número do disco ({0}) para apagá-lo e gravar a mídia. Qualquer outra coisa cancela: </value></data>

@@ -101,7 +101,8 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
         return
             "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; " +
             $"$d = $null; try {{ $d = Get-Disk -Number {n} }} catch {{ exit 4 }}; " +
-            $"if ($null -eq $d -or [string]$d.UniqueId -ne {id}) {{ exit 4 }}; " +
+            // A blank id would match a blank argument and defeat the swap check; -cne compares case-sensitively.
+            $"if ($null -eq $d -or [string]::IsNullOrWhiteSpace([string]$d.UniqueId) -or [string]$d.UniqueId -cne {id}) {{ exit 4 }}; " +
             // One MiB is left free: a partition as large as the whole disk does not fit after the MBR and alignment.
             $"$size = [Math]::Min([int64]$d.Size - {ReservedBytes.ToString(CultureInfo.InvariantCulture)}, {max}L); " +
             // Clear-Disk fails on a disk that was never initialized (RAW), for example one an earlier run already cleared.

@@ -184,6 +184,7 @@
   <data name="Media_UsbRefusal_HardDisk" xml:space="preserve"><value>it is an external hard disk (use --allow-hard-disk to allow it).</value></data>
   <data name="Media_UsbRefusal_HoldsSourceFiles" xml:space="preserve"><value>it holds files the media needs ({0}). Copy them to another drive first.</value></data>
   <data name="Media_UsbRefusal_TooSmall" xml:space="preserve"><value>it is too small for the media.</value></data>
+  <data name="Media_UsbRefusal_NoUniqueId" xml:space="preserve"><value>Windows reports no unique ID for it, so it cannot be told apart from another stick plugged in later. Try another USB stick or port.</value></data>
   <data name="Media_UsbEraseWarning" xml:space="preserve"><value>EVERYTHING on it will be erased.</value></data>
   <data name="Media_UsbIsHardDisk" xml:space="preserve"><value>This is an external hard disk.</value></data>
   <data name="Media_UsbTypeNumber" xml:space="preserve"><value>Type the disk number ({0}) to erase it and write the media. Anything else cancels: </value></data>
