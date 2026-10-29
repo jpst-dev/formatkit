@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\FormatKit.Cleanup\FormatKit.Cleanup.csproj" />
     <ProjectReference Include="..\..\src\FormatKit.Drivers\FormatKit.Drivers.csproj" />
     <ProjectReference Include="..\..\src\FormatKit.Programs\FormatKit.Programs.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Dev\FormatKit.Dev.csproj" />
     <ProjectReference Include="..\..\src\FormatKit.Cli\FormatKit.Cli.csproj" />
   </ItemGroup>
   <ItemGroup>

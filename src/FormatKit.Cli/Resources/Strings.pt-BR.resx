@@ -127,4 +127,11 @@
   <data name="Programs_ExportFailed" xml:space="preserve"><value>O winget não conseguiu exportar os programas (código de saída {0}).</value></data>
   <data name="Programs_ExportDone" xml:space="preserve"><value>Programas instalados exportados para {0}</value></data>
   <data name="Programs_ExportUsage" xml:space="preserve"><value>Para instalá-los em um Windows novo, adicione isto aos módulos do perfil:</value></data>
+  <data name="Cmd_Dev" xml:space="preserve"><value>Comandos do ambiente de desenvolvimento.</value></data>
+  <data name="Cmd_DevWslUser" xml:space="preserve"><value>Cria o usuário Linux do WSL, define a senha (digitada aqui) e o torna o padrão.</value></data>
+  <data name="Cmd_DevSshKey" xml:space="preserve"><value>Cria a chave SSH (frase secreta digitada aqui), inicia o ssh-agent e carrega a chave.</value></data>
+  <data name="Dev_Redirected" xml:space="preserve"><value>Este comando precisa de um console onde você possa digitar; a entrada está redirecionada ou ninguém está conectado.</value></data>
+  <data name="Dev_UserNameUnusable" xml:space="preserve"><value>O nome de usuário do Windows '{0}' não é um nome de usuário Linux válido. Passe --profile com dev.wsl.user.</value></data>
+  <data name="Dev_ProfileSection" xml:space="preserve"><value>A seção dev do perfil tem {0} problema(s):</value></data>
+  <data name="Dev_NextAction" xml:space="preserve"><value>próximo passo: {0}</value></data>
 </root>

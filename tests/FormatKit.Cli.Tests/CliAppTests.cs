@@ -9,6 +9,7 @@ using FormatKit.Core.Profiles;
 using FormatKit.Core.Running;
 using FormatKit.Core.Steps;
 using FormatKit.Core.Tests.Fakes;
+using FormatKit.Dev;
 using FormatKit.Drivers;
 using FormatKit.Drivers.Catalog;
 using FormatKit.Programs;
@@ -580,6 +581,25 @@ public sealed class CliAppTests : IDisposable
         var steps = programs.CreateSteps(section);
         Assert.NotEmpty(steps);
         Assert.All(steps, step => Assert.StartsWith("programs", step.Id, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Dev_example_profile_is_valid()
+    {
+        var dev = new DevModule(TimeProvider.System, DevEnvironment.Current() with { LogicalProcessors = 16 }, _fs);
+        var loader = new ProfileLoader(
+        [
+            new CleanupModule(CleanupCatalog.LoadEmbedded(), _paths, _fs),
+            new ProgramsModule(ProgramCatalog.LoadEmbedded(), _paths, _fs),
+            dev,
+        ]);
+
+        var result = loader.Load(ProfilePath("dev-example.json"));
+
+        Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
+        var profile = result.Value!.Profile;
+        var steps = dev.CreateSteps(profile.Modules["dev"], profile.BaseDirectory);
+        Assert.Equal(["dev.wsl", "dev.git", "dev.ssh", "dev.dotfiles", "dev.shell", "dev.devdrive"], steps.Select(st => st.Id));
     }
 
     [Fact]

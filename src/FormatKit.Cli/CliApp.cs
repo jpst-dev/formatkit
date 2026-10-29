@@ -6,6 +6,7 @@ using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Core;
 using FormatKit.Core.Profiles;
+using FormatKit.Dev;
 using FormatKit.Drivers;
 using FormatKit.Drivers.Catalog;
 using FormatKit.Programs;
@@ -45,6 +46,7 @@ public sealed class CliApp
             new DriversModule(catalog, env.NetworkRetryDelay),
             new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files, env.Log),
             new ProgramsModule(_programs, AppPaths.Default, env.Services.Files, env.Log),
+            new DevModule(TimeProvider.System, env.Dev, files: env.Services.Files),
         ];
     }
 
@@ -86,6 +88,7 @@ public sealed class CliApp
         root.Subcommands.Add(DriversCommands.Create(context));
         root.Subcommands.Add(CleanupCommands.Create(context));
         root.Subcommands.Add(ProgramsCommands.Create(context));
+        root.Subcommands.Add(DevCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
 
         var parse = root.Parse(args);

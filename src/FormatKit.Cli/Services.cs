@@ -20,7 +20,8 @@ public sealed record CliEnvironment(
     TextWriter Out,
     TimeSpan RebootCountdown,
     TimeSpan NetworkRetryDelay,
-    string? SimulateRebootAfterStep = null);
+    string? SimulateRebootAfterStep = null,
+    FormatKit.Dev.DevEnvironment? Dev = null);
 
 /// <summary>The composition root: the only place that builds real adapters.</summary>
 public static class Services

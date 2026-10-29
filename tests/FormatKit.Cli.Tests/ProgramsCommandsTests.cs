@@ -174,9 +174,9 @@ public sealed class ProgramsCommandsTests : IDisposable
     }
 
     [Fact]
-    public void Default_modules_order_is_drivers_cleanup_programs()
+    public void Default_modules_order_is_drivers_cleanup_programs_dev()
     {
-        Assert.Equal(["drivers", "cleanup", "programs"], App().Modules.Select(m => m.Name));
+        Assert.Equal(["drivers", "cleanup", "programs", "dev"], App().Modules.Select(m => m.Name));
     }
 
     [Fact]

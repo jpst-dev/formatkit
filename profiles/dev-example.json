@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "name": "Dev environment example",
+  "modules": {
+    "programs": {
+      "enabled": true,
+      "acceptAgreements": true,
+      "catalog": ["development.git", "development.vscode", "development.oh-my-posh"]
+    },
+    "cleanup": {
+      "enabled": true,
+      "level": "safe",
+      "include": ["developer.developer-mode", "developer.long-paths", "developer.show-extensions"]
+    },
+    "dev": {
+      "enabled": true,
+      "wsl": {
+        "distro": "Ubuntu",
+        "user": "joao",
+        "wslconfig": { "memory": "8GB", "processors": 4, "swap": "2GB" }
+      },
+      "git": {
+        "name": "Joao Silva",
+        "email": "joao@example.com",
+        "defaultBranch": "main",
+        "editor": "code --wait",
+        "autocrlf": "input"
+      },
+      "ssh": { "keyType": "ed25519", "comment": "joao@new-pc" },
+      "dotfiles": {
+        "repo": "https://github.com/joao/dotfiles.git",
+        "cloneTo": "%USERPROFILE%\\dotfiles",
+        "files": [
+          { "from": "powershell/profile.ps1", "to": "%USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1" },
+          { "from": "git/.gitconfig.local", "to": "%USERPROFILE%\\.gitconfig.local" }
+        ]
+      },
+      "shell": {
+        "wsl": {
+          "zsh": true,
+          "ohMyZsh": true,
+          "theme": "robbyrussell",
+          "plugins": ["git", "zsh-autosuggestions", "zsh-syntax-highlighting"]
+        },
+        "windows": { "ohMyPosh": true, "theme": "paradox", "font": "Meslo" }
+      },
+      "devDrive": {
+        "path": "C:\\DevDrive\\dev.vhdx",
+        "sizeGB": 100,
+        "letter": "D",
+        "label": "Dev",
+        "caches": ["npm", "nuget", "pip", "cargo"]
+      }
+    }
+  }
+}

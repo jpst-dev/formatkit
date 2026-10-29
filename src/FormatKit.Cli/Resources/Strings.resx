@@ -127,4 +127,11 @@
   <data name="Programs_ExportFailed" xml:space="preserve"><value>winget could not export the programs (exit code {0}).</value></data>
   <data name="Programs_ExportDone" xml:space="preserve"><value>Exported the installed programs to {0}</value></data>
   <data name="Programs_ExportUsage" xml:space="preserve"><value>To install them on a fresh Windows, add this to the profile's modules:</value></data>
+  <data name="Cmd_Dev" xml:space="preserve"><value>Dev environment commands.</value></data>
+  <data name="Cmd_DevWslUser" xml:space="preserve"><value>Create the WSL Linux user, set its password (typed here) and make it the default.</value></data>
+  <data name="Cmd_DevSshKey" xml:space="preserve"><value>Create the SSH key (passphrase typed here), start ssh-agent and load the key.</value></data>
+  <data name="Dev_Redirected" xml:space="preserve"><value>This command needs a console where you can type; input is redirected or nobody is signed in.</value></data>
+  <data name="Dev_UserNameUnusable" xml:space="preserve"><value>The Windows user name '{0}' is not a valid Linux user name. Pass --profile with dev.wsl.user.</value></data>
+  <data name="Dev_ProfileSection" xml:space="preserve"><value>The dev section of the profile has {0} problem(s):</value></data>
+  <data name="Dev_NextAction" xml:space="preserve"><value>next: {0}</value></data>
 </root>
