@@ -1,1 +1,9 @@
-{}
+{
+  "category.apps": "Apps",
+  "category.privacy": "Privacidade",
+  "category.performance": "Desempenho",
+  "category.developer": "Desenvolvedor",
+  "level.safe": "Seguro",
+  "level.balanced": "Equilibrado",
+  "level.aggressive": "Agressivo"
+}
