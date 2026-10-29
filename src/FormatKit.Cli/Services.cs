@@ -64,7 +64,8 @@ public static class Services
             new CimLicensing(processes),
             new PowerShellDiskImages(processes),
             new PowerShellWindowsImages(processes),
-            new PowerShellDisks(processes));
+            new PowerShellDisks(processes),
+            new PowerShellWindowsReadiness(processes));
 
         return new CliEnvironment(
             services,

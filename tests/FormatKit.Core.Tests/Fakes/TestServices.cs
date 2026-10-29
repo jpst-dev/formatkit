@@ -28,7 +28,8 @@ public static class TestServices
         FakeLicensing? licensing = null,
         FakeDiskImages? diskImages = null,
         FakeWindowsImages? windowsImages = null,
-        FakeDisks? disks = null)
+        FakeDisks? disks = null,
+        FakeWindowsReadiness? readiness = null)
     {
         processes ??= new FakeProcessRunner();
         files ??= new InMemoryFileSystem();
@@ -57,7 +58,8 @@ public static class TestServices
             licensing ?? new FakeLicensing(new WindowsActivation(true, "OEM:DM")),
             diskImages ?? new FakeDiskImages(),
             windowsImages ?? new FakeWindowsImages(files),
-            disks ?? new FakeDisks());
+            disks ?? new FakeDisks(),
+            readiness ?? new FakeWindowsReadiness());
     }
 
     public static StepContext Context(ServiceSet services) =>

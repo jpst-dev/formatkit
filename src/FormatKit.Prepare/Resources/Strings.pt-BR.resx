@@ -42,6 +42,32 @@
   <data name="Activation_Unknown_Title" xml:space="preserve"><value>Ativação do Windows não verificada</value></data>
   <data name="Activation_Unknown_Detail" xml:space="preserve"><value>O Windows não informou o estado da ativação.</value></data>
   <data name="Activation_Unknown_Action" xml:space="preserve"><value>Abra Configurações &gt; Sistema &gt; Ativação para ver o estado.</value></data>
+  <data name="Win11_Already_Title" xml:space="preserve"><value>Este PC já usa o Windows 11</value></data>
+  <data name="Win11_Already_Detail" xml:space="preserve"><value>Os requisitos do Windows 11 não se aplicam: o PC já está em uma versão do Windows 11.</value></data>
+  <data name="Win11_Met_Title" xml:space="preserve"><value>Este PC parece atender aos requisitos do Windows 11</value></data>
+  <data name="Win11_Met_Detail" xml:space="preserve"><value>A memória, o firmware, o Secure Boot e o TPM lidos atendem ao Windows 11.</value></data>
+  <data name="Win11_Met_Action" xml:space="preserve"><value>Confirme com o app Verificação de Integridade do PC, da Microsoft, antes de criar a mídia de instalação. A mídia não contorna os requisitos.</value></data>
+  <data name="Win11_Ram_Title" xml:space="preserve"><value>Memória RAM insuficiente para o Windows 11</value></data>
+  <data name="Win11_Ram_Detail" xml:space="preserve"><value>O Windows 11 precisa de 4 GB de RAM ou mais, e este PC tem menos.</value></data>
+  <data name="Win11_Ram_Action" xml:space="preserve"><value>A mídia de instalação não contorna os requisitos, então o Windows 11 se recusará a instalar. Abra a Verificação de Integridade do PC para ver o que dá para mudar, ou continue no Windows 10.</value></data>
+  <data name="Win11_Uefi_Title" xml:space="preserve"><value>O firmware é BIOS legado, não UEFI</value></data>
+  <data name="Win11_Uefi_Detail" xml:space="preserve"><value>O Windows 11 precisa de firmware UEFI, e este PC inicia em modo BIOS legado.</value></data>
+  <data name="Win11_Uefi_Action" xml:space="preserve"><value>A mídia de instalação não contorna os requisitos. Abra a Verificação de Integridade do PC; se o firmware aceitar UEFI, mude isso na configuração do firmware (talvez seja preciso converter o disco para GPT antes).</value></data>
+  <data name="Win11_SecureBoot_Title" xml:space="preserve"><value>A Inicialização Segura está desligada</value></data>
+  <data name="Win11_SecureBoot_Detail" xml:space="preserve"><value>O Windows 11 precisa de um PC que funcione com a Inicialização Segura (Secure Boot), e ela está desligada neste.</value></data>
+  <data name="Win11_SecureBoot_Action" xml:space="preserve"><value>Ligue a Inicialização Segura na configuração do firmware e confirme com a Verificação de Integridade do PC. A mídia de instalação não contorna os requisitos.</value></data>
+  <data name="Win11_Tpm_Title" xml:space="preserve"><value>O TPM é anterior à versão 2.0</value></data>
+  <data name="Win11_Tpm_Detail" xml:space="preserve"><value>O Windows 11 precisa de um TPM 2.0, e este PC tem um mais antigo.</value></data>
+  <data name="Win11_Tpm_Action" xml:space="preserve"><value>A mídia de instalação não contorna os requisitos. Abra a Verificação de Integridade do PC; alguns PCs oferecem TPM 2.0 (fTPM ou PTT) na configuração do firmware.</value></data>
+  <data name="Win11_TpmNone_Title" xml:space="preserve"><value>Nenhum TPM encontrado</value></data>
+  <data name="Win11_TpmNone_Detail" xml:space="preserve"><value>O Windows 11 precisa de um TPM 2.0, e o Windows não informa nenhum neste PC.</value></data>
+  <data name="Win11_TpmNone_Action" xml:space="preserve"><value>Abra a Verificação de Integridade do PC. Alguns PCs têm o TPM 2.0 (fTPM ou PTT) desligado na configuração do firmware. A mídia de instalação não contorna os requisitos.</value></data>
+  <data name="Win11_TpmNotElevated_Title" xml:space="preserve"><value>TPM não verificado</value></data>
+  <data name="Win11_TpmNotElevated_Detail" xml:space="preserve"><value>Ler a versão do TPM exige um terminal de administrador.</value></data>
+  <data name="Win11_TpmNotElevated_Action" xml:space="preserve"><value>Abra o tpm.msc para ver a versão do TPM, use a Verificação de Integridade do PC, ou rode este comando de novo em um terminal de administrador.</value></data>
+  <data name="Win11_Unknown_Title" xml:space="preserve"><value>Alguns requisitos do Windows 11 não foram verificados</value></data>
+  <data name="Win11_Unknown_Detail" xml:space="preserve"><value>O Windows não informou a memória, o tipo de firmware ou a Inicialização Segura.</value></data>
+  <data name="Win11_Unknown_Action" xml:space="preserve"><value>Abra a Verificação de Integridade do PC, da Microsoft, para verificar este PC.</value></data>
   <data name="UserFolders_Name_Desktop" xml:space="preserve"><value>Área de Trabalho</value></data>
   <data name="UserFolders_Name_Documents" xml:space="preserve"><value>Documentos</value></data>
   <data name="UserFolders_Name_Pictures" xml:space="preserve"><value>Imagens</value></data>

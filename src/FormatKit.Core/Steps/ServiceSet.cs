@@ -29,4 +29,5 @@ public sealed record ServiceSet(
     ILicensing Licensing,
     IDiskImages DiskImages,
     IWindowsImages WindowsImages,
-    IDisks Disks);
+    IDisks Disks,
+    IWindowsReadiness Readiness);
