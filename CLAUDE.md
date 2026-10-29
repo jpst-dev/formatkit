@@ -7,6 +7,7 @@ Windows CLI (.NET 10, single self-contained `formatkit.exe`) that rebuilds a mac
 - Build: `dotnet build`
 - Unit tests (fast, run before every commit): `dotnet test -- --filter-not-trait "Category=Integration"`
 - Publish: `dotnet publish src/FormatKit.Cli -c Release -o artifacts`
+- Publish the UI: `dotnet publish src/FormatKit.App -c Release -o artifacts` (`FormatKitUI.exe`, next to `formatkit.exe`)
 
 `Directory.Build.props` sets `TreatWarningsAsErrors`, nullable and implicit usings for every project: a warning breaks the build.
 
@@ -14,6 +15,8 @@ Windows CLI (.NET 10, single self-contained `formatkit.exe`) that rebuilds a mac
 
 - `src/FormatKit.Core`: engine (`Running/RunEngine`, run state, reboot and resume), profiles, steps (`IModule`, `IStep`, `StepResult`, `ServiceSet`), system access interfaces (`SystemAccess/`), logging, reporting.
 - `src/FormatKit.Drivers`, `Cleanup`, `Programs`, `Dev`: one module each. `src/FormatKit.Cli`: System.CommandLine commands and wiring.
+- `src/FormatKit.Hosting`: composition root and shared flows used by the CLI and the UI.
+- `src/FormatKit.App`: WPF window plus the elevated worker mode (`--worker`), published as `FormatKitUI.exe`. Not `FormatKit.exe`: file names are case-insensitive and it would collide with `formatkit.exe`.
 - `tests/FormatKit.<Project>.Tests`: xunit.v3, one test project per source project. Fakes for system access live in `tests/FormatKit.Core.Tests/Fakes`.
 - `docs/superpowers/specs` and `plans`: the design spec and implementation plan of each sub-project. The spec is the authority; record what VM runs found in its "found while running" section.
 - `tools/New-TestVm.ps1` creates the Hyper-V test VM; `tools/vm/` drives it (see below).
@@ -22,7 +25,7 @@ Windows CLI (.NET 10, single self-contained `formatkit.exe`) that rebuilds a mac
 
 - Everything goes through the `SystemAccess` interfaces (registry, files, processes, services, console), so steps are unit-tested with fakes. No direct `Registry`, `File` or `Process` calls in steps.
 - TDD: write the failing test first. Every fix found in a VM run gets a unit test that pins it.
-- `ServiceSet`: add new services as the last parameter, then wire them in `src/FormatKit.Cli/Services.cs` and `tests/FormatKit.Core.Tests/Fakes/TestServices.cs` (an optional parameter with a fake default).
+- `ServiceSet`: add new services as the last parameter, then wire them in `src/FormatKit.Hosting/Services.cs` and `tests/FormatKit.Core.Tests/Fakes/TestServices.cs` (an optional parameter with a fake default).
 - Dev module items are `DevItem` records with a `DevItemOutcome`; `DevStepResult.From` turns them into a `StepResult`.
 - A step that is not done after a reboot returns `StepResult.RebootAndRunAgain` (it runs once more after the resume; a second request fails).
 - PowerShell literals built in C# go through `PowerShellText.SingleQuote`.

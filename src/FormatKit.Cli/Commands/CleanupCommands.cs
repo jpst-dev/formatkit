@@ -23,10 +23,6 @@ internal static class CleanupCommands
         return cleanup;
     }
 
-    /// <summary>The ` [level]` and ` [contested]` suffix shown after an item's title in the dry-run plan.</summary>
-    internal static string Markers(CleanupItem item) =>
-        $" [{LevelName(item.Level)}]" + (item.Contested ? $" [{Strings.Get("Marker_Contested")}]" : "");
-
     private static string LevelName(CleanupLevel level) => level.ToString().ToLowerInvariant();
 
     private static Command CreateList(CommandContext context)
@@ -43,10 +39,7 @@ internal static class CleanupCommands
             var only = parse.GetValue(category) is { } c ? Enum.Parse<CleanupCategory>(c, ignoreCase: true) : (CleanupCategory?)null;
             var verbose = parse.GetValue<bool>("--verbose");
 
-            var items = context.Cleanup.Items
-                .Where(i => maxLevel is null || i.Level <= maxLevel)
-                .Where(i => only is null || i.Category == only)
-                .ToList();
+            var items = context.Cleanup.Filter(maxLevel, only);
 
             var idWidth = items.Count == 0 ? 0 : items.Max(i => i.Id.Length);
             var contested = $"[{Strings.Get("Marker_Contested")}]";

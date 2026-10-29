@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FormatKit.Core\FormatKit.Core.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Cleanup\FormatKit.Cleanup.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Drivers\FormatKit.Drivers.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Programs\FormatKit.Programs.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Dev\FormatKit.Dev.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Hosting\FormatKit.Hosting.csproj" />
+    <ProjectReference Include="..\..\src\FormatKit.Cli\FormatKit.Cli.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\FormatKit.Core.Tests\Fakes\**\*.cs" LinkBase="Fakes" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

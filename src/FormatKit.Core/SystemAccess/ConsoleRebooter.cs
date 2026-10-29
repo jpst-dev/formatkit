@@ -54,22 +54,9 @@ public sealed class ConsoleRebooter : IRebooter
             await _delay(TimeSpan.FromMilliseconds(100), ct).ConfigureAwait(false);
         }
 
-        try
+        if (await SystemRestart.RestartAsync(_runner, _log, ct).ConfigureAwait(false))
         {
-            var result = await _runner.RunAsync(
-                new ProcessSpec("shutdown.exe", ["/r", "/t", "0"], Timeouts.Query), ct).ConfigureAwait(false);
-            if (result.ExitCode == 0 && !result.TimedOut)
-            {
-                return true;
-            }
-
-            _log.Warning(
-                "shutdown.exe failed (exit {ExitCode}, timedOut {TimedOut}): {StdErr}",
-                result.ExitCode, result.TimedOut, result.StdErr);
-        }
-        catch (FileNotFoundException ex)
-        {
-            _log.Warning(ex, "shutdown.exe not found");
+            return true;
         }
 
         _write(Strings.Get("Reboot_ShutdownFailed"));

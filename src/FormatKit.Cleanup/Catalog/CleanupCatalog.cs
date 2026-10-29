@@ -53,6 +53,13 @@ public sealed record CleanupCatalog(int SchemaVersion, IReadOnlyList<CleanupItem
         => JsonSerializer.Deserialize<CleanupCatalog>(json, Options)
            ?? throw new InvalidOperationException("Cleanup catalog JSON is empty.");
 
+    /// <summary>Items at or below <paramref name="maxLevel"/> (each level includes the ones before it) in <paramref name="category"/>, in catalog order; a null filter keeps everything. This is what <c>cleanup list</c> shows.</summary>
+    public IReadOnlyList<CleanupItem> Filter(CleanupLevel? maxLevel, CleanupCategory? category) =>
+        Items
+            .Where(i => maxLevel is null || i.Level <= maxLevel)
+            .Where(i => category is null || i.Category == category)
+            .ToList();
+
     public CleanupItem? Find(string id) =>
         Items.FirstOrDefault(i => string.Equals(i.Id, id, StringComparison.Ordinal));
 }

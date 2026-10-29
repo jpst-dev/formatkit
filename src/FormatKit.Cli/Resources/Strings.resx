@@ -16,7 +16,6 @@
   <data name="Opt_Output" xml:space="preserve"><value>Folder that receives the exported drivers.</value></data>
   <data name="Opt_Profile" xml:space="preserve"><value>Path to the profile JSON file.</value></data>
   <data name="Opt_Resume" xml:space="preserve"><value>Resume the interrupted run.</value></data>
-  <data name="Error_Wmi" xml:space="preserve"><value>Could not read the system information: {0}</value></data>
   <data name="Cancelled" xml:space="preserve"><value>Cancelled.</value></data>
   <data name="Cancelled_Run" xml:space="preserve"><value>Cancelled. Run 'formatkit run --resume' to continue the run.</value></data>
   <data name="Elevation_Declined" xml:space="preserve"><value>The administrator permission was declined. Run the command again and accept the prompt, or start formatkit from an elevated terminal.</value></data>

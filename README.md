@@ -1,6 +1,6 @@
 # FormatKit
 
-FormatKit is a Windows command-line tool (.NET 10, a single `formatkit.exe`) that automates the tedious part of a clean Windows reinstall: after you format and install Windows, it detects your hardware and gets the machine to a fully working state with minimal clicking.
+FormatKit is a Windows tool (.NET 10: a command-line `formatkit.exe` and a graphical `FormatKitUI.exe`) that automates the tedious part of a clean Windows reinstall: after you format and install Windows, it detects your hardware and gets the machine to a fully working state with minimal clicking.
 
 ## Philosophy
 
@@ -8,7 +8,7 @@ A clean install beats a cloned or "migrated" one. FormatKit does not restore an 
 
 ## Status
 
-Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist**.
+Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist + graphical interface**.
 
 Implemented:
 
@@ -20,7 +20,9 @@ Implemented:
 
 - Preparation checklist: `formatkit prepare check` lists what a reinstall would lose and what to save first (read-only, no elevation).
 
-Planned (not available yet): installation media, WPF UI.
+- Graphical interface: `FormatKitUI.exe`, a WPF window over the same engine (see [Graphical interface](#graphical-interface)).
+
+Planned (not available yet): installation media.
 
 ## **WARNING: this tool changes your system**
 
@@ -104,6 +106,24 @@ Optional `modules.drivers.networkDriverBackup`: path to a folder created by `dri
 formatkit run --profile profiles\example.json --dry-run
 formatkit run --profile profiles\example.json
 ```
+
+## Graphical interface
+
+`FormatKitUI.exe` is a Windows window over the same engine as the command line. Download it from the [Releases](../../releases) page next to `formatkit.exe`; it is also self-contained and not code-signed (see Installation). The two files are independent, and the window does not replace the CLI.
+
+The window runs without administrator rights. It asks for UAC only when you start a run whose plan has a step that needs it; a plan with no such step runs unelevated. Opening a profile, the checklist, the queries and the catalogs never prompt.
+
+| Page | What it does |
+| --- | --- |
+| Home | Shows what is available and a **Resume** banner when an interrupted run is found. |
+| Checklist | `prepare check`: an optional profile, the results by status, and **Save as Markdown**. |
+| Run profile | Open a profile (or the built-in "Drivers only"), review the plan, confirm, then follow each step with a **Stop** button, the result and a reboot countdown. A run resumes in this same window after a reboot. |
+| Hardware | The detected hardware, as `formatkit hardware`. |
+| Cleanup diagnosis | `cleanup check`: tweaks that break or weaken this PC, with the fix. |
+| Catalogs | The cleanup and programs catalogs. |
+| About | Version, repository, **Open log folder** and the CLI-only commands. |
+
+Profiles are opened and shown, not edited. The window runs the profile you reviewed: if the file changes before the run starts, it is refused and you review it again. Installation media is not in the window yet.
 
 ## Cleanup
 
@@ -402,9 +422,10 @@ In an elevated terminal the command also reads the BitLocker recovery protectors
 dotnet build -c Release
 dotnet test -c Release -- --filter-not-trait "Category=Integration"
 dotnet publish src/FormatKit.Cli -c Release -o artifacts   # artifacts\formatkit.exe
+dotnet publish src/FormatKit.App -c Release -o artifacts   # artifacts\FormatKitUI.exe
 ```
 
-Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes and attaches `formatkit.exe` to a GitHub release.
+Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes and attaches `formatkit.exe` and `FormatKitUI.exe` to a GitHub release.
 
 ## License
 
@@ -412,6 +433,6 @@ Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes an
 
 ## Resumo em português
 
-O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). Mídia de instalação e interface WPF são planejadas.
+O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). A interface gráfica (`FormatKitUI.exe`, uma janela WPF sobre o mesmo motor, que só pede UAC ao executar um perfil) já está disponível; a mídia de instalação é planejada.
 
 **Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. Códigos de saída: veja a tabela acima. Licença MIT.

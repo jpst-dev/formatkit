@@ -153,4 +153,36 @@ public class ConsoleRendererTests
 
         Assert.Equal("1 item blocks formatting.", lines[^2]);
     }
+
+    [Fact]
+    public void Summary_is_public_and_matches_the_console_summary()
+    {
+        var saved = CultureInfo.CurrentUICulture;
+        CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+        try
+        {
+            var report = new PrepareReport(
+            [
+                Item(PrepareStatus.Attention, PrepareGroup.Data, "A1"),
+                Item(PrepareStatus.Attention, PrepareGroup.Data, "A2"),
+            ]);
+
+            Assert.Equal("No blockers. Review the 2 items marked Attention before formatting.", ConsoleRenderer.Summary(report));
+            Assert.Equal("Safe to format.", ConsoleRenderer.Summary(new PrepareReport([])));
+        }
+        finally { CultureInfo.CurrentUICulture = saved; }
+    }
+
+    [Fact]
+    public void Status_and_group_titles_are_the_console_headings()
+    {
+        var saved = CultureInfo.CurrentUICulture;
+        CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+        try
+        {
+            Assert.Equal("Not checked", ConsoleRenderer.StatusTitle(PrepareStatus.NotChecked));
+            Assert.Equal("Security and licenses", ConsoleRenderer.GroupTitle(PrepareGroup.Security));
+        }
+        finally { CultureInfo.CurrentUICulture = saved; }
+    }
 }

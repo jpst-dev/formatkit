@@ -1,0 +1,118 @@
+<UserControl x:Class="FormatKit.App.Views.CatalogsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:FormatKit.App.Localization"
+             xmlns:views="clr-namespace:FormatKit.App.Views">
+    <UserControl.Resources>
+        <views:CatalogTitleConverter x:Key="Title" />
+        <DataTemplate x:Key="ItemTemplate">
+            <StackPanel Margin="0,4">
+                <TextBlock Text="{Binding Converter={StaticResource Title}}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Id}" Opacity="0.6" FontSize="11" />
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="320" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.ColumnSpan="2" Text="{loc:Loc Nav_Catalogs}" FontSize="28" FontWeight="SemiBold" />
+
+        <TextBox Grid.Row="1" Margin="0,12,12,0" Padding="4"
+                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="{loc:Loc Cat_Search}" />
+
+        <TabControl Grid.Row="2" Margin="0,12,12,0" SelectedIndex="{Binding SelectedTab, Mode=TwoWay}">
+            <TabItem Header="{loc:Loc Cat_TabCleanup}">
+                <DockPanel Margin="0,8,0,0">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="{loc:Loc Cat_LevelFilter}" VerticalAlignment="Center" />
+                        <ComboBox Margin="8,0,16,0" MinWidth="120" ItemsSource="{Binding LevelOptions}"
+                                  DisplayMemberPath="Label" SelectedItem="{Binding LevelOption, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
+                        <TextBlock Text="{loc:Loc Cat_CategoryFilter}" VerticalAlignment="Center" />
+                        <ComboBox Margin="8,0,0,0" MinWidth="120" ItemsSource="{Binding CleanupCategoryOptions}"
+                                  DisplayMemberPath="Label" SelectedItem="{Binding CleanupCategoryOption, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding CleanupItems}" SelectedItem="{Binding SelectedCleanup, Mode=TwoWay}"
+                             ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource Title}}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="{loc:Loc Cat_TabPrograms}">
+                <DockPanel Margin="0,8,0,0">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="{loc:Loc Cat_CategoryFilter}" VerticalAlignment="Center" />
+                        <ComboBox Margin="8,0,0,0" MinWidth="140" ItemsSource="{Binding ProgramCategoryOptions}"
+                                  DisplayMemberPath="Label" SelectedItem="{Binding ProgramCategoryOption, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding ProgramItems}" SelectedItem="{Binding SelectedProgram, Mode=TwoWay}"
+                             ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource Title}}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+
+        <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="0,12,0,0" Padding="12"
+                CornerRadius="4" BorderThickness="1" BorderBrush="Gray">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc Cat_SelectHint}" TextWrapping="Wrap" Opacity="0.6">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Details}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Details.Title}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{Binding Details.Lines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

@@ -3,7 +3,7 @@ using FormatKit.Cleanup.Steps;
 using FormatKit.Cli.Localization;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Running;
-using FormatKit.Core.Steps;
+using FormatKit.Hosting;
 
 namespace FormatKit.Cli.Commands;
 
@@ -52,9 +52,7 @@ internal static class RunCommand
                 path = load.State!.ProfilePath;
             }
 
-            var profile = path == BuiltInProfiles.DriversOnlyPath
-                ? new LoadedProfile(BuiltInProfiles.DriversOnly, path, BuiltInProfiles.DriversOnlyHash)
-                : LoadProfile(context, path!);
+            var profile = LoadProfile(context, path!);
             if (profile is null && resuming)
             {
                 o.WriteLine(Strings.Get("Run_ResumeProfileInvalid"));
@@ -72,12 +70,12 @@ internal static class RunCommand
 
     internal static LoadedProfile? LoadProfile(CommandContext context, string path)
     {
-        var result = new ProfileLoader(context.Modules).Load(path);
-        if (result.IsValid)
-            return result.Value;
+        var outcome = new ProfileService(context.Modules).Load(path);
+        if (outcome.Profile is not null)
+            return outcome.Profile;
 
-        context.Out.WriteLine(Strings.Format("Profile_Errors", result.Errors.Count));
-        foreach (var error in result.Errors)
+        context.Out.WriteLine(Strings.Format("Profile_Errors", outcome.Errors.Count));
+        foreach (var error in outcome.Errors)
         {
             context.Out.WriteLine(error.Path.Length == 0
                 ? $"  {error.Message}"
@@ -94,7 +92,7 @@ internal static class RunFlow
         CommandContext context, LoadedProfile profile, bool resume, bool dryRun, CancellationToken ct)
     {
         var o = context.Out;
-        var plan = SimulatedRebootStep.Apply(PlanBuilder.Build(profile.Profile, context.Modules), context.Env.SimulateRebootAfterStep);
+        var plan = PlanService.Build(profile.Profile, context.Modules, context.Env.SimulateRebootAfterStep);
 
         if (dryRun)
         {
@@ -103,14 +101,8 @@ internal static class RunFlow
             {
                 var admin = step.RequiresAdmin ? $" [{Strings.Get("Plan_Admin")}]" : "";
                 o.WriteLine($"  {step.Id}  {step.Title}{admin}");
-                if (step is CleanupCategoryStep cleanup)
-                {
-                    foreach (var item in cleanup.Items)
-                        o.WriteLine($"    {item.Id}  {item.LocalizedText().Title}{CleanupCommands.Markers(item)}");
-                }
-
-                foreach (var line in ProgramsCommands.DryRunLines(step))
-                    o.WriteLine(line);
+                foreach (var line in DryRun.Items(step))
+                    o.WriteLine($"    {line}");
             }
 
             return ExitCodes.Ok;
@@ -119,14 +111,11 @@ internal static class RunFlow
         if (plan.Any(s => s.RequiresAdmin) && await context.EnsureElevatedAsync() is { } exit)
             return exit;
 
-        var env = context.Env;
-        var engine = new RunEngine(env.StateStore, env.ScheduledTasks, env.Rebooter, env.Reports, env.RebootCountdown, env.Log, new ConsoleRunProgress(o));
-        var request = new RunRequest(profile.Path, profile.Hash, plan, new StepContext(env.Services, env.Log), resume);
-
+        var session = new RunSession(context.Env.ToHost());
         RunSummary summary;
         try
         {
-            summary = await engine.RunAsync(request, ct);
+            summary = await session.RunAsync(profile, plan, resume, new ConsoleRunProgress(o), ct);
         }
         catch (OperationCanceledException)
         {
@@ -134,8 +123,8 @@ internal static class RunFlow
             return ExitCodes.Cancelled;
         }
 
-        if (resume && summary.Status is RunStatus.NothingToResume or RunStatus.StateCorrupt or RunStatus.ProfileChanged)
-            await RemoveResumeTaskAsync(context, ct);
+        if (session.ResumeTaskRemoved)
+            o.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
 
         return Report(o, summary);
     }
@@ -143,15 +132,8 @@ internal static class RunFlow
     /// <summary>Best-effort removal of the automatic resume task when a resume ends early.</summary>
     public static async Task RemoveResumeTaskAsync(CommandContext context, CancellationToken ct)
     {
-        try
-        {
-            if (await context.Env.ScheduledTasks.RemoveResumeTaskAsync(ct))
-                context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            context.Env.Log.Warning(ex, "Could not remove the resume scheduled task");
-        }
+        if (await new RunSession(context.Env.ToHost()).RemoveResumeTaskAsync(ct))
+            context.Out.WriteLine(Strings.Get("Run_ResumeTaskRemoved"));
     }
 
     private static int Report(TextWriter o, RunSummary summary)
