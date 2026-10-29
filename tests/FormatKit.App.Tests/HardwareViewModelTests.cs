@@ -80,6 +80,8 @@ public class HardwareViewModelTests
             TestServices.Create() with { Hardware = hardware }, VendorCatalog.LoadEmbedded());
 
         var load = vm.LoadCommand.ExecuteAsync(null);
+        // Queries start on the thread pool: wait until the first one holds the gate.
+        await hardware.FirstStarted.WaitAsync(TestContext.Current.CancellationToken);
         await vm.ScanCommand.ExecuteAsync(null);
         Assert.True(vm.IsBusy);
         hardware.Release();
@@ -98,6 +100,7 @@ public class HardwareViewModelTests
             TestServices.Create() with { Hardware = hardware }, VendorCatalog.LoadEmbedded());
 
         var first = vm.LoadCommand.ExecuteAsync(null);
+        await hardware.FirstStarted.WaitAsync(TestContext.Current.CancellationToken);
         await vm.LoadCommand.ExecuteAsync(null);
         hardware.Release();
         await first;
@@ -109,7 +112,11 @@ public class HardwareViewModelTests
     private sealed class GatedHardwareInfo : IHardwareInfo
     {
         private readonly TaskCompletionSource _gate = new();
+        private readonly TaskCompletionSource _firstStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private int _calls;
+
+        /// <summary>Completes when the first read is waiting at the gate.</summary>
+        public Task FirstStarted => _firstStarted.Task;
 
         public void Release() => _gate.SetResult();
 
@@ -117,6 +124,7 @@ public class HardwareViewModelTests
         {
             if (Interlocked.Increment(ref _calls) == 1)
             {
+                _firstStarted.SetResult();
                 await _gate.Task;
                 return FakeHardwareInfo.Sample(manufacturer: "First");
             }
