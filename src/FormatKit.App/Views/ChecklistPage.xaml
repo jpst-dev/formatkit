@@ -50,15 +50,27 @@
             <TextBlock Text="{Binding Summary}" FontSize="18" FontWeight="SemiBold" Margin="0,16,0,0" TextWrapping="Wrap"
                        Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibility}}" />
             <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange"
-                    Visibility="{Binding HasSaveMessage, Converter={StaticResource BoolToVisibility}}">
+                    Visibility="{Binding SaveSucceeded, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding SaveMessage}" TextWrapping="Wrap" />
+            </Border>
+
+            <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Firebrick"
+                    Visibility="{Binding SaveFailed, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock Text="{Binding SaveMessage}" TextWrapping="Wrap" />
             </Border>
 
             <ItemsControl ItemsSource="{Binding Groups}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Expander Header="{Binding Title}" IsExpanded="{Binding StartsExpanded, Mode=OneWay}"
+                        <Expander IsExpanded="{Binding StartsExpanded, Mode=OneWay}"
                                   Margin="0,16,0,0" FontSize="18" FontWeight="SemiBold">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Glyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                               Foreground="{Binding Color}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Title}" />
+                                </StackPanel>
+                            </Expander.Header>
                             <ItemsControl ItemsSource="{Binding Sections}" FontSize="12" FontWeight="Normal">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -68,7 +80,7 @@
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border Margin="0,6,0,0" Padding="12" CornerRadius="4"
-                                                                BorderThickness="1" BorderBrush="Gray">
+                                                                BorderThickness="1,1,1,1" BorderBrush="{Binding Color}">
                                                             <StackPanel>
                                                                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                                                 <TextBlock Text="{Binding Detail}" Opacity="0.75" TextWrapping="Wrap" />

@@ -18,11 +18,14 @@ public sealed class ChecklistViewModelTests : IDisposable
         public string Id => "fake.check";
         public PrepareGroup Group => PrepareGroup.Data;
         public bool Ran { get; private set; }
+        public Task? Gate { get; init; }
 
-        public Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct)
+        public async Task<IReadOnlyList<PrepareItem>> RunAsync(PrepareContext context, CancellationToken ct)
         {
             Ran = true;
-            return Task.FromResult<IReadOnlyList<PrepareItem>>(items);
+            if (Gate is not null)
+                await Gate;
+            return items;
         }
     }
 
@@ -203,5 +206,58 @@ public sealed class ChecklistViewModelTests : IDisposable
 
         vm.ClearProfileCommand.Execute(null);
         Assert.Null(vm.ProfilePath);
+    }
+
+    [Fact]
+    public void StatusStyle_GivesEveryStatusADistinctGlyphAndColor()
+    {
+        var statuses = Enum.GetValues<PrepareStatus>();
+
+        Assert.Equal(statuses.Length, statuses.Select(StatusStyle.Glyph).Distinct().Count());
+        Assert.Equal(statuses.Length, statuses.Select(StatusStyle.Color).Distinct().Count());
+        Assert.All(statuses, s => Assert.False(string.IsNullOrEmpty(StatusStyle.Glyph(s))));
+    }
+
+    [Fact]
+    public async Task Check_RowsAndGroupsCarryTheirStatusStyle()
+    {
+        var vm = Create(new ScriptedCheck(Item(PrepareStatus.Blocker, PrepareGroup.Data, "b")));
+
+        await vm.CheckCommand.ExecuteAsync(null);
+
+        Assert.Equal(StatusStyle.Glyph(PrepareStatus.Blocker), vm.Groups[0].Glyph);
+        Assert.Equal(StatusStyle.Color(PrepareStatus.Blocker), vm.Groups[0].Color);
+        Assert.Equal(StatusStyle.Color(PrepareStatus.Blocker), vm.Groups[0].Sections[0].Items[0].Color);
+    }
+
+    [Fact]
+    public async Task Check_IsDisabledWhileRunning()
+    {
+        var gate = new TaskCompletionSource();
+        var vm = Create(new ScriptedCheck { Gate = gate.Task });
+
+        var running = vm.CheckCommand.ExecuteAsync(null);
+        Assert.True(vm.IsBusy);
+        Assert.False(vm.CheckCommand.CanExecute(null));
+
+        gate.SetResult();
+        await running;
+        Assert.True(vm.CheckCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task Save_Failure_IsFlaggedAsErrorAndWarningIsNot()
+    {
+        var vm = Create(new ScriptedCheck(Item(PrepareStatus.Ok, PrepareGroup.Data, "o")));
+        await vm.CheckCommand.ExecuteAsync(null);
+
+        _dialogs.SaveFileResult = @"C:\missing\check.md";
+        vm.SaveMarkdownCommand.Execute(null);
+        Assert.True(vm.SaveFailed);
+
+        _files.CreateDirectory(@"C:\out");
+        _dialogs.SaveFileResult = @"C:\out\check.md";
+        vm.SaveMarkdownCommand.Execute(null);
+        Assert.False(vm.SaveFailed);
     }
 }

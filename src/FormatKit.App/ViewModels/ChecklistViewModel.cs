@@ -9,7 +9,10 @@ using FormatKit.Prepare.Rendering;
 
 namespace FormatKit.App.ViewModels;
 
-public sealed record ItemRow(string Title, string? Detail, string? Action);
+public sealed record ItemRow(string Title, string? Detail, string? Action, PrepareStatus Status = PrepareStatus.Ok)
+{
+    public string Color => StatusStyle.Color(Status);
+}
 
 public sealed record GroupSection(PrepareGroup Group, IReadOnlyList<ItemRow> Items)
 {
@@ -22,6 +25,10 @@ public sealed record StatusGroup(PrepareStatus Status, IReadOnlyList<GroupSectio
     public string Title => ConsoleRenderer.StatusTitle(Status);
 
     public bool StartsExpanded => !StartsCollapsed;
+
+    public string Glyph => StatusStyle.Glyph(Status);
+
+    public string Color => StatusStyle.Color(Status);
 }
 
 /// <summary>The "before you format" checklist (the CLI's <c>prepare check</c>), optionally against a profile.</summary>
@@ -43,7 +50,12 @@ public sealed partial class ChecklistViewModel : QueryPageViewModel
         _runner = runner;
         _profiles = profiles;
         _dialogs = dialogs;
-        CheckCommand = new AsyncRelayCommand(CheckAsync, AsyncRelayCommandOptions.AllowConcurrentExecutions);
+        CheckCommand = new AsyncRelayCommand(CheckAsync, () => !IsBusy);
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(IsBusy))
+                CheckCommand.NotifyCanExecuteChanged();
+        };
         SaveMarkdownCommand = new RelayCommand(SaveMarkdown, () => _run is not null);
         BrowseProfileCommand = new RelayCommand(BrowseProfile);
         ClearProfileCommand = new RelayCommand(() => ProfilePath = null);
@@ -72,12 +84,18 @@ public sealed partial class ChecklistViewModel : QueryPageViewModel
     private string _summary = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSaveMessage))]
+    [NotifyPropertyChangedFor(nameof(HasSaveMessage), nameof(SaveSucceeded))]
     private string? _saveMessage;
 
     public bool HasProfileErrors => ProfileErrors.Count > 0;
 
     public bool HasSaveMessage => SaveMessage is not null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SaveSucceeded))]
+    private bool _saveFailed;
+
+    public bool SaveSucceeded => HasSaveMessage && !SaveFailed;
 
     public bool HasResults => Groups.Count > 0;
 
@@ -86,6 +104,7 @@ public sealed partial class ChecklistViewModel : QueryPageViewModel
     private async Task CheckAsync()
     {
         SaveMessage = null;
+        SaveFailed = false;
         var path = string.IsNullOrWhiteSpace(ProfilePath) ? null : ProfilePath;
         await RunQueryAsync(
             async ct =>
@@ -134,7 +153,7 @@ public sealed partial class ChecklistViewModel : QueryPageViewModel
                 status.GroupBy(i => i.Group)
                     .OrderBy(g => g.Key)
                     .Select(group => new GroupSection(
-                        group.Key, group.Select(i => new ItemRow(i.Title, i.Detail, i.Action)).ToList()))
+                        group.Key, group.Select(i => new ItemRow(i.Title, i.Detail, i.Action, i.Status)).ToList()))
                     .ToList(),
                 status.Key == PrepareStatus.Ok))
             .ToList();
@@ -152,10 +171,12 @@ public sealed partial class ChecklistViewModel : QueryPageViewModel
         if (_run is null || _dialogs.SaveFile(MarkdownFilter, DefaultFileName) is not { } path)
             return;
 
+        SaveFailed = false;
         var write = _runner.WriteMarkdown(_run, path);
         if (write.Error is not null)
         {
             SaveMessage = Strings.Format("Prepare_OutputFailed", path, write.Error);
+            SaveFailed = true;
             return;
         }
 
