@@ -1,0 +1,38 @@
+<UserControl x:Class="FormatKit.App.Views.HomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:FormatKit.App.ViewModels"
+             xmlns:loc="clr-namespace:FormatKit.App.Localization">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32" MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Text="{loc:Loc Nav_Home}" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock Text="{loc:Loc Home_Intro}" TextWrapping="Wrap" Margin="0,12,0,0" />
+
+            <Border Margin="0,20,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange">
+                <TextBlock Text="{loc:Loc Home_Warning}" TextWrapping="Wrap" />
+            </Border>
+
+            <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="SteelBlue"
+                    Visibility="{Binding HasInterruptedRun, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc Home_Interrupted}" TextWrapping="Wrap" />
+                    <Button Content="{loc:Loc Home_Resume}" Command="{Binding ResumeCommand}"
+                            HorizontalAlignment="Left" Margin="0,8,0,0" Padding="16,4" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{loc:Loc Home_Before_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,0" />
+            <TextBlock Text="{loc:Loc Home_Before_Text}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <Button Content="{loc:Loc Home_Before_Checklist}" Command="{Binding GoToCommand}"
+                    CommandParameter="{x:Static vm:Page.Checklist}" HorizontalAlignment="Left" Margin="0,8,0,0" Padding="16,4" />
+
+            <TextBlock Text="{loc:Loc Home_After_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,0" />
+            <TextBlock Text="{loc:Loc Home_After_Text}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <Button Content="{loc:Loc Home_After_Run}" Command="{Binding GoToCommand}"
+                    CommandParameter="{x:Static vm:Page.RunProfile}" HorizontalAlignment="Left" Margin="0,8,0,0" Padding="16,4" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

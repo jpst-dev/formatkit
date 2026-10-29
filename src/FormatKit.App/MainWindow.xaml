@@ -1,6 +1,22 @@
 <Window x:Class="FormatKit.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FormatKit" Width="1000" Height="650">
-    <Grid />
+        xmlns:vm="clr-namespace:FormatKit.App.ViewModels"
+        xmlns:views="clr-namespace:FormatKit.App.Views"
+        Title="FormatKit" Width="1000" Height="650" MinWidth="720" MinHeight="480">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:HomeViewModel}"><views:HomePage /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AboutViewModel}"><views:AboutPage /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}"><views:PlaceholderPage /></DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <ListBox ItemsSource="{Binding NavItems}" DisplayMemberPath="Title"
+                 SelectedValuePath="Page" SelectedValue="{Binding Current, Mode=TwoWay}"
+                 BorderThickness="0,0,1,0" FontSize="15" Padding="0,8" />
+        <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" />
+    </Grid>
 </Window>

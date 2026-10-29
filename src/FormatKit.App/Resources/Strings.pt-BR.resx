@@ -10,4 +10,33 @@
   <data name="Reboot_Now" xml:space="preserve"><value>Reiniciar agora</value></data>
   <data name="Reboot_Cancel" xml:space="preserve"><value>Cancelar</value></data>
   <data name="Error_Unhandled" xml:space="preserve"><value>Erro inesperado: {0}</value></data>
+  <data name="Nav_Home" xml:space="preserve"><value>Início</value></data>
+  <data name="Nav_Checklist" xml:space="preserve"><value>Checklist</value></data>
+  <data name="Nav_RunProfile" xml:space="preserve"><value>Executar perfil</value></data>
+  <data name="Nav_Hardware" xml:space="preserve"><value>Hardware</value></data>
+  <data name="Nav_CleanupDiagnosis" xml:space="preserve"><value>Diagnóstico de limpeza</value></data>
+  <data name="Nav_Catalogs" xml:space="preserve"><value>Catálogos</value></data>
+  <data name="Nav_Media" xml:space="preserve"><value>Mídia de instalação</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>Sobre</value></data>
+  <data name="Home_Intro" xml:space="preserve"><value>O FormatKit prepara a reinstalação do Windows e reconstrói a máquina depois. Ele verifica o que poderia ser perdido antes de formatar e depois instala drivers, programas e configurações a partir de um perfil JSON.</value></data>
+  <data name="Home_Before_Title" xml:space="preserve"><value>Antes de formatar</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Rode o checklist para ver o que seria perdido e prepare a mídia de instalação.</value></data>
+  <data name="Home_Before_Checklist" xml:space="preserve"><value>Abrir Checklist</value></data>
+  <data name="Home_After_Title" xml:space="preserve"><value>Depois de formatar</value></data>
+  <data name="Home_After_Text" xml:space="preserve"><value>Execute o seu perfil para instalar drivers e programas e aplicar as configurações.</value></data>
+  <data name="Home_After_Run" xml:space="preserve"><value>Abrir Executar perfil</value></data>
+  <data name="Home_Warning" xml:space="preserve"><value>O FormatKit altera o sistema e pode reiniciar o computador. Teste primeiro em uma máquina virtual.</value></data>
+  <data name="Home_Interrupted" xml:space="preserve"><value>Uma execução foi interrompida antes de terminar. Você pode retomá-la de onde parou.</value></data>
+  <data name="Home_Resume" xml:space="preserve"><value>Retomar</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Versão</value></data>
+  <data name="About_Repository" xml:space="preserve"><value>Repositório</value></data>
+  <data name="About_OpenLogs" xml:space="preserve"><value>Abrir pasta de logs</value></data>
+  <data name="About_CliTitle" xml:space="preserve"><value>Comandos disponíveis só na linha de comando (por enquanto)</value></data>
+  <data name="About_Cli_cleanup_undo" xml:space="preserve"><value>Desfaz as alterações de uma limpeza a partir do diário.</value></data>
+  <data name="About_Cli_drivers_backup_network" xml:space="preserve"><value>Salva os drivers de rede para reinstalar sem internet.</value></data>
+  <data name="About_Cli_programs_export" xml:space="preserve"><value>Grava os programas instalados em uma lista reutilizável em um perfil.</value></data>
+  <data name="About_Cli_programs_search" xml:space="preserve"><value>Procura um programa no catálogo de pacotes.</value></data>
+  <data name="About_Cli_dev_wsl_user" xml:space="preserve"><value>Cria o usuário Linux dentro de uma distribuição WSL.</value></data>
+  <data name="About_Cli_dev_ssh_key" xml:space="preserve"><value>Cria uma chave SSH e mostra a parte pública.</value></data>
+  <data name="Placeholder_Soon" xml:space="preserve"><value>Esta página chega em uma etapa posterior.</value></data>
 </root>

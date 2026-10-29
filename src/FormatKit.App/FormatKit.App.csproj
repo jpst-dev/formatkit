@@ -19,4 +19,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="FormatKit.App.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
 </Project>

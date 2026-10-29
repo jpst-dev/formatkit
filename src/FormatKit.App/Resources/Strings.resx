@@ -10,4 +10,33 @@
   <data name="Reboot_Now" xml:space="preserve"><value>Restart now</value></data>
   <data name="Reboot_Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Error_Unhandled" xml:space="preserve"><value>Unexpected error: {0}</value></data>
+  <data name="Nav_Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Nav_Checklist" xml:space="preserve"><value>Checklist</value></data>
+  <data name="Nav_RunProfile" xml:space="preserve"><value>Run profile</value></data>
+  <data name="Nav_Hardware" xml:space="preserve"><value>Hardware</value></data>
+  <data name="Nav_CleanupDiagnosis" xml:space="preserve"><value>Cleanup diagnosis</value></data>
+  <data name="Nav_Catalogs" xml:space="preserve"><value>Catalogs</value></data>
+  <data name="Nav_Media" xml:space="preserve"><value>Installation media</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>About</value></data>
+  <data name="Home_Intro" xml:space="preserve"><value>FormatKit prepares a Windows reinstall and rebuilds the machine afterwards. It checks what could be lost before you format, then installs drivers, programs and settings from a JSON profile.</value></data>
+  <data name="Home_Before_Title" xml:space="preserve"><value>Before formatting</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Run the checklist to find what would be lost, and prepare the installation media.</value></data>
+  <data name="Home_Before_Checklist" xml:space="preserve"><value>Open Checklist</value></data>
+  <data name="Home_After_Title" xml:space="preserve"><value>After formatting</value></data>
+  <data name="Home_After_Text" xml:space="preserve"><value>Run your profile to install drivers and programs and apply your settings.</value></data>
+  <data name="Home_After_Run" xml:space="preserve"><value>Open Run profile</value></data>
+  <data name="Home_Warning" xml:space="preserve"><value>FormatKit changes the system and can restart the computer. Try it in a virtual machine first.</value></data>
+  <data name="Home_Interrupted" xml:space="preserve"><value>A run was interrupted before it finished. You can resume it where it stopped.</value></data>
+  <data name="Home_Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Version</value></data>
+  <data name="About_Repository" xml:space="preserve"><value>Repository</value></data>
+  <data name="About_OpenLogs" xml:space="preserve"><value>Open log folder</value></data>
+  <data name="About_CliTitle" xml:space="preserve"><value>Commands available only in the command line (for now)</value></data>
+  <data name="About_Cli_cleanup_undo" xml:space="preserve"><value>Reverts the changes of a cleanup run from its journal.</value></data>
+  <data name="About_Cli_drivers_backup_network" xml:space="preserve"><value>Saves the network drivers so they can be reinstalled without internet.</value></data>
+  <data name="About_Cli_programs_export" xml:space="preserve"><value>Writes the installed programs to a list you can reuse in a profile.</value></data>
+  <data name="About_Cli_programs_search" xml:space="preserve"><value>Searches the package catalog for a program.</value></data>
+  <data name="About_Cli_dev_wsl_user" xml:space="preserve"><value>Creates the Linux user inside a WSL distribution.</value></data>
+  <data name="About_Cli_dev_ssh_key" xml:space="preserve"><value>Creates an SSH key and shows the public part.</value></data>
+  <data name="Placeholder_Soon" xml:space="preserve"><value>This page arrives in a later step.</value></data>
 </root>
