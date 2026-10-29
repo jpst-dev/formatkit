@@ -26,7 +26,7 @@ internal static partial class ZshRc
     /// <summary>True when the first line is the marker, i.e. FormatKit wrote the file and may rewrite it.</summary>
     public static bool IsManaged(string existing)
     {
-        var text = existing.TrimStart('﻿');
+        var text = existing.TrimStart('\uFEFF');
         var end = text.IndexOf('\n');
         var first = end < 0 ? text : text[..end];
         return first.TrimEnd('\r') == Marker;

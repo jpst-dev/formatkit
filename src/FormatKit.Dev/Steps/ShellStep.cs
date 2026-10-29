@@ -353,7 +353,7 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
         try
         {
             var existing = files.FileExists(path) ? files.ReadAllBytes(path) : [];
-            var text = Utf8.GetString(existing).TrimStart('﻿');
+            var text = Utf8.GetString(existing).TrimStart('\uFEFF');
             var appended = PowerShellProfileBlock.Append(text, initLine);
             if (appended is null)
                 return new(path, DevItemOutcome.AlreadyInOrder);
