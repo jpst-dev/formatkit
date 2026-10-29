@@ -66,6 +66,14 @@ public sealed class WindowsRegistry : IRegistry
         return key?.GetSubKeyNames() ?? [];
     }
 
+    public IReadOnlyList<string> GetValueNames(string path)
+    {
+        var (hive, subKey) = Split(path);
+        using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+        using var key = baseKey.OpenSubKey(subKey, writable: false);
+        return key?.GetValueNames().Where(n => n.Length > 0).ToArray() ?? [];
+    }
+
     private static (RegistryHive Hive, string SubKey) Split(string path)
     {
         var slash = path.IndexOf('\\');

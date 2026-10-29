@@ -309,7 +309,9 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
             return;
         }
 
-        items.Add(await InstallFontAsync(ohMyPosh, windows.Font, fontLabel, ctx, ct).ConfigureAwait(false));
+        items.Add(IsFontInstalled(windows.Font, ctx)
+            ? new DevItem(fontLabel, DevItemOutcome.AlreadyInOrder)
+            : await InstallFontAsync(ohMyPosh, windows.Font, fontLabel, ctx, ct).ConfigureAwait(false));
         foreach (var profile in profiles)
         {
             var item = EnsureProfile(profile.Path, profile.InitLine, ctx);
@@ -343,6 +345,17 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
 
         ctx.Log.Warning("Windows PowerShell execution policy is {Policy}; {Path} will not load", policy, item.Label);
         return item with { Outcome = DevItemOutcome.Pending, NextAction = Strings.Get("Next_EnablePsScripts"), Detail = policy };
+    }
+
+    /// <summary>
+    /// Installing again replaces the per-user font files, which crashed a Windows Terminal opened right after (spec 12), so an installed
+    /// family is left alone. Font names look like "MesloLGM Nerd Font Regular (TrueType)"; the space after the family keeps "MesloLGMX" out.
+    /// </summary>
+    private static bool IsFontInstalled(string font, StepContext ctx)
+    {
+        var prefix = TerminalFragment.FontFamilies[font] + " ";
+        return new[] { @"HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts", @"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" }
+            .Any(key => ctx.Services.Registry.GetValueNames(key).Any(n => n.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)));
     }
 
     /// <summary>Exit 0 also when the font is already installed (spec 12), so success is reported as done.</summary>

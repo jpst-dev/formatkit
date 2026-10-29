@@ -23,4 +23,7 @@ public interface IRegistry
 
     /// <summary>Returns an empty list when the key is absent.</summary>
     IReadOnlyList<string> GetSubKeyNames(string path);
+
+    /// <summary>Read-only. Returns an empty list when the key is absent; the unnamed default value is not listed.</summary>
+    IReadOnlyList<string> GetValueNames(string path);
 }

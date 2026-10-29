@@ -412,6 +412,38 @@ public class ShellStepTests
         Assert.All(result.Messages, m => Assert.Contains(Strings.Get("Outcome_Done"), m));
     }
 
+    private const string UserFonts = @"HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts";
+    private const string MachineFonts = @"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
+
+    [Theory]
+    [InlineData(UserFonts)]
+    [InlineData(MachineFonts)]
+    public async Task Installed_font_family_is_not_installed_again(string key)
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.Set(key, "MesloLGM Nerd Font Regular (TrueType)", RegistryKind.String, "x.ttf");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Empty(rig.UserContext.Calls);
+        Assert.Contains("font Meslo: " + Strings.Get("Outcome_AlreadyInOrder"), result.Messages);
+    }
+
+    [Theory]
+    [InlineData("MesloLGS Nerd Font Regular (TrueType)")]
+    [InlineData("MesloLGMX Nerd Font Regular (TrueType)")]
+    [InlineData("MesloLGM Nerd Font")]
+    public async Task Other_family_does_not_count_as_installed(string name)
+    {
+        var rig = WithOhMyPosh();
+        rig.Registry.Set(UserFonts, name, RegistryKind.String, "x.ttf");
+
+        var result = await Run(Step(windows: Win()), rig);
+
+        Assert.Single(rig.UserContext.Calls);
+        Assert.Contains("font Meslo: " + Strings.Get("Outcome_Done"), result.Messages);
+    }
+
     [Fact]
     public async Task Font_install_failure_is_reported()
     {
