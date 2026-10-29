@@ -24,4 +24,6 @@ public sealed record ServiceSet(
     IUserEnvironment UserEnvironment,
     IToolLocator Tools,
     WslClient Wsl,
-    IVirtualDisks VirtualDisks);
+    IVirtualDisks VirtualDisks,
+    IVolumes Volumes,
+    ILicensing Licensing);

@@ -58,7 +58,9 @@ public static class Services
                 name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Machine),
                 name => Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)),
             new WslClient(processes),
-            new PowerShellVirtualDisks(processes, files, paths));
+            new PowerShellVirtualDisks(processes, files, paths),
+            new PowerShellVolumes(processes),
+            new CimLicensing(processes));
 
         return new CliEnvironment(
             services,

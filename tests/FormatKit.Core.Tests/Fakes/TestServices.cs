@@ -23,7 +23,9 @@ public static class TestServices
         FakeInteractiveConsole? console = null,
         FakeUserEnvironment? userEnvironment = null,
         FakeToolLocator? tools = null,
-        FakeVirtualDisks? virtualDisks = null)
+        FakeVirtualDisks? virtualDisks = null,
+        FakeVolumes? volumes = null,
+        FakeLicensing? licensing = null)
     {
         processes ??= new FakeProcessRunner();
         files ??= new InMemoryFileSystem();
@@ -47,7 +49,9 @@ public static class TestServices
             userEnvironment ?? new FakeUserEnvironment(),
             tools ?? new FakeToolLocator(),
             new WslClient(processes),
-            virtualDisks ?? new FakeVirtualDisks());
+            virtualDisks ?? new FakeVirtualDisks(),
+            volumes ?? new FakeVolumes(new VolumeInfo('C', 0, BitLockerState.Off, null, null)),
+            licensing ?? new FakeLicensing(new WindowsActivation(true, "OEM:DM")));
     }
 
     public static StepContext Context(ServiceSet services) =>
