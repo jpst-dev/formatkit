@@ -155,8 +155,11 @@ file in both languages.
   opening on Run profile in resume mode; `--worker --pipe <name> ...` → the
   worker, with no window (section 6).
 - A named mutex `Local\FormatKit.App` keeps one window per user session; a
-  second start brings the first window to the front and exits. The worker does
-  not take the mutex.
+  second start brings the first window to the front and exits. A second start
+  with `--resume` (the resume task finding a window already open) signals the
+  event `Local\FormatKit.App.Resume` instead, and the open window comes to the
+  front, opens Run profile and resumes the run. The mutex and both events grant
+  only the user. The worker does not take the mutex.
 - Views and ViewModels per page, one `MainViewModel` with the navigation, and a
   `IDialogService` (file pickers, confirmations, reboot countdown) so
   ViewModels never touch WPF types and are tested with a fake.
@@ -305,12 +308,12 @@ Worker → window:
 
 | Type | Fields |
 |---|---|
-| `planned` | steps: id, title, requiresAdmin |
+| `planned` | steps: id, title, requiresAdmin, doneBefore; profileName (optional: missing keeps the name shown) |
 | `stepStarted` | number, total, id |
 | `stepFinished` | id, outcome, messages, nextAction |
 | `rebootCountdown` | seconds |
 | `finished` | the `RunSummary` (status, step reports, report directory, error) |
-| `failed` | a localized message (worker error before or outside the engine) |
+| `failed` | a localized message (worker error before or outside the engine) and a reason: `other`, `stopped` or `profileChanged` (optional: missing is `other`); the window acts on the reason, never on the text |
 | `consoleOpened`, `consoleClosed` | a step opened, then closed, a console window for the user to type in (section 6.5) |
 | `consoleLine` | text: a line the step writes for the user (public data only) |
 | `disks`, `mediaProgress`, `mediaFinished` | media phase only |
@@ -346,7 +349,9 @@ not copied). The window shows the countdown dialog (section 5.3).
 A run started from the UI registers the resume task with `FormatKitUI.exe
 --resume` (D6). At the next logon the task starts the window elevated; the
 window opens on Run profile and starts the worker with `run --resume` without
-`runas`. Resume errors (nothing to resume, corrupt state, profile changed or
+`runas`. When a window is already open, the task's start signals it to resume
+instead (section 4); that window uses UAC when it is not elevated. The `planned`
+message carries the profile name, so the header shows it. Resume errors (nothing to resume, corrupt state, profile changed or
 invalid) are shown with the CLI's texts, and the task is removed as the CLI
 removes it.
 
@@ -358,8 +363,10 @@ clone` that may prompt) in a **new console window** with the same arguments,
 environment and timeout handling as `WindowsInteractiveConsole`, and waits for
 it. `CanPrompt` is true when a user is signed in at the console. `WriteLine`
 goes to the run log and, as a step message (`consoleLine`), to the window.
-The window shows "Type in the console window that opened" on the running step
-between `consoleOpened` and `consoleClosed`. The process arguments are not
+The window shows "If the console window that opened asks for something, type
+it there." on the running step between `consoleOpened` and `consoleClosed`
+(every attached console sends them, also the dotfiles clone that normally asks
+nothing). The process arguments are not
 sent. The values typed never pass
 through FormatKit, as today.
 
@@ -369,7 +376,9 @@ through FormatKit, as today.
 - **Profile changed between review and run:** the worker refuses (D7).
 - **Closing the window during a run:** a dialog asks "Stop after the current
   step?"; on yes the window sends `cancel`, waits for `finished`, then closes.
-  On no it stays open.
+  On no it stays open. A pending start (the UAC prompt, the worker's
+  connection) counts as a run: on yes the start is cancelled, and a worker that
+  connects anyway is sent `cancel` and waited for.
 - **Pipe broken or window gone:** the worker treats it as `cancel`: it finishes
   the current step and stops; the run state stays saved for **Resume**.
 - **Worker exits unexpectedly** (pipe closed without `finished`): the page says
@@ -550,3 +559,11 @@ Automation and the Hyper-V synthetic keyboard:
   simulated reboot shows its earlier outcome after the resume, and the hash
   refusal returns to the review with Reload.
 - **7 (media):** not run; waits for the media phase.
+
+Polish after merge, 2026-10-29 (unit-tested, not yet run in the VM):
+
+- **P1 (resume with a window open):** a `--resume` start that found a window open only brought it forward; it now signals `Local\FormatKit.App.Resume` and that window opens Run profile and resumes (section 4).
+- **P2 (close during the start):** closing during the UAC prompt or the worker's connection closed at once; it now asks "Stop after the current step?" and on yes cancels the start (section 7).
+- **P3 (resumed profile name):** a resumed run showed no profile name; `planned` now carries `profileName` (section 6.2).
+- **P4 (console hint):** the hint showed for consoles that ask nothing; it now reads "If the console window that opened asks for something, type it there." (section 6.5).
+- **P5 (refusal by text):** the window recognized the profile-changed refusal by its localized text; `failed` now carries a `reason` code (section 6.2).
