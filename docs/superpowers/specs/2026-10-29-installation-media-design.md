@@ -94,7 +94,7 @@ profile (as `FormatKit.Prepare`).
 | `SetupOptions` | Record: `Account` (`Local`, `Microsoft`), `Edition?`, `ComputerName?`, `Language?`, `Keyboard?`, `TimeZone?`. |
 | `SetupSectionParser` | Reads and validates the `setup` element of the profile JSON. Returns `ProfileError`s with paths such as `setup.account`. |
 | `SetupDefaults` | Fills missing language, keyboard and time zone from the current PC (through `IRegistry` and `TimeZoneInfo.Local`), then resolves the language against the image (section 6). |
-| `GenericKeys` | The table of public generic installation keys by edition name (Home, Home N, Pro, Pro N, Education, Education N, Pro Education, Pro for Workstations, Enterprise). |
+| `GenericKeys` | The table of public generic installation keys by edition name (Home, Home N, Home Single Language, Pro, Pro N, Pro for Workstations, Pro for Workstations N, Pro Education, Education, Education N, Enterprise, Enterprise N; plan ruling R8). |
 | `UnattendBuilder` | Pure function: resolved `SetupOptions`, the image's language and whether a profile is bundled → the `autounattend.xml` text (section 6). |
 | `ProfileBundle` | From the loaded profile and the modules' `ExternalInputs`, copies each input to `FormatKit\inputs\<n>-<name>` and writes `profile.json` with those paths relative (section 7). |
 | `InstallMedia` | Checks that a mounted ISO root is Windows 11 x64 installation media and reads its image: `sources\install.wim` or `install.esd`, its editions and languages, and `efi\boot\bootx64.efi`. |
@@ -131,7 +131,7 @@ CIM like `PowerShellVirtualDisks`, with literals through
     by tests, as the BitLocker values were for `prepare`.
   - `Task<string> PrepareUsbAsync(int number, string uniqueId, CancellationToken ct)`:
     fails without changing anything when disk `number` no longer has
-    `uniqueId`; otherwise `Clear-Disk -RemoveData -RemoveOEM`, MBR, one active
+    `uniqueId` or its id is blank; otherwise `Clear-Disk -RemoveData -RemoveOEM`, MBR, one active
     partition of `min(disk size − 1 MiB, 32 GiB)`, FAT32, label `FORMATKIT`, a drive
     letter; returns the root.
 - Copying uses the existing `IFileSystem` (`EnumerateFileEntries`, `Copy`,
