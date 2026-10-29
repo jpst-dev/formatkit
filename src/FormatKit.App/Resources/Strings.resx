@@ -129,7 +129,7 @@
   <data name="RunProfile_UseLast" xml:space="preserve"><value>Use it</value></data>
   <data name="RunProfile_Errors" xml:space="preserve"><value>This profile has errors</value></data>
   <data name="RunProfile_Plan" xml:space="preserve"><value>Plan</value></data>
-  <data name="RunProfile_Admin" xml:space="preserve"><value>admin</value></data>
+  <data name="RunProfile_Admin" xml:space="preserve"><value>administrator</value></data>
   <data name="RunProfile_NeedsAdmin" xml:space="preserve"><value>This plan needs administrator rights. Windows asks for permission when the run starts.</value></data>
   <data name="RunProfile_NoSteps" xml:space="preserve"><value>This profile enables nothing to run.</value></data>
   <data name="RunProfile_Reload" xml:space="preserve"><value>Reload</value></data>

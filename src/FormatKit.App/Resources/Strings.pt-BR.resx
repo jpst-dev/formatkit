@@ -129,7 +129,7 @@
   <data name="RunProfile_UseLast" xml:space="preserve"><value>Usar</value></data>
   <data name="RunProfile_Errors" xml:space="preserve"><value>Este perfil tem erros</value></data>
   <data name="RunProfile_Plan" xml:space="preserve"><value>Plano</value></data>
-  <data name="RunProfile_Admin" xml:space="preserve"><value>admin</value></data>
+  <data name="RunProfile_Admin" xml:space="preserve"><value>administrador</value></data>
   <data name="RunProfile_NeedsAdmin" xml:space="preserve"><value>Este plano exige direitos de administrador. O Windows pede permissão quando a execução começa.</value></data>
   <data name="RunProfile_NoSteps" xml:space="preserve"><value>Este perfil não habilita nada para executar.</value></data>
   <data name="RunProfile_Reload" xml:space="preserve"><value>Recarregar</value></data>

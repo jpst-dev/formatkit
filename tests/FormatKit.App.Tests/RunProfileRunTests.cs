@@ -269,6 +269,8 @@ public sealed class RunProfileRunTests : IDisposable
             var app = Values(Path.Combine(root.FullName, "src", "FormatKit.App", "Resources", file));
             foreach (var key in keys)
                 Assert.Equal(cli[key], app.GetValueOrDefault(key));
+            // The plan's admin badge reads as the CLI's dry-run badge (seen in VM scenario 2).
+            Assert.Equal(cli["Plan_Admin"], app.GetValueOrDefault("RunProfile_Admin"));
         }
 
         static Dictionary<string, string> Values(string path) =>
