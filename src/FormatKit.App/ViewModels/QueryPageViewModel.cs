@@ -10,7 +10,7 @@ namespace FormatKit.App.ViewModels;
 public abstract partial class QueryPageViewModel(Serilog.ILogger? log = null) : ObservableObject
 {
     private readonly Serilog.ILogger _log = log ?? Serilog.Core.Logger.None;
-    private CancellationTokenSource? _running;
+    private readonly Dictionary<object, CancellationTokenSource> _running = [];
 
     [ObservableProperty]
     private bool _isBusy;
@@ -22,17 +22,24 @@ public abstract partial class QueryPageViewModel(Serilog.ILogger? log = null) : 
     public bool HasError => Error is not null;
 
     /// <summary>Cancels the running query; the page calls this when the user navigates away.</summary>
-    public void Leave() => _running?.Cancel();
+    public void Leave()
+    {
+        foreach (var source in _running.Values.ToList())
+            source.Cancel();
+    }
 
     /// <summary>
-    /// Runs a system query guarded against WMI/COM failures. A newer query replaces the running one; a cancelled
-    /// query shows no error and applies nothing.
+    /// Runs a system query guarded against WMI/COM failures. Queries with different <paramref name="slot"/> keys run
+    /// independently; a repeat of the same slot replaces the older one. A cancelled or replaced query shows no error
+    /// and applies nothing. <see cref="IsBusy"/> stays true while any query runs.
     /// </summary>
-    protected async Task RunQueryAsync<T>(Func<CancellationToken, Task<T>> query, Action<T> apply)
+    protected async Task RunQueryAsync<T>(Func<CancellationToken, Task<T>> query, Action<T> apply, object? slot = null)
     {
-        _running?.Cancel();
+        var key = slot ?? string.Empty;
+        if (_running.TryGetValue(key, out var previous))
+            previous.Cancel();
         var source = new CancellationTokenSource();
-        _running = source;
+        _running[key] = source;
         IsBusy = true;
         Error = null;
         try
@@ -54,14 +61,16 @@ public abstract partial class QueryPageViewModel(Serilog.ILogger? log = null) : 
         {
             // The user left the page: not an error.
         }
+        catch (Exception ex)
+        {
+            _log.Error(ex, "Showing the query result failed");
+            Error = ex.Message;
+        }
         finally
         {
-            if (ReferenceEquals(_running, source))
-            {
-                _running = null;
-                IsBusy = false;
-            }
-
+            if (_running.TryGetValue(key, out var current) && ReferenceEquals(current, source))
+                _running.Remove(key);
+            IsBusy = _running.Count > 0;
             source.Dispose();
         }
     }

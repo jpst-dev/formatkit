@@ -74,10 +74,10 @@ public sealed partial class HardwareViewModel : QueryPageViewModel
         Scan?.WindowsUpdateError is { } error ? Strings.Format("Scan_WuError", error) : string.Empty;
 
     private Task LoadAsync() =>
-        RunQueryAsync(ct => _services.Hardware.ReadAsync(ct), snapshot => Hardware = snapshot);
+        RunQueryAsync(ct => _services.Hardware.ReadAsync(ct), snapshot => Hardware = snapshot, nameof(LoadAsync));
 
     private Task ScanAsync() =>
-        RunQueryAsync(ct => new DriverScanner(_services, _vendors).ScanAsync(ct), report => Scan = report);
+        RunQueryAsync(ct => new DriverScanner(_services, _vendors).ScanAsync(ct), report => Scan = report, nameof(ScanAsync));
 
     private static IReadOnlyList<string> OrNone(IEnumerable<string>? items)
     {

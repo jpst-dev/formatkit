@@ -72,6 +72,63 @@ public class HardwareViewModelTests
         Assert.False(vm.IsBusy);
     }
 
+    [Fact]
+    public async Task Scan_DuringLoad_KeepsBothResults()
+    {
+        var hardware = new GatedHardwareInfo();
+        var vm = new HardwareViewModel(
+            TestServices.Create() with { Hardware = hardware }, VendorCatalog.LoadEmbedded());
+
+        var load = vm.LoadCommand.ExecuteAsync(null);
+        await vm.ScanCommand.ExecuteAsync(null);
+        Assert.True(vm.IsBusy);
+        hardware.Release();
+        await load;
+
+        Assert.NotNull(vm.Scan);
+        Assert.NotNull(vm.Hardware);
+        Assert.False(vm.IsBusy);
+    }
+
+    [Fact]
+    public async Task Load_Twice_AppliesOnlyTheSecondResult()
+    {
+        var hardware = new GatedHardwareInfo();
+        var vm = new HardwareViewModel(
+            TestServices.Create() with { Hardware = hardware }, VendorCatalog.LoadEmbedded());
+
+        var first = vm.LoadCommand.ExecuteAsync(null);
+        await vm.LoadCommand.ExecuteAsync(null);
+        hardware.Release();
+        await first;
+
+        Assert.Equal("Second Model 1", vm.MachineText);
+    }
+
+    /// <summary>The first read waits for <see cref="Release"/> and ignores cancellation; later reads return at once.</summary>
+    private sealed class GatedHardwareInfo : IHardwareInfo
+    {
+        private readonly TaskCompletionSource _gate = new();
+        private int _calls;
+
+        public void Release() => _gate.SetResult();
+
+        public async Task<HardwareSnapshot> ReadAsync(CancellationToken ct)
+        {
+            if (Interlocked.Increment(ref _calls) == 1)
+            {
+                await _gate.Task;
+                return FakeHardwareInfo.Sample(manufacturer: "First");
+            }
+
+            return FakeHardwareInfo.Sample(manufacturer: "Second");
+        }
+
+        public Task<IReadOnlyList<ProblemDevice>> ReadDisabledDevicesAsync(CancellationToken ct) => Task.FromResult<IReadOnlyList<ProblemDevice>>([]);
+
+        public Task<bool> HasBatteryAsync(CancellationToken ct) => Task.FromResult(false);
+    }
+
     private sealed class BlockingHardwareInfo : IHardwareInfo
     {
         public TaskCompletionSource Started { get; } = new();

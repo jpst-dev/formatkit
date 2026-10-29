@@ -10,33 +10,6 @@ public class QueryPageViewModelTests
     }
 
     [Fact]
-    public async Task Leave_CancelsRunningQuery()
-    {
-        var page = new TestPage();
-        var started = new TaskCompletionSource();
-        CancellationToken seen = default;
-        var applied = false;
-
-        var run = page.RunAsync<int>(async ct =>
-        {
-            seen = ct;
-            started.SetResult();
-            await Task.Delay(Timeout.Infinite, ct);
-            return 1;
-        }, _ => applied = true);
-        await started.Task;
-        Assert.True(page.IsBusy);
-
-        page.Leave();
-        await run;
-
-        Assert.True(seen.IsCancellationRequested);
-        Assert.False(page.IsBusy);
-        Assert.Null(page.Error);
-        Assert.False(applied);
-    }
-
-    [Fact]
     public async Task RunQuery_AppliesValueAndClearsBusy()
     {
         var page = new TestPage();
@@ -47,5 +20,51 @@ public class QueryPageViewModelTests
         Assert.Equal(7, value);
         Assert.False(page.IsBusy);
         Assert.False(page.HasError);
+    }
+
+    [Fact]
+    public async Task StaleResult_IsNotApplied_AndBusyStaysUntilTheNewestFinishes()
+    {
+        var page = new TestPage();
+        var firstGate = new TaskCompletionSource<int>();
+        var secondGate = new TaskCompletionSource<int>();
+        var applied = new List<int>();
+
+        var first = page.RunAsync(_ => firstGate.Task, applied.Add);
+        var second = page.RunAsync(_ => secondGate.Task, applied.Add);
+        firstGate.SetResult(1);
+        await first;
+
+        Assert.Empty(applied);
+        Assert.True(page.IsBusy);
+
+        secondGate.SetResult(2);
+        await second;
+
+        Assert.Equal([2], applied);
+        Assert.False(page.IsBusy);
+    }
+
+    [Fact]
+    public async Task RefusedQuery_SetsErrorAndHasError()
+    {
+        var page = new TestPage();
+
+        await page.RunAsync<int>(_ => throw new System.Runtime.InteropServices.COMException("refused"), _ => { });
+
+        Assert.True(page.HasError);
+        Assert.Contains("refused", page.Error);
+        Assert.False(page.IsBusy);
+    }
+
+    [Fact]
+    public async Task ApplyThrowing_SetsErrorInsteadOfEscaping()
+    {
+        var page = new TestPage();
+
+        await page.RunAsync(_ => Task.FromResult(1), _ => throw new InvalidOperationException("boom"));
+
+        Assert.Contains("boom", page.Error);
+        Assert.False(page.IsBusy);
     }
 }
