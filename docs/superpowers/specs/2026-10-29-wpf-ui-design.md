@@ -519,7 +519,7 @@ Portuguese UI, 1024x768).
 - **V5 (resume rows):** on `run --resume` the rows of steps done before the stop or reboot stayed "Pending"; the `planned` message now carries each such step's earlier outcome (`doneBefore`) and the window shows it with "Done before the stop or reboot." (VM scenario 4, 2026-10-29).
 - **V6 (profile changed):** the worker's hash refusal landed on the result page with every row Pending and a Resume offer; it now returns to the review with the message so the user can Reload (VM scenario 6, 2026-10-29).
 
-VM scenarios (section 8.1), 2026-10-29, Windows 11 build 26100 Hyper-V VM with
+VM scenarios (section 8.1), 2026-10-29, Windows 11 build 26300 Hyper-V VM with
 nested virtualization, Brazilian Portuguese UI, 1024x768, driven through UI
 Automation and the Hyper-V synthetic keyboard:
 
