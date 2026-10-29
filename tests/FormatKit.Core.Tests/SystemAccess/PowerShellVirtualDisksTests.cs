@@ -50,6 +50,27 @@ public class PowerShellVirtualDisksTests
     }
 
     [Fact]
+    public async Task Create_makes_the_vhdx_folder_before_diskpart()
+    {
+        var (disks, runner, files) = Create();
+        var folderExisted = false;
+        runner.OnRun = spec =>
+        {
+            if (spec.FileName == "diskpart.exe")
+            {
+                folderExisted = files.DirectoryExists(@"D:\Dev Disks");
+                files.Seed(Vhdx, "vhdx");
+            }
+        };
+        runner.Enqueue("diskpart.exe", Result(0));
+        runner.Enqueue("powershell.exe", Result(0));
+
+        await disks.CreateDevDriveAsync(Vhdx, 50, 'D', "Dev", TestContext.Current.CancellationToken);
+
+        Assert.True(folderExisted);
+    }
+
+    [Fact]
     public async Task Create_failure_detaches_and_deletes()
     {
         var (disks, runner, files) = Create();

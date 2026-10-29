@@ -60,6 +60,8 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
         try
         {
             files.CreateDirectory(paths.Root);
+            // diskpart's create vdisk fails with "path not found" when the VHDX folder does not exist yet.
+            files.CreateDirectory(Path.GetDirectoryName(vhdxPath)!);
             // diskpart reads the script in the console OEM code page, so non-ASCII paths (João) need it, not UTF-8.
             files.WriteAllBytes(paths.DevDriveScriptFile, ProcessOutputDecoder.OemEncoding.GetBytes(script + Environment.NewLine));
 
