@@ -44,6 +44,11 @@
                     <StackPanel>
                         <TextBlock Text="{loc:Loc RunProfile_Errors}" FontWeight="SemiBold" />
                         <ItemsControl ItemsSource="{Binding Errors}">
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Path}" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="0,6,0,0">
@@ -61,6 +66,11 @@
                     <TextBlock Text="{loc:Loc RunProfile_NeedsAdmin}" TextWrapping="Wrap" Opacity="0.75" Margin="0,4,0,0"
                                Visibility="{Binding PlanNeedsAdmin, Converter={StaticResource BoolToVisibility}}" />
                     <ItemsControl ItemsSource="{Binding Plan}">
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="0,8,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Gray">
@@ -128,6 +138,11 @@
                 </StackPanel>
 
                 <ItemsControl ItemsSource="{Binding Steps}" Margin="0,8,0,0">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border x:Name="Row" Margin="0,8,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Gray">

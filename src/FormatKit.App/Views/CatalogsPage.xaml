@@ -35,13 +35,31 @@
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Text="{loc:Loc Cat_LevelFilter}" VerticalAlignment="Center" />
                         <ComboBox Margin="8,0,16,0" MinWidth="120" ItemsSource="{Binding LevelOptions}"
-                                  DisplayMemberPath="Label" SelectedItem="{Binding LevelOption, Mode=TwoWay}" />
+                                  DisplayMemberPath="Label" SelectedItem="{Binding LevelOption, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
                         <TextBlock Text="{loc:Loc Cat_CategoryFilter}" VerticalAlignment="Center" />
                         <ComboBox Margin="8,0,0,0" MinWidth="120" ItemsSource="{Binding CleanupCategoryOptions}"
-                                  DisplayMemberPath="Label" SelectedItem="{Binding CleanupCategoryOption, Mode=TwoWay}" />
+                                  DisplayMemberPath="Label" SelectedItem="{Binding CleanupCategoryOption, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
                     </StackPanel>
                     <ListBox ItemsSource="{Binding CleanupItems}" SelectedItem="{Binding SelectedCleanup, Mode=TwoWay}"
-                             ItemTemplate="{StaticResource ItemTemplate}" />
+                             ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource Title}}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
                 </DockPanel>
             </TabItem>
             <TabItem Header="{loc:Loc Cat_TabPrograms}">
@@ -49,10 +67,22 @@
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Text="{loc:Loc Cat_CategoryFilter}" VerticalAlignment="Center" />
                         <ComboBox Margin="8,0,0,0" MinWidth="140" ItemsSource="{Binding ProgramCategoryOptions}"
-                                  DisplayMemberPath="Label" SelectedItem="{Binding ProgramCategoryOption, Mode=TwoWay}" />
+                                  DisplayMemberPath="Label" SelectedItem="{Binding ProgramCategoryOption, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
                     </StackPanel>
                     <ListBox ItemsSource="{Binding ProgramItems}" SelectedItem="{Binding SelectedProgram, Mode=TwoWay}"
-                             ItemTemplate="{StaticResource ItemTemplate}" />
+                             ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource Title}}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
                 </DockPanel>
             </TabItem>
         </TabControl>

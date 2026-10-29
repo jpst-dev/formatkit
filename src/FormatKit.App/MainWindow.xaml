@@ -21,7 +21,13 @@
         </Grid.ColumnDefinitions>
         <ListBox ItemsSource="{Binding NavItems}" DisplayMemberPath="Title"
                  SelectedValuePath="Page" SelectedValue="{Binding Current, Mode=TwoWay}"
-                 BorderThickness="0,0,1,0" FontSize="15" Padding="0,8" />
+                 BorderThickness="0,0,1,0" FontSize="15" Padding="0,8">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
         <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" />
     </Grid>
 </Window>

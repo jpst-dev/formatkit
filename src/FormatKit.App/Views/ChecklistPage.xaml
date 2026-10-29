@@ -35,6 +35,11 @@
                 <StackPanel>
                     <TextBlock Text="{loc:Loc Checklist_ProfileErrors}" FontWeight="SemiBold" />
                     <ItemsControl ItemsSource="{Binding ProfileErrors}">
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Path}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="0,6,0,0">
@@ -60,6 +65,11 @@
             </Border>
 
             <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Expander IsExpanded="{Binding StartsExpanded, Mode=OneWay}"
@@ -72,11 +82,21 @@
                                 </StackPanel>
                             </Expander.Header>
                             <ItemsControl ItemsSource="{Binding Sections}" FontSize="12" FontWeight="Normal">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Margin="0,8,0,0">
                                             <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" />
                                             <ItemsControl ItemsSource="{Binding Items}">
+                                                <ItemsControl.ItemContainerStyle>
+                                                    <Style TargetType="ContentPresenter">
+                                                        <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                                                    </Style>
+                                                </ItemsControl.ItemContainerStyle>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border Margin="0,6,0,0" Padding="12" CornerRadius="4"

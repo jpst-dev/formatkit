@@ -33,11 +33,21 @@
             </Border>
 
             <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Margin="0,20,0,0">
                             <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" />
                             <ItemsControl ItemsSource="{Binding Findings}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Margin="0,8,0,0" Padding="12" CornerRadius="4"
