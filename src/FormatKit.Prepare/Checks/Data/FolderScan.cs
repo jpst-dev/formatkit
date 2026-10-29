@@ -2,10 +2,12 @@ using FormatKit.Core.SystemAccess;
 
 namespace FormatKit.Prepare.Checks.Data;
 
-/// <summary>Size of the local files under a folder. Cloud-only placeholders are skipped; folders that could not be listed are counted.</summary>
+/// <summary>Size of the local files under a folder. Cloud-only placeholders and the hidden system desktop.ini that Windows
+/// puts in every user folder are skipped; folders that could not be listed are counted.</summary>
 internal sealed record FolderScan(long Bytes, int FileCount, int UnreadableFolders)
 {
     private const FileAttributes CloudOnly = (FileAttributes)0x400000 | FileAttributes.Offline;
+    private const FileAttributes HiddenSystem = FileAttributes.Hidden | FileAttributes.System;
 
     /// <summary>Checks <paramref name="ct"/> per file, so Ctrl+C stops a large scan promptly.</summary>
     public static FolderScan Run(IFileSystem files, string folder, CancellationToken ct)
@@ -16,7 +18,7 @@ internal sealed record FolderScan(long Bytes, int FileCount, int UnreadableFolde
         foreach (var entry in files.EnumerateFileEntries(folder, recursive: true, _ => unreadable++))
         {
             ct.ThrowIfCancellationRequested();
-            if ((entry.Attributes & CloudOnly) != 0)
+            if ((entry.Attributes & CloudOnly) != 0 || IsFolderSettings(entry))
                 continue;
             bytes += entry.Length;
             count++;
@@ -24,4 +26,8 @@ internal sealed record FolderScan(long Bytes, int FileCount, int UnreadableFolde
 
         return new FolderScan(bytes, count, unreadable);
     }
+
+    private static bool IsFolderSettings(FileEntry entry) =>
+        (entry.Attributes & HiddenSystem) == HiddenSystem
+        && string.Equals(Path.GetFileName(entry.Path), "desktop.ini", StringComparison.OrdinalIgnoreCase);
 }

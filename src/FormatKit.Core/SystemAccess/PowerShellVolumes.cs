@@ -82,6 +82,8 @@ public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
         4 => BitLockerState.Decrypting,
         5 => BitLockerState.Suspended,
         6 => BitLockerState.Locked,
+        // "Waiting for activation" (device encryption without protectors): encrypted with a clear key, like a suspended volume.
+        8 => BitLockerState.Suspended,
         _ => BitLockerState.Unknown,
     };
 

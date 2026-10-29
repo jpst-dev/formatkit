@@ -44,6 +44,7 @@ public class PowerShellVolumesTests
     [InlineData("4", BitLockerState.Decrypting)]
     [InlineData("5", BitLockerState.Suspended)]
     [InlineData("6", BitLockerState.Locked)]
+    [InlineData("8", BitLockerState.Suspended)]
     [InlineData("0", BitLockerState.Unknown)]
     [InlineData("null", BitLockerState.Unknown)]
     public async Task MapsBitLocker(string value, BitLockerState expected)

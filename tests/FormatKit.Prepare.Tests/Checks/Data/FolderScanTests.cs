@@ -27,4 +27,28 @@ public class FolderScanTests
 
         Assert.Equal(new FolderScan(15, 2, 0), scan);
     }
+
+    [Fact]
+    public void Folder_settings_files_do_not_count()
+    {
+        // Windows puts a hidden system desktop.ini in every user folder; it is not the user's data.
+        var files = new InMemoryFileSystem();
+        files.SeedEntry(@"C:\Users\joao\Pictures\desktop.ini", 504, FileAttributes.Hidden | FileAttributes.System | FileAttributes.Archive);
+        files.SeedEntry(@"C:\Users\joao\Pictures\sub\Desktop.INI", 100, FileAttributes.Hidden | FileAttributes.System);
+
+        var scan = FolderScan.Run(files, @"C:\Users\joao\Pictures", CancellationToken.None);
+
+        Assert.Equal(new FolderScan(0, 0, 0), scan);
+    }
+
+    [Fact]
+    public void A_visible_desktop_ini_counts()
+    {
+        var files = new InMemoryFileSystem();
+        files.SeedEntry(@"C:\Users\joao\Documents\desktop.ini", 50);
+
+        var scan = FolderScan.Run(files, @"C:\Users\joao\Documents", CancellationToken.None);
+
+        Assert.Equal(new FolderScan(50, 1, 0), scan);
+    }
 }
