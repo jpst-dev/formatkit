@@ -61,7 +61,21 @@ public sealed class MediaBuilder(ServiceSet services, ILogger log)
         }
     }
 
+    /// <summary>Writes the media. Any failure other than cancellation is a <see cref="MediaWriteException"/> (the target is partly written).</summary>
     public async Task WriteAsync(PreparedMedia media, MediaRequest request, string targetRoot,
+        IProgress<MediaProgress>? progress, CancellationToken ct)
+    {
+        try
+        {
+            await WriteCoreAsync(media, request, targetRoot, progress, ct);
+        }
+        catch (Exception e) when (e is not (OperationCanceledException or MediaWriteException))
+        {
+            throw new MediaWriteException(e.Message, e);
+        }
+    }
+
+    private async Task WriteCoreAsync(PreparedMedia media, MediaRequest request, string targetRoot,
         IProgress<MediaProgress>? progress, CancellationToken ct)
     {
         var bundleBytes = request.Bundle?.Items.Sum(i => i.Bytes) ?? 0;
@@ -101,7 +115,7 @@ public sealed class MediaBuilder(ServiceSet services, ILogger log)
             }
             catch (InvalidOperationException e)
             {
-                throw new MediaException(Strings.Format("Media_SplitFailed", e.Message));
+                throw new MediaWriteException(Strings.Format("Media_SplitFailed", e.Message), e);
             }
 
             copied += media.Image.Bytes;

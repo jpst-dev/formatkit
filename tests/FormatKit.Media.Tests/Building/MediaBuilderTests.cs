@@ -183,7 +183,7 @@ public class MediaBuilderTests
         var rig = new Rig(imageBytes: MediaBuilder.Fat32MaxFile + 1);
         rig.Images.ThrowOnSplit = new InvalidOperationException("split failed");
         var media = await rig.Builder.PrepareAsync(Request(), CancellationToken.None);
-        await Assert.ThrowsAnyAsync<Exception>(() => rig.Builder.WriteAsync(media, Request(), @"G:\out", null, CancellationToken.None));
+        await Assert.ThrowsAsync<MediaWriteException>(() => rig.Builder.WriteAsync(media, Request(), @"G:\out", null, CancellationToken.None));
         await media.DisposeAsync();
         Assert.Equal([Iso], rig.Disk.Dismounted);
     }
@@ -206,6 +206,38 @@ public class MediaBuilderTests
         var ex = await Assert.ThrowsAsync<MediaException>(() =>
             rig.Builder.PrepareAsync(Request(setup: new SetupOptions(Edition: "nope")), CancellationToken.None));
         Assert.Contains("setup.edition", ex.Message);
+    }
+
+    [Fact]
+    public async Task Write_split_failure_is_a_write_error_with_the_original_inside()
+    {
+        var rig = new Rig(imageBytes: MediaBuilder.Fat32MaxFile + 1);
+        var original = new InvalidOperationException("dism failed");
+        rig.Images.ThrowOnSplit = original;
+        await using var media = await rig.Builder.PrepareAsync(Request(), CancellationToken.None);
+        var ex = await Assert.ThrowsAsync<MediaWriteException>(() =>
+            rig.Builder.WriteAsync(media, Request(), @"G:\out", null, CancellationToken.None));
+        Assert.Same(original, ex.InnerException);
+    }
+
+    [Fact]
+    public async Task Write_unreadable_folder_is_a_write_error()
+    {
+        var rig = new Rig();
+        await using var media = await rig.Builder.PrepareAsync(Request(), CancellationToken.None);
+        rig.Fs.MarkUnreadable(@"E:\boot");
+        await Assert.ThrowsAsync<MediaWriteException>(() =>
+            rig.Builder.WriteAsync(media, Request(), @"G:\out", null, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Write_copy_failure_is_a_write_error()
+    {
+        var rig = new Rig();
+        await using var media = await rig.Builder.PrepareAsync(Request(), CancellationToken.None);
+        rig.Fs.FailWrites = true;
+        await Assert.ThrowsAsync<MediaWriteException>(() =>
+            rig.Builder.WriteAsync(media, Request(), @"G:\out", null, CancellationToken.None));
     }
 
     [Fact]
