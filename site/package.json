@@ -11,7 +11,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
-    "check": "astro check && vitest run"
+    "check": "astro check && vitest run",
+    "check:dist": "node scripts/check-dist.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.7",
