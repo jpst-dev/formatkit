@@ -62,7 +62,6 @@ public class DevDriveStepTests
         Assert.Empty(rig.Disks.Calls);
         Assert.Empty(rig.Environment.Values);
         Assert.All(result.Messages, m => Assert.Contains(Text("NotApplicable"), m));
-        Assert.Contains(result.Messages, m => m.Contains(Strings.Get("Next_UpdateWindows")));
         Assert.Equal(3, result.Messages.Count); // drive, remount, npm
     }
 
@@ -75,7 +74,6 @@ public class DevDriveStepTests
         var result = await rig.Run(Options());
 
         Assert.Empty(rig.Disks.Calls);
-        Assert.Contains(result.Messages, m => m.Contains(Strings.Get("Next_UpdateWindows")));
     }
 
     [Fact]
@@ -212,6 +210,47 @@ public class DevDriveStepTests
         Assert.Contains(Text("Failed"), Message(result, "remount at startup"));
         Assert.Contains(Text("Done"), Message(result, "Dev Drive"));
         Assert.Equal(@"D:\packages\npm", rig.Environment.Get("npm_config_cache"));
+    }
+
+    [Fact]
+    public async Task Free_space_lookup_failure_keeps_all_items()
+    {
+        var rig = new Rig();
+        rig.Disks.FreeBytesFailure = new DriveNotFoundException("no drive");
+
+        var result = await rig.Run(Options("npm"));
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.Contains(Strings.Get("Next_SeeLog"), result.NextAction);
+        Assert.Contains("no drive", Message(result, "Dev Drive"));
+        Assert.Contains(Text("NotApplicable"), Message(result, "remount at startup"));
+        Assert.Contains(Text("NotApplicable"), Message(result, "npm"));
+        Assert.DoesNotContain(rig.Disks.Calls, c => c.StartsWith("Create ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Vhdx_missing_after_attach_is_not_created_over()
+    {
+        var rig = new Rig();
+        rig.Disks.States[Vhdx] = new VirtualDiskState(false, null, null);
+        rig.Disks.VanishOnAttach = true;
+
+        var result = await rig.Run(Options("npm"));
+
+        Assert.Equal(StepOutcome.Failed, result.Outcome);
+        Assert.DoesNotContain(rig.Disks.Calls, c => c.StartsWith("Create ", StringComparison.Ordinal));
+        Assert.Contains(Text("NotApplicable"), Message(result, "npm"));
+    }
+
+    [Fact]
+    public async Task Label_and_letter_compare_ignoring_case()
+    {
+        var rig = new Rig();
+        rig.Disks.States[Vhdx] = new VirtualDiskState(true, 'd', "DEV");
+
+        var result = await rig.Run(Options());
+
+        Assert.Contains(Text("AlreadyInOrder"), Message(result, "Dev Drive"));
     }
 
     [Fact]

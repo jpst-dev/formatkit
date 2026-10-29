@@ -24,6 +24,12 @@ public sealed class FakeVirtualDisks : IVirtualDisks
     public Task AttachAsync(string vhdxPath, CancellationToken ct)
     {
         Calls.Add($"Attach {vhdxPath}");
+        if (VanishOnAttach)
+        {
+            States.Remove(vhdxPath);
+            return Task.CompletedTask;
+        }
+
         if (States.TryGetValue(vhdxPath, out var state))
         {
             States[vhdxPath] = state with { Attached = true };
@@ -53,7 +59,13 @@ public sealed class FakeVirtualDisks : IVirtualDisks
 
     public bool IsLetterInUse(char letter) => LettersInUse.Contains(char.ToUpperInvariant(letter));
 
-    public long FreeBytes(string hostRoot) => FreeBytesValue;
+    /// <summary>When set, <see cref="FreeBytes"/> throws it, as DriveInfo does for a missing or not-ready drive.</summary>
+    public Exception? FreeBytesFailure { get; set; }
+
+    /// <summary>When set, <see cref="AttachAsync"/> leaves the VHDX unknown afterwards (the file vanished).</summary>
+    public bool VanishOnAttach { get; set; }
+
+    public long FreeBytes(string hostRoot) => FreeBytesFailure is null ? FreeBytesValue : throw FreeBytesFailure;
 
     public Task RegisterRemountTaskAsync(string vhdxPath, CancellationToken ct)
     {

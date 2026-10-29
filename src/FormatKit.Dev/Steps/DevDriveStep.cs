@@ -45,7 +45,7 @@ internal sealed class DevDriveStep(DevDriveOptions options) : IStep
 
         if (!IsSupportedBuild(ctx.Services.Registry))
         {
-            items.Add(new DevItem(DriveLabel, DevItemOutcome.NotApplicable, Strings.Get("Next_UpdateWindows"), Strings.Get("Next_UpdateWindows")));
+            items.Add(new DevItem(DriveLabel, DevItemOutcome.NotApplicable, Strings.Get("Next_UpdateWindows")));
             items.Add(new DevItem(RemountLabel, DevItemOutcome.NotApplicable));
             items.AddRange(options.Caches.Select(c => new DevItem(c, DevItemOutcome.NotApplicable)));
             return DevStepResult.From(items);
@@ -90,13 +90,19 @@ internal sealed class DevDriveStep(DevDriveOptions options) : IStep
                 await disks.AttachAsync(options.Path, ct).ConfigureAwait(false);
                 state = await disks.GetAsync(options.Path, ct).ConfigureAwait(false);
                 attachedNow = true;
+                if (state is null)
+                {
+                    // Never create over a file that was just there.
+                    ctx.Log.Warning("{Path} is unknown after it was attached", options.Path);
+                    return new DevItem(DriveLabel, DevItemOutcome.Failed, Strings.Get("Next_SeeLog"));
+                }
             }
 
             if (state is null)
                 return await CreateAsync(ctx, ct).ConfigureAwait(false);
 
             if (state.Attached && state.Letter is { } letter
-                && char.ToUpperInvariant(letter) == options.Letter && string.Equals(state.Label, options.Label, StringComparison.Ordinal))
+                && char.ToUpperInvariant(letter) == options.Letter && string.Equals(state.Label, options.Label, StringComparison.OrdinalIgnoreCase))
                 return new DevItem(DriveLabel, attachedNow ? DevItemOutcome.Done : DevItemOutcome.AlreadyInOrder);
 
             ctx.Log.Warning("{Path} is attached as {Letter} {Label}, not {WantedLetter} {WantedLabel}",
@@ -107,6 +113,12 @@ internal sealed class DevDriveStep(DevDriveOptions options) : IStep
         {
             ctx.Log.Warning(ex, "The Dev Drive at {Path} could not be set up", options.Path);
             return new DevItem(DriveLabel, DevItemOutcome.Failed, Strings.Get("Next_SeeLog"));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // FreeBytes (DriveInfo) throws for a missing or not-ready host drive.
+            ctx.Log.Warning(ex, "The host drive of {Path} could not be used", options.Path);
+            return new DevItem(DriveLabel, DevItemOutcome.Failed, Strings.Get("Next_SeeLog"), ex.Message);
         }
     }
 
