@@ -35,7 +35,23 @@ public sealed record RebootCountdown(int Seconds) : WorkerMessage;
 
 public sealed record Finished(RunSummary Summary) : WorkerMessage;
 
-public sealed record Failed(string Message) : WorkerMessage;
+/// <summary>
+/// Why the worker sent <see cref="Failed"/>, so the window reacts to the code and never to the message text, which
+/// is in the worker's UI language. Serialized as a camelCase string.
+/// </summary>
+public enum FailureReason
+{
+    [JsonStringEnumMemberName("other")] Other,
+
+    /// <summary>The window asked to stop; the run stays saved for Resume.</summary>
+    [JsonStringEnumMemberName("stopped")] Stopped,
+
+    /// <summary>The profile's hash differs from the reviewed one; nothing ran.</summary>
+    [JsonStringEnumMemberName("profileChanged")] ProfileChanged,
+}
+
+/// <summary>The run ended without a result; <paramref name="Message"/> is shown as it is. A missing reason is <see cref="FailureReason.Other"/>.</summary>
+public sealed record Failed(string Message, FailureReason Reason = FailureReason.Other) : WorkerMessage;
 
 /// <summary>A step opened a console window for the user to type in (a password or passphrase prompt).</summary>
 public sealed record ConsoleOpened : WorkerMessage;

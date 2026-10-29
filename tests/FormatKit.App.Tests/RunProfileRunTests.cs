@@ -183,7 +183,7 @@ public sealed class RunProfileRunTests : IDisposable
     {
         var vm = Reviewed();
         SeedState();
-        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged")));
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged"), FailureReason.ProfileChanged));
 
         await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
 
@@ -193,6 +193,32 @@ public sealed class RunProfileRunTests : IDisposable
         Assert.Null(vm.FinalStatus);
         Assert.False(vm.IsRunning);
         Assert.False(vm.ResumeCommand.CanExecute(null) && vm.IsResult);
+    }
+
+    [Fact]
+    public async Task Run_ProfileChangedRefusal_RecognizedByItsReasonInAnotherLanguage()
+    {
+        // A worker running under another UI culture sends the text in its own language.
+        var vm = Reviewed();
+        _launcher.Script.Add(new Failed("Das Profil wurde geändert.", FailureReason.ProfileChanged));
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal(RunPhase.Review, vm.Phase);
+        Assert.Equal("Das Profil wurde geändert.", vm.RunMessage);
+        Assert.Null(vm.FinalStatus);
+    }
+
+    [Fact]
+    public async Task Run_FailureWithTheProfileChangedTextButNoReason_IsNotARefusal()
+    {
+        var vm = Reviewed();
+        _launcher.Script.Add(new Failed(Strings.Get("Worker_ProfileChanged")));
+
+        await vm.RunCommand.ExecuteAsync(null).WaitAsync(Timeout, Ct);
+
+        Assert.Equal(RunPhase.Result, vm.Phase);
+        Assert.Equal(Strings.Get("Worker_ProfileChanged"), vm.FinalStatus);
     }
 
     [Fact]
@@ -392,7 +418,7 @@ public sealed class RunProfileRunTests : IDisposable
             new Expect<Cancel>(),
             new StepFinished("drivers.scan", StepOutcome.Succeeded, [], null),
             new Do(SeedState),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
 
         var run = vm.RunCommand.ExecuteAsync(null);
@@ -479,7 +505,7 @@ public sealed class RunProfileRunTests : IDisposable
             new StepStarted(1, 3, "drivers.scan"),
             new Expect<Cancel>(),
             new Do(() => release.Task),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
         var run = vm.RunCommand.ExecuteAsync(null);
         await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].State == StepState.Running);
@@ -679,7 +705,7 @@ public sealed class RunProfileRunTests : IDisposable
             PlannedAll(),
             new Expect<Cancel>(),
             new Do(() => release.Task),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
         var run = vm.RunCommand.ExecuteAsync(null);
         await WaitUntil(() => _launcher.Jobs.Count == 1);
@@ -731,7 +757,7 @@ public sealed class RunProfileRunTests : IDisposable
             new StepStarted(1, 3, "drivers.scan"),
             new Expect<Cancel>(),
             new Do(() => release.Task),
-            new Failed(Strings.Get("Worker_Stopped")),
+            new Failed(Strings.Get("Worker_Stopped"), FailureReason.Stopped),
         ]);
         var run = vm.RunCommand.ExecuteAsync(null);
         await WaitUntil(() => vm.Steps.Count == 3 && vm.Steps[0].State == StepState.Running);

@@ -357,9 +357,10 @@ public sealed partial class RunProfileViewModel
                 ReportDirectory = done.Summary.ReportDirectory;
                 return RunStatusText.Of(done.Summary);
             case Failed failed:
-                // Shown as it arrives: after a stop it is the worker's Worker_Stopped text, which offers Resume.
-                _env.Log.Warning("Run: the worker reported a failure: {Message}", failed.Message);
-                if (!_stepStarted && failed.Message == Strings.Get("Worker_ProfileChanged"))
+                // Shown as it arrives: after a stop it is the worker's Worker_Stopped text, which offers Resume. The
+                // reason code, not the text (in the worker's UI language), tells a refusal apart.
+                _env.Log.Warning("Run: the worker reported a failure ({Reason}): {Message}", failed.Reason, failed.Message);
+                if (!_stepStarted && failed.Reason == FailureReason.ProfileChanged)
                     _refusal = failed.Message;
                 return failed.Message;
             default:

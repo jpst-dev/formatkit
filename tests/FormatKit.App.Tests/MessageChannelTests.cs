@@ -20,6 +20,8 @@ public class MessageChannelTests
         new Finished(new RunSummary(RunStatus.CompletedWithFailures,
             [new StepReport("a", "Step A", StepOutcome.Failed, ["x"], "retry")], "C:\\r", "err", true)),
         new Failed("boom"),
+        new Failed("stopped", FailureReason.Stopped),
+        new Failed("changed", FailureReason.ProfileChanged),
         new Cancel(),
         new RebootNow(),
         new RebootCancel(),
@@ -108,6 +110,26 @@ public class MessageChannelTests
         await using var ch = new MessageChannel(ms, Log);
         await ch.SendAsync(new Planned([], "Mine"), CancellationToken.None);
         Assert.Contains("\"profileName\":\"Mine\"", Encoding.UTF8.GetString(ms.ToArray()));
+    }
+
+    [Theory]
+    [InlineData(FailureReason.Other, "other")]
+    [InlineData(FailureReason.Stopped, "stopped")]
+    [InlineData(FailureReason.ProfileChanged, "profileChanged")]
+    public async Task Send_FailureReasonIsACamelCaseString(FailureReason reason, string json)
+    {
+        var ms = new MemoryStream();
+        await using var ch = new MessageChannel(ms, Log);
+        await ch.SendAsync(new Failed("x", reason), CancellationToken.None);
+        Assert.Contains($"\"reason\":\"{json}\"", Encoding.UTF8.GetString(ms.ToArray()));
+    }
+
+    [Fact]
+    public async Task Read_FailedWithoutReason_IsOther()
+    {
+        await using var ch = Over("{\"type\":\"failed\",\"message\":\"x\"}\n");
+        var failed = Assert.IsType<Failed>(Assert.Single(await ReadAll(ch)));
+        Assert.Equal(("x", FailureReason.Other), (failed.Message, failed.Reason));
     }
 
     [Fact]
