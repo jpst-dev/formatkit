@@ -7,4 +7,17 @@
   <data name="Setup_UnknownProperty" xml:space="preserve"><value>Unknown property &apos;{0}&apos; in the setup section.</value></data>
   <data name="Setup_InvalidValue" xml:space="preserve"><value>Invalid value: expected {0}.</value></data>
   <data name="Setup_LanguageNotInImage" xml:space="preserve"><value>The image has no language &apos;{1}&apos; for {0}. Available languages: {2}.</value></data>
+  <data name="Media_NoInstallImage" xml:space="preserve"><value>The ISO has no sources\install.wim or sources\install.esd.</value></data>
+  <data name="Media_NoBootFile" xml:space="preserve"><value>The ISO has no efi\boot\bootx64.efi: it is not UEFI-bootable Windows media.</value></data>
+  <data name="Media_ImageUnreadable" xml:space="preserve"><value>Could not read the Windows image: {0}</value></data>
+  <data name="Media_NoEditions" xml:space="preserve"><value>The Windows image lists no editions.</value></data>
+  <data name="Media_NotAmd64" xml:space="preserve"><value>Edition &apos;{0}&apos; is not 64-bit (amd64); only x64 media is supported.</value></data>
+  <data name="Media_NotWindows11" xml:space="preserve"><value>Edition &apos;{0}&apos; is version {1}; Windows 11 (build 22000 or later) is required.</value></data>
+  <data name="Media_NoLanguages" xml:space="preserve"><value>Edition &apos;{0}&apos; reports no languages.</value></data>
+  <data name="Media_EditionNotInImage" xml:space="preserve"><value>The image has no edition &apos;{1}&apos; for {0}. Available editions: {2}.</value></data>
+  <data name="Media_EsdTooLarge" xml:space="preserve"><value>install.esd is larger than 4 GiB minus 1 byte and cannot be split; it does not fit a FAT32 stick.</value></data>
+  <data name="Media_MountFailed" xml:space="preserve"><value>Could not mount the ISO: {0}</value></data>
+  <data name="Media_UnreadableFolder" xml:space="preserve"><value>Could not read the folder {0} of the ISO.</value></data>
+  <data name="Media_DismountFailed" xml:space="preserve"><value>Could not dismount the ISO ({0}). Run by hand: Dismount-DiskImage -ImagePath {1}</value></data>
+  <data name="Media_SplitFailed" xml:space="preserve"><value>Could not split install.wim: {0}</value></data>
 </root>
