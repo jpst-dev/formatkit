@@ -40,4 +40,32 @@
   <data name="Activation_Unknown_Title" xml:space="preserve"><value>Windows activation not checked</value></data>
   <data name="Activation_Unknown_Detail" xml:space="preserve"><value>Windows did not report its activation state.</value></data>
   <data name="Activation_Unknown_Action" xml:space="preserve"><value>Open Settings &gt; System &gt; Activation to see the state.</value></data>
+  <data name="UserFolders_Name_Desktop" xml:space="preserve"><value>Desktop</value></data>
+  <data name="UserFolders_Name_Documents" xml:space="preserve"><value>Documents</value></data>
+  <data name="UserFolders_Name_Pictures" xml:space="preserve"><value>Pictures</value></data>
+  <data name="UserFolders_Name_Videos" xml:space="preserve"><value>Videos</value></data>
+  <data name="UserFolders_Name_Music" xml:space="preserve"><value>Music</value></data>
+  <data name="UserFolders_Name_Downloads" xml:space="preserve"><value>Downloads</value></data>
+  <data name="UserFolders_OneDrive_Title" xml:space="preserve"><value>{0} is synced by OneDrive</value></data>
+  <data name="UserFolders_OneDrive_Detail" xml:space="preserve"><value>Synced by OneDrive; make sure it is up to date before the reinstall.</value></data>
+  <data name="UserFolders_Safe_Title" xml:space="preserve"><value>{0} is not on the Windows drive</value></data>
+  <data name="UserFolders_Safe_Detail" xml:space="preserve"><value>{0} survives the reinstall.</value></data>
+  <data name="UserFolders_Empty_Title" xml:space="preserve"><value>{0} is empty</value></data>
+  <data name="UserFolders_Lost_Title" xml:space="preserve"><value>{0} has files that will be erased</value></data>
+  <data name="UserFolders_Lost_Detail" xml:space="preserve"><value>{0} in {1} files in {2}.</value></data>
+  <data name="UserFolders_Lost_Action" xml:space="preserve"><value>Copy {0} to an external drive.</value></data>
+  <data name="UserFolders_Unreadable_One" xml:space="preserve"><value>1 folder could not be read.</value></data>
+  <data name="UserFolders_Unreadable_Many" xml:space="preserve"><value>{0} folders could not be read.</value></data>
+  <data name="OtherUsers_Title" xml:space="preserve"><value>The account {0} also has files that will be lost</value></data>
+  <data name="OtherUsers_Detail_Size" xml:space="preserve"><value>The profile folder of {0} ({2}) holds {1}.</value></data>
+  <data name="OtherUsers_Detail" xml:space="preserve"><value>The profile folder of {0} ({1}) will be erased; its size could not be read completely.</value></data>
+  <data name="OtherUsers_Action" xml:space="preserve"><value>Ask {0} to copy their files to an external drive, or copy them yourself.</value></data>
+  <data name="Volumes_Unknown_Title" xml:space="preserve"><value>Disk layout not checked</value></data>
+  <data name="Volumes_Unknown_Detail" xml:space="preserve"><value>Windows did not report which physical disk each volume is on.</value></data>
+  <data name="Volumes_Unknown_Action" xml:space="preserve"><value>Open Disk Management and check which volumes share the disk with Windows. In Windows Setup, delete only the Windows partitions.</value></data>
+  <data name="Volumes_SameDisk_Title" xml:space="preserve"><value>{0}: is on the same disk as Windows</value></data>
+  <data name="Volumes_SameDisk_Detail" xml:space="preserve"><value>Windows Setup can erase {0}: if you delete or format the wrong partition.</value></data>
+  <data name="Volumes_SameDisk_Action" xml:space="preserve"><value>In Windows Setup, delete only the Windows partitions; do not delete {0}:.</value></data>
+  <data name="Volumes_OtherDisk_Title" xml:space="preserve"><value>{0}: is on another disk</value></data>
+  <data name="Volumes_OtherDisk_Detail" xml:space="preserve"><value>{0}: is on disk {1} and is not touched by the reinstall.</value></data>
 </root>
