@@ -361,3 +361,59 @@ are not captured).
    look different (compare bytes as checked out; document it).
 5. Disks with BitLocker or low free space during Dev Drive creation, and a
    letter taken by a USB drive between validation and creation.
+
+## 12. Verified in the VM
+
+Probed on Windows 11 build 26300 with nested virtualization, running as the
+signed-in user elevated (a scheduled task), 2026-10-28. These findings
+override the sections above where they differ.
+
+- **WSL stub:** a clean install has only the inbox `wsl.exe` stub. `wsl
+  --status` exits 50 and prints UTF-16 even with `WSL_UTF8=1`; after the WSL
+  package is installed, `WSL_UTF8=1` gives UTF-8. Output must be decoded
+  defensively (strip `\0` and BOM).
+- **Platform install:** `wsl --install --no-distribution` exits 0, installs
+  the WSL package (3.0.3) and enables `VirtualMachinePlatform`; `wsl --status`
+  then exits 0 although WSL 2 cannot start until a reboot. So 6.1 step 1
+  always returns `RebootRequired` after a successful platform install. It
+  fails from a PowerShell Direct (network) session; FormatKit runs in the
+  console session, where it works.
+- **Distro install:** `wsl --install Ubuntu --no-launch` exits 0 and the
+  distro appears in `wsl --list --quiet`. WSL errors exit `-1` and print a
+  stable token line `Código de erro: Wsl/<area>/<CODE>` (for example
+  `WSL_E_DISTRO_NOT_FOUND`, `WININET_E_NAME_NOT_RESOLVED` right after a
+  reboot, before DNS is ready). Network tokens get "check the internet
+  connection and run again".
+- **`--exec` paths:** a direct `--exec useradd` fails (`execvpe(useradd)
+  failed`); commands run directly through `--exec` use absolute paths
+  (`/usr/sbin/useradd`, `/usr/bin/passwd`, `/usr/bin/getent`, `/usr/bin/id`,
+  `/usr/bin/chsh`, `/usr/bin/cat`, `/usr/bin/test`). Inside `sh -c` the
+  normal `PATH` applies.
+- **User:** `useradd -m -G sudo -s /bin/bash joao` leaves the password locked
+  (`passwd -S` → `joao L …`). Ubuntu's `/etc/wsl.conf` already has `[boot]
+  systemd=true`; the constant `printf '%s' "$2" > "$1"` script writes the
+  merged file correctly, and after `wsl --terminate` the default user is
+  `joao`. Typing the password through the attached console is checked in
+  scenario 13.
+- **Ubuntu image:** has `git`, `apt-get` and `chsh`; not `zsh`.
+- **Dev Drive:** the diskpart script plus `Format-Volume -DevDrive` creates a
+  ReFS volume that `fsutil devdrv query` reports as trusted. The VHDX is
+  **not** re-attached after a reboot; the `FormatKit-DevDrive` SYSTEM startup
+  task running `Mount-DiskImage` brings it back with the same letter and
+  trust. So 6.6 step 5 always registers the task.
+- **Oh My Posh:** `JanDeDobbeleer.OhMyPosh` is an MSIX (v31.9.1), so the
+  catalog entry is per user (`context` and `scope` `user`). The executable is
+  the alias `%LOCALAPPDATA%\Microsoft\WindowsApps\oh-my-posh.exe`. `oh-my-posh
+  font install meslo` exits 0 on first and repeated runs and installs per-user
+  fonts with family `MesloLGM Nerd Font`. `oh-my-posh init pwsh --config
+  paradox` and `oh-my-posh init powershell --config paradox` accept a built-in
+  theme name; the profile line is `oh-my-posh init <pwsh|powershell> --config
+  <theme> | Invoke-Expression`.
+- **Terminal fragment:** Microsoft's fragment documentation allows `updates`
+  with a GUID for the default PowerShell profiles and dynamic profiles;
+  fragment files must be UTF-8. Windows Terminal 1.24 is present. The font
+  change is checked by eye in scenario 15.
+- **Developer settings:** all six values took effect: Developer Mode on,
+  `LongPathsEnabled`, Explorer values written, `sudo config` reports inline
+  mode (`sudo.exe` exists on this build), `Get-ExecutionPolicy -Scope
+  LocalMachine` is `RemoteSigned`.
