@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
@@ -18,10 +20,12 @@ public static class WorkerPipe
     private const int BufferSize = 64 * 1024;
 
     /// <summary>
-    /// Creates the server and waits for one client. Returns null when none connects within <paramref name="timeout"/>;
-    /// throws when <paramref name="ct"/> is cancelled or the name is already taken.
+    /// Creates the server and waits for one client, which must be the process <paramref name="clientProcessId"/> (the
+    /// window that started the worker). Returns null when none connects within <paramref name="timeout"/>. Throws when
+    /// <paramref name="ct"/> is cancelled, when the name is already taken, and <see cref="UnauthorizedAccessException"/>
+    /// (after closing the pipe) when another process connected.
     /// </summary>
-    public static async Task<Stream?> AcceptAsync(string name, TimeSpan timeout, CancellationToken ct)
+    public static async Task<Stream?> AcceptAsync(string name, int clientProcessId, TimeSpan timeout, CancellationToken ct)
     {
         // maxNumberOfServerInstances 1 also makes the server the first instance, so a squatted name fails here.
         var server = NamedPipeServerStreamAcl.Create(
@@ -38,6 +42,10 @@ public static class WorkerPipe
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             timeoutCts.CancelAfter(timeout);
             await server.WaitForConnectionAsync(timeoutCts.Token).ConfigureAwait(false);
+            if (!NativeMethods.GetNamedPipeClientProcessId(server.SafePipeHandle, out var connected))
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            if (connected != clientProcessId)
+                throw new UnauthorizedAccessException($"Process {connected} connected to {name}; expected {clientProcessId}.");
             return server;
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
@@ -61,7 +69,8 @@ public static class WorkerPipe
     {
         // Not PipeOptions.CurrentUserOnly: its owner check compares with the token's default owner, the Administrators
         // group in an elevated window (after a resume), so it would refuse the worker's pipe, owned by the user SID.
-        var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous);
+        // Identification: the worker may identify the window's user but never act as it.
+        var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Identification);
         try
         {
             await client.ConnectAsync(timeout, ct).ConfigureAwait(false);

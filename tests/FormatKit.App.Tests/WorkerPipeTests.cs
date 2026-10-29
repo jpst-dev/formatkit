@@ -10,12 +10,14 @@ public class WorkerPipeTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
+    private static int Me => Environment.ProcessId;
+
     private static string NewName() => "FormatKit-test-" + Guid.NewGuid().ToString("N");
 
     [Fact]
     public async Task Accept_NoClientWithinTimeout_ReturnsNull()
     {
-        var accepted = await WorkerPipe.AcceptAsync(NewName(), TimeSpan.FromMilliseconds(100), Ct);
+        var accepted = await WorkerPipe.AcceptAsync(NewName(), Me, TimeSpan.FromMilliseconds(100), Ct);
 
         Assert.Null(accepted);
     }
@@ -26,7 +28,7 @@ public class WorkerPipeTests
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => WorkerPipe.AcceptAsync(NewName(), TimeSpan.FromSeconds(30), cts.Token));
+            () => WorkerPipe.AcceptAsync(NewName(), Me, TimeSpan.FromSeconds(30), cts.Token));
     }
 
     [Fact]
@@ -34,7 +36,7 @@ public class WorkerPipeTests
     {
         var name = NewName();
         var log = new LoggerConfiguration().CreateLogger();
-        var accepting = WorkerPipe.AcceptAsync(name, TimeSpan.FromSeconds(10), Ct);
+        var accepting = WorkerPipe.AcceptAsync(name, Me, TimeSpan.FromSeconds(10), Ct);
 
         // Both ends run unelevated here; the client also checks that the server's owner is the current user.
         await using var window = new MessageChannel(await WorkerPipe.ConnectAsync(name, TimeSpan.FromSeconds(10), Ct), log);
@@ -57,12 +59,41 @@ public class WorkerPipeTests
     public async Task Accept_OnlyOneConnection()
     {
         var name = NewName();
-        var accepting = WorkerPipe.AcceptAsync(name, TimeSpan.FromSeconds(10), Ct);
+        var accepting = WorkerPipe.AcceptAsync(name, Me, TimeSpan.FromSeconds(10), Ct);
         await using var first = await WorkerPipe.ConnectAsync(name, TimeSpan.FromSeconds(10), Ct);
         await using var server = await accepting;
         Assert.NotNull(server);
 
         await Assert.ThrowsAsync<TimeoutException>(() => WorkerPipe.ConnectAsync(name, TimeSpan.FromMilliseconds(200), Ct));
+    }
+
+    [Fact]
+    public async Task Accept_NameAlreadyTaken_Throws()
+    {
+        var name = NewName();
+        await using var squatter = new NamedPipeServerStream(
+            name, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+
+        await Assert.ThrowsAnyAsync<Exception>(() => WorkerPipe.AcceptAsync(name, Me, TimeSpan.FromSeconds(5), Ct));
+
+        // The worker did not join the squatter's pipe: a client still reaches the squatter.
+        var squatterAccepts = squatter.WaitForConnectionAsync(Ct);
+        await using var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous);
+        await client.ConnectAsync(5000, Ct);
+        await squatterAccepts.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+    }
+
+    [Fact]
+    public async Task Accept_WrongClientProcess_ThrowsAndClosesThePipe()
+    {
+        var name = NewName();
+        var accepting = WorkerPipe.AcceptAsync(name, Me + 4, TimeSpan.FromSeconds(10), Ct);
+        await using var client = await WorkerPipe.ConnectAsync(name, TimeSpan.FromSeconds(10), Ct);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => accepting);
+
+        var buffer = new byte[1];
+        Assert.Equal(0, await client.ReadAsync(buffer, Ct).AsTask().WaitAsync(TimeSpan.FromSeconds(5), Ct));
     }
 
     [Fact]

@@ -1,11 +1,11 @@
-using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using FormatKit.App.Localization;
 using FormatKit.App.Services;
 using FormatKit.App.ViewModels;
 using FormatKit.App.Worker;
-using FormatKit.Core.Steps;
+using FormatKit.Core;
+using FormatKit.Core.Logging;
 using FormatKit.Core.SystemAccess;
 using FormatKit.Hosting;
 using FormatKit.Prepare;
@@ -14,9 +14,6 @@ namespace FormatKit.App;
 
 public partial class App : Application
 {
-    /// <summary>Exit code of a worker that could not run its job (no window connected, or an unexpected error).</summary>
-    private const int WorkerFailedExitCode = 2;
-
     private const string InstanceName = "Local\\FormatKit.App";
 
     private readonly IDialogService _dialogs = new WpfDialogService();
@@ -70,60 +67,62 @@ public partial class App : Application
         _window.Show();
     }
 
-    /// <summary>Accepts the window's connection, runs the job over it and shuts down with the job's exit code.</summary>
+    /// <summary>
+    /// Runs the worker's job and always shuts down with its exit code. The logger exists before anything can fail, so
+    /// every failure path writes a log line.
+    /// </summary>
     private async Task RunWorkerAsync(AppArguments arguments)
     {
-        var code = await Task.Run(() => RunWorkerJobAsync(arguments.PipeName!, arguments.Job));
-        Shutdown(code);
-    }
-
-    private static async Task<int> RunWorkerJobAsync(string pipeName, IReadOnlyList<string> job)
-    {
-        Stream? stream = null;
+        var code = WorkerHost.ExitFailed;
         HostEnvironment? host = null;
         try
         {
-            stream = await WorkerPipe.AcceptAsync(pipeName, WorkerPipe.AcceptTimeout, CancellationToken.None).ConfigureAwait(false);
-
-            // The channel and rebooter are built inside the host's factory, so they log through the host's logger.
-            MessageChannel? channel = null;
-            PipeRebooter? rebooter = null;
-            var connected = stream;
-            Func<ServiceSet, Serilog.ILogger, IRebooter>? pipeRebooter = connected is null ? null : (services, log) =>
-            {
-                channel = new MessageChannel(connected, log);
-                return rebooter = new PipeRebooter(channel, services.Processes, log);
-            };
             host = Hosting.Services.CreateReal(verbose: false, new HostOptions(
                 ["--resume"],
                 ConsoleLog: false,
-                Rebooter: pipeRebooter,
                 Console: (session, log) => new NewConsoleInteractiveConsole(session, log)));
-
-            if (channel is null || rebooter is null)
-            {
-                host.Log.Error("Worker: no window connected to {Pipe} within {Timeout}", pipeName, WorkerPipe.AcceptTimeout);
-                return WorkerFailedExitCode;
-            }
-
-            await using (channel.ConfigureAwait(false))
-            {
-                stream = null; // owned by the channel now
-                var set = ModuleSet.CreateReal(host.Services, host.Log, host.NetworkRetryDelay, host.Dev);
-                var exitCode = await new WorkerHost(host, set.Modules, rebooter).RunAsync(channel, job, CancellationToken.None).ConfigureAwait(false);
-                host.Log.Information("Worker: exiting with {ExitCode}", exitCode);
-                return exitCode;
-            }
+            var modules = ModuleSet.CreateReal(host.Services, host.Log, host.NetworkRetryDelay, host.Dev).Modules;
+            code = await Task.Run(() => WorkerProcess.RunAsync(
+                host, modules, arguments.PipeName!, arguments.ClientProcessId!.Value, arguments.Job,
+                WorkerPipe.AcceptTimeout, CancellationToken.None));
         }
         catch (Exception ex)
         {
-            host?.Log.Fatal(ex, "Worker: unexpected error");
-            return WorkerFailedExitCode;
+            LogStartupFailure(host, ex);
         }
         finally
         {
-            if (stream is not null) await stream.DisposeAsync().ConfigureAwait(false);
-            (host?.Log as IDisposable)?.Dispose();
+            try
+            {
+                (host?.Log as IDisposable)?.Dispose();
+            }
+            catch (Exception)
+            {
+                // The log is the only place left to report to; never let it keep the process alive.
+            }
+
+            Shutdown(code);
+        }
+    }
+
+    /// <summary>Logs through the host, or, when building the host failed, through a logger of its own.</summary>
+    private static void LogStartupFailure(HostEnvironment? host, Exception ex)
+    {
+        try
+        {
+            if (host is not null)
+            {
+                host.Log.Fatal(ex, "Worker: unexpected error");
+                return;
+            }
+
+            var log = LogSetup.Create(AppPaths.Default, TimeProvider.System, verbose: false, console: false);
+            log.Fatal(ex, "Worker: could not build the host");
+            (log as IDisposable)?.Dispose();
+        }
+        catch (Exception)
+        {
+            // Not even a log file can be written.
         }
     }
 

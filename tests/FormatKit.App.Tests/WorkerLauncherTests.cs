@@ -25,11 +25,13 @@ public class WorkerLauncherTests
         var (exe, args, runas) = Assert.Single(starter.Starts);
         Assert.Equal(Exe, exe);
         Assert.True(runas);
-        Assert.Equal(8, args.Count);
+        Assert.Equal(10, args.Count);
         Assert.Equal("--worker", args[0]);
         Assert.Equal("--pipe", args[1]);
         Assert.Matches("^FormatKit-[0-9a-f]{32}$", args[2]);
-        Assert.Equal(["run", "--profile", path, "--profile-hash", "abc"], args.Skip(3));
+        Assert.Equal("--client-pid", args[3]);
+        Assert.Equal(Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture), args[4]);
+        Assert.Equal(["run", "--profile", path, "--profile-hash", "abc"], args.Skip(5));
         await using var worker = await starter.Accepted!;
         Assert.NotNull(worker);
     }

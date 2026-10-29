@@ -24,7 +24,8 @@ internal sealed class FakeElevationStarter : IElevationStarter
         if (Decline) return Task.FromResult<IStartedProcess?>(null);
 
         var pipe = copy[copy.IndexOf("--pipe") + 1];
-        Accepted = WorkerPipe.AcceptAsync(pipe, TimeSpan.FromSeconds(10), CancellationToken.None);
+        var clientPid = int.Parse(copy[copy.IndexOf("--client-pid") + 1], System.Globalization.CultureInfo.InvariantCulture);
+        Accepted = WorkerPipe.AcceptAsync(pipe, clientPid, TimeSpan.FromSeconds(10), CancellationToken.None);
         Process = new FakeStartedProcess();
         return Task.FromResult<IStartedProcess?>(Process);
     }

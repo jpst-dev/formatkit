@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 
 namespace FormatKit.App.Worker;
@@ -13,7 +14,7 @@ public interface IWorkerLauncher
 public sealed record WorkerConnection(MessageChannel Channel, Task<int> Exited);
 
 /// <summary>
-/// Starts <c>FormatKit.exe --worker --pipe FormatKit-&lt;guid&gt; &lt;job...&gt;</c> (with <c>runas</c> when
+/// Starts <c>FormatKit.exe --worker --pipe FormatKit-&lt;guid&gt; --client-pid &lt;this pid&gt; &lt;job...&gt;</c> (with <c>runas</c> when
 /// <c>elevate</c>) and connects to its pipe. The arguments go as a list, so a path with spaces stays one argument.
 /// Throws <see cref="IOException"/> when the worker exits before accepting the connection, and
 /// <see cref="TimeoutException"/> when it does not accept within the connect timeout.
@@ -30,7 +31,8 @@ public sealed class WorkerLauncher(
     public async Task<WorkerConnection?> StartAsync(IReadOnlyList<string> job, bool elevate, CancellationToken ct)
     {
         var pipe = "FormatKit-" + Guid.NewGuid().ToString("N");
-        List<string> args = ["--worker", "--pipe", pipe, .. job];
+        // The worker accepts only this process as its client.
+        List<string> args = ["--worker", "--pipe", pipe, "--client-pid", Environment.ProcessId.ToString(CultureInfo.InvariantCulture), .. job];
 
         var process = await starter.StartAsync(_exePath, args, elevate).ConfigureAwait(false);
         if (process is null)
