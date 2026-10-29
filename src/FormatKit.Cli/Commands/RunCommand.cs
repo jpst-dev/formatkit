@@ -4,6 +4,7 @@ using FormatKit.Cli.Localization;
 using FormatKit.Core.Profiles;
 using FormatKit.Core.Running;
 using FormatKit.Core.Steps;
+using FormatKit.Hosting;
 
 namespace FormatKit.Cli.Commands;
 
@@ -52,9 +53,7 @@ internal static class RunCommand
                 path = load.State!.ProfilePath;
             }
 
-            var profile = path == BuiltInProfiles.DriversOnlyPath
-                ? new LoadedProfile(BuiltInProfiles.DriversOnly, path, BuiltInProfiles.DriversOnlyHash)
-                : LoadProfile(context, path!);
+            var profile = LoadProfile(context, path!);
             if (profile is null && resuming)
             {
                 o.WriteLine(Strings.Get("Run_ResumeProfileInvalid"));
@@ -72,12 +71,12 @@ internal static class RunCommand
 
     internal static LoadedProfile? LoadProfile(CommandContext context, string path)
     {
-        var result = new ProfileLoader(context.Modules).Load(path);
-        if (result.IsValid)
-            return result.Value;
+        var outcome = new ProfileService(context.Modules).Load(path);
+        if (outcome.Profile is not null)
+            return outcome.Profile;
 
-        context.Out.WriteLine(Strings.Format("Profile_Errors", result.Errors.Count));
-        foreach (var error in result.Errors)
+        context.Out.WriteLine(Strings.Format("Profile_Errors", outcome.Errors.Count));
+        foreach (var error in outcome.Errors)
         {
             context.Out.WriteLine(error.Path.Length == 0
                 ? $"  {error.Message}"
@@ -94,7 +93,7 @@ internal static class RunFlow
         CommandContext context, LoadedProfile profile, bool resume, bool dryRun, CancellationToken ct)
     {
         var o = context.Out;
-        var plan = SimulatedRebootStep.Apply(PlanBuilder.Build(profile.Profile, context.Modules), context.Env.SimulateRebootAfterStep);
+        var plan = PlanService.Build(profile.Profile, context.Modules, context.Env.SimulateRebootAfterStep);
 
         if (dryRun)
         {

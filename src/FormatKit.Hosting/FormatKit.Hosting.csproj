@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
+    <ProjectReference Include="..\FormatKit.Cleanup\FormatKit.Cleanup.csproj" />
+    <ProjectReference Include="..\FormatKit.Drivers\FormatKit.Drivers.csproj" />
+    <ProjectReference Include="..\FormatKit.Programs\FormatKit.Programs.csproj" />
+    <ProjectReference Include="..\FormatKit.Dev\FormatKit.Dev.csproj" />
+    <ProjectReference Include="..\FormatKit.Prepare\FormatKit.Prepare.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FormatKit.Hosting.Tests" />
+    <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
+    <InternalsVisibleTo Include="FormatKit.App.Tests" />
+    <InternalsVisibleTo Include="formatkit" />
+    <InternalsVisibleTo Include="FormatKit" />
+  </ItemGroup>
+</Project>

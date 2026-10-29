@@ -6,10 +6,9 @@ using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Core;
 using FormatKit.Core.Profiles;
-using FormatKit.Dev;
 using FormatKit.Drivers;
 using FormatKit.Drivers.Catalog;
-using FormatKit.Programs;
+using FormatKit.Hosting;
 using FormatKit.Programs.Catalog;
 
 namespace FormatKit.Cli;
@@ -27,13 +26,18 @@ public sealed class CliApp
     private readonly ProgramCatalog _programs;
 
     public CliApp(CliEnvironment env)
-        : this(env, VendorCatalog.LoadEmbedded(), null)
+        : this(env, ModuleSet.CreateReal(env.Services, env.Log, env.NetworkRetryDelay, env.Dev))
+    {
+    }
+
+    private CliApp(CliEnvironment env, ModuleSet set)
+        : this(env, set.Vendors, set.Modules, set.Cleanup, set.Issues, set.Programs)
     {
     }
 
     /// <summary>Test seam: lets tests plan with fake modules.</summary>
     internal CliApp(
-        CliEnvironment env, VendorCatalog catalog, IReadOnlyList<IModule>? modules,
+        CliEnvironment env, VendorCatalog catalog, IReadOnlyList<IModule> modules,
         CleanupCatalog? cleanup = null, KnownIssues? issues = null, ProgramCatalog? programs = null)
     {
         _env = env;
@@ -41,13 +45,7 @@ public sealed class CliApp
         _cleanup = cleanup ?? CleanupCatalog.LoadEmbedded();
         _issues = issues ?? KnownIssues.LoadEmbedded();
         _programs = programs ?? ProgramCatalog.LoadEmbedded();
-        _modules = modules ??
-        [
-            new DriversModule(catalog, env.NetworkRetryDelay),
-            new CleanupModule(_cleanup, AppPaths.Default, env.Services.Files, env.Log),
-            new ProgramsModule(_programs, AppPaths.Default, env.Services.Files, env.Log),
-            new DevModule(TimeProvider.System, env.Dev),
-        ];
+        _modules = modules;
     }
 
     /// <summary>The modules <see cref="RunAsync"/> plans with; exposed so tests can check their order.</summary>

@@ -73,6 +73,6 @@ public static class Services
             Console.Out,
             RebootCountdown: TimeSpan.FromSeconds(60),
             NetworkRetryDelay: TimeSpan.FromSeconds(5),
-            SimulateRebootAfterStep: Environment.GetEnvironmentVariable(Commands.SimulatedRebootStep.EnvironmentVariable));
+            SimulateRebootAfterStep: Environment.GetEnvironmentVariable(FormatKit.Hosting.SimulatedRebootStep.EnvironmentVariable));
     }
 }
