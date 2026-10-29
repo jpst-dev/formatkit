@@ -5,7 +5,7 @@ namespace FormatKit.App;
 public enum AppMode { Window, Resume, Worker }
 
 /// <summary>
-/// The command line of FormatKit.exe: the window, the resume after a reboot, or an elevated worker
+/// The command line of FormatKitUI.exe: the window, the resume after a reboot, or an elevated worker
 /// (<c>--worker --pipe &lt;name&gt; --client-pid &lt;window pid&gt; &lt;job...&gt;</c>).
 /// </summary>
 public sealed record AppArguments(AppMode Mode, string? PipeName, IReadOnlyList<string> Job, int? ClientProcessId = null)

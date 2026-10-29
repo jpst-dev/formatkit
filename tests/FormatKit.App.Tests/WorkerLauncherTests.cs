@@ -5,7 +5,7 @@ namespace FormatKit.App.Tests;
 
 public class WorkerLauncherTests
 {
-    private const string Exe = @"C:\Program Files\FormatKit\FormatKit.exe";
+    private const string Exe = @"C:\Program Files\FormatKit\FormatKitUI.exe";
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 

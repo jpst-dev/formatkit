@@ -14,7 +14,7 @@ public interface IWorkerLauncher
 public sealed record WorkerConnection(MessageChannel Channel, Task<int> Exited);
 
 /// <summary>
-/// Starts <c>FormatKit.exe --worker --pipe FormatKit-&lt;guid&gt; --client-pid &lt;this pid&gt; &lt;job...&gt;</c> (with <c>runas</c> when
+/// Starts <c>FormatKitUI.exe --worker --pipe FormatKit-&lt;guid&gt; --client-pid &lt;this pid&gt; &lt;job...&gt;</c> (with <c>runas</c> when
 /// <c>elevate</c>) and connects to its pipe. The arguments go as a list, so a path with spaces stays one argument.
 /// Throws <see cref="IOException"/> when the worker exits before accepting the connection, and
 /// <see cref="TimeoutException"/> when it does not accept within the connect timeout.

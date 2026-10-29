@@ -32,11 +32,11 @@ public class SchtasksScheduledTasksTests
         var runner = new FakeProcessRunner();
         runner.Enqueue("schtasks.exe", Result(0));
 
-        await new SchtasksScheduledTasks(runner, "C:\\x\\FormatKit.exe", ["--resume"])
+        await new SchtasksScheduledTasks(runner, "C:\\x\\FormatKitUI.exe", ["--resume"])
             .RegisterResumeTaskAsync(TestContext.Current.CancellationToken);
 
         var call = Assert.Single(runner.Calls);
-        Assert.Equal("\"C:\\x\\FormatKit.exe\" --resume", call.Arguments[call.Arguments.ToList().IndexOf("/TR") + 1]);
+        Assert.Equal("\"C:\\x\\FormatKitUI.exe\" --resume", call.Arguments[call.Arguments.ToList().IndexOf("/TR") + 1]);
     }
 
     [Fact]

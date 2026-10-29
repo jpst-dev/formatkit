@@ -4,7 +4,7 @@ using Serilog;
 namespace FormatKit.App.Tests;
 
 /// <summary>
-/// Starts the built FormatKit.exe as a worker, without elevation, with a job that fails at once (the profile does not
+/// Starts the built FormatKitUI.exe as a worker, without elevation, with a job that fails at once (the profile does not
 /// exist): proves the pipe connects across processes and the job's arguments arrive whole. Changes nothing on the
 /// machine; the worker writes its own log file in the usual logs folder.
 /// </summary>
@@ -15,7 +15,7 @@ public class WorkerEndToEndTests
     public async Task Worker_MissingProfile_SendsFailedAndExitsWithTwo()
     {
         var ct = TestContext.Current.CancellationToken;
-        var exe = Path.Combine(AppContext.BaseDirectory, "FormatKit.exe");
+        var exe = Path.Combine(AppContext.BaseDirectory, "FormatKitUI.exe");
         var profile = Path.Combine(Path.GetTempPath(), "Perfis de teste " + Guid.NewGuid().ToString("N"), "ação.json");
         var launcher = new WorkerLauncher(new ElevationStarter(), new LoggerConfiguration().CreateLogger(), exe);
 

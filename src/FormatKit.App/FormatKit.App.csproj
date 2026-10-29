@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
-    <AssemblyName>FormatKit</AssemblyName>
+    <AssemblyName>FormatKitUI</AssemblyName>
     <RootNamespace>FormatKit.App</RootNamespace>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>

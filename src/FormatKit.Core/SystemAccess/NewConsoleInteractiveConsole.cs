@@ -9,7 +9,7 @@ namespace FormatKit.Core.SystemAccess;
 /// <remarks>
 /// .NET has no CREATE_NEW_CONSOLE switch on <see cref="System.Diagnostics.ProcessStartInfo"/>. It is not needed here:
 /// with <c>UseShellExecute = false</c> and <c>CreateNoWindow = false</c>, a console program started by a process that
-/// has no console (the GUI-subsystem FormatKit.exe) gets a new console window from Windows. Started from a process
+/// has no console (the GUI-subsystem FormatKitUI.exe) gets a new console window from Windows. Started from a process
 /// that has a console (a test host), it shares that console instead.
 /// </remarks>
 public sealed class NewConsoleInteractiveConsole(IUserSession session, ILogger log) : IInteractiveConsole
