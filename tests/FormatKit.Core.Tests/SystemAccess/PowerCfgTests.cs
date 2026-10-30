@@ -77,6 +77,16 @@ public class PowerCfgTests
     }
 
     [Fact]
+    public async Task Rename_passes_guid_name_and_description()
+    {
+        var (cfg, runner) = Create(Result(0));
+
+        await cfg.RenameAsync(Other, "FormatKit Performance", "Tuned by FormatKit", TestContext.Current.CancellationToken);
+
+        Assert.Equal(["/changename", Other.ToString(), "FormatKit Performance", "Tuned by FormatKit"], Assert.Single(runner.Calls).Arguments);
+    }
+
+    [Fact]
     public async Task Nonzero_exit_throws()
     {
         var (cfg, _) = Create(Result(1, stderr: "erro"));

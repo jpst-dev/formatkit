@@ -10,6 +10,15 @@ public class FakePowerSchemes : IPowerSchemes
 
     public List<Guid> Deleted { get; } = [];
 
+    /// <summary>The source of every <see cref="DuplicateAsync"/> call, in order.</summary>
+    public List<Guid> Duplicated { get; } = [];
+
+    /// <summary>Every <see cref="RenameAsync"/> call, in order.</summary>
+    public List<(Guid Scheme, string Name, string Description)> Renames { get; } = [];
+
+    /// <summary>The GUID the next <see cref="DuplicateAsync"/> returns, so a test can seed values for it beforehand.</summary>
+    public Guid NextCreated { get; private set; } = Guid.NewGuid();
+
     /// <summary>Every <see cref="SetValueAsync"/> call, in order.</summary>
     public List<(Guid Scheme, string Subgroup, string Setting, int Ac, int? Dc)> Writes { get; } = [];
 
@@ -50,9 +59,19 @@ public class FakePowerSchemes : IPowerSchemes
 
     public Task<Guid> DuplicateAsync(Guid source, CancellationToken ct)
     {
-        var created = Guid.NewGuid();
+        var created = NextCreated;
+        NextCreated = Guid.NewGuid();
+        Duplicated.Add(source);
         Schemes.Add(created);
         return Task.FromResult(created);
+    }
+
+    public Task RenameAsync(Guid scheme, string name, string description, CancellationToken ct)
+    {
+        if (!Schemes.Contains(scheme))
+            throw new InvalidOperationException($"powercfg /changename failed: no scheme {scheme}");
+        Renames.Add((scheme, name, description));
+        return Task.CompletedTask;
     }
 
     /// <summary>Throws on a GUID not in <see cref="Schemes"/>, as powercfg does.</summary>

@@ -23,7 +23,7 @@ public sealed record ServiceAction(string Name, ServiceStartType StartType) : Cl
 
 public sealed record AppxAction(string Package, string StoreId) : CleanupAction;
 
-/// <summary><paramref name="Scheme"/> is <c>balanced</c>, <c>highPerformance</c> or <c>ultimate</c>.</summary>
+/// <summary><paramref name="Scheme"/> is <c>balanced</c>, <c>highPerformance</c>, <c>ultimate</c> or <c>formatkit</c> (a FormatKit-tuned copy of High performance).</summary>
 public sealed record PowerSchemeAction(string Scheme) : CleanupAction;
 
 public sealed record OptionalFeatureAction(string Name, OptionalFeatureState State) : CleanupAction;

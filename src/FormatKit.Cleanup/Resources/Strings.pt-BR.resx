@@ -34,4 +34,6 @@
   <data name="Validation_UnknownItem" xml:space="preserve"><value>item de limpeza desconhecido &quot;{0}&quot;</value></data>
   <data name="Validation_IncludeExcludeOverlap" xml:space="preserve"><value>O item de limpeza &quot;{0}&quot; está em include e em exclude.</value></data>
   <data name="Validation_ConfirmAggressive" xml:space="preserve"><value>Itens de limpeza agressivos estão selecionados ({0}); defina &quot;confirmAggressive&quot; como true para aplicá-los.</value></data>
+  <data name="PowerScheme_FormatKit_Name" xml:space="preserve"><value>FormatKit Desempenho</value></data>
+  <data name="PowerScheme_FormatKit_Description" xml:space="preserve"><value>Alto desempenho ajustado pelo FormatKit: sem estacionamento de núcleos, sem economia de energia em PCIe e USB, disco nunca desliga.</value></data>
 </root>

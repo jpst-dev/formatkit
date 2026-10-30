@@ -108,6 +108,22 @@ public class ItemSelectorTests
     }
 
     [Fact]
+    public void Included_power_scheme_item_wins_over_the_levels_item()
+    {
+        var catalog = NewCatalog(
+            Item("performance.high", CleanupLevel.Balanced, actions: new PowerSchemeAction("highPerformance")),
+            Item("performance.formatkit", CleanupLevel.Aggressive, actions: new PowerSchemeAction("formatkit")) with { OptIn = true });
+
+        var included = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Aggressive, ["performance.formatkit"], [], true));
+        var notIncluded = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Aggressive, [], [], true));
+        var lowLevel = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Balanced, ["performance.formatkit"], [], true));
+
+        Assert.Equal(["performance.formatkit"], included.Select(i => i.Id));
+        Assert.Equal(["performance.high"], notIncluded.Select(i => i.Id));
+        Assert.Equal(["performance.formatkit"], lowLevel.Select(i => i.Id));
+    }
+
+    [Fact]
     public void Only_the_last_item_for_the_same_power_setting_is_kept()
     {
         const string display = "7516b95f-f776-4464-8c53-06167f40cc99";

@@ -195,6 +195,14 @@ public class CatalogValidatorTests : IDisposable
                 $$"""{ "type": "powerSetting", "subgroup": "{{subgroup}}", "setting": "{{setting}}", "ac": 0 }""")),
             "must be a GUID");
 
+    [Theory]
+    [InlineData("balanced")]
+    [InlineData("highPerformance")]
+    [InlineData("ultimate")]
+    [InlineData("formatkit")]
+    public void Power_scheme_accepts_known_schemes(string scheme) =>
+        Assert.Empty(Validate(Item(category: "power", id: "power.scheme-test", scope: "machine", action: $$"""{ "type": "powerScheme", "scheme": "{{scheme}}" }""")));
+
     [Fact]
     public void Laptop_sensitive_without_power_action_is_rejected() =>
         AssertError(Validate(Item(laptopSensitive: true)), "laptopSensitive");

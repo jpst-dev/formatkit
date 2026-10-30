@@ -3,12 +3,13 @@ using FormatKit.Cleanup.Journal;
 
 namespace FormatKit.Cleanup.Actions;
 
-internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> createdSchemes)
+/// <param name="formatKitSchemes">The created schemes that are FormatKit performance plans; none when omitted.</param>
+internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> createdSchemes, Func<IReadOnlySet<Guid>>? formatKitSchemes = null)
 {
     private readonly RegistryHandler _registry = new();
     private readonly ServiceHandler _service = new();
     private readonly AppxHandler _appx = new();
-    private readonly PowerSchemeHandler _power = new(createdSchemes);
+    private readonly PowerSchemeHandler _power = new(createdSchemes, formatKitSchemes);
     private readonly OptionalFeatureHandler _feature = new();
     private readonly ScheduledTaskHandler _scheduledTask = new();
     private readonly StartupItemHandler _startupItem = new();

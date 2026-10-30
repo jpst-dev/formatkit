@@ -9,6 +9,9 @@ public interface IPowerSchemes
     /// <summary>Duplicates a scheme and returns the new scheme's GUID.</summary>
     Task<Guid> DuplicateAsync(Guid source, CancellationToken ct);
 
+    /// <summary>Sets the scheme's display name and description.</summary>
+    Task RenameAsync(Guid scheme, string name, string description, CancellationToken ct);
+
     Task SetActiveAsync(Guid scheme, CancellationToken ct);
 
     Task DeleteAsync(Guid scheme, CancellationToken ct);

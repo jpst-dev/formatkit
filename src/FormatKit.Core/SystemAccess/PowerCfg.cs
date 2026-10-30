@@ -23,6 +23,9 @@ public sealed partial class PowerCfg(IProcessRunner runner) : IPowerSchemes
     public async Task<Guid> DuplicateAsync(Guid source, CancellationToken ct) =>
         FirstGuid(await RunAsync(["/duplicatescheme", source.ToString()], ct).ConfigureAwait(false), "/duplicatescheme");
 
+    public async Task RenameAsync(Guid scheme, string name, string description, CancellationToken ct) =>
+        await RunAsync(["/changename", scheme.ToString(), name, description], ct).ConfigureAwait(false);
+
     public async Task SetActiveAsync(Guid scheme, CancellationToken ct) =>
         await RunAsync(["/setactive", scheme.ToString()], ct).ConfigureAwait(false);
 

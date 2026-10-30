@@ -82,7 +82,7 @@ public static partial class CatalogValidator
                         Error($"appx package '{appx.Package}' has no storeId");
                     break;
                 case PowerSchemeAction power:
-                    if (power.Scheme is not ("balanced" or "highPerformance" or "ultimate"))
+                    if (power.Scheme is not ("balanced" or "highPerformance" or "ultimate" or "formatkit"))
                         Error($"unknown power scheme '{power.Scheme}'");
                     break;
                 case OptionalFeatureAction feature:

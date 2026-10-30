@@ -93,7 +93,7 @@ public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileS
 
         var selected = ItemSelector.Select(catalog, options, log);
         var journal = new JournalStore(files ?? new FileSystem(), paths);
-        var handlers = new ActionHandlers(() => PowerSchemeHandler.CreatedSchemes(journal.Load().Journal));
+        var handlers = new ActionHandlers(() => PowerSchemeHandler.CreatedSchemes(journal.Load().Journal), () => PowerSchemeHandler.FormatKitSchemes(journal.Load().Journal));
         var applier = new ItemApplier(handlers, journal);
         var included = new HashSet<string>(options.Include, StringComparer.Ordinal);
 
