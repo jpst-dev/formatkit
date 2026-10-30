@@ -197,6 +197,35 @@ public class CleanupDiagnosisTests
         Assert.Empty(report.Findings);
     }
 
+    /// <summary>The FormatKit plan is identified by the scheme GUID its journal entry records (with <c>formatkit: true</c>), not by its name.</summary>
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task FormatKit_plan_is_not_reported_but_another_custom_scheme_is(bool activeIsFormatKit, bool reported)
+    {
+        var formatKit = Guid.NewGuid();
+        var other = Guid.NewGuid();
+        _power.Active = activeIsFormatKit ? formatKit : other;
+        new JournalStore(_files, _paths).Save(new CleanupJournal(1,
+        [
+            new JournalEntry("performance.formatkit-plan", DateTimeOffset.UtcNow,
+                [new JournalAction(FormatKit.Cleanup.Actions.PowerSchemeHandler.Type, "power", System.Text.Json.JsonSerializer.SerializeToElement(
+                    new
+                    {
+                        previous = BuiltInPowerSchemes.Balanced.ToString(),
+                        created = formatKit.ToString(),
+                        source = BuiltInPowerSchemes.HighPerformance.ToString(),
+                        formatkit = true,
+                        settings = Array.Empty<string>(),
+                    }))],
+                null),
+        ]));
+
+        var report = await Run(KnownIssues.LoadEmbedded());
+
+        Assert.Equal(reported, report.Findings.Any(f => f.Issue.Id == "info.non-built-in-power-scheme"));
+    }
+
     [Fact]
     public async Task Applied_lists_each_item_with_unreverted_entries_once()
     {
