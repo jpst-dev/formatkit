@@ -8,6 +8,7 @@ import type { Badge } from '../lib/badges';
 import { siteHref } from '../lib/catalogPaths';
 import { whenToUse } from '../lib/whenToUse';
 import ActionDetails from './ActionDetails.astro';
+import { itemHeadings } from '../lib/catalogHeadings';
 
 interface Props {
   item: CleanupItem;
@@ -30,6 +31,7 @@ const badges: Badge[] = [
   ...(item.requiresReboot ? [{ text: t(locale, 'badge.reboot'), tone: 'plain' as const }] : []),
   ...(scopeKey ? [{ text: t(locale, scopeKey), tone: 'plain' as const }] : item.scope ? [{ text: item.scope, tone: 'plain' as const }] : []),
 ];
+const h = Object.fromEntries(itemHeadings((k) => t(locale, k)).map((x) => [x.slug, x]));
 const undoCommand = `formatkit cleanup undo ${item.id}`;
 ---
 
@@ -37,17 +39,17 @@ const undoCommand = `formatkit cleanup undo ${item.id}`;
   <p class="fk-item-id"><code>{item.id}</code></p>
   <p class="fk-badges">{badges.map((b) => <span class="fk-badge" data-tone={b.tone}>{b.text}</span>)}</p>
 
-  <h2>{t(locale, 'item.what')}</h2>
+  <h2 id={h.what.slug}>{h.what.text}</h2>
   <p>{text.what}</p>
 
-  <h2>{t(locale, 'item.breaks')}</h2>
+  <h2 id={h.breaks.slug}>{h.breaks.text}</h2>
   <p>{text.breaks}</p>
 
-  <h2>{t(locale, 'item.when')}</h2>
+  <h2 id={h.when.slug}>{h.when.text}</h2>
   <p>{when.join(' ')}</p>
   {text.gain && <p>{text.gain}</p>}
 
-  <h2>{t(locale, 'item.evidence')}</h2>
+  <h2 id={h.evidence.slug}>{h.evidence.text}</h2>
   {
     item.evidence ? (
       <>
@@ -67,11 +69,11 @@ const undoCommand = `formatkit cleanup undo ${item.id}`;
     )
   }
 
-  <h2>{t(locale, 'item.undo')}</h2>
+  <h2 id={h.undo.slug}>{h.undo.text}</h2>
   <pre><code>{undoCommand}</code></pre>
   <p><a href={siteHref(base, locale, 'safety') + (locale === 'en' ? '#undo' : '#desfazer')}>{t(locale, 'item.undo.journal')}</a></p>
 
-  <h2>{t(locale, 'item.technical')}</h2>
+  <h2 id={h.technical.slug}>{h.technical.text}</h2>
   {
     item.actions.length > 0 ? (
       <details>

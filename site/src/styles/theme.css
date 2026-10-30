@@ -59,14 +59,7 @@ header.header {
   font-weight: 800;
   text-transform: lowercase;
   letter-spacing: -0.02em;
-}
-.site-title::after {
-  content: '';
-  display: inline-block;
-  width: 0.5em;
-  height: 1em;
-  margin-inline-start: 0.2em;
-  background: var(--fk-green);
+  gap: 0.6em;
 }
 
 /* Sidebar */

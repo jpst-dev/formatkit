@@ -2,7 +2,7 @@
   "name": "formatkit-make-icon",
   "private": true,
   "type": "module",
-  "description": "Renders assets/formatkit.svg into assets/formatkit.ico and the site favicon.",
+  "description": "Renders assets/formatkit.svg into assets/formatkit.ico and the site favicon and logo.",
   "scripts": {
     "make": "node make-icon.mjs"
   },
