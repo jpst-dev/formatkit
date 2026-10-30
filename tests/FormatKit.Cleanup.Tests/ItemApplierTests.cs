@@ -53,6 +53,34 @@ public class ItemApplierTests
     }
 
     [Fact]
+    public async Task User_scope_startup_item_records_the_user_sid_and_machine_scope_does_not()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(@"HKCU\Software\Microsoft\Windows\CurrentVersion\Run", "App", RegistryKind.String, "app.exe");
+        registry.Set(@"HKLM\Software\Microsoft\Windows\CurrentVersion\Run", "App", RegistryKind.String, "app.exe");
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("startup.user", scope: ItemScope.User, actions: [new StartupItemAction("App", ItemScope.User)]), ctx, Ct);
+        await NewApplier().ApplyAsync(Item("startup.machine", actions: [new StartupItemAction("App", ItemScope.Machine)]), ctx, Ct);
+
+        var entries = _journal.Load().Journal!.Entries;
+        Assert.Equal("S-1-5-21-1-2-3-1001", entries.Single(e => e.ItemId == "startup.user").UserSid);
+        Assert.Null(entries.Single(e => e.ItemId == "startup.machine").UserSid);
+    }
+
+    [Fact]
+    public async Task Startup_item_with_missing_run_value_is_already_in_place_and_journals_nothing()
+    {
+        var outcome = await NewApplier().ApplyAsync(
+            Item("startup.user", scope: ItemScope.User, actions: [new StartupItemAction("Gone", ItemScope.User)]),
+            Context(new FakeRegistry()), Ct);
+
+        Assert.Equal(ItemStatus.AlreadyInPlace, outcome.Status);
+        Assert.False(_files.FileExists(_journal.Path));
+    }
+
+    [Fact]
     public async Task Applies_only_unapplied_actions_and_journals_them()
     {
         var registry = new FakeRegistry();

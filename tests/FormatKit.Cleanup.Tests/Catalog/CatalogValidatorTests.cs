@@ -154,6 +154,26 @@ public class CatalogValidatorTests : IDisposable
             "scope user");
 
     [Fact]
+    public void User_scope_startupItem_in_user_scope_item_is_accepted() =>
+        Assert.Empty(Validate(Item(scope: "user", action: """{ "type": "startupItem", "name": "OneDrive", "scope": "user" }""")));
+
+    [Fact]
+    public void Machine_scope_startupItem_in_user_scope_item_is_rejected() =>
+        AssertError(
+            Validate(Item(scope: "user", action: """{ "type": "startupItem", "name": "OneDrive", "scope": "machine" }""")),
+            "scope user");
+
+    [Fact]
+    public void Machine_scope_startupItem_in_machine_scope_item_is_accepted() =>
+        Assert.Empty(Validate(Item(scope: "machine", action: """{ "type": "startupItem", "name": "OneDrive", "scope": "machine" }""")));
+
+    [Fact]
+    public void Blank_startupItem_name_is_rejected() =>
+        AssertError(
+            Validate(Item(scope: "machine", action: """{ "type": "startupItem", "name": " ", "scope": "machine" }""")),
+            "startupItem");
+
+    [Fact]
     public void Unknown_named_handler_is_rejected() =>
         AssertError(
             Validate(Item(scope: "machine", action: """{ "type": "named", "handler": "nope" }""")),

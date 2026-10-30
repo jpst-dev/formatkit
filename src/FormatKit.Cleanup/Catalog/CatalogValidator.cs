@@ -101,6 +101,10 @@ public static partial class CatalogValidator
                     else if (ProtectedLists.IsProtectedTask(taskPath, taskName))
                         Error($"scheduledTask '{taskPath}{taskName}' is protected");
                     break;
+                case StartupItemAction startup:
+                    if (string.IsNullOrWhiteSpace(startup.Name) || startup.Name.Contains('\\'))
+                        Error($"startupItem name '{startup.Name}' must be a single Run value name");
+                    break;
                 case NamedAction named:
                     if (!ProtectedLists.NamedHandlers.Contains(named.Handler))
                         Error($"unknown named handler '{named.Handler}'");
@@ -109,8 +113,9 @@ public static partial class CatalogValidator
         }
 
         if (item.Scope == ItemScope.User
-            && !actions.All(a => a is RegistryAction r && r.Path.StartsWith("HKCU\\", StringComparison.OrdinalIgnoreCase)))
-            Error("scope user requires only HKCU registry actions");
+            && !actions.All(a => a is RegistryAction r && r.Path.StartsWith("HKCU\\", StringComparison.OrdinalIgnoreCase)
+                || a is StartupItemAction { Scope: ItemScope.User }))
+            Error("scope user requires only HKCU registry or user-scope startupItem actions");
     }
 
     private static void ValidateRegistry(RegistryAction registry, Action<string> error)
