@@ -26,7 +26,8 @@ public static class TestServices
         FakeVirtualDisks? virtualDisks = null,
         FakeVolumes? volumes = null,
         FakeLicensing? licensing = null,
-        FakeScheduledTaskControl? taskControl = null)
+        FakeScheduledTaskControl? taskControl = null,
+        FakePrinters? printers = null)
     {
         processes ??= new FakeProcessRunner();
         files ??= new InMemoryFileSystem();
@@ -53,7 +54,8 @@ public static class TestServices
             virtualDisks ?? new FakeVirtualDisks(),
             volumes ?? new FakeVolumes(new VolumeInfo('C', 0, BitLockerState.Off, null, null)),
             licensing ?? new FakeLicensing(new WindowsActivation(true, "OEM:DM")),
-            taskControl ?? new FakeScheduledTaskControl());
+            taskControl ?? new FakeScheduledTaskControl(),
+            printers ?? new FakePrinters());
     }
 
     public static StepContext Context(ServiceSet services) =>

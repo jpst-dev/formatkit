@@ -71,7 +71,8 @@ public static class Services
             new PowerShellVirtualDisks(processes, files, paths),
             new PowerShellVolumes(processes),
             new CimLicensing(processes),
-            new PowerShellScheduledTaskControl(processes));
+            new PowerShellScheduledTaskControl(processes),
+            new PowerShellPrinters(processes));
 
         return new HostEnvironment(
             services,

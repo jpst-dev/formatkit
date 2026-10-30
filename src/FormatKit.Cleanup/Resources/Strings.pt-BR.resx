@@ -36,4 +36,7 @@
   <data name="Validation_ConfirmAggressive" xml:space="preserve"><value>Itens de limpeza agressivos estão selecionados ({0}); defina &quot;confirmAggressive&quot; como true para aplicá-los.</value></data>
   <data name="PowerScheme_FormatKit_Name" xml:space="preserve"><value>FormatKit Desempenho</value></data>
   <data name="PowerScheme_FormatKit_Description" xml:space="preserve"><value>Alto desempenho ajustado pelo FormatKit: sem estacionamento de núcleos, sem economia de energia em PCIe e USB, disco nunca desliga.</value></data>
+  <data name="Skip_PrinterInstalled" xml:space="preserve"><value>ignorado: há uma impressora instalada nesta máquina (o spooler de impressão é necessário)</value></data>
+  <data name="Warning_ExplorerRestartFailed" xml:space="preserve"><value>O Windows Explorer não voltou depois de ser reiniciado</value></data>
+  <data name="NextAction_SignOutAndIn" xml:space="preserve"><value>Saia da conta e entre novamente para trazer a barra de tarefas de volta.</value></data>
 </root>
