@@ -1,0 +1,8 @@
+---
+// The site is dark only. Starlight code still calls updatePickers, so keep a no-op.
+---
+
+<script is:inline>
+	document.documentElement.dataset.theme = 'dark';
+	window.StarlightThemeProvider = { updatePickers() {} };
+</script>

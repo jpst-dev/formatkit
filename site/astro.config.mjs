@@ -34,6 +34,21 @@ export default defineConfig({
         { label: 'FAQ', translations: { 'pt-BR': 'Perguntas frequentes' }, slug: 'faq' },
         { label: 'Changelog', translations: { 'pt-BR': 'Novidades' }, slug: 'changelog' },
       ],
+      customCss: ['./src/styles/theme.css'],
+      components: {
+        ThemeProvider: './src/components/overrides/ThemeProvider.astro',
+        ThemeSelect: './src/components/overrides/ThemeSelect.astro',
+      },
+      expressiveCode: {
+        themes: ['github-dark'],
+        // github-dark supplies green-ish strings and dim comments; panel colours come from the tokens.
+        styleOverrides: {
+          codeBackground: 'var(--fk-panel)',
+          borderColor: 'var(--fk-line)',
+          codeFontFamily: 'var(--fk-mono)',
+          uiFontFamily: 'var(--fk-mono)',
+        },
+      },
       plugins: [starlightLinksValidator()],
     }),
     fkWarnings(),
