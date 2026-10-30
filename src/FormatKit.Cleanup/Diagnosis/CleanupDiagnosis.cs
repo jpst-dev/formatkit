@@ -19,10 +19,9 @@ public sealed record RevertedItem(string ItemId, bool Checked);
 /// <param name="NotChecked">Rules whose evaluation threw; each is logged (R16).</param>
 /// <param name="RevertedByWindows">Applied items whose target no longer matches (informational), plus those that could not be checked.</param>
 public sealed record DiagnosisReport(
-    IReadOnlyList<Finding> Findings, IReadOnlyList<AppliedItem> Applied, string? JournalError, int NotChecked,
-    IReadOnlyList<RevertedItem>? RevertedByWindows = null)
+    IReadOnlyList<Finding> Findings, IReadOnlyList<AppliedItem> Applied, string? JournalError, int NotChecked)
 {
-    public IReadOnlyList<RevertedItem> RevertedByWindows { get; init; } = RevertedByWindows ?? [];
+    public IReadOnlyList<RevertedItem> RevertedByWindows { get; init; } = [];
 }
 
 /// <summary>Read-only: evaluates the known-issue rules and lists what the journal can still undo. Never writes to the system.</summary>
@@ -79,8 +78,10 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
             sorted,
             applied,
             load.Status == JournalLoadStatus.Corrupt ? load.Error : null,
-            notChecked,
-            reverted);
+            notChecked)
+        {
+            RevertedByWindows = reverted,
+        };
     }
 
     /// <summary>Unreverted journaled items still in the catalog whose actions no longer hold. Items another user applied are skipped: their per-user state is not ours to read.</summary>
@@ -93,6 +94,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
         var result = new List<RevertedItem>();
         foreach (var group in journal.Entries.Where(e => e.RevertedAt is null).GroupBy(e => e.ItemId, StringComparer.Ordinal))
         {
+            ct.ThrowIfCancellationRequested();
             if (catalog.Find(group.Key) is not { } item || !group.All(e => e.CanBeUndoneBy(currentSid)))
                 continue;
             try
@@ -100,7 +102,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
                 if (!await applier.IsAppliedAsync(item, ctx, ct))
                     result.Add(new RevertedItem(item.Id, true));
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
                 // Access denied or an absent target: not known to be reverted.
                 log?.Warning(ex, "Could not check whether Windows reverted cleanup item {Item}", item.Id);

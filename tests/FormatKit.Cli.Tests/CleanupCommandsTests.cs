@@ -221,6 +221,7 @@ public sealed class CleanupCommandsTests : IDisposable
 
         Assert.Equal(ExitCodes.Ok, exit);
         Assert.Contains("  " + id + " (not checked: could not read its current state)", _out.ToString());
+        Assert.DoesNotContain("Fix: formatkit run --profile", _out.ToString());
     }
 
     [Fact]

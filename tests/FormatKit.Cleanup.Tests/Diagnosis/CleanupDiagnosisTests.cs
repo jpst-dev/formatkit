@@ -375,4 +375,32 @@ public class CleanupDiagnosisTests
 
         Assert.Equal(["privacy.b"], report.RevertedByWindows.Select(r => r.ItemId));
     }
+
+    [Fact]
+    public async Task Reverted_by_windows_treats_an_internal_cancellation_as_not_checked_and_continues()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]),
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.b", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "B", 0)]));
+        SaveJournal(Entry("privacy.a"), Entry("privacy.b"));
+        var registry = new ThrowingRegistry(new OperationCanceledException()); // a handler timeout, not the caller's token
+
+        var report = await RunWithCatalog(catalog, registry);
+
+        Assert.Equal([new RevertedItem("privacy.a", false), new RevertedItem("privacy.b", false)], report.RevertedByWindows);
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_stops_when_the_caller_cancels()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]));
+        SaveJournal(Entry("privacy.a"));
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            new CleanupDiagnosis(Rules(), _paths, null, catalog).RunAsync(
+                TestServices.Create(files: _files, registry: _registry, services: _services, power: _power, hardware: _hardware), cts.Token));
+    }
 }

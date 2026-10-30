@@ -99,8 +99,15 @@ internal static class CleanupCommands
             o.WriteLine(Strings.Get("Check_Reverted"));
             foreach (var item in report.RevertedByWindows)
             {
-                o.WriteLine("  " + item.ItemId + (item.Checked ? "" : " " + Strings.Get("Check_Reverted_NotChecked")));
-                o.WriteLine("    " + Strings.Get("Check_Reverted_Fix"));
+                if (item.Checked)
+                {
+                    o.WriteLine("  " + item.ItemId);
+                    o.WriteLine("    " + Strings.Get("Check_Reverted_Fix"));
+                }
+                else
+                {
+                    o.WriteLine("  " + item.ItemId + " " + Strings.Get("Check_Reverted_NotChecked"));
+                }
             }
         }
 
