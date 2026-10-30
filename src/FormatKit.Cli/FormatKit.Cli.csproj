@@ -8,6 +8,7 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
     <DebugType>embedded</DebugType>
+    <ApplicationIcon>..\..\assets\formatkit.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />

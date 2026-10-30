@@ -9,6 +9,8 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'FormatKit',
+      // Same mark as the exe icon (assets/formatkit.svg, copied by tools/make-icon).
+      favicon: '/favicon.svg',
       defaultLocale: 'root',
       locales: {
         root: { label: 'Português', lang: 'pt-BR' },
