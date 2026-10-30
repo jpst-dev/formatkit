@@ -2029,13 +2029,13 @@
         "en": {
           "title": "Turn off hibernation",
           "what": "Turns hibernation off with powercfg /hibernate off, which deletes the hibernation file. Fast Startup goes off with it.",
-          "breaks": "Hibernate and Fast Startup are gone, and a laptop cannot hibernate when its battery runs low. Undo turns hibernation back on.",
+          "breaks": "Hibernate and Fast Startup are gone, and a laptop cannot hibernate when its battery runs low. Undo runs powercfg /hibernate on, which recreates the hibernation file; on a PC whose firmware has no hibernation it only logs a warning.",
           "gain": "Frees the disk space used by hiberfil.sys."
         },
         "pt-BR": {
           "title": "Desativar a hibernação",
           "what": "Desativa a hibernação com powercfg /hibernate off, que apaga o arquivo de hibernação. A Inicialização Rápida é desativada junto.",
-          "breaks": "Hibernar e a Inicialização Rápida somem, e um notebook não consegue hibernar quando a bateria está acabando. Desfazer reativa a hibernação.",
+          "breaks": "Hibernar e a Inicialização Rápida somem, e um notebook não consegue hibernar quando a bateria está acabando. Desfazer executa powercfg /hibernate on, que recria o arquivo de hibernação; num PC cujo firmware não tem hibernação, apenas registra um aviso no log.",
           "gain": "Libera o espaço em disco usado pelo hiberfil.sys."
         }
       },

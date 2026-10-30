@@ -26,8 +26,16 @@ internal sealed class HibernateHandler : IActionHandler
     public Task<JournalAction> CaptureAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
     {
         var enabled = RegistryHandler.CapturePrevious(ctx.Services.Registry, PowerPath, EnabledName);
-        ctx.Log.Debug("Hibernation previous state: {Enabled}", enabled);
-        return Task.FromResult(new JournalAction(Name, Name, JsonSerializer.SerializeToElement(new { enabled })));
+        var effective = IsEffectivelyEnabled(ctx.Services.Registry);
+        ctx.Log.Debug("Hibernation previous state: {Enabled}, effectively enabled {Effective}", enabled, effective);
+        return Task.FromResult(new JournalAction(Name, Name, JsonSerializer.SerializeToElement(new { enabled, effective })));
+    }
+
+    /// <summary>True unless <c>HibernateEnabled</c> (or, when absent, <c>HibernateEnabledDefault</c>) is a DWORD 0.</summary>
+    private static bool IsEffectivelyEnabled(IRegistry registry)
+    {
+        var effective = registry.Read(PowerPath, EnabledName) ?? registry.Read(PowerPath, DefaultName);
+        return effective is not { Kind: RegistryKind.Dword, Data: "0" };
     }
 
     public async Task<JournalAction> ApplyAsync(CleanupAction action, JournalAction captured, StepContext ctx, CancellationToken ct)
@@ -42,19 +50,35 @@ internal sealed class HibernateHandler : IActionHandler
         return captured;
     }
 
-    /// <summary>Deletes the value when it was absent; turns hibernation back on only when it was 1.</summary>
+    /// <summary>
+    /// Runs <c>powercfg /hibernate on</c> when hibernation was effectively enabled (it recreates the hibernation
+    /// file), then puts <c>HibernateEnabled</c> back as it was: deleted when it was absent, so the default rules again.
+    /// A powercfg failure (for example firmware without hibernation) is logged and does not stop the undo.
+    /// </summary>
     public async Task UndoAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
     {
+        var registry = ctx.Services.Registry;
         var enabled = recorded.Previous.GetProperty("enabled");
-        if (enabled.TryGetProperty("absent", out var absent) && absent.GetBoolean())
+        var wasAbsent = enabled.TryGetProperty("absent", out var absent) && absent.GetBoolean();
+        var wasOn = recorded.Previous.TryGetProperty("effective", out var effective)
+            ? effective.GetBoolean()
+            : wasAbsent
+                ? registry.Read(PowerPath, DefaultName) is not { Kind: RegistryKind.Dword, Data: "0" }
+                : enabled.GetProperty("data").GetString() != "0";
+
+        if (wasOn)
         {
-            ctx.Services.Registry.Delete(PowerPath, EnabledName);
-        }
-        else if (enabled.GetProperty("data").GetString() == "1")
-        {
-            await PowerCfgAsync(ctx, "on", ct).ConfigureAwait(false);
+            try
+            {
+                await PowerCfgAsync(ctx, "on", ct).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                ctx.Log.Warning(ex, "Could not turn hibernation back on; run powercfg /hibernate on yourself if you need it");
+            }
         }
 
+        RegistryHandler.Restore(registry, PowerPath, EnabledName, enabled);
         ctx.Log.Information("Hibernation state restored");
     }
 

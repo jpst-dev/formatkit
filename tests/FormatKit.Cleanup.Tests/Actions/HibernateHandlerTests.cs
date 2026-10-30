@@ -1,4 +1,6 @@
+using System.Text.Json;
 using FormatKit.Cleanup.Actions;
+using FormatKit.Cleanup.Journal;
 using FormatKit.Cleanup.Catalog;
 using FormatKit.Core.Steps;
 using FormatKit.Core.SystemAccess;
@@ -79,9 +81,24 @@ public class HibernateHandlerTests
     }
 
     [Fact]
-    public async Task Undo_runs_powercfg_on_only_when_it_was_one()
+    public async Task Undo_runs_powercfg_on_and_restores_the_value_when_it_was_one()
     {
-        var (_, runner, ctx) = Setup("1");
+        var (registry, runner, ctx) = Setup("1");
+        var handler = new HibernateHandler();
+        var recorded = await handler.ApplyAsync(Action, await handler.CaptureAsync(Action, ctx, Ct), ctx, Ct);
+        runner.OnRun = null;
+        runner.Enqueue("powercfg.exe", new ProcessResult(0, "", "", TimeSpan.Zero, false));
+
+        await handler.UndoAsync(recorded, ctx, Ct);
+
+        Assert.Equal(["/hibernate", "on"], runner.Calls[1].Arguments);
+        Assert.Equal(new RegistryValue(RegistryKind.Dword, "1"), registry.Read(Power, "HibernateEnabled"));
+    }
+
+    [Fact]
+    public async Task Undo_turns_hibernation_on_then_deletes_the_value_when_it_was_absent_and_the_default_was_on()
+    {
+        var (registry, runner, ctx) = Setup(null, "1");
         var handler = new HibernateHandler();
         var recorded = await handler.ApplyAsync(Action, await handler.CaptureAsync(Action, ctx, Ct), ctx, Ct);
         runner.Enqueue("powercfg.exe", new ProcessResult(0, "", "", TimeSpan.Zero, false));
@@ -89,19 +106,35 @@ public class HibernateHandlerTests
         await handler.UndoAsync(recorded, ctx, Ct);
 
         Assert.Equal(["/hibernate", "on"], runner.Calls[1].Arguments);
+        Assert.Null(registry.Read(Power, "HibernateEnabled"));
     }
 
     [Fact]
-    public async Task Undo_deletes_the_value_when_it_was_absent_and_runs_nothing_more()
+    public async Task Undo_logs_a_powercfg_failure_and_still_deletes_the_value()
     {
-        var (registry, runner, ctx) = Setup(null);
+        var (registry, runner, ctx) = Setup(null, "1");
         var handler = new HibernateHandler();
         var recorded = await handler.ApplyAsync(Action, await handler.CaptureAsync(Action, ctx, Ct), ctx, Ct);
+        runner.OnRun = null;
+        runner.Enqueue("powercfg.exe", new ProcessResult(1, "", "The system firmware does not support hibernation.", TimeSpan.Zero, false));
 
         await handler.UndoAsync(recorded, ctx, Ct);
 
+        Assert.Equal(2, runner.Calls.Count);
         Assert.Null(registry.Read(Power, "HibernateEnabled"));
-        Assert.Single(runner.Calls);
+    }
+
+    [Fact]
+    public async Task Undo_of_a_journal_without_the_effective_state_reads_the_default_now()
+    {
+        var (registry, runner, ctx) = Setup("0", "1");
+        var recorded = new JournalAction("hibernate", "hibernate",
+            JsonSerializer.SerializeToElement(new { enabled = new { absent = true } }));
+
+        await new HibernateHandler().UndoAsync(recorded, ctx, Ct);
+
+        Assert.Equal(["/hibernate", "on"], runner.Calls.Single().Arguments);
+        Assert.Null(registry.Read(Power, "HibernateEnabled"));
     }
 
     [Fact]

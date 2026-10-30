@@ -152,7 +152,7 @@ selected by `include`, and when included it wins over the level's plan.
 |---|---|---|---|---|
 | `keyboardLayout` (item `input.ptbr-us-international`) | user | Through PowerShell `Get-WinUserLanguageList` / `Set-WinUserLanguageList`: make `pt-BR` the first language with exactly the input method `0416:00020409` (US-International), removing ABNT/ABNT2 from pt-BR; other languages keep their order and inputs. | first language is pt-BR and its input methods are exactly `0416:00020409` | previous list serialized (tags and input method tips) / restored with `Set-WinUserLanguageList` |
 | `soundScheme` (item `sound.no-sounds`) | user | Set `HKCU\AppEvents\Schemes` default to `.None` and clear every `...\Apps\*\*\.Current` default value. | scheme is `.None` and all `.Current` values are empty | previous scheme name and every `.Current` value / restored |
-| `hibernate` (item `power.hibernation-off`) | machine | `powercfg /hibernate off` | `HKLM\SYSTEM\CurrentControlSet\Control\Power\HibernateEnabled` is 0 | previous state / `powercfg /hibernate on` |
+| `hibernate` (item `power.hibernation-off`) | machine | `powercfg /hibernate off` | `HKLM\SYSTEM\CurrentControlSet\Control\Power\HibernateEnabled` is 0 | previous `HibernateEnabled` (value or absent) and the effective state (`HibernateEnabled`, else `HibernateEnabledDefault`) / when hibernation was effectively on, `powercfg /hibernate on` (a failure is a logged warning, e.g. firmware without hibernation), then `HibernateEnabled` restored or deleted when it was absent |
 
 All three go through the existing process and registry abstractions and are
 unit-tested with fakes; PowerShell literals go through
