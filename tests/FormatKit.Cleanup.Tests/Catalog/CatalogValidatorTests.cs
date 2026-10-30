@@ -208,4 +208,41 @@ public class CatalogValidatorTests : IDisposable
     [InlineData("3")]
     public void Odd_length_or_non_hex_binary_value_is_rejected(string value) =>
         AssertError(Validate(Item(action: BinaryAction(value))), "does not match kind");
+
+    private static string TaskAction(string path, string name) =>
+        $$"""{ "type": "scheduledTask", "path": "{{path.Replace("\\", "\\\\")}}", "name": "{{name}}", "enabled": false }""";
+
+    [Theory]
+    [InlineData(@"\Microsoft\Windows\WindowsUpdate\", "Scheduled Start")]
+    [InlineData(@"\Microsoft\Windows\WindowsUpdate\Sub\", "Anything")]
+    [InlineData(@"\Microsoft\Windows\UpdateOrchestrator\", "Reboot")]
+    [InlineData(@"\Microsoft\Windows\WaaSMedic\", "PerformRemediation")]
+    [InlineData(@"\Microsoft\Windows\Defrag\", "ScheduledDefrag")]
+    [InlineData(@"\Microsoft\Windows\PI\", "Secure-Boot-Update")]
+    [InlineData(@"\Microsoft\Windows\Autochk\", "Proxy")]
+    [InlineData(@"\Microsoft\XblGameSave\", "XblGameSaveTask")]
+    [InlineData(@"\Microsoft\Windows\Windows Defender\", "Windows Defender Scheduled Scan")]
+    [InlineData(@"\microsoft\windows\windows defender\", "x")]
+    [InlineData(@"\Microsoft\Windows\Windows Error Reporting\", "QueueReporting")]
+    public void Protected_scheduled_task_is_rejected(string path, string name) =>
+        AssertError(Validate(Item(scope: "machine", action: TaskAction(path, name))), "protected");
+
+    [Fact]
+    public void Unprotected_scheduled_task_is_accepted() =>
+        Assert.Empty(Validate(Item(scope: "machine", action: TaskAction(@"\Microsoft\Windows\Application Experience\", "ProgramDataUpdater"))));
+
+    [Theory]
+    [InlineData(@"Microsoft\Windows\Application Experience\")]
+    [InlineData(@"\Microsoft\Windows\Application Experience")]
+    [InlineData("")]
+    public void Scheduled_task_path_without_leading_and_trailing_backslash_is_rejected(string path) =>
+        AssertError(Validate(Item(scope: "machine", action: TaskAction(path, "ProgramDataUpdater"))), "must start and end with a backslash");
+
+    [Fact]
+    public void Protected_task_helper_matches_exact_paths_and_prefixes_case_insensitively()
+    {
+        Assert.True(ProtectedLists.IsProtectedTask(@"\Microsoft\Windows\Defrag\", "scheduleddefrag"));
+        Assert.False(ProtectedLists.IsProtectedTask(@"\Microsoft\Windows\Defrag\", "Other"));
+        Assert.False(ProtectedLists.IsProtectedTask(@"\Microsoft\Windows\WindowsUpdateX\", "T"));
+    }
 }

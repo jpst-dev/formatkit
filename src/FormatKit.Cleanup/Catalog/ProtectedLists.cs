@@ -12,6 +12,30 @@ public static class ProtectedLists
         "SSDPSRV", "StiSvc", "SCardSvr", "SensorService", "vmcompute", "vmms", "LxssManager",
         "WSLService");
 
+    /// <summary>
+    /// No <c>scheduledTask</c> action may target these (spec 5.3). An entry ending in <c>\</c> is a folder prefix
+    /// (everything under it); any other entry is an exact task path (folder plus name).
+    /// </summary>
+    public static IReadOnlySet<string> ScheduledTasks { get; } = Set(
+        @"\Microsoft\Windows\WindowsUpdate\",
+        @"\Microsoft\Windows\UpdateOrchestrator\",
+        @"\Microsoft\Windows\WaaSMedic\",
+        @"\Microsoft\Windows\Defrag\ScheduledDefrag",
+        @"\Microsoft\Windows\PI\Secure-Boot-Update",
+        @"\Microsoft\Windows\Autochk\Proxy",
+        @"\Microsoft\XblGameSave\XblGameSaveTask",
+        @"\Microsoft\Windows\Windows Defender\",
+        @"\Microsoft\Windows\Windows Error Reporting\QueueReporting");
+
+    /// <summary>True when the task at <paramref name="path"/> + <paramref name="name"/> is protected.</summary>
+    public static bool IsProtectedTask(string path, string name)
+    {
+        var full = path + name;
+        return ScheduledTasks.Any(entry => entry.EndsWith('\\')
+            ? full.StartsWith(entry, StringComparison.OrdinalIgnoreCase)
+            : string.Equals(full, entry, StringComparison.OrdinalIgnoreCase));
+    }
+
     /// <summary>Apps that are never removed. Entries ending in <c>*</c> are prefixes.</summary>
     public static IReadOnlySet<string> NeverRemoveApps { get; } = Set(
         "Microsoft.WindowsStore", "Microsoft.DesktopAppInstaller", "Microsoft.MicrosoftEdge*",

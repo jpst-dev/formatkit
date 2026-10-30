@@ -89,6 +89,16 @@ public static partial class CatalogValidator
                     if (feature.State == OptionalFeatureState.Absent)
                         Error($"optionalFeature '{feature.Name}' state must be enabled or disabled");
                     break;
+                case ScheduledTaskAction task:
+                    var taskPath = task.Path ?? "";
+                    var taskName = task.Name ?? "";
+                    if (!taskPath.StartsWith('\\') || !taskPath.EndsWith('\\'))
+                        Error($"scheduledTask path '{taskPath}' must start and end with a backslash");
+                    else if (string.IsNullOrWhiteSpace(taskName) || taskName.Contains('\\'))
+                        Error($"scheduledTask name '{taskName}' must be a single task name");
+                    else if (ProtectedLists.IsProtectedTask(taskPath, taskName))
+                        Error($"scheduledTask '{taskPath}{taskName}' is protected");
+                    break;
                 case NamedAction named:
                     if (!ProtectedLists.NamedHandlers.Contains(named.Handler))
                         Error($"unknown named handler '{named.Handler}'");

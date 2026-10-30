@@ -70,7 +70,8 @@ public static class Services
             new WslClient(processes),
             new PowerShellVirtualDisks(processes, files, paths),
             new PowerShellVolumes(processes),
-            new CimLicensing(processes));
+            new CimLicensing(processes),
+            new PowerShellScheduledTaskControl(processes));
 
         return new HostEnvironment(
             services,

@@ -26,4 +26,5 @@ public sealed record ServiceSet(
     WslClient Wsl,
     IVirtualDisks VirtualDisks,
     IVolumes Volumes,
-    ILicensing Licensing);
+    ILicensing Licensing,
+    IScheduledTaskControl TaskControl);
