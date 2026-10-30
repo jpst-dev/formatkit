@@ -24,6 +24,7 @@ const scopeKey = item.scope === 'user' ? 'badge.scope.user' : item.scope === 'ma
 const badges: Badge[] = [
   { text: labelFor('level', item.level, labels), tone: levelTone(item.level) },
   { text: labelFor('category', item.category, labels), tone: 'plain' },
+  ...(item.optIn ? [{ text: t(locale, 'badge.optIn'), tone: 'amber' as const }] : []),
   ...(item.contested ? [{ text: t(locale, 'badge.contested'), tone: 'amber' as const }] : []),
   ...(item.laptopSensitive ? [{ text: t(locale, 'badge.laptopSensitive'), tone: 'plain' as const }] : []),
   ...(item.requiresReboot ? [{ text: t(locale, 'badge.reboot'), tone: 'plain' as const }] : []),

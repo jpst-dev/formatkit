@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { beforeEach, expect, test } from 'vitest';
 import { loadCleanup, sortForIndex } from '../src/loaders/cleanup';
 import { readWarnings, resetWarnings } from '../src/lib/warnings';
+import { KNOWN_CATEGORIES } from '../src/lib/labels';
 
 const read = (url: string) => JSON.parse(readFileSync(fileURLToPath(new URL(url, import.meta.url)), 'utf8'));
 const real = read('../../src/FormatKit.Cleanup/Catalog/Data/cleanup.json');
@@ -34,7 +35,7 @@ test('future.json loads and warns', () => {
   const list = loadCleanup(fixture('future.json'));
   expect(list[0].category).toBe('windowsSettings');
   expect(list[0].level).toBe('extreme');
-  expect(list[0].actions[0]).toEqual({ type: 'service', name: 'DiagTrack' });
+  expect(list[0].actions[0]).toEqual({ type: 'firewallRule', name: 'DiagTrack' });
   const codes = readWarnings().map((w) => w.code);
   expect(codes).toContain('schema.version');
   expect(codes).toContain('action.unknown');
@@ -42,7 +43,7 @@ test('future.json loads and warns', () => {
 
 test('booleans default to false, order is file position', () => {
   const [a, b] = loadCleanup(doc(item({ id: 'a.1' }), item({ id: 'a.2', contested: true })));
-  expect(a).toMatchObject({ contested: false, requiresReboot: false, laptopSensitive: false, order: 0 });
+  expect(a).toMatchObject({ contested: false, requiresReboot: false, laptopSensitive: false, optIn: false, order: 0 });
   expect(b).toMatchObject({ contested: true, order: 1 });
 });
 
@@ -96,4 +97,20 @@ test('non-string gain is dropped', () => {
   const [i] = loadCleanup(doc(item({ text: t })));
   expect('gain' in i.text.en).toBe(false);
   expect(i.text['pt-BR'].gain).toBe('G');
+});
+
+test('optIn is read from the item', () => {
+  expect(loadCleanup(doc(item({ optIn: true })))[0].optIn).toBe(true);
+});
+
+test('the action types the catalog uses are known and do not warn', () => {
+  const types = ['appx', 'registry', 'named', 'powerScheme', 'powerSetting', 'scheduledTask', 'service', 'startupItem'];
+  loadCleanup(doc(item({ actions: types.map((type) => ({ type })) })));
+  expect(readWarnings()).toEqual([]);
+});
+
+test('the real catalog loads with every category labelled and every action known', () => {
+  const list = loadCleanup(real);
+  for (const i of list) expect(KNOWN_CATEGORIES as readonly string[]).toContain(i.category);
+  expect(readWarnings().filter((w) => w.code === 'action.unknown')).toEqual([]);
 });

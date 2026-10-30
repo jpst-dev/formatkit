@@ -34,6 +34,7 @@ const groups = [...sortForIndex(items)];
           {list.map((i) => {
             const flags: Badge[] = [
               { text: labelFor('level', i.level, labels), tone: levelTone(i.level) },
+              ...(i.optIn ? [{ text: t(locale, 'badge.optIn'), tone: 'amber' as const }] : []),
               ...(i.contested ? [{ text: t(locale, 'badge.contested'), tone: 'amber' as const }] : []),
               ...(i.laptopSensitive ? [{ text: t(locale, 'badge.laptopSensitive'), tone: 'plain' as const }] : []),
               ...(i.requiresReboot ? [{ text: t(locale, 'badge.reboot'), tone: 'plain' as const }] : []),

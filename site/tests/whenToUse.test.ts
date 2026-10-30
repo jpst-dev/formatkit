@@ -19,3 +19,8 @@ test('developer items say they are opt-in through include, instead of the level 
   expect(whenToUse(dev, tt)).toEqual(['T:when.developer']);
   expect(whenToUse({ ...dev, contested: true }, tt)).toEqual(['T:when.developer', 'T:when.contested']);
 });
+
+test('opt-in items add that they are applied only through include', () => {
+  const item = { ...base, category: 'power', contested: false, laptopSensitive: true, optIn: true } as CleanupItem;
+  expect(whenToUse(item, tt)).toEqual(['T:when.balanced', 'T:when.optIn', 'T:when.laptopSensitive']);
+});
