@@ -14,7 +14,10 @@ test('en: links, prompt and default log', async () => {
   expect(html).toContain('href="/formatkit/en/download/"');
   expect(html).toContain('/formatkit/en/guide/before/');
   expect(html).toContain('/formatkit/en/catalog/');
-  expect(html).toMatch(/<code[^>]*>formatkit run --profile cleanup-balanced\.json --dry-run<\/code>/);
+  const code = html.match(/<code[^>]*>(.*?)<\/code>/s)![1];
+  expect(code.replace(/<[^>]+>/g, '')).toBe('formatkit run --profile cleanup-balanced.json --dry-run');
+  expect(code.match(/<span[^>]*class="[^"]*fk-tok/g)?.length).toBe(5);
+  expect(code).toContain('>--dry-run</span>');
   expect(html).toContain('Hardware detected');
   expect(html.match(/\[ OK \]/g)?.length).toBe(4);
   expect(html.match(/\[ \.\. \]/g)?.length).toBe(1);

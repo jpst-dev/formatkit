@@ -40,7 +40,7 @@ const hasWarn = Astro.slots.has('warn');
       </div>
     </div>
     <div class="fk-log fk-panel">
-      <p class="fk-log-prompt"><span aria-hidden="true">&gt; </span><code>{t(locale, 'home.log.prompt')}</code></p>
+      <p class="fk-log-prompt"><span aria-hidden="true">&gt; </span><code>{t(locale, 'home.log.prompt').split(' ').map((tok, i) => <Fragment>{i > 0 && ' '}<span class="fk-tok">{tok}</span></Fragment>)}</code></p>
       <ul class="fk-log-lines">
         {
           lines.map((l, i) => (
@@ -145,6 +145,9 @@ const hasWarn = Astro.slots.has('warn');
   }
   .fk-run {
     color: var(--fk-dim);
+  }
+  .fk-tok {
+    white-space: nowrap;
   }
   .fk-log-prompt code {
     overflow-wrap: normal;
