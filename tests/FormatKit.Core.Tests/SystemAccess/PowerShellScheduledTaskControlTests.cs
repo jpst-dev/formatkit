@@ -53,4 +53,14 @@ public class PowerShellScheduledTaskControlTests
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => control.SetEnabledAsync(@"\A\", "B", false, TestContext.Current.CancellationToken));
     }
+
+    [Fact]
+    public async Task IsEnabled_fails_clearly_when_several_tasks_match()
+    {
+        var (control, _) = Create(Result(0, "Multiple\r\n"));
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => control.IsEnabledAsync(@"\A\", "B", TestContext.Current.CancellationToken));
+        Assert.Contains("More than one", ex.Message);
+    }
 }

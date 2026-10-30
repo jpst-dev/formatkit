@@ -92,7 +92,9 @@ public static partial class CatalogValidator
                 case ScheduledTaskAction task:
                     var taskPath = task.Path ?? "";
                     var taskName = task.Name ?? "";
-                    if (!taskPath.StartsWith('\\') || !taskPath.EndsWith('\\'))
+                    if (taskPath.IndexOfAny(['*', '?', '[']) >= 0 || taskName.IndexOfAny(['*', '?', '[']) >= 0)
+                        Error($"scheduledTask '{taskPath}{taskName}' must not contain wildcards (*, ? or [)");
+                    else if (!taskPath.StartsWith('\\') || !taskPath.EndsWith('\\'))
                         Error($"scheduledTask path '{taskPath}' must start and end with a backslash");
                     else if (string.IsNullOrWhiteSpace(taskName) || taskName.Contains('\\'))
                         Error($"scheduledTask name '{taskName}' must be a single task name");

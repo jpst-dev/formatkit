@@ -245,4 +245,14 @@ public class CatalogValidatorTests : IDisposable
         Assert.False(ProtectedLists.IsProtectedTask(@"\Microsoft\Windows\Defrag\", "Other"));
         Assert.False(ProtectedLists.IsProtectedTask(@"\Microsoft\Windows\WindowsUpdateX\", "T"));
     }
+
+    [Theory]
+    [InlineData(@"\Microsoft\Windows\Windows*\", "Task")]
+    [InlineData(@"\Microsoft\Windows\Windows?efender\", "Task")]
+    [InlineData(@"\Microsoft\Windows\[W]indowsUpdate\", "Task")]
+    [InlineData(@"\Microsoft\Windows\Application Experience\", "*")]
+    [InlineData(@"\Microsoft\Windows\Application Experience\", "Program?ataUpdater")]
+    [InlineData(@"\Microsoft\Windows\Application Experience\", "[P]rogramDataUpdater")]
+    public void Scheduled_task_wildcards_are_rejected(string path, string name) =>
+        AssertError(Validate(Item(scope: "machine", action: TaskAction(path, name))), "wildcard");
 }
