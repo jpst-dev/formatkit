@@ -106,3 +106,28 @@ test('undo journal link points at the Undo section of the safety page', async ()
   const pt = await render(CatalogItem, { item, locale: 'pt-BR' });
   expect(pt).toContain('/safety/#desfazer"');
 });
+
+test('item page shows the id line first, before the badges', async () => {
+  const html = await render(CatalogItem, { item, locale: 'en' });
+  expect(html).toMatch(/<p class="fk-item-id[^"]*"[^>]*><code[^>]*>apps\.x<\/code><\/p>/);
+  expect(html.indexOf('fk-item-id')).toBeLessThan(html.indexOf('fk-badges'));
+});
+
+test('item badges carry tones: safe green, aggressive amber, balanced plain, contested amber', async () => {
+  const safe = await render(CatalogItem, { item: { ...item, level: 'safe', contested: false }, locale: 'en' });
+  expect(safe).toMatch(/data-tone="green"/);
+  const aggressive = await render(CatalogItem, { item: { ...item, level: 'aggressive', contested: false }, locale: 'en' });
+  expect(aggressive).toMatch(/data-tone="amber"/);
+  const balanced = await render(CatalogItem, { item: { ...item, level: 'balanced', contested: false }, locale: 'en' });
+  expect(balanced).not.toMatch(/data-tone="(green|amber)"/);
+  expect(balanced).toMatch(/data-tone="plain"/);
+  const contested = await render(CatalogItem, { item: { ...item, level: 'balanced', contested: true }, locale: 'en' });
+  expect(contested).toMatch(/data-tone="amber">Contested</);
+});
+
+test('index flags carry the same tones', async () => {
+  for (const [level, tone] of [['safe', 'green'], ['aggressive', 'amber'], ['balanced', 'plain']] as const) {
+    const html = await render(CatalogIndex, { items: [{ ...item, level, contested: false, laptopSensitive: false, requiresReboot: false }], locale: 'en' });
+    expect(html).toMatch(new RegExp(`class="fk-badge[^"]*"[^>]*data-tone="${tone}"|data-tone="${tone}"[^>]*class="fk-badge`));
+  }
+});

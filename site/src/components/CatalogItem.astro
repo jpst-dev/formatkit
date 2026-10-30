@@ -3,6 +3,8 @@ import type { CleanupItem } from '../loaders/cleanup';
 import { labelFor } from '../lib/labels';
 import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
 import type { SiteLocale } from '../lib/text';
+import { levelTone } from '../lib/badges';
+import type { Badge } from '../lib/badges';
 import { siteHref } from '../lib/catalogPaths';
 import { whenToUse } from '../lib/whenToUse';
 import ActionDetails from './ActionDetails.astro';
@@ -19,19 +21,20 @@ const text = pickText(item.text, locale);
 const base = import.meta.env.BASE_URL;
 const when = whenToUse(item, (k) => t(locale, k));
 const scopeKey = item.scope === 'user' ? 'badge.scope.user' : item.scope === 'machine' ? 'badge.scope.machine' : '';
-const badges = [
-  labelFor('level', item.level, labels),
-  labelFor('category', item.category, labels),
-  ...(item.contested ? [t(locale, 'badge.contested')] : []),
-  ...(item.laptopSensitive ? [t(locale, 'badge.laptopSensitive')] : []),
-  ...(item.requiresReboot ? [t(locale, 'badge.reboot')] : []),
-  ...(scopeKey ? [t(locale, scopeKey)] : item.scope ? [item.scope] : []),
+const badges: Badge[] = [
+  { text: labelFor('level', item.level, labels), tone: levelTone(item.level) },
+  { text: labelFor('category', item.category, labels), tone: 'plain' },
+  ...(item.contested ? [{ text: t(locale, 'badge.contested'), tone: 'amber' as const }] : []),
+  ...(item.laptopSensitive ? [{ text: t(locale, 'badge.laptopSensitive'), tone: 'plain' as const }] : []),
+  ...(item.requiresReboot ? [{ text: t(locale, 'badge.reboot'), tone: 'plain' as const }] : []),
+  ...(scopeKey ? [{ text: t(locale, scopeKey), tone: 'plain' as const }] : item.scope ? [{ text: item.scope, tone: 'plain' as const }] : []),
 ];
 const undoCommand = `formatkit cleanup undo ${item.id}`;
 ---
 
 <div class="fk-item">
-  <p class="fk-badges">{badges.map((b) => <span class="fk-badge">{b}</span>)}</p>
+  <p class="fk-item-id"><code>{item.id}</code></p>
+  <p class="fk-badges">{badges.map((b) => <span class="fk-badge" data-tone={b.tone}>{b.text}</span>)}</p>
 
   <h2>{t(locale, 'item.what')}</h2>
   <p>{text.what}</p>
@@ -83,15 +86,36 @@ const undoCommand = `formatkit cleanup undo ${item.id}`;
 </div>
 
 <style>
+  .fk-item-id {
+    margin: 0 0 0.5rem;
+  }
+  .fk-item-id code {
+    font-family: var(--fk-mono);
+    color: var(--fk-green);
+    background: none;
+    padding: 0;
+  }
   .fk-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
   .fk-badge {
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 999px;
-    padding: 0 0.6rem;
+    border: 1px solid var(--fk-line);
+    border-radius: 3px;
+    padding: 0 0.5rem;
+    font-family: var(--fk-mono);
     font-size: var(--sl-text-sm);
+  }
+  .fk-badge[data-tone='green'] {
+    border-color: var(--fk-green);
+    color: var(--fk-green);
+  }
+  .fk-badge[data-tone='green']::before {
+    content: '● ';
+  }
+  .fk-badge[data-tone='amber'] {
+    border-color: var(--fk-amber);
+    color: var(--fk-amber);
   }
 </style>
