@@ -36,7 +36,7 @@ internal sealed class CleanupCategoryStep(
         var printerInstalled = await PrinterInstalledAsync(ctx, ct).ConfigureAwait(false);
         foreach (var item in items)
         {
-            if (SkipReason(item, hasBattery, printerInstalled, ctx) is not null)
+            if (await SkipReasonAsync(item, hasBattery, printerInstalled, ctx, ct).ConfigureAwait(false) is not null)
                 return false;
 
             try
@@ -65,7 +65,7 @@ internal sealed class CleanupCategoryStep(
         foreach (var item in items)
         {
             var title = item.LocalizedText().Title;
-            var skip = SkipReason(item, hasBattery, printerInstalled, ctx);
+            var skip = await SkipReasonAsync(item, hasBattery, printerInstalled, ctx, ct).ConfigureAwait(false);
             if (skip is not null)
             {
                 ctx.Log.Warning("Cleanup item {Item} skipped ({Reason})", item.Id, skip);
@@ -196,15 +196,33 @@ internal sealed class CleanupCategoryStep(
         }
     }
 
-    /// <summary>The resource key of the reason the item cannot apply here, or null when it is eligible.</summary>
-    private string? SkipReason(CleanupItem item, bool hasBattery, bool printerInstalled, StepContext ctx)
+    /// <summary>
+    /// The resource key of the reason the item cannot apply here, or null when it is eligible. A noPrinter item that is
+    /// already applied is eligible (it reports "already in place"): with the spooler disabled the printer listing fails,
+    /// which would otherwise read as "a printer is installed" on every re-run.
+    /// </summary>
+    private async Task<string?> SkipReasonAsync(CleanupItem item, bool hasBattery, bool printerInstalled, StepContext ctx, CancellationToken ct)
     {
         if (item.LaptopSensitive && hasBattery && !includedIds.Contains(item.Id))
             return "Skip_Battery";
         if (item.Scope == ItemScope.User && !ctx.Services.UserSession.IsConsoleUser)
             return "Skip_OtherUser";
-        if (item.Condition == ItemCondition.NoPrinter && printerInstalled)
+        if (item.Condition == ItemCondition.NoPrinter && printerInstalled
+            && !await IsAppliedOrFalseAsync(item, ctx, ct).ConfigureAwait(false))
             return "Skip_PrinterInstalled";
         return null;
+    }
+
+    private async Task<bool> IsAppliedOrFalseAsync(CleanupItem item, StepContext ctx, CancellationToken ct)
+    {
+        try
+        {
+            return await applier.IsAppliedAsync(item, ctx, ct).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            ctx.Log.Warning(ex, "Could not check cleanup item {Item}", item.Id);
+            return false;
+        }
     }
 }

@@ -269,6 +269,36 @@ public class CleanupCategoryStepBehaviorTests
         Assert.Equal([Message(item, Strings.Get("Skip_PrinterInstalled"))], result.Messages);
     }
 
+    // Final review M3: with the spooler disabled Get-Printer fails, which counts as "printer installed".
+    [Fact]
+    public async Task Applied_noPrinter_item_is_already_in_place_even_when_the_listing_fails()
+    {
+        _printers.Failure = new InvalidOperationException("Get-Printer failed: the spooler is not running");
+        _registry.Set(@"HKLM\Software\Test", "performance.spooler", RegistryKind.Dword, "0");
+        var item = Item("performance.spooler") with { Condition = ItemCondition.NoPrinter };
+
+        var step = Step(item);
+        var result = await step.ExecuteAsync(_ctx, Ct);
+
+        Assert.True(await step.CheckAsync(_ctx, Ct));
+        Assert.Equal(StepOutcome.Skipped, result.Outcome);
+        Assert.Equal([Message(item, Strings.Get("Status_AlreadyInPlace"))], result.Messages);
+    }
+
+    [Fact]
+    public async Task Applied_noPrinter_item_is_already_in_place_when_a_printer_is_listed()
+    {
+        _printers.Names.Add("HP LaserJet");
+        _registry.Set(@"HKLM\Software\Test", "performance.spooler", RegistryKind.Dword, "0");
+        var item = Item("performance.spooler") with { Condition = ItemCondition.NoPrinter };
+
+        var step = Step(item);
+        var result = await step.ExecuteAsync(_ctx, Ct);
+
+        Assert.True(await step.CheckAsync(_ctx, Ct));
+        Assert.Equal([Message(item, Strings.Get("Status_AlreadyInPlace"))], result.Messages);
+    }
+
     [Fact]
     public async Task Printers_are_not_listed_when_no_item_has_the_condition()
     {

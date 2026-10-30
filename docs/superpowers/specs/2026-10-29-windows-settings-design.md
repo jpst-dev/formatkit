@@ -87,7 +87,7 @@ sample each, idle cost only) showed:
 |---|---|---|
 | `optIn` | false | Selected only by `include`. It still carries a `level`, which drives `confirmAggressive` and the level badge in the UI; an included `laptopSensitive` item applies on a battery, as today. `developer` items are `optIn` implicitly (the validator requires it to be true or absent for them). |
 | `restartsExplorer` | false | After the step applies such an item, Explorer is restarted once at the end of the step (`taskkill /f /im explorer.exe`; if Winlogon has not restarted it within 3 s, `cmd /c start explorer.exe` in the console user's session through the limited-token user-context runner, never from the elevated process; section 12). Not a reboot. |
-| `condition` | absent | `noPrinter`: the item is skipped ("not applicable: a printer is installed") when any printer other than the built-in virtual ones (Microsoft Print to PDF, Microsoft XPS Document Writer, OneNote, Fax) is present. |
+| `condition` | absent | `noPrinter`: the item is skipped ("not applicable: a printer is installed") when any printer other than the built-in virtual ones (Microsoft Print to PDF, Microsoft XPS Document Writer, OneNote, Fax) is present. The condition is evaluated only for an item that is not already applied: once the spooler is disabled the printer listing fails (counted as "a printer is installed"), and a re-run must report "already in place". |
 | `laptopSensitive` | false | Now allowed on items with a `powerScheme` or `powerSetting` action, or the `hibernate` handler. |
 
 Validation (cleanup spec 5.2) gains: the id pattern accepts the new
