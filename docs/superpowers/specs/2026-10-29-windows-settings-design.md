@@ -186,7 +186,9 @@ shows the opt-in items.
 
 Levels: S safe, B balanced, A aggressive; "opt" means `optIn`; "c" means
 contested. All new user-facing text exists in `en` and `pt-BR`. Values below
-are the research's; D9 applies to each.
+are the research's; D9 applies to each. Struck-through entries were dropped
+in Task 10 (not verifiable per D9, or a duplicate) and do not ship; each is
+described in `docs/cleanup-not-included.md`.
 
 ### 7.1 `startup` (scope as noted)
 
@@ -202,11 +204,11 @@ are the research's; D9 applies to each.
 |---|---|---|
 | `apps.widgets` | B | `MicrosoftWindows.Client.WebExperience`, plus HKLM `Dsh\AllowNewsAndInterests=0` |
 | `apps.outlook-new` | B | `Microsoft.OutlookForWindows` |
-| `apps.dev-home` | B | `Microsoft.Windows.DevHome` |
+| ~~`apps.dev-home`~~ | dropped (D9) | ~~`Microsoft.Windows.DevHome`~~ see `docs/cleanup-not-included.md` |
 | `apps.bing-search` | B | `Microsoft.BingSearch` |
 | `apps.copilot` | B | `Microsoft.Copilot` |
 | `apps.office-hub` | A, c | `Microsoft.MicrosoftOfficeHub` (the Copilot key opens it) |
-| `apps.phone-link` (existing) | B | gains `MicrosoftWindows.CrossDevice` |
+| `apps.phone-link` (existing) | B | ~~gains `MicrosoftWindows.CrossDevice`~~ dropped (D9): unchanged, see `docs/cleanup-not-included.md` |
 
 `Microsoft.ZuneMusic` (Media Player) is not removed: it is the default player.
 
@@ -215,13 +217,13 @@ are the research's; D9 applies to each.
 | Id | Level | Setting |
 |---|---|---|
 | `interface.taskbar-left` | S, opt | `Explorer\Advanced\TaskbarAl=0` |
-| `interface.taskbar-search-icon` | S | `Search\SearchboxTaskbarMode=1` (icon only) |
+| ~~`interface.taskbar-search-icon`~~ | dropped (D9) | ~~`Search\SearchboxTaskbarMode=1` (icon only)~~ see `docs/cleanup-not-included.md` |
 | `interface.taskbar-task-view-off` | S | `Explorer\Advanced\ShowTaskViewButton=0` |
-| `interface.taskbar-end-task` | S | `Explorer\Advanced\TaskbarDeveloperSettings\TaskbarEndTask=1` |
-| `interface.explorer-this-pc` | S | `Explorer\Advanced\LaunchTo=1` |
-| `interface.classic-context-menu` | B | `HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32` default value `""` |
+| ~~`interface.taskbar-end-task`~~ | dropped (D9) | ~~`Explorer\Advanced\TaskbarDeveloperSettings\TaskbarEndTask=1`~~ see `docs/cleanup-not-included.md` |
+| ~~`interface.explorer-this-pc`~~ | dropped (D9) | ~~`Explorer\Advanced\LaunchTo=1`~~ see `docs/cleanup-not-included.md` |
+| ~~`interface.classic-context-menu`~~ | dropped (D9) | ~~`HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32` default value `""`~~ see `docs/cleanup-not-included.md` |
 | `interface.start-recommendations-off` | S | `Explorer\Advanced\Start_IrisRecommendations=0` and `Start_TrackDocs=0` |
-| `interface.start-web-results-off` | A, c | `HKCU\Software\Policies\Microsoft\Windows\Explorer\DisableSearchBoxSuggestions=1` (Start search can go blank) |
+| ~~`interface.start-web-results-off`~~ | dropped | ~~`HKCU\Software\Policies\Microsoft\Windows\Explorer\DisableSearchBoxSuggestions=1` (Start search can go blank)~~ the existing `privacy.start-web-search` (B) already sets this policy; ruling I4 keeps it at B and puts the blank-Start-search risk in its breaks text |
 
 ### 7.4 `ai` (machine unless noted)
 
@@ -231,19 +233,19 @@ are the research's; D9 applies to each.
 | `ai.click-to-do-off` | S | `WindowsAI\DisableClickToDo=1` |
 | `ai.paint-off` | S | Paint policies `DisableCocreator`, `DisableGenerativeFill`, `DisableImageCreator` = 1 |
 | `ai.notepad-off` | S | Notepad policy `DisableAIFeatures=1` |
-| `ai.edge-copilot-off` | S | Edge policy `HubsSidebarEnabled=0` |
+| ~~`ai.edge-copilot-off`~~ | dropped (D9) | ~~Edge policy `HubsSidebarEnabled=0`~~ see `docs/cleanup-not-included.md` |
 | `ai.fabric-service-manual` | A, c | `service WSAIFabricSvc manual` |
 
 ### 7.5 `privacy` (new items, user)
 
 | Id | Level | Setting (`ContentDeliveryManager` unless noted) |
 |---|---|---|
-| `privacy.start-suggestions` | S | `SystemPaneSuggestionsEnabled=0`, `SubscribedContent-338388Enabled=0` |
-| `privacy.lock-screen-tips` | S | `RotatingLockScreenOverlayEnabled=0`, `SubscribedContent-338387Enabled=0` |
-| `privacy.settings-suggestions` | S | `SubscribedContent-338393Enabled=0`, `-353694Enabled=0`, `-353696Enabled=0` |
+| ~~`privacy.start-suggestions`~~ | dropped (D9) | ~~`SystemPaneSuggestionsEnabled=0`, `SubscribedContent-338388Enabled=0`~~ see `docs/cleanup-not-included.md` |
+| ~~`privacy.lock-screen-tips`~~ | dropped (D9) | ~~`RotatingLockScreenOverlayEnabled=0`, `SubscribedContent-338387Enabled=0`~~ see `docs/cleanup-not-included.md` |
+| ~~`privacy.settings-suggestions`~~ | dropped (D9) | ~~`SubscribedContent-338393Enabled=0`, `-353694Enabled=0`, `-353696Enabled=0`~~ see `docs/cleanup-not-included.md` |
 | `privacy.tips-notifications` | S | `SubscribedContent-338389Enabled=0` |
 | `privacy.silent-app-installs` | S | `SilentInstalledAppsEnabled=0` |
-| `privacy.welcome-experience` | S | `SubscribedContent-310093Enabled=0` |
+| ~~`privacy.welcome-experience`~~ | dropped (D9) | ~~`SubscribedContent-310093Enabled=0`~~ see `docs/cleanup-not-included.md` |
 | `privacy.delivery-optimization-no-peers` | S | machine, `DeliveryOptimization\DODownloadMode=0` |
 | `privacy.diagtrack-manual` | B | machine, `service DiagTrack manual` |
 | `privacy.telemetry-tasks` | B | machine, `scheduledTask` off: `MareBackup`, `StartupAppTask`, `Consolidator`, `UsbCeip`, `Microsoft-Windows-DiskDiagnosticDataCollector`, `DmClient`, `DmClientOnScenarioDownload`, `UsageDataReporting`, `BootstrapUsageDataReporting` (`PcaPatchDbTask` dropped: Windows turns it back on at every boot, section 12) |
@@ -263,7 +265,7 @@ are the research's; D9 applies to each.
 |---|---|
 | `appearance.dark-theme` | `Themes\Personalize\AppsUseLightTheme=0`, `SystemUsesLightTheme=0` |
 | `appearance.transparency-off` | `Themes\Personalize\EnableTransparency=0` |
-| `appearance.animations-off` | `Control Panel\Desktop\WindowMetrics\MinAnimate="0"`, `Explorer\Advanced\TaskbarAnimations=0` |
+| `appearance.animations-off` | `Control Panel\Desktop\WindowMetrics\MinAnimate="0"` (~~`Explorer\Advanced\TaskbarAnimations=0`~~ dropped, D9, see `docs/cleanup-not-included.md`) |
 
 ### 7.8 `input`
 
@@ -276,7 +278,7 @@ are the research's; D9 applies to each.
 
 | Id | Level | Setting |
 |---|---|---|
-| `sound.communications-no-ducking` | S | `HKCU\Software\Microsoft\Multimedia\Audio\UserDuckingPreference=3` ("do nothing") |
+| ~~`sound.communications-no-ducking`~~ | dropped (D9) | ~~`HKCU\Software\Microsoft\Multimedia\Audio\UserDuckingPreference=3` ("do nothing")~~ see `docs/cleanup-not-included.md` |
 | `sound.no-sounds` | S, opt | named `soundScheme` |
 
 ### 7.10 `power` (machine)
