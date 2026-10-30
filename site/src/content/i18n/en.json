@@ -71,7 +71,7 @@
   "home.cta.catalog": "Browse the catalog",
   "home.log.1": "Hardware detected",
   "home.log.2": "Missing drivers: plan ready",
-  "home.log.3": "Profile programs: plan ready",
+  "home.log.3": "Cleanup level balanced: plan ready",
   "home.motion.pause": "Pause motion",
   "home.motion.play": "Play motion",
   "home.log.prompt": "formatkit run --profile cleanup-balanced.json --dry-run",

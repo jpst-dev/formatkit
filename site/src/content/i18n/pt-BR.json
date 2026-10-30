@@ -71,7 +71,7 @@
   "home.cta.catalog": "Ver o catálogo",
   "home.log.1": "Hardware detectado",
   "home.log.2": "Drivers que faltam: plano pronto",
-  "home.log.3": "Programas do perfil: plano pronto",
+  "home.log.3": "Limpeza nível equilibrado: plano pronto",
   "home.motion.pause": "Pausar animação",
   "home.motion.play": "Retomar animação",
   "home.log.prompt": "formatkit run --profile cleanup-balanced.json --dry-run",

@@ -75,7 +75,6 @@ const hasWarn = Astro.slots.has('warn');
     function sync() {
       var off = root.dataset.motion === 'off';
       btn.textContent = off ? btn.getAttribute('data-play') : btn.getAttribute('data-pause');
-      btn.setAttribute('aria-pressed', off ? 'true' : 'false');
     }
     sync();
     btn.hidden = false;
@@ -106,6 +105,10 @@ const hasWarn = Astro.slots.has('warn');
     align-items: center;
     max-width: 72rem;
     margin: 0 auto;
+  }
+  .fk-hero h1 {
+    font-size: clamp(2.25rem, 7vw, 4.5rem);
+    line-height: 1.05;
   }
   .fk-hero-lead {
     color: var(--fk-body);
@@ -214,16 +217,17 @@ const hasWarn = Astro.slots.has('warn');
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .fk-hero *,
-    .fk-texture {
+    .fk-hero * {
       animation: none !important;
+    }
+    .fk-motion {
+      display: none;
     }
     .fk-log-lines li {
       opacity: 1;
     }
   }
-  :global(html[data-motion='off']) .fk-hero *,
-  :global(html[data-motion='off']) .fk-texture {
+  :global(html[data-motion='off']) .fk-hero * {
     animation: none !important;
   }
   :global(html[data-motion='off']) .fk-log-lines li {

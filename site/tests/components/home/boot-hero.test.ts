@@ -19,6 +19,7 @@ test('en: links, prompt and default log', async () => {
   expect(code.match(/<span[^>]*class="[^"]*fk-tok/g)?.length).toBe(5);
   expect(code).toContain('>--dry-run</span>');
   expect(html).toContain('Hardware detected');
+  expect(html).toContain('Cleanup level balanced: plan ready');
   expect(html.match(/\[ OK \]/g)?.length).toBe(4);
   expect(html.match(/\[ \.\. \]/g)?.length).toBe(1);
 });
@@ -52,11 +53,11 @@ test('motion-off rules do not force opacity on the texture or on all hero childr
   const { readFileSync } = await import('node:fs');
   const src = readFileSync(new URL('../../../src/components/home/BootHero.astro', import.meta.url), 'utf8');
   const rules = [...src.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(
-    (m) => /prefers-reduced-motion|data-motion|\.fk-hero \*|\.fk-texture|\.fk-log-lines li/.test(m[1]) && /opacity/.test(m[2]),
+    (m) => /prefers-reduced-motion|data-motion|\.fk-hero \*|\.fk-log-lines li/.test(m[1]) && /opacity/.test(m[2]),
   );
   expect(rules.length).toBeGreaterThan(0);
   for (const r of rules) {
-    expect(r[1]).not.toMatch(/\.fk-texture|\.fk-hero \*/);
+    expect(r[1]).not.toMatch(/\.fk-hero \*/);
     expect(r[1]).toMatch(/\.fk-log-lines li/);
   }
 });
@@ -72,4 +73,28 @@ test('warn line sits below the hero grid, outside the log box', async () => {
 test('guide link text has no arrow of its own', async () => {
   const html = await render({ locale: 'en' });
   expect(html).not.toContain('↓');
+});
+
+test('motion button has no aria-pressed (label swap only)', async () => {
+  const html = await render({ locale: 'en' });
+  expect(html).not.toContain('aria-pressed');
+});
+
+test('hero h1 size rule, reduced-motion hides the toggle, no dead texture selectors', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../../../src/components/home/BootHero.astro', import.meta.url), 'utf8');
+  expect(src).toMatch(/\.fk-hero h1\s*\{[^}]*clamp\(2\.25rem, 7vw, 4\.5rem\)/);
+  expect(src).not.toContain('.fk-texture');
+  expect(src).toMatch(/prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.fk-motion\s*\{\s*display: none/);
+});
+
+test('no literal arrow inside .fk-link-dim links (the ::after adds it)', async () => {
+  const { readFileSync } = await import('node:fs');
+  for (const f of ['../../../src/content/docs/index.mdx', '../../../src/content/docs/en/index.mdx', '../../../src/components/home/BootHero.astro']) {
+    const src = readFileSync(new URL(f, import.meta.url), 'utf8');
+    const links = [...src.matchAll(/<a[^>]*fk-link-dim[^>]*>([^<]*)<\/a>/g)];
+    for (const m of links) expect(m[1]).not.toMatch(/[→↓]/);
+  }
+  const html = await render({ locale: 'en' });
+  expect(html).not.toMatch(/fk-link-dim[^>]*>[^<]*[→↓]\s*<\/a>/);
 });

@@ -115,3 +115,7 @@ Catalog item page: `CatalogItem.astro` shows the id in mono green under the titl
 - The `[ WARN ]` caution is a full-width amber line under the hero grid; the hero prompt's tokens are `nowrap` spans so flags never break.
 - `check:dist`'s command check reads code spans and fences in the MDX sources, not the built HTML, so the hero prompt (an i18n string) is not checked by it; `boot-hero.test.ts` pins the prompt instead.
 - CatalogTexture repeats the ids to ~20000 characters so the drift never shows a blank strip.
+- The hero h1 needed its own size rule: the bare h1/h2 rule capped it at 2.5rem, so BootHero sets `clamp(2.25rem, 7vw, 4.5rem)` and the bare rule now targets only docs page titles.
+- The Safety headline was softened to "Os ajustes têm volta." / "Tweaks can be undone.", and the hero log's third line names cleanup ("Limpeza nível equilibrado: plano pronto"), because undo and the shown profile only cover cleanup.
+- Code blocks use Expressive Code's github-dark (blue strings), not green: a deliberate deviation from §5, kept for readability.
+- The motion preference is read in the head (ThemeProvider) so a stored "off" applies before first paint; BootHero's script only drives the button.

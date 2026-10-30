@@ -19,6 +19,7 @@ test('ThemeProvider forces dark and keeps the Starlight stub', async () => {
   expect(html).toContain('StarlightThemeProvider');
   expect(html).toContain('updatePickers');
   expect(html).not.toContain('prefers-color-scheme');
+  expect(html).toMatch(/try\s*\{[^}]*localStorage\.getItem\('fk-motion'\)[^}]*dataset\.motion = 'off'/);
 });
 
 test('Hero override renders no markup without a hero', async () => {
