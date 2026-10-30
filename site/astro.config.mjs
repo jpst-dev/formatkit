@@ -38,6 +38,7 @@ export default defineConfig({
       components: {
         ThemeProvider: './src/components/overrides/ThemeProvider.astro',
         ThemeSelect: './src/components/overrides/ThemeSelect.astro',
+        Hero: './src/components/overrides/Hero.astro',
       },
       expressiveCode: {
         themes: ['github-dark'],

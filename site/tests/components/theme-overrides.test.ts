@@ -20,3 +20,9 @@ test('ThemeProvider forces dark and keeps the Starlight stub', async () => {
   expect(html).toContain('updatePickers');
   expect(html).not.toContain('prefers-color-scheme');
 });
+
+test('Hero override renders no markup', async () => {
+  const { default: Hero } = await import('../../src/components/overrides/Hero.astro');
+  const html = await render(Hero);
+  expect(html.trim()).toBe('');
+});

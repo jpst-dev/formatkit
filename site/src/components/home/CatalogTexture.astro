@@ -13,7 +13,7 @@ const sorted = [...ids].sort();
 let text = '';
 if (sorted.length > 0) {
   const joined = sorted.join('  ');
-  while (text.length < 4000) text += joined + '  ';
+  while (text.length < 20000) text += joined + '  ';
 }
 ---
 
