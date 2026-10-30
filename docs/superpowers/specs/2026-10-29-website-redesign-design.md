@@ -66,7 +66,7 @@ Type: headings JetBrains Mono 800, tight letter spacing; the home `h1` about 4.5
 
 Same structure in `index.mdx` and `en/index.mdx`; only the copy differs. Sections, top to bottom:
 
-0. **Hero** (`BootHero`): small label (`FormatKit · Windows 11 x64 →`, links to the download page), `h1` "Windows limpo. Máquina pronta." / "Clean Windows. Ready machine.", italic subline "Com o mínimo de cliques." / "With as few clicks as possible.", one paragraph from today's tagline, primary button "Baixar" → download, secondary "Ler o guia ↓" → `guide/before/`, plus "Ver o catálogo" and "GitHub" as dim links. Beside it, a log box: the prompt `formatkit run --profile cleanup-balanced.json --dry-run` (a real README command, rendered in a `<code>` element so `check:dist` validates it) and four or five lines that appear one after another, each `[ OK ]` or `[ .. ]` with a real step or catalog id, ending on a blinking cursor. Behind it, `CatalogTexture`. Below it, a `[ WARN ]` amber line with today's caution text ("Esta ferramenta altera o sistema…"): the warning stays on the home page, as the website spec requires.
+0. **Hero** (`BootHero`): small label (`FormatKit · Windows 11 x64 →`, links to the download page), `h1` "Windows limpo. Máquina pronta." / "Clean Windows. Ready machine.", italic subline "Com o mínimo de cliques." / "With as few clicks as possible.", one paragraph from today's tagline, primary button "Baixar" → download, secondary "Ler o guia ↓" → `guide/before/`, plus "Ver o catálogo" and "GitHub" as dim links. Beside it, a log box: the prompt `formatkit run --profile cleanup-balanced.json --dry-run` (a real README command, rendered in a `<code>` element; `boot-hero.test.ts` pins it, since `check:dist` only reads the MDX sources) and four or five lines that appear one after another, each `[ OK ]` or `[ .. ]` with a real step or catalog id, ending on a blinking cursor. Behind it, `CatalogTexture`. Below it, a `[ WARN ]` amber line with today's caution text ("Esta ferramenta altera o sistema…"): the warning stays on the home page, as the website spec requires.
 1. **01 · Como funciona**: "Formatou. Rodou um perfil." / italic "Voltou a trabalhar."; four step cards: detectar, drivers, programas, limpeza.
 2. **02 · O perfil**: "Um arquivo." / italic "Não uma imagem."; a short paragraph; the real contents of `profiles/cleanup-balanced.json` as a JSON code block.
 3. **03 · O catálogo** (`CatalogStat`): the total item count as a huge outlined number with a scan-line fill, the per-category counts below it with their labels from i18n, a sentence and a link to the catalog.
@@ -108,4 +108,10 @@ Catalog item page: `CatalogItem.astro` shows the id in mono green under the titl
 
 ## Found while building
 
-(Empty.)
+- Starlight renders its own PageTitle h1 on pages without `hero`; the home keeps `hero: {}` and a `Hero` override renders nothing for an empty hero, but must render Starlight's default Hero otherwise (the 404 page is a hero-only splash page).
+- Motion-off must not force `opacity: 1` on the texture (only on the animated log lines); the texture rests at 0.07 (0.04 below 50rem for readability on phones).
+- Step cards follow the real module order (drivers -> cleanup -> programs, per README), not the order first written in section 6.
+- The undo card only claims what `formatkit cleanup undo` covers: cleanup tweaks.
+- The `[ WARN ]` caution is a full-width amber line under the hero grid; the hero prompt's tokens are `nowrap` spans so flags never break.
+- `check:dist`'s command check reads code spans and fences in the MDX sources, not the built HTML, so the hero prompt (an i18n string) is not checked by it; `boot-hero.test.ts` pins the prompt instead.
+- CatalogTexture repeats the ids to ~20000 characters so the drift never shows a blank strip.
