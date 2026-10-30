@@ -1,0 +1,49 @@
+---
+title: FAQ
+description: Short answers about SmartScreen, antivirus, performance, laptops, undo, offline use and cloned images.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Windows showed "Windows protected your PC". Is it safe?
+
+FormatKit is **not code-signed**, which is why SmartScreen warns you. If you trust the source, click **More info**, then **Run anyway**. Always download from the [Download page](/formatkit/en/download/) and check the file's SHA-256. If you prefer, build it yourself from the source code.
+
+## My antivirus complained about the file. What do I do?
+
+The program is not signed and changes the system (it installs drivers and software and can reboot the PC), which some antivirus tools treat with suspicion. Check the file's SHA-256 on the Download page. If the values do not match, do not run it. When in doubt, build from source or try it in a virtual machine first.
+
+## Does FormatKit make games faster?
+
+FormatKit makes no such claim. It reinstalls and configures Windows; it does not promise more FPS. The Measurements page (coming soon) will show one virtual machine's numbers, together with the limits of that measurement.
+
+## Can I use it on a laptop?
+
+Yes. The cleanup power items, such as the high and ultimate performance plans, are **skipped on laptops** unless you list them in `include` in the profile. They only apply if you ask for them.
+
+## How do I undo what FormatKit did in the cleanup?
+
+Every cleanup change is recorded in a journal and can be reverted:
+
+```powershell
+formatkit cleanup undo apps.clipchamp
+formatkit cleanup undo --all
+```
+
+The first reverts one item (the `id` comes from `formatkit cleanup list`); the second reverts everything FormatKit applied. The command asks for administrator rights. To see what already breaks or weakens your PC, use `formatkit cleanup check`, which changes nothing.
+
+## Does it work offline?
+
+Partly. If the network is down during a run, FormatKit tries to install the network driver from the backup you made with `formatkit drivers backup-network --output <dir>` and set in the profile. Without that backup, a run with no internet stops with exit code 3. Windows Update drivers, programs and downloads need a connection.
+
+## Why not restore a cloned image of the old system?
+
+A clean install beats a cloned or "migrated" one: a clone carries over the clutter of the old system. FormatKit starts from a fresh Windows and builds the environment from a profile, a small file you can read, review and reuse. Every step is logged and can be previewed first with `--dry-run`.
+
+## Should I test it in a virtual machine?
+
+That is the recommendation. FormatKit installs drivers and software, needs administrator rights and **can reboot the computer**. Try it in a virtual machine first and use `--dry-run` before a real run.
+
+<Aside type="note">
+See the [step-by-step guide](/formatkit/en/guide/before/).
+</Aside>

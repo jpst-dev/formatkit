@@ -1,0 +1,85 @@
+---
+import type { KnownIssue } from '../loaders/knownIssues';
+import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+
+interface Props {
+  issues?: KnownIssue[];
+  locale?: SiteLocale;
+}
+
+const props = Astro.props;
+let issues = props.issues;
+if (!issues) {
+  const { getCollection } = await import('astro:content');
+  issues = (await getCollection('knownIssues')).map((e) => e.data as KnownIssue);
+}
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+
+const ORDER = ['breaks', 'security', 'contested', 'info'];
+const COMMAND = /^(Enable-|Disable-|Get-|Set-|sc\.exe\s|reg\s|powercfg\s|bcdedit\s)/i;
+const isCommand = (fix: string) => COMMAND.test(fix.trim());
+
+const known = ORDER.filter((s) => issues!.some((i) => i.severity === s));
+const other = [...new Set(issues.map((i) => i.severity))].filter((s) => !ORDER.includes(s));
+const groups = [...known, ...other].map((severity) => ({
+  severity,
+  heading: labels[`issues.group.${severity}`] ?? severity,
+  items: issues!.filter((i) => i.severity === severity).map((i) => ({ id: i.id, ...pickText(i.text, locale) })),
+}));
+const hasCommand = groups.some((g) => g.items.some((i) => i.fix && isCommand(i.fix)));
+---
+
+<div class="fk-issues">
+  {hasCommand && <p>{t(locale, 'issues.fix-note')}</p>}
+  {
+    groups.map((g) => (
+      <section>
+        <h3>{g.heading}</h3>
+        <ul>
+          {g.items.map((i) => (
+            <li>
+              <h4>{i.title}</h4>
+              <p>
+                <strong>{t(locale, 'issues.breaks')}:</strong> {i.breaks}
+              </p>
+              {i.fix && (
+                <>
+                  <p>
+                    <strong>{t(locale, 'issues.fix')}:</strong>
+                    {isCommand(i.fix) ? '' : <> {i.fix}</>}
+                  </p>
+                  {isCommand(i.fix) && (
+                    <pre>
+                      <code>{i.fix}</code>
+                    </pre>
+                  )}
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .fk-issues ul {
+    list-style: none;
+    padding: 0;
+  }
+  .fk-issues li {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin: 0 0 1rem;
+  }
+  .fk-issues h4 {
+    margin: 0.25rem 0;
+  }
+  .fk-issues pre {
+    overflow-x: auto;
+  }
+</style>

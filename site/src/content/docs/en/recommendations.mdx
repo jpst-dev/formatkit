@@ -1,0 +1,21 @@
+---
+title: Recommendations
+description: Good practices before and after reinstalling Windows, and the FormatKit program catalog.
+---
+
+import ProgramList from '../../../components/ProgramList.astro';
+
+## Good practices
+
+- **Keep your data off the Windows drive** before you format. Run `formatkit prepare check` on the old Windows; see the [step-by-step guide](/formatkit/en/guide/before/).
+- **Back up regularly**, not only before a reinstall. Keep a copy on another disk or in the cloud.
+- **Use a password manager** and note where your BitLocker recovery key is, if you use BitLocker.
+- **Keep Windows and drivers up to date.** FormatKit installs drivers; Windows Update keeps handling updates.
+- **Start with the `safe` cleanup level.** Only go up to `balanced` or `aggressive` if you know what each item changes. Run `formatkit cleanup list --verbose` to see what each one does and what it can break, and read the [Safety & undo](/formatkit/en/safety/) page.
+- **Test in a virtual machine** and use `--dry-run` before a real run.
+
+## Program catalog
+
+These are the programs in the built-in catalog, grouped by category. The list is generated from the `programs.json` file of FormatKit: name, description and source, in no order of preference. You use the catalog `id` in the profile (`formatkit programs list` shows them all) or install any other winget package through the `winget` section.
+
+<ProgramList />

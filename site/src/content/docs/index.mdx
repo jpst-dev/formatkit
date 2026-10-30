@@ -1,0 +1,75 @@
+---
+title: FormatKit
+description: Reconstrua o seu PC depois de uma instalação limpa do Windows.
+template: splash
+hero: {}
+---
+
+import { Code } from '@astrojs/starlight/components';
+import BootHero from '../../components/home/BootHero.astro';
+import HomeSection from '../../components/home/HomeSection.astro';
+import CatalogStat from '../../components/home/CatalogStat.astro';
+import HomeStyles from '../../components/home/HomeStyles.astro';
+import profile from '../../../../profiles/cleanup-balanced.json?raw';
+
+<HomeStyles />
+
+<BootHero
+  title="Windows limpo. Máquina pronta."
+  subtitle="Com o mínimo de cliques."
+  lead="Depois de formatar e instalar o Windows, o FormatKit detecta o seu hardware e leva a máquina a um estado totalmente funcional, com o mínimo de cliques."
+>
+  <Fragment slot="warn">[ WARN ] Esta ferramenta altera o sistema: o FormatKit instala drivers e programas, executa ferramentas de fabricantes, precisa de direitos de administrador e **pode reiniciar o computador**. Teste primeiro em uma máquina virtual e use `--dry-run` antes de uma execução real. Você usa por sua conta e risco.</Fragment>
+</BootHero>
+
+<div class="fk-home">
+
+<HomeSection num="01" label="Como funciona">
+  <h2 class="fk-home-h">Formatou. Rodou um perfil.</h2>
+  <p class="fk-sub">Voltou a trabalhar.</p>
+  <div class="fk-steps">
+    <div class="fk-panel"><strong>Detectar</strong><p>Lê o hardware e vê o que falta.</p></div>
+    <div class="fk-panel"><strong>Drivers</strong><p>Instala os drivers que a máquina precisa.</p></div>
+    <div class="fk-panel"><strong>Limpeza</strong><p>Aplica os ajustes do catálogo.</p></div>
+    <div class="fk-panel"><strong>Programas</strong><p>Instala os programas do perfil.</p></div>
+  </div>
+</HomeSection>
+
+<HomeSection num="02" label="O perfil">
+  <h2 class="fk-home-h">Um arquivo.</h2>
+  <p class="fk-sub">Não uma imagem.</p>
+  <p>Instalação limpa, não clonada. Não restaura uma imagem antiga. Recria o ambiente a partir de um perfil: um pequeno arquivo JSON que diz o que configurar.</p>
+  <Code code={profile} lang="json" title="profiles/cleanup-balanced.json" />
+</HomeSection>
+
+<HomeSection num="03" label="O catálogo">
+  <h2 class="fk-home-h sr-only">O catálogo</h2>
+  <CatalogStat />
+  <p>Cada ajuste tem explicação, risco e como desfazer.</p>
+  <p><a class="fk-link-dim" href="/formatkit/catalog/">Ver o catálogo</a></p>
+</HomeSection>
+
+<HomeSection num="04" label="Segurança">
+  <h2 class="fk-home-h">Os ajustes têm volta.</h2>
+  <p class="fk-sub">E tudo fica no log.</p>
+  <div class="fk-cards">
+    <a class="fk-panel fk-card" href="/formatkit/safety/"><strong><code>--dry-run</code></strong><span>Cada passo pode ser visto antes de ser executado.</span></a>
+    <a class="fk-panel fk-card" href="/formatkit/safety/"><strong>Diário de desfazer</strong><span>Cada ajuste de limpeza aplicado fica no diário e pode ser desfeito.</span></a>
+  </div>
+</HomeSection>
+
+<HomeSection num="05" label="Dois jeitos">
+  <h2 class="fk-home-h">Janela ou linha de comando.</h2>
+  <div class="fk-cards">
+    <a class="fk-panel fk-card" href="/formatkit/download/"><strong><code>FormatKitUI.exe</code></strong><span>Para clicar.</span></a>
+    <a class="fk-panel fk-card" href="/formatkit/download/"><strong><code>formatkit.exe</code></strong><span>Para o terminal.</span></a>
+  </div>
+</HomeSection>
+
+<section class="fk-closing">
+  <h2 class="fk-home-h">Pronto para formatar?</h2>
+  <p>Windows 11 x64 · sem instalar o .NET · SHA-256 publicado em cada versão</p>
+  <a class="fk-btn" href="/formatkit/download/">Baixar</a>
+</section>
+
+</div>

@@ -1,0 +1,48 @@
+---
+title: Segurança e desfazer
+description: O que o FormatKit nunca faz, como desfazer a limpeza e como diagnosticar ajustes que quebram o Windows.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import KnownIssues from '../../components/KnownIssues.astro';
+
+<Aside type="caution" title="Esta ferramenta muda o seu sistema">
+  O FormatKit instala drivers e programas, executa ferramentas de fabricantes, precisa de administrador e **pode reiniciar o computador**. **Teste primeiro em uma máquina virtual** e use `--dry-run` antes de uma execução de verdade. Você usa por sua conta e risco.
+</Aside>
+
+## O que o FormatKit nunca faz
+
+A limpeza só mexe no que está no catálogo, e o catálogo tem travas:
+
+- **Serviços protegidos.** Nenhuma ação altera o tipo de início de um serviço protegido, como Windows Update, Windows Defender, Firewall, BITS, DNS, DHCP, Plug and Play, Agendador de Tarefas e Log de Eventos, nem os serviços do WSL e do Hyper-V.
+- **Só remove aplicativos de uma lista permitida.** A Microsoft Store, o App Installer, o Edge, a Segurança do Windows, Fotos, Calculadora, Bloco de Notas, Windows Terminal, Paint e as bibliotecas de runtime (VCLibs, UI.Xaml, .NET) nunca são removidos.
+- **Itens contestados ficam no nível `aggressive`.** São ajustes populares sem ganho documentado pela Microsoft e ficam sempre separados, com o rótulo "contestado".
+- **Itens que reduzem a segurança** (Integridade de memória e VBS desligados) também só entram no `aggressive`, e o perfil precisa de `confirmAggressive: true`.
+- **Nada acontece sem registro.** Toda mudança da limpeza é gravada em um diário antes de ser aplicada.
+
+### O que o catálogo de programas nunca instala
+
+O catálogo só lista pacotes oficiais com instalação silenciosa confiável. Ficam de fora: otimizadores e "limpadores", atualizadores de driver, antivírus de terceiros (o Windows Defender basta), instaladores que embutem adware e qualquer coisa que precise de crack. Veja o que está no catálogo na página [Recomendações](/formatkit/recommendations/).
+
+## Desfazer
+
+Cada item que a limpeza aplica fica no diário `C:\ProgramData\FormatKit\cleanup-journal.json`, com o estado anterior de cada alvo. Desfazer devolve o estado original: se um item foi aplicado duas vezes e desfeito uma, o resultado volta ao que era antes da primeira aplicação.
+
+```powershell
+formatkit cleanup undo apps.clipchamp
+formatkit cleanup undo --all
+```
+
+O primeiro reverte os itens que você indicar (os `id` vêm de `formatkit cleanup list`); o segundo reverte tudo o que o FormatKit aplicou. O comando pede permissão de administrador. Se o diário estiver corrompido, o comando mostra o caminho do arquivo e não reverte nada.
+
+## Diagnosticar o seu PC
+
+`formatkit cleanup check` procura ajustes que já quebram ou enfraquecem este PC, mesmo os que não foram feitos pelo FormatKit. Ele **não muda nada e não pede elevação**. Termina com código 1 se achar algo em "Quebra recursos do Windows" ou "Riscos de segurança", e com 0 caso contrário.
+
+```powershell
+formatkit cleanup check
+```
+
+Para cada achado, mostra o título, o que quebra e a correção. Abaixo estão todos os problemas que ele detecta, gerados a partir do catálogo de problemas conhecidos do FormatKit.
+
+<KnownIssues />
