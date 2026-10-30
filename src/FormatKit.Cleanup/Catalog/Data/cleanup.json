@@ -440,13 +440,13 @@
         "en": {
           "title": "Remove the Copilot app",
           "what": "Uninstalls the Microsoft Copilot app and stops Windows from installing it for new users.",
-          "breaks": "The Copilot chat app is gone. On personal PCs the Copilot key, on keyboards that have one, opens this app, so the key does nothing until you pick another app in Settings > Personalization > Text input > Copilot key. On work or school (Entra ID) PCs the key opens Microsoft 365 Copilot instead, which this item keeps. Windows updates can bring the app back; cleanup check reports it. Undo reinstalls it from the Microsoft Store.",
+          "breaks": "The Copilot chat app is gone. On personal PCs the Copilot key, on keyboards that have one, opens Copilot where it is available, so after removal the key may no longer open anything until you pick another app in Settings > Personalization > Text input > Copilot key. On managed work or school PCs with Microsoft 365 Copilot installed and an Entra ID sign-in, the key can open Microsoft 365 Copilot instead, which this item keeps. Windows updates can bring the app back; cleanup check reports it. Undo reinstalls it from the Microsoft Store.",
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
           "title": "Remover o app Copilot",
           "what": "Desinstala o app Microsoft Copilot e impede que o Windows o instale para novos usuários.",
-          "breaks": "O app de chat Copilot some. Em PCs pessoais, a tecla Copilot, nos teclados que a têm, abre este app, então ela não faz nada até você escolher outro app em Configurações > Personalização > Entrada de texto > Tecla Copilot. Em PCs de trabalho ou escola (Entra ID), a tecla abre o Microsoft 365 Copilot, que este item mantém. Atualizações do Windows podem trazer o app de volta; o cleanup check avisa. Desfazer reinstala o app pela Microsoft Store.",
+          "breaks": "O app de chat Copilot some. Em PCs pessoais, a tecla Copilot, nos teclados que a têm, abre o Copilot onde ele está disponível, então depois da remoção a tecla pode deixar de abrir qualquer coisa até você escolher outro app em Configurações > Personalização > Entrada de texto > Tecla Copilot. Em PCs gerenciados de trabalho ou escola, com o Microsoft 365 Copilot instalado e entrada com Entra ID, a tecla pode abrir o Microsoft 365 Copilot, que este item mantém. Atualizações do Windows podem trazer o app de volta; o cleanup check avisa. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
         }
       },
@@ -470,13 +470,13 @@
         "en": {
           "title": "Remove Microsoft 365 Copilot",
           "what": "Uninstalls the Microsoft 365 Copilot app (formerly the Microsoft 365 or Office app) and stops Windows from installing it for new users.",
-          "breaks": "On work or school (Entra ID) PCs the Copilot key, on keyboards that have one, opens this app, so the key does nothing until you pick another app in Settings > Personalization > Text input > Copilot key. On personal PCs the key opens the Copilot app and does not change. Microsoft 365 apps such as Word and Excel stay. Undo reinstalls it from the Microsoft Store.",
+          "breaks": "On managed work or school PCs with an Entra ID sign-in, the Copilot key, on keyboards that have one, can open this app, so after removal the key may no longer open anything until you pick another app in Settings > Personalization > Text input > Copilot key. On personal PCs the key opens Copilot where it is available and does not change. Microsoft 365 apps such as Word and Excel stay. Undo reinstalls it from the Microsoft Store.",
           "gain": "No gain is documented by Microsoft."
         },
         "pt-BR": {
           "title": "Remover o Microsoft 365 Copilot",
           "what": "Desinstala o app Microsoft 365 Copilot (antigo app Microsoft 365 ou Office) e impede que o Windows o instale para novos usuários.",
-          "breaks": "Em PCs de trabalho ou escola (Entra ID), a tecla Copilot, nos teclados que a têm, abre este app, então ela não faz nada até você escolher outro app em Configurações > Personalização > Entrada de texto > Tecla Copilot. Em PCs pessoais, a tecla abre o app Copilot e não muda. Os apps do Microsoft 365, como Word e Excel, continuam. Desfazer reinstala o app pela Microsoft Store.",
+          "breaks": "Em PCs gerenciados de trabalho ou escola, com entrada com Entra ID, a tecla Copilot, nos teclados que a têm, pode abrir este app, então depois da remoção a tecla pode deixar de abrir qualquer coisa até você escolher outro app em Configurações > Personalização > Entrada de texto > Tecla Copilot. Em PCs pessoais, a tecla abre o Copilot onde ele está disponível e não muda. Os apps do Microsoft 365, como Word e Excel, continuam. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "A Microsoft não documenta nenhum ganho."
         }
       },

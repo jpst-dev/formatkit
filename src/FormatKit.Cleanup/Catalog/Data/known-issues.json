@@ -1359,12 +1359,12 @@
       "text": {
         "en": {
           "title": "Windows apps are blocked from running in the background by policy",
-          "breaks": "Microsoft warns that text message, email and voicemail notifications can stop, and email may not sync in the background. Some app features, such as the Snipping Tool overlay, also stop working.",
+          "breaks": "Microsoft warns that text message, email and voicemail notifications can stop, and email may not sync in the background. App features that need background activity can also stop; the Snipping Tool overlay is one reported case.",
           "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy\" /v LetAppsRunInBackground /f"
         },
         "pt-BR": {
           "title": "Os apps do Windows estão impedidos de rodar em segundo plano por política",
-          "breaks": "A Microsoft avisa que notificações de mensagens, e-mail e correio de voz podem parar, e o e-mail pode não sincronizar em segundo plano. Alguns recursos de apps, como a sobreposição da Ferramenta de Captura, também param de funcionar.",
+          "breaks": "A Microsoft avisa que notificações de mensagens, e-mail e correio de voz podem parar, e o e-mail pode não sincronizar em segundo plano. Recursos de apps que precisam de atividade em segundo plano também podem parar; a sobreposição da Ferramenta de Captura é um caso relatado.",
           "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy\" /v LetAppsRunInBackground /f"
         }
       }
