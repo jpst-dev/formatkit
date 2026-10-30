@@ -1,3 +1,9 @@
 ---
-// The home page renders its own hero (BootHero); Starlight's hero block stays empty.
+import Default from '@astrojs/starlight/components/Hero.astro';
+import { shouldRenderDefaultHero } from '../../lib/hero';
+
+// The home keeps `hero: {}` and renders BootHero itself, so nothing is drawn for an empty hero.
+// Other splash pages (the 404) have their content in the hero: render Starlight's default.
+const hero = Astro.locals.starlightRoute?.entry?.data?.hero;
 ---
+{shouldRenderDefaultHero(hero) && <Default><slot /></Default>}
