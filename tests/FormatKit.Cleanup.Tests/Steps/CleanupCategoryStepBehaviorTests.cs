@@ -75,7 +75,7 @@ public class CleanupCategoryStepBehaviorTests
 
         Assert.Equal(StepOutcome.Succeeded, result.Outcome);
         Assert.Single(result.Messages);
-        Assert.Equal(2, _delays.Count);
+        Assert.Equal(3, _delays.Count);
         Assert.Null(result.NextAction);
     }
 
@@ -91,8 +91,48 @@ public class CleanupCategoryStepBehaviorTests
         Assert.Equal(StepOutcome.Succeeded, result.Outcome);
         Assert.Equal(Strings.Get("Warning_ExplorerRestartFailed"), result.Messages[^1]);
         Assert.Equal(Strings.Get("NextAction_SignOutAndIn"), result.NextAction);
-        Assert.True(_delays.Aggregate(TimeSpan.Zero, (x, y) => x + y) <= TimeSpan.FromSeconds(15));
+        Assert.Equal(15, _delays.Count);
+        Assert.All(_delays, d => Assert.Equal(TimeSpan.FromSeconds(1), d));
+        Assert.Equal(15, _processes.Calls.Count(c => c.FileName == "tasklist.exe"));
         Assert.DoesNotContain(_processes.Calls, c => c.FileName == "cmd.exe" || c.FileName.Contains("explorer", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task Tasklist_that_always_fails_gives_the_warning()
+    {
+        _processes.Enqueue("taskkill.exe", Ok());
+        for (var i = 0; i < 40; i++)
+            _processes.Enqueue("tasklist.exe", new ProcessResult(1, "", "err", TimeSpan.Zero, false));
+
+        var result = await Step(Restarting("interface.a")).ExecuteAsync(_ctx, Ct);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Equal(Strings.Get("Warning_ExplorerRestartFailed"), result.Messages[^1]);
+    }
+
+    [Fact]
+    public async Task First_poll_waits_so_a_dying_explorer_is_not_seen()
+    {
+        _processes.Enqueue("taskkill.exe", Ok());
+        _processes.Enqueue("tasklist.exe", Ok(ExplorerLine));
+        var seenDelays = -1;
+        _processes.OnRun = spec => { if (spec.FileName == "tasklist.exe") seenDelays = _delays.Count; };
+
+        await Step(Restarting("interface.a")).ExecuteAsync(_ctx, Ct);
+
+        Assert.Equal(1, seenDelays);
+    }
+
+    [Fact]
+    public async Task Other_image_names_containing_explorer_do_not_count()
+    {
+        _processes.Enqueue("taskkill.exe", Ok());
+        for (var i = 0; i < 40; i++)
+            _processes.Enqueue("tasklist.exe", Ok("\"notexplorer.exe\",\"1\",\"Console\",\"1\",\"1 K\""));
+
+        var result = await Step(Restarting("interface.a")).ExecuteAsync(_ctx, Ct);
+
+        Assert.Equal(Strings.Get("Warning_ExplorerRestartFailed"), result.Messages[^1]);
     }
 
     [Fact]

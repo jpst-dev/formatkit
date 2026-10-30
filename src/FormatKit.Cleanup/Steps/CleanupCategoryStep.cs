@@ -130,16 +130,18 @@ internal sealed class CleanupCategoryStep(
                 return false;
             }
 
-            for (var poll = 0; ; poll++)
+            // Wait first: right after a forced kill the dying process can still be listed.
+            for (var poll = 0; poll < ExplorerPolls; poll++)
             {
+                await _delay(ExplorerPollInterval, ct).ConfigureAwait(false);
                 var list = await runner.RunAsync(
                     new ProcessSpec("tasklist.exe", ["/fi", "imagename eq explorer.exe", "/fo", "csv", "/nh"], Timeouts.Query), ct).ConfigureAwait(false);
-                if (list.ExitCode == 0 && list.StdOut.Contains("explorer.exe", StringComparison.OrdinalIgnoreCase))
+                if (list.ExitCode == 0 && list.StdOut.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                        .Any(l => l.TrimStart().StartsWith("\"explorer.exe\"", StringComparison.OrdinalIgnoreCase)))
                     return true;
-                if (poll >= ExplorerPolls)
-                    return false;
-                await _delay(ExplorerPollInterval, ct).ConfigureAwait(false);
             }
+
+            return false;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
