@@ -332,6 +332,257 @@
       ]
     },
     {
+      "id": "apps.widgets",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Widgets",
+          "what": "Uninstalls the Windows Web Experience Pack, which runs Widgets, stops Windows from installing it for new users, and sets the policy that turns Widgets off.",
+          "breaks": "The Widgets board, its taskbar button and the widgets on the lock screen are gone. Windows can bring the package back when it repairs WebView2; cleanup check reports it. Undo reinstalls it from the Microsoft Store and removes the policy.",
+          "gain": "Widgets and its WebView2 processes stop running; the test VM measured about 90 MB less in use."
+        },
+        "pt-BR": {
+          "title": "Remover os Widgets",
+          "what": "Desinstala o Windows Web Experience Pack, que executa os Widgets, impede que o Windows o instale para novos usuários e define a política que desativa os Widgets.",
+          "breaks": "O painel de Widgets, o botão na barra de tarefas e os widgets da tela de bloqueio somem. O Windows pode trazer o pacote de volta ao reparar o WebView2; o cleanup check avisa. Desfazer reinstala o pacote pela Microsoft Store e remove a política.",
+          "gain": "Os Widgets e seus processos do WebView2 param de rodar; a VM de teste mediu cerca de 90 MB a menos em uso."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "MicrosoftWindows.Client.WebExperience",
+          "storeId": "9MSSGKG348SP"
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Dsh",
+          "name": "AllowNewsAndInterests",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "apps.outlook-new",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove the new Outlook",
+          "what": "Uninstalls the new Outlook for Windows app and stops Windows from installing it for new users.",
+          "breaks": "The new Outlook app is gone. Outlook on the web and classic Outlook from Microsoft 365 are not affected. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o novo Outlook",
+          "what": "Desinstala o app novo Outlook para Windows e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app novo Outlook some. O Outlook na web e o Outlook clássico do Microsoft 365 não são afetados. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.OutlookForWindows",
+          "storeId": "9NRX63209R7B"
+        }
+      ]
+    },
+    {
+      "id": "apps.bing-search",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Microsoft Bing",
+          "what": "Uninstalls the Microsoft Bing app and stops Windows from installing it for new users.",
+          "breaks": "The Microsoft Bing app is gone. Searching the web in your browser keeps working. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o app Microsoft Bing",
+          "what": "Desinstala o app Microsoft Bing e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app Microsoft Bing some. Pesquisar na web pelo navegador continua funcionando. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.BingSearch",
+          "storeId": "9NZBF4GT040C"
+        }
+      ]
+    },
+    {
+      "id": "apps.copilot",
+      "category": "apps",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove the Copilot app",
+          "what": "Uninstalls the Microsoft Copilot app and stops Windows from installing it for new users.",
+          "breaks": "The Copilot chat app is gone. Windows updates can bring it back; cleanup check reports it. The Copilot key on some keyboards opens the Microsoft 365 Copilot app, which this item keeps. Undo reinstalls it from the Microsoft Store.",
+          "gain": "One less app running in the background and getting updates."
+        },
+        "pt-BR": {
+          "title": "Remover o app Copilot",
+          "what": "Desinstala o app Microsoft Copilot e impede que o Windows o instale para novos usuários.",
+          "breaks": "O app de chat Copilot some. Atualizações do Windows podem trazê-lo de volta; o cleanup check avisa. A tecla Copilot de alguns teclados abre o app Microsoft 365 Copilot, que este item mantém. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.Copilot",
+          "storeId": "9NHT9RB2F4HD"
+        }
+      ]
+    },
+    {
+      "id": "apps.office-hub",
+      "category": "apps",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Remove Microsoft 365 Copilot",
+          "what": "Uninstalls the Microsoft 365 Copilot app (formerly the Microsoft 365 or Office app) and stops Windows from installing it for new users.",
+          "breaks": "The Copilot key, on keyboards that have one, opens this app, so the key does nothing until you pick another app for it in Settings. Microsoft 365 apps such as Word and Excel stay. Undo reinstalls it from the Microsoft Store.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Remover o Microsoft 365 Copilot",
+          "what": "Desinstala o app Microsoft 365 Copilot (antigo app Microsoft 365 ou Office) e impede que o Windows o instale para novos usuários.",
+          "breaks": "A tecla Copilot, nos teclados que a têm, abre este app, então ela não faz nada até você escolher outro app para ela em Configurações. Os apps do Microsoft 365, como Word e Excel, continuam. Desfazer reinstala o app pela Microsoft Store.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "appx",
+          "package": "Microsoft.MicrosoftOfficeHub",
+          "storeId": "9WZDNCRD29V9"
+        }
+      ]
+    },
+    {
+      "id": "startup.onedrive",
+      "category": "startup",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Stop OneDrive from starting with Windows",
+          "what": "Turns off the OneDrive entry in Startup apps, as its toggle in Task Manager does. OneDrive stays installed and its Run entry is kept.",
+          "breaks": "Files no longer sync until you open OneDrive yourself. Undo turns the startup entry back on.",
+          "gain": "OneDrive does not sit in memory after you sign in; the test VM measured about 86 MB."
+        },
+        "pt-BR": {
+          "title": "Impedir o OneDrive de iniciar com o Windows",
+          "what": "Desativa a entrada do OneDrive em Aplicativos de inicialização, como a opção dele no Gerenciador de Tarefas. O OneDrive continua instalado e a entrada Run é mantida.",
+          "breaks": "Os arquivos deixam de sincronizar até você abrir o OneDrive. Desfazer reativa a entrada de inicialização.",
+          "gain": "O OneDrive não fica na memória depois que você entra na conta; a VM de teste mediu cerca de 86 MB."
+        }
+      },
+      "actions": [
+        {
+          "type": "startupItem",
+          "name": "OneDrive",
+          "scope": "user"
+        }
+      ]
+    },
+    {
+      "id": "startup.edge-startup-boost",
+      "category": "startup",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Edge startup boost",
+          "what": "Sets the Microsoft Edge policy that stops Edge from starting in the background when you sign in.",
+          "breaks": "Edge opens a little slower the first time after you sign in. Edge settings show the option as managed by your organization.",
+          "gain": "Edge processes do not start at sign-in unless you open Edge."
+        },
+        "pt-BR": {
+          "title": "Desativar a inicialização rápida do Edge",
+          "what": "Define a política do Microsoft Edge que impede o Edge de iniciar em segundo plano quando você entra na conta.",
+          "breaks": "O Edge abre um pouco mais devagar na primeira vez depois de entrar na conta. As configurações do Edge mostram a opção como gerenciada pela sua organização.",
+          "gain": "Os processos do Edge não iniciam ao entrar na conta, a menos que você abra o Edge."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "StartupBoostEnabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "startup.edge-background",
+      "category": "startup",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Stop Edge from running after it is closed",
+          "what": "Sets the Microsoft Edge policy that stops Edge from running in the background after you close its last window.",
+          "breaks": "Edge extensions and web notifications stop working while Edge is closed. Edge settings show the option as managed by your organization.",
+          "gain": "Edge leaves memory when you close it."
+        },
+        "pt-BR": {
+          "title": "Impedir o Edge de rodar depois de fechado",
+          "what": "Define a política do Microsoft Edge que impede o Edge de continuar rodando em segundo plano depois que você fecha a última janela.",
+          "breaks": "Extensões e notificações de sites do Edge param de funcionar enquanto o Edge está fechado. As configurações do Edge mostram a opção como gerenciada pela sua organização.",
+          "gain": "O Edge sai da memória quando você o fecha."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "BackgroundModeEnabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
       "id": "privacy.advertising-id",
       "category": "privacy",
       "level": "safe",
@@ -605,6 +856,796 @@
           "name": "HasAccepted",
           "kind": "dword",
           "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.start-suggestions",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off suggestions in Start",
+          "what": "Turns off the setting that lets Windows show suggested apps and content in Start.",
+          "breaks": "Nothing known. A Windows update can turn suggestions back on; cleanup check reports it.",
+          "gain": "Start does not show promoted apps."
+        },
+        "pt-BR": {
+          "title": "Desativar sugestões no Iniciar",
+          "what": "Desativa a configuração que permite ao Windows mostrar apps e conteúdo sugeridos no Iniciar.",
+          "breaks": "Nada conhecido. Uma atualização do Windows pode reativar as sugestões; o cleanup check avisa.",
+          "gain": "O Iniciar não mostra apps promovidos."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SystemPaneSuggestionsEnabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.lock-screen-tips",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off tips on the lock screen",
+          "what": "Turns off the fun facts, tips and tricks that Windows shows over the lock screen picture.",
+          "breaks": "Nothing known. The lock screen picture itself does not change.",
+          "gain": "No promoted content on the lock screen."
+        },
+        "pt-BR": {
+          "title": "Desativar dicas na tela de bloqueio",
+          "what": "Desativa as curiosidades, dicas e truques que o Windows mostra sobre a imagem da tela de bloqueio.",
+          "breaks": "Nada conhecido. A imagem da tela de bloqueio não muda.",
+          "gain": "Sem conteúdo promovido na tela de bloqueio."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "RotatingLockScreenOverlayEnabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.tips-notifications",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off tips and suggestions notifications",
+          "what": "Turns off the notifications with tips and suggestions about using Windows.",
+          "breaks": "You no longer get tips about Windows features as notifications.",
+          "gain": "Fewer notifications that are not about your apps."
+        },
+        "pt-BR": {
+          "title": "Desativar notificações de dicas e sugestões",
+          "what": "Desativa as notificações com dicas e sugestões de uso do Windows.",
+          "breaks": "Você deixa de receber dicas sobre recursos do Windows como notificações.",
+          "gain": "Menos notificações que não são dos seus apps."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338389Enabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.silent-app-installs",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Stop automatic installs of suggested apps",
+          "what": "Turns off the setting that lets Windows install suggested apps for you without asking.",
+          "breaks": "Nothing known. Apps you install yourself are not affected.",
+          "gain": "Apps you did not choose are not installed in the background."
+        },
+        "pt-BR": {
+          "title": "Impedir a instalação automática de apps sugeridos",
+          "what": "Desativa a configuração que permite ao Windows instalar apps sugeridos sem perguntar.",
+          "breaks": "Nada conhecido. Apps que você instala não são afetados.",
+          "gain": "Apps que você não escolheu não são instalados em segundo plano."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SilentInstalledAppsEnabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.delivery-optimization-no-peers",
+      "category": "privacy",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Download updates only from Microsoft",
+          "what": "Sets the Delivery Optimization policy to HTTP only, so Windows downloads updates and Store apps from Microsoft and not from other PCs.",
+          "breaks": "PCs on your network no longer share update downloads, so each one downloads them in full. Settings shows the option as managed by your organization.",
+          "gain": "Your PC does not upload update data to other PCs."
+        },
+        "pt-BR": {
+          "title": "Baixar atualizações só da Microsoft",
+          "what": "Define a política de Otimização de Entrega como só HTTP, então o Windows baixa atualizações e apps da Store da Microsoft e não de outros PCs.",
+          "breaks": "Os PCs da sua rede deixam de compartilhar downloads de atualização, então cada um baixa tudo. O app Configurações mostra a opção como gerenciada pela sua organização.",
+          "gain": "Seu PC não envia dados de atualização para outros PCs."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+          "name": "DODownloadMode",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "privacy.diagtrack-manual",
+      "category": "privacy",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Set the telemetry service to Manual",
+          "what": "Changes the Connected User Experiences and Telemetry service (DiagTrack) from Automatic to Manual, so it does not start with Windows.",
+          "breaks": "Nothing was seen to break in the test VM. Windows still sends required diagnostic data when the service runs. Undo restores the previous start type.",
+          "gain": "The telemetry service does not run all the time."
+        },
+        "pt-BR": {
+          "title": "Pôr o serviço de telemetria em Manual",
+          "what": "Muda o serviço Experiências do Usuário Conectado e Telemetria (DiagTrack) de Automático para Manual, então ele não inicia com o Windows.",
+          "breaks": "Nada deixou de funcionar na VM de teste. O Windows ainda envia os dados de diagnóstico necessários quando o serviço roda. Desfazer restaura o tipo de inicialização anterior.",
+          "gain": "O serviço de telemetria não fica rodando o tempo todo."
+        }
+      },
+      "actions": [
+        {
+          "type": "service",
+          "name": "DiagTrack",
+          "startType": "manual"
+        }
+      ]
+    },
+    {
+      "id": "privacy.telemetry-tasks",
+      "category": "privacy",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off telemetry scheduled tasks",
+          "what": "Disables ten scheduled tasks that collect compatibility, usage and customer experience data: Application Experience, Customer Experience Improvement Program, disk diagnostics, feedback and flighting tasks.",
+          "breaks": "Windows sends less data about app compatibility and use; nothing else was seen to break in the test VM. Undo turns the tasks back on.",
+          "gain": "These tasks no longer wake up to collect and upload data."
+        },
+        "pt-BR": {
+          "title": "Desativar tarefas agendadas de telemetria",
+          "what": "Desativa dez tarefas agendadas que coletam dados de compatibilidade, de uso e de experiência do usuário: tarefas de Experiência de Aplicativos, do Programa de Aperfeiçoamento da Experiência do Usuário, de diagnóstico de disco, de comentários e de flighting.",
+          "breaks": "O Windows envia menos dados sobre compatibilidade e uso de apps; nada mais deixou de funcionar na VM de teste. Desfazer reativa as tarefas.",
+          "gain": "Essas tarefas deixam de acordar para coletar e enviar dados."
+        }
+      },
+      "actions": [
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\",
+          "name": "MareBackup",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\",
+          "name": "StartupAppTask",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\",
+          "name": "PcaPatchDbTask",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\",
+          "name": "Consolidator",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\",
+          "name": "UsbCeip",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\DiskDiagnostic\\",
+          "name": "Microsoft-Windows-DiskDiagnosticDataCollector",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Feedback\\Siuf\\",
+          "name": "DmClient",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Feedback\\Siuf\\",
+          "name": "DmClientOnScenarioDownload",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Flighting\\FeatureConfig\\",
+          "name": "UsageDataReporting",
+          "enabled": false
+        },
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Flighting\\FeatureConfig\\",
+          "name": "BootstrapUsageDataReporting",
+          "enabled": false
+        }
+      ]
+    },
+    {
+      "id": "privacy.compatibility-appraiser",
+      "category": "privacy",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off the Compatibility Appraiser task",
+          "what": "Disables the Microsoft Compatibility Appraiser Exp task, which checks whether the PC and its apps are ready for the next Windows version.",
+          "breaks": "One report says a feature update download got stuck until the task was turned back on. Undo this item before a feature update.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Desativar a tarefa Avaliador de Compatibilidade",
+          "what": "Desativa a tarefa Microsoft Compatibility Appraiser Exp, que verifica se o PC e os apps estão prontos para a próxima versão do Windows.",
+          "breaks": "Um relato diz que o download de uma atualização de recursos travou até a tarefa ser reativada. Desfaça este item antes de uma atualização de recursos.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "scheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\",
+          "name": "Microsoft Compatibility Appraiser Exp",
+          "enabled": false
+        }
+      ]
+    },
+    {
+      "id": "ai.recall-off",
+      "category": "ai",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Recall",
+          "what": "Sets the policies that make Recall unavailable and stop Windows from saving screen snapshots for it.",
+          "breaks": "Recall cannot be used, and saved snapshots are deleted. On Copilot+ PCs the Recall component is removed at the next restart; after undo, turn Recall back on in Windows features. On other PCs nothing visible changes.",
+          "gain": "Windows does not take snapshots of your screen."
+        },
+        "pt-BR": {
+          "title": "Desativar o Recall",
+          "what": "Define as políticas que deixam o Recall indisponível e impedem o Windows de salvar capturas da tela para ele.",
+          "breaks": "O Recall não pode ser usado, e as capturas salvas são apagadas. Em PCs Copilot+ o componente do Recall é removido na próxima reinicialização; depois de desfazer, ative o Recall de novo em Recursos do Windows. Nos outros PCs nada visível muda.",
+          "gain": "O Windows não tira capturas da sua tela."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "AllowRecallEnablement",
+          "kind": "dword",
+          "value": 0
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableAIDataAnalysis",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "ai.click-to-do-off",
+      "category": "ai",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Click to Do",
+          "what": "Sets the policy that turns off Click to Do, which takes a screenshot and suggests actions for what is on screen.",
+          "breaks": "Click to Do and its entry points are gone. Microsoft documents this policy for Windows Insider builds; on other builds it may have no effect.",
+          "gain": "Windows does not analyze screenshots of your screen to suggest actions."
+        },
+        "pt-BR": {
+          "title": "Desativar o Clique para Fazer",
+          "what": "Define a política que desativa o Clique para Fazer, que tira uma captura da tela e sugere ações para o que aparece nela.",
+          "breaks": "O Clique para Fazer e seus atalhos somem. A Microsoft documenta esta política para versões Windows Insider; em outras versões ela pode não ter efeito.",
+          "gain": "O Windows não analisa capturas da sua tela para sugerir ações."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableClickToDo",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "ai.paint-off",
+      "category": "ai",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off AI features in Paint",
+          "what": "Sets the policies that turn off Cocreator, generative fill and Image Creator in Paint.",
+          "breaks": "Those three AI tools are no longer available in Paint. Drawing and editing keep working.",
+          "gain": "Paint stays a plain editor with no AI tools."
+        },
+        "pt-BR": {
+          "title": "Desativar os recursos de IA do Paint",
+          "what": "Define as políticas que desativam o Cocriador, o preenchimento generativo e o Criador de Imagens no Paint.",
+          "breaks": "Essas três ferramentas de IA deixam de estar disponíveis no Paint. Desenhar e editar continuam funcionando.",
+          "gain": "O Paint fica um editor simples, sem ferramentas de IA."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableCocreator",
+          "kind": "dword",
+          "value": 1
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableGenerativeFill",
+          "kind": "dword",
+          "value": 1
+        },
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableImageCreator",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "ai.notepad-off",
+      "category": "ai",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off AI features in Notepad",
+          "what": "Sets the policy that turns off the Copilot features in Notepad, such as rewrite and summarize.",
+          "breaks": "Notepad no longer offers to rewrite, shorten or summarize text with AI. Editing keeps working.",
+          "gain": "Notepad stays a plain text editor, with no AI buttons."
+        },
+        "pt-BR": {
+          "title": "Desativar os recursos de IA do Bloco de Notas",
+          "what": "Define a política que desativa os recursos do Copilot no Bloco de Notas, como reescrever e resumir.",
+          "breaks": "O Bloco de Notas deixa de oferecer reescrever, encurtar ou resumir texto com IA. A edição continua funcionando.",
+          "gain": "O Bloco de Notas fica um editor de texto simples, sem botões de IA."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SOFTWARE\\Policies\\WindowsNotepad",
+          "name": "DisableAIFeatures",
+          "kind": "dword",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "ai.fabric-service-manual",
+      "category": "ai",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Set the AI Components Host service to Manual",
+          "what": "Changes the Windows AI Components Host service (WSAIFabricSvc) from Automatic to Manual, so it starts only when something asks for it.",
+          "breaks": "Local AI features that rely on this service may start slower or not work; Microsoft does not document which ones. Undo restores the previous start type.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Pôr o serviço Host de Componentes de IA em Manual",
+          "what": "Muda o serviço Host de Componentes de IA do Windows (WSAIFabricSvc) de Automático para Manual, então ele só inicia quando algo o pede.",
+          "breaks": "Recursos de IA locais que dependem deste serviço podem demorar a iniciar ou não funcionar; a Microsoft não documenta quais são. Desfazer restaura o tipo de inicialização anterior.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "service",
+          "name": "WSAIFabricSvc",
+          "startType": "manual"
+        }
+      ]
+    },
+    {
+      "id": "interface.taskbar-left",
+      "category": "interface",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "optIn": true,
+      "restartsExplorer": true,
+      "text": {
+        "en": {
+          "title": "Align the taskbar to the left",
+          "what": "Moves the Start button and the taskbar icons to the left, as Settings > Personalization > Taskbar > Taskbar alignment does. Explorer restarts to apply it.",
+          "breaks": "Nothing breaks; the taskbar looks like the one in Windows 10. Explorer restarts, so open File Explorer windows close.",
+          "gain": "The Start button stays in the corner, where it is quicker to reach."
+        },
+        "pt-BR": {
+          "title": "Alinhar a barra de tarefas à esquerda",
+          "what": "Move o botão Iniciar e os ícones da barra de tarefas para a esquerda, como Configurações > Personalização > Barra de tarefas > Alinhamento da barra de tarefas. O Explorer reinicia para aplicar.",
+          "breaks": "Nada deixa de funcionar; a barra fica como a do Windows 10. O Explorer reinicia, então as janelas do Explorador de Arquivos abertas se fecham.",
+          "gain": "O botão Iniciar fica no canto, onde é mais rápido de alcançar."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarAl",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "interface.taskbar-task-view-off",
+      "category": "interface",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "restartsExplorer": true,
+      "text": {
+        "en": {
+          "title": "Hide the Task View button",
+          "what": "Hides the Task View button on the taskbar. Explorer restarts to apply it.",
+          "breaks": "The button is gone; Windows+Tab still opens Task View and virtual desktops. Explorer restarts, so open File Explorer windows close.",
+          "gain": "More room on the taskbar."
+        },
+        "pt-BR": {
+          "title": "Ocultar o botão Visão de Tarefas",
+          "what": "Oculta o botão Visão de Tarefas na barra de tarefas. O Explorer reinicia para aplicar.",
+          "breaks": "O botão some; Windows+Tab continua abrindo a Visão de Tarefas e as áreas de trabalho virtuais. O Explorer reinicia, então as janelas do Explorador de Arquivos abertas se fecham.",
+          "gain": "Mais espaço na barra de tarefas."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowTaskViewButton",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "interface.start-recommendations-off",
+      "category": "interface",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "restartsExplorer": true,
+      "text": {
+        "en": {
+          "title": "Turn off recommendations in Start",
+          "what": "Turns off the Start recommendations for tips, shortcuts and new apps, and the recommended files. Explorer restarts to apply it.",
+          "breaks": "Start no longer lists recent files, File Explorer no longer shows recent files, and app Jump Lists lose their recent items. A Windows update can turn recommendations back on; cleanup check reports it. Explorer restarts, so open File Explorer windows close.",
+          "gain": "Start shows only your pinned apps, with no promoted content."
+        },
+        "pt-BR": {
+          "title": "Desativar as recomendações no Iniciar",
+          "what": "Desativa as recomendações de dicas, atalhos e novos apps no Iniciar e os arquivos recomendados. O Explorer reinicia para aplicar.",
+          "breaks": "O Iniciar deixa de listar arquivos recentes, o Explorador de Arquivos deixa de mostrar arquivos recentes e as Listas de Atalhos dos apps perdem os itens recentes. Uma atualização do Windows pode reativar as recomendações; o cleanup check avisa. O Explorer reinicia, então as janelas do Explorador de Arquivos abertas se fecham.",
+          "gain": "O Iniciar mostra só os apps fixados, sem conteúdo promovido."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_IrisRecommendations",
+          "kind": "dword",
+          "value": 0
+        },
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_TrackDocs",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "appearance.dark-theme",
+      "category": "appearance",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Use dark mode",
+          "what": "Sets both the Windows mode and the app mode to dark, as Settings > Personalization > Colors does.",
+          "breaks": "Nothing breaks; apps that follow the Windows setting turn dark. Some parts of Windows change only after you sign out and back in.",
+          "gain": "A dark taskbar, Start, File Explorer and apps, easier on the eyes at night."
+        },
+        "pt-BR": {
+          "title": "Usar o modo escuro",
+          "what": "Define o modo do Windows e o modo dos apps como escuro, como Configurações > Personalização > Cores.",
+          "breaks": "Nada deixa de funcionar; os apps que seguem a configuração do Windows ficam escuros. Algumas partes do Windows só mudam depois de sair e entrar de novo na conta.",
+          "gain": "Barra de tarefas, Iniciar, Explorador de Arquivos e apps escuros, mais confortáveis à noite."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "AppsUseLightTheme",
+          "kind": "dword",
+          "value": 0
+        },
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "SystemUsesLightTheme",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "appearance.transparency-off",
+      "category": "appearance",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Turn off transparency effects",
+          "what": "Turns off the transparency of the taskbar, Start and windows, as Settings > Personalization > Colors does.",
+          "breaks": "Nothing breaks; these surfaces become solid. Some parts of Windows change only after you sign out and back in.",
+          "gain": "A plainer look, which some people find easier to read."
+        },
+        "pt-BR": {
+          "title": "Desativar os efeitos de transparência",
+          "what": "Desativa a transparência da barra de tarefas, do Iniciar e das janelas, como Configurações > Personalização > Cores.",
+          "breaks": "Nada deixa de funcionar; essas superfícies ficam sólidas. Algumas partes do Windows só mudam depois de sair e entrar de novo na conta.",
+          "gain": "Um visual mais simples, que algumas pessoas acham mais fácil de ler."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "EnableTransparency",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "appearance.animations-off",
+      "category": "appearance",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Turn off minimize and maximize animations",
+          "what": "Turns off the animation of windows when they are minimized, maximized and restored, as \"Animate windows when minimizing and maximizing\" in Performance Options does.",
+          "breaks": "Nothing breaks; windows change size at once. Takes effect after you sign out and back in.",
+          "gain": "Windows respond at once when you minimize or maximize them."
+        },
+        "pt-BR": {
+          "title": "Desativar as animações ao minimizar e maximizar",
+          "what": "Desativa a animação das janelas ao minimizar, maximizar e restaurar, como a opção \"Animar janelas ao minimizar e maximizar\" das Opções de desempenho.",
+          "breaks": "Nada deixa de funcionar; as janelas mudam de tamanho na hora. Passa a valer depois de sair e entrar de novo na conta.",
+          "gain": "As janelas respondem na hora ao minimizar ou maximizar."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Control Panel\\Desktop\\WindowMetrics",
+          "name": "MinAnimate",
+          "kind": "string",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "id": "input.ptbr-us-international",
+      "category": "input",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Use pt-BR with the US-International keyboard",
+          "what": "Makes Portuguese (Brazil) the first language with only the United States-International keyboard, removing the ABNT and ABNT2 layouts from it. Other languages keep their order and keyboards.",
+          "breaks": "The ABNT2 layout is gone from Portuguese (Brazil): on an ABNT2 keyboard, keys such as Ç and the accents type other characters. Undo restores the previous language list.",
+          "gain": "Accents typed on a US keyboard work as dead keys (' then a gives á), without switching layouts."
+        },
+        "pt-BR": {
+          "title": "Usar pt-BR com o teclado Estados Unidos-Internacional",
+          "what": "Deixa Português (Brasil) como primeiro idioma só com o teclado Estados Unidos-Internacional, removendo dele os layouts ABNT e ABNT2. Os outros idiomas mantêm a ordem e os teclados.",
+          "breaks": "O layout ABNT2 some do Português (Brasil): num teclado ABNT2, teclas como Ç e os acentos digitam outros caracteres. Desfazer restaura a lista de idiomas anterior.",
+          "gain": "Acentos num teclado americano funcionam como teclas mortas (' e depois a dá á), sem trocar de layout."
+        }
+      },
+      "actions": [
+        {
+          "type": "named",
+          "handler": "keyboardLayout"
+        }
+      ]
+    },
+    {
+      "id": "input.sticky-keys-shortcut-off",
+      "category": "input",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off the Sticky Keys shortcut",
+          "what": "Turns off the shortcut that turns Sticky Keys on when you press Shift five times.",
+          "breaks": "Pressing Shift five times no longer turns Sticky Keys on; you can still turn it on in Settings > Accessibility > Keyboard. The other Sticky Keys options are set to the Windows defaults. Takes effect after you sign out and back in.",
+          "gain": "No Sticky Keys prompt in the middle of a game or while typing."
+        },
+        "pt-BR": {
+          "title": "Desativar o atalho das Teclas de Aderência",
+          "what": "Desativa o atalho que liga as Teclas de Aderência quando você pressiona Shift cinco vezes.",
+          "breaks": "Pressionar Shift cinco vezes não liga mais as Teclas de Aderência; você ainda pode ligá-las em Configurações > Acessibilidade > Teclado. As outras opções das Teclas de Aderência voltam ao padrão do Windows. Passa a valer depois de sair e entrar de novo na conta.",
+          "gain": "Sem o aviso das Teclas de Aderência no meio de um jogo ou da digitação."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKCU\\Control Panel\\Accessibility\\StickyKeys",
+          "name": "Flags",
+          "kind": "string",
+          "value": "506"
+        }
+      ]
+    },
+    {
+      "id": "sound.no-sounds",
+      "category": "sound",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "user",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Use the No Sounds scheme",
+          "what": "Sets the Windows sound scheme to No Sounds and clears the sound of every event, as Control Panel > Sound > Sounds does.",
+          "breaks": "Windows plays no sound for notifications, errors, sign-in and other events. Music, videos and games are not affected. Undo restores the previous scheme and sounds.",
+          "gain": "A quiet PC with no system beeps."
+        },
+        "pt-BR": {
+          "title": "Usar o esquema Nenhum som",
+          "what": "Define o esquema de sons do Windows como Nenhum som e limpa o som de cada evento, como Painel de Controle > Som > Sons.",
+          "breaks": "O Windows não toca som em notificações, erros, entrada na conta e outros eventos. Músicas, vídeos e jogos não são afetados. Desfazer restaura o esquema e os sons anteriores.",
+          "gain": "Um PC silencioso, sem bipes do sistema."
+        }
+      },
+      "actions": [
+        {
+          "type": "named",
+          "handler": "soundScheme"
         }
       ]
     },
@@ -919,6 +1960,255 @@
           "name": "PowerThrottlingOff",
           "kind": "dword",
           "value": 1
+        }
+      ]
+    },
+    {
+      "id": "performance.formatkit-plan",
+      "category": "performance",
+      "level": "aggressive",
+      "contested": true,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": true,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Use the FormatKit Performance power plan",
+          "what": "Creates a copy of High performance named FormatKit Performance with core parking off, energy performance preference 0, aggressive boost, PCI Express link power management off, USB selective suspend off and the hard disk never turned off, and activates it.",
+          "breaks": "The PC uses more power and runs warmer, even at idle. On a laptop, battery life gets much shorter. Undo activates the previous plan and deletes this one.",
+          "gain": "No gain is documented by Microsoft."
+        },
+        "pt-BR": {
+          "title": "Usar o plano de energia FormatKit Desempenho",
+          "what": "Cria uma cópia do Alto desempenho chamada FormatKit Desempenho, com estacionamento de núcleos desligado, preferência de desempenho energético 0, boost agressivo, gerenciamento de energia do link PCI Express desligado, suspensão seletiva de USB desligada e disco rígido nunca desligado, e a ativa.",
+          "breaks": "O PC gasta mais energia e esquenta mais, mesmo ocioso. Em notebook, a bateria dura bem menos. Desfazer ativa o plano anterior e apaga este.",
+          "gain": "A Microsoft não documenta nenhum ganho."
+        }
+      },
+      "actions": [
+        {
+          "type": "powerScheme",
+          "scheme": "formatkit"
+        }
+      ]
+    },
+    {
+      "id": "performance.spooler-off",
+      "category": "performance",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "optIn": true,
+      "condition": "noPrinter",
+      "text": {
+        "en": {
+          "title": "Turn off the Print Spooler",
+          "what": "Disables the Print Spooler service. Skipped when a printer other than the built-in virtual ones is installed.",
+          "breaks": "Nothing can print, including Microsoft Print to PDF, and you cannot add a printer until you undo this item. Undo restores the previous start type.",
+          "gain": "The spooler stops running (about 20 MB in the test VM), and Microsoft advises turning it off on PCs that do not print, to reduce exposure to print spooler vulnerabilities."
+        },
+        "pt-BR": {
+          "title": "Desativar o Spooler de Impressão",
+          "what": "Desativa o serviço Spooler de Impressão. Ignorado quando há uma impressora instalada além das virtuais do Windows.",
+          "breaks": "Nada consegue imprimir, nem o Microsoft Print to PDF, e você não consegue adicionar uma impressora até desfazer este item. Desfazer restaura o tipo de inicialização anterior.",
+          "gain": "O spooler para de rodar (cerca de 20 MB na VM de teste), e a Microsoft recomenda desligá-lo em PCs que não imprimem, para reduzir a exposição a falhas do spooler."
+        }
+      },
+      "actions": [
+        {
+          "type": "service",
+          "name": "Spooler",
+          "startType": "disabled"
+        }
+      ]
+    },
+    {
+      "id": "performance.trkwks-manual",
+      "category": "performance",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Set the Distributed Link Tracking Client to Manual",
+          "what": "Changes the Distributed Link Tracking Client service (TrkWks) from Automatic to Manual, so it does not start with Windows.",
+          "breaks": "Shortcuts to files that were moved between NTFS drives or across a network may no longer find their target. Undo restores the previous start type.",
+          "gain": "One less service running all the time."
+        },
+        "pt-BR": {
+          "title": "Pôr o Cliente de Rastreamento de Link Distribuído em Manual",
+          "what": "Muda o serviço Cliente de rastreamento de link distribuído (TrkWks) de Automático para Manual, então ele não inicia com o Windows.",
+          "breaks": "Atalhos para arquivos movidos entre unidades NTFS ou pela rede podem deixar de achar o destino. Desfazer restaura o tipo de inicialização anterior.",
+          "gain": "Um serviço a menos rodando o tempo todo."
+        }
+      },
+      "actions": [
+        {
+          "type": "service",
+          "name": "TrkWks",
+          "startType": "manual"
+        }
+      ]
+    },
+    {
+      "id": "power.fast-startup-off",
+      "category": "power",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "text": {
+        "en": {
+          "title": "Turn off Fast Startup",
+          "what": "Turns off Fast Startup, so shutting down closes Windows completely instead of hibernating its kernel.",
+          "breaks": "Starting the PC from off can take a little longer. Takes effect from the next shutdown.",
+          "gain": "Shutting down really turns Windows off, which dual boot and Wake-on-LAN need."
+        },
+        "pt-BR": {
+          "title": "Desativar a Inicialização Rápida",
+          "what": "Desativa a Inicialização Rápida, então desligar fecha o Windows por completo em vez de hibernar o núcleo dele.",
+          "breaks": "Ligar o PC desligado pode demorar um pouco mais. Passa a valer a partir do próximo desligamento.",
+          "gain": "Desligar desliga o Windows de verdade, o que dual boot e Wake-on-LAN precisam."
+        }
+      },
+      "actions": [
+        {
+          "type": "registry",
+          "path": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+          "name": "HiberbootEnabled",
+          "kind": "dword",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "power.hibernation-off",
+      "category": "power",
+      "level": "balanced",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": true,
+      "text": {
+        "en": {
+          "title": "Turn off hibernation",
+          "what": "Turns hibernation off with powercfg /hibernate off, which deletes the hibernation file. Fast Startup goes off with it.",
+          "breaks": "Hibernate and Fast Startup are gone, and a laptop cannot hibernate when its battery runs low. Undo turns hibernation back on.",
+          "gain": "Frees the disk space used by hiberfil.sys."
+        },
+        "pt-BR": {
+          "title": "Desativar a hibernação",
+          "what": "Desativa a hibernação com powercfg /hibernate off, que apaga o arquivo de hibernação. A Inicialização Rápida é desativada junto.",
+          "breaks": "Hibernar e a Inicialização Rápida somem, e um notebook não consegue hibernar quando a bateria está acabando. Desfazer reativa a hibernação.",
+          "gain": "Libera o espaço em disco usado pelo hiberfil.sys."
+        }
+      },
+      "actions": [
+        {
+          "type": "named",
+          "handler": "hibernate"
+        }
+      ]
+    },
+    {
+      "id": "power.monitor-off-15",
+      "category": "power",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Turn off the display after 15 minutes",
+          "what": "Sets the active power plan to turn off the display after 15 minutes without use when plugged in. If the profile also includes the 30-minute item, that one is applied instead.",
+          "breaks": "Nothing breaks. Only the plan active now changes; another plan keeps its own timeout. Undo restores the previous timeout on this plan.",
+          "gain": "The display rests while you are away."
+        },
+        "pt-BR": {
+          "title": "Desligar a tela depois de 15 minutos",
+          "what": "Define o plano de energia ativo para desligar a tela depois de 15 minutos sem uso quando ligado na tomada. Se o perfil também incluir o item de 30 minutos, ele é aplicado no lugar deste.",
+          "breaks": "Nada deixa de funcionar. Só muda o plano ativo agora; outro plano mantém o próprio tempo. Desfazer restaura o tempo anterior neste plano.",
+          "gain": "A tela descansa enquanto você está longe."
+        }
+      },
+      "actions": [
+        {
+          "type": "powerSetting",
+          "subgroup": "7516b95f-f776-4464-8c53-06167f40cc99",
+          "setting": "3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e",
+          "ac": 900
+        }
+      ]
+    },
+    {
+      "id": "power.monitor-off-30",
+      "category": "power",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": false,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Turn off the display after 30 minutes",
+          "what": "Sets the active power plan to turn off the display after 30 minutes without use when plugged in.",
+          "breaks": "Nothing breaks. Only the plan active now changes; another plan keeps its own timeout. Undo restores the previous timeout on this plan.",
+          "gain": "The display rests while you are away."
+        },
+        "pt-BR": {
+          "title": "Desligar a tela depois de 30 minutos",
+          "what": "Define o plano de energia ativo para desligar a tela depois de 30 minutos sem uso quando ligado na tomada.",
+          "breaks": "Nada deixa de funcionar. Só muda o plano ativo agora; outro plano mantém o próprio tempo. Desfazer restaura o tempo anterior neste plano.",
+          "gain": "A tela descansa enquanto você está longe."
+        }
+      },
+      "actions": [
+        {
+          "type": "powerSetting",
+          "subgroup": "7516b95f-f776-4464-8c53-06167f40cc99",
+          "setting": "3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e",
+          "ac": 1800
+        }
+      ]
+    },
+    {
+      "id": "power.sleep-never",
+      "category": "power",
+      "level": "safe",
+      "contested": false,
+      "requiresReboot": false,
+      "scope": "machine",
+      "laptopSensitive": true,
+      "optIn": true,
+      "text": {
+        "en": {
+          "title": "Never sleep when plugged in",
+          "what": "Sets the active power plan to never put the PC to sleep when plugged in.",
+          "breaks": "The PC stays on until you turn it off or put it to sleep, and uses more power. Battery settings do not change. Undo restores the previous timeout on this plan.",
+          "gain": "Downloads, remote sessions and long tasks are not interrupted by sleep."
+        },
+        "pt-BR": {
+          "title": "Nunca suspender na tomada",
+          "what": "Define o plano de energia ativo para nunca suspender o PC quando ligado na tomada.",
+          "breaks": "O PC fica ligado até você desligá-lo ou suspendê-lo, e gasta mais energia. As configurações na bateria não mudam. Desfazer restaura o tempo anterior neste plano.",
+          "gain": "Downloads, sessões remotas e tarefas longas não são interrompidos pela suspensão."
+        }
+      },
+      "actions": [
+        {
+          "type": "powerSetting",
+          "subgroup": "238c9fa8-0aad-41ed-83f4-97be242c8f20",
+          "setting": "29f6c1db-86da-48c5-9fdb-f2b67b1f44da",
+          "ac": 0
         }
       ]
     },

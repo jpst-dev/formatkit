@@ -156,12 +156,27 @@ public class CatalogsViewModelTests
     }
 
     [Fact]
+    public void OptInItems_ShowTheOptInBadgeAndDetailLine()
+    {
+        var text = new ItemText("Dark theme", "what", "breaks", "gain");
+        var optIn = new CleanupItem("appearance.dark", CleanupCategory.Appearance, CleanupLevel.Safe, false, false, ItemScope.User, false,
+            new Dictionary<string, ItemText> { ["en"] = text, ["pt-BR"] = text }, [], OptIn: true);
+        var vm = new CatalogsViewModel(new CleanupCatalog(1, [optIn, Cleanup("apps.bloat", CleanupLevel.Safe, "Remove Bloat")]), new ProgramCatalog(1, []));
+
+        Assert.Equal(FormatKit.App.Localization.Strings.Get("Cat_OptInBadge"), vm.OptInBadge);
+        vm.SelectedCleanup = optIn;
+        Assert.Contains(FormatKit.App.Localization.Strings.Get("Cat_OptIn"), vm.Details!.Lines);
+        vm.SelectedCleanup = vm.CleanupItems.Single(i => i.Id == "apps.bloat");
+        Assert.DoesNotContain(FormatKit.App.Localization.Strings.Get("Cat_OptIn"), vm.Details!.Lines);
+    }
+
+    [Fact]
     public void EveryFilterValue_HasAResourceInBothLanguages()
     {
         var keys = Enum.GetValues<CleanupLevel>().Select(v => "Level_" + v)
             .Concat(Enum.GetValues<CleanupCategory>().Select(v => "CleanupCategory_" + v))
             .Concat(Enum.GetValues<ProgramCategory>().Select(v => "ProgramCategory_" + v))
-            .Append("Cat_Context_Machine").Append("Cat_Context_User");
+            .Append("Cat_Context_Machine").Append("Cat_Context_User").Append("Cat_OptIn").Append("Cat_OptInBadge");
         var manager = new System.Resources.ResourceManager("FormatKit.App.Resources.Strings", typeof(FormatKit.App.Localization.LocExtension).Assembly);
         foreach (var culture in new[] { "en", "pt-BR" })
             foreach (var key in keys)

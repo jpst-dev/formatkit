@@ -127,15 +127,17 @@ Profiles are opened and shown, not edited. The window runs the profile you revie
 
 ## Cleanup
 
-The `cleanup` module removes preinstalled apps and applies privacy and performance tweaks. Every item has a level, and every change is recorded in a journal so it can be undone.
+The `cleanup` module removes preinstalled apps and sets up Windows: what starts with it, privacy, AI features, the taskbar and Start, appearance, keyboard, sound, performance and power. Its categories are `apps`, `startup`, `privacy`, `ai`, `interface`, `appearance`, `input`, `sound`, `performance`, `power` and `developer`. Every item has a level, and every change is recorded in a journal so it can be undone.
 
 | Level | What it holds |
 | --- | --- |
-| `safe` | Removes the bundled apps almost nobody uses (Clipchamp, Solitaire, News, Weather, Feedback Hub, Power Automate), turns off advertising ID, tailored experiences, activity history and similar, and turns Game Mode on. |
-| `balanced` | Everything in `safe`, plus more apps (Teams personal, Get Help, Xbox app, Phone Link, To Do), minimal diagnostic data, no web search in Start, online speech recognition off, the High performance power plan and pointer precision off. |
+| `safe` | Removes the bundled apps almost nobody uses (Clipchamp, Solitaire, News, Weather, Feedback Hub, Power Automate), stops OneDrive and Edge from starting on their own, turns off advertising ID, tailored experiences, activity history, suggestions in Start and on the lock screen, Recall and the AI features of Paint and Notepad, hides the Task View button and Start recommendations, turns off Fast Startup and turns Game Mode on. |
+| `balanced` | Everything in `safe`, plus more apps (Teams personal, Get Help, Xbox app, Phone Link, To Do, Widgets, the new Outlook, Bing, Copilot), minimal diagnostic data, the telemetry service and tasks, no web search in Start, online speech recognition off, hibernation off, the High performance power plan and pointer precision off. |
 | `aggressive` | Everything in `balanced`, plus the Ultimate Performance power plan, Memory Integrity and VBS off (reduces security) and the contested tweaks. |
 
 Levels are cumulative: `safe` is inside `balanced`, which is inside `aggressive`. Run `formatkit cleanup list --verbose` to see every item with what it does and what it can break. Items marked contested have no gain that Microsoft documents; they are always `aggressive`. Power plan items are skipped on laptops unless you list them in `include`. The `developer` category (Developer Mode, long paths, file extensions, hidden files, sudo, PowerShell execution policy) is never selected by a level; list its items in `include`, with or without `level`.
+
+Personal preferences are opt-in in the same way: dark mode, transparency and animations off, the taskbar on the left, pt-BR with the US-International keyboard, the No Sounds scheme, display and sleep timeouts, the FormatKit Performance power plan and the Print Spooler off (skipped when a printer is installed). `cleanup list` and the app mark them `opt-in`; a level never selects them.
 
 Profile section:
 
@@ -153,7 +155,7 @@ Profile section:
 - `include` and `exclude` take item ids from `cleanup list`. The selection is every item at or below `level`, plus `include`, minus `exclude`. An unknown id, or an id in both lists, is a profile error.
 - `confirmAggressive` must be `true` when the selection contains any `aggressive` item (including one added through `include`). Without it the profile is rejected and the message names those items.
 
-A ready profile is in `profiles/cleanup-balanced.json`. Preview it with `formatkit run --profile profiles\cleanup-balanced.json --dry-run`.
+A ready profile is in `profiles/cleanup-balanced.json`. Preview it with `formatkit run --profile profiles\cleanup-balanced.json --dry-run`. `profiles/windows-setup-example.json` adds opt-in items through `include`.
 
 ```powershell
 formatkit cleanup list --level balanced

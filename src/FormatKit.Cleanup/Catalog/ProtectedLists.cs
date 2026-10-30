@@ -49,7 +49,9 @@ public static class ProtectedLists
         "Clipchamp.Clipchamp", "Microsoft.MicrosoftSolitaireCollection", "Microsoft.BingNews",
         "Microsoft.BingWeather", "Microsoft.GetHelp", "Microsoft.Getstarted",
         "Microsoft.WindowsFeedbackHub", "Microsoft.PowerAutomateDesktop", "MSTeams",
-        "Microsoft.GamingApp", "Microsoft.YourPhone", "Microsoft.Todos");
+        "Microsoft.GamingApp", "Microsoft.YourPhone", "Microsoft.Todos",
+        "MicrosoftWindows.Client.WebExperience", "Microsoft.OutlookForWindows", "Microsoft.BingSearch",
+        "Microsoft.Copilot", "Microsoft.MicrosoftOfficeHub");
 
     /// <summary>Handler names a <c>named</c> action may use.</summary>
     public static IReadOnlySet<string> NamedHandlers { get; } = Set("memoryIntegrity", "keyboardLayout", "soundScheme", "hibernate");

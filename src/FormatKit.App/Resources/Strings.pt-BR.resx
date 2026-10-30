@@ -95,6 +95,8 @@
   <data name="Cat_Gain" xml:space="preserve"><value>Ganho: {0}</value></data>
   <data name="Cat_Contested" xml:space="preserve"><value>Ajuste contestado</value></data>
   <data name="Cat_Laptop" xml:space="preserve"><value>Sensível em notebooks</value></data>
+  <data name="Cat_OptIn" xml:space="preserve"><value>Opcional: só é aplicado quando o perfil o lista em include</value></data>
+  <data name="Cat_OptInBadge" xml:space="preserve"><value>opcional</value></data>
   <data name="Cat_Winget" xml:space="preserve"><value>id do winget: {0}</value></data>
   <data name="Cat_Source" xml:space="preserve"><value>Fonte: {0}</value></data>
   <data name="Cat_Context" xml:space="preserve"><value>Instala para: {0}</value></data>

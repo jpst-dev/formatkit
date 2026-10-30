@@ -12,7 +12,7 @@ namespace FormatKit.Cli.Commands;
 internal static class CleanupCommands
 {
     private static readonly string[] Levels = ["safe", "balanced", "aggressive"];
-    private static readonly string[] Categories = ["apps", "privacy", "performance", "developer"];
+    private static readonly string[] Categories = Enum.GetNames<CleanupCategory>().Select(n => n.ToLowerInvariant()).ToArray();
 
     public static Command Create(CommandContext context)
     {
@@ -43,12 +43,14 @@ internal static class CleanupCommands
 
             var idWidth = items.Count == 0 ? 0 : items.Max(i => i.Id.Length);
             var contested = $"[{Strings.Get("Marker_Contested")}]";
+            var optIn = $"[{Strings.Get("Marker_OptIn")}]";
             foreach (var item in items)
             {
                 var text = item.LocalizedText();
                 context.Out.WriteLine(
                     $"{item.Id.PadRight(idWidth)}  {LevelName(item.Level).PadRight(10)}  " +
-                    $"{(item.Contested ? contested : "").PadRight(contested.Length)}  {text.Title}");
+                    $"{(item.Contested ? contested : "").PadRight(contested.Length)}  " +
+                    $"{(item.IsOptIn ? optIn : "").PadRight(optIn.Length)}  {text.Title}");
                 if (!verbose)
                     continue;
 

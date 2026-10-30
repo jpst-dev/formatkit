@@ -183,20 +183,175 @@ antivirus. Scripts often do this with policies that are hard to find later.
 - The Windows Update, Update Orchestrator, Defender, Security and firewall services
   when disabled (see "Disabling services").
 
+## Disabling more services: SysMain, search, notifications, sharing and others
+
+**What people claim:** disabling SysMain, Windows Search (`WSearch`), push
+notifications (`WpnService`), Connected Devices Platform (`CDPSvc`), Server
+(`LanmanServer`), IP Helper (`iphlpsvc`), Delivery Optimization (`DoSvc`),
+Windows Error Reporting (`WerSvc`) or the Bluetooth services frees memory and
+speeds the PC up.
+
+**What actually happens:** FormatKit's test VM measured no idle memory gain from
+changing service start types; disabling SysMain even showed slightly more memory in
+use. Each of these services backs a feature:
+
+- `SysMain`: preloads apps you use often; without it, apps open a little slower
+  from cold.
+- `WSearch`: Start and File Explorer search.
+- `WpnService`: notifications from the Store, Xbox, Teams and other apps.
+- `CDPSvc`: Phone Link, Nearby sharing and the clipboard across devices.
+- `LanmanServer`: shared folders and printers on this PC.
+- `iphlpsvc`: IPv6 transition (Teredo), which Xbox online play can use.
+- `DoSvc`: downloads for Windows Update and the Microsoft Store (reported broken in
+  [privacy.sexy #462](https://github.com/undergroundwires/privacy.sexy/issues/462)).
+  To stop sharing downloads with other PCs, use the
+  `privacy.delivery-optimization-no-peers` item instead.
+- `WerSvc`: crash reports that Microsoft and app vendors use to fix bugs.
+- Bluetooth (`bthserv`, `BTAGService`, `BthAvctpSvc`): these already ship Manual and
+  start only when a device needs them; disabling them breaks Bluetooth and Bluetooth
+  audio ([winutil #2685](https://github.com/ChrisTitusTech/winutil/issues/2685),
+  [#2877](https://github.com/ChrisTitusTech/winutil/issues/2877)).
+
+The Xbox and Windows Update services are on FormatKit's protected list (see
+"Disabling services").
+
+**How `cleanup check` reports it:** disabled Xbox and Windows Update services are
+listed under **Breaks Windows features** (see "Disabling services"). `cleanup check`
+does **not** detect the other services above when disabled, because it has no rule
+for them yet.
+
+## Turning off Game Bar integration
+
+**What people claim:** turning off the Game Bar and Xbox capture integration makes
+games run smoother.
+
+**What actually happens:** no gain is measured, and turning the integration off has
+been reported to cause stutter on CPUs with performance and efficiency cores
+([Win11Debloat #784](https://github.com/Raphire/Win11Debloat/issues/784)) and an
+`ms-gamebar` error popup when a game opens the Game Bar. To stop background
+recording, turn it off in Settings > Gaming > Captures.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
+for it.
+
+## Turning off background apps globally
+
+**What people claim:** blocking every app from running in the background saves
+resources.
+
+**What actually happens:** no gain is measured, and apps that need to run in the
+background stop working; the Snipping Tool overlay is one reported case
+([winutil #3401](https://github.com/ChrisTitusTech/winutil/issues/3401)). Turn it off
+per app in Settings > Apps > Installed apps > Advanced options instead.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
+for it.
+
+## Turning off multiplane overlay (MPO)
+
+**What people claim:** turning off multiplane overlay (`OverlayTestMode`) fixes
+flicker and stutter.
+
+**What actually happens:** no gain is measured, and it has been reported to make
+`dwm.exe` crash, in a way a restore point does not undo
+([winutil #4975](https://github.com/ChrisTitusTech/winutil/issues/4975)). Flicker is
+better fixed with a GPU driver update.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
+for it.
+
+## Turning off IPv6
+
+**What people claim:** turning off IPv6 (`DisabledComponents` = 255) and Teredo makes
+the network faster.
+
+**What actually happens:** no gain is measured. Windows prefers IPv6 and some
+features depend on it, such as Xbox online networking.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
+for it.
+
+## Blocking telemetry in the hosts file
+
+**What people claim:** adding Microsoft telemetry hosts to the `hosts` file stops
+Windows from sending data.
+
+**What actually happens:** the lists also block hosts that Windows Update and other
+services need ([privacy.sexy #462](https://github.com/undergroundwires/privacy.sexy/issues/462)).
+Microsoft says `settings-win.data.microsoft.com` must not be blocked
+([Microsoft Learn](https://learn.microsoft.com/en-us/windows/privacy/configure-windows-diagnostic-data-in-your-organization)).
+FormatKit's privacy items lower diagnostic data with the documented policies
+instead.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
+for the `hosts` file.
+
+## Denying access to the Start search `store.db`
+
+**What people claim:** a deny ACL on the Start search `store.db` file blocks Store
+suggestions in search.
+
+**What actually happens:** Start search can come back empty, and neither a registry
+backup nor a restore point undoes it
+([Win11Debloat #830](https://github.com/Raphire/Win11Debloat/issues/830)). The
+`privacy.start-web-search` item turns web results off with a documented policy.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
+for file permissions.
+
+## `DISM /StartComponentCleanup /ResetBase`
+
+**What people claim:** it shrinks the WinSxS folder and frees disk space.
+
+**What actually happens:** it does free space, but installed updates can no longer be
+uninstalled, and nothing undoes it. Windows already cleans up the component store on
+its own schedule.
+
+**How `cleanup check` reports it:** it does **not** detect it, because it leaves no
+setting to read.
+
+## Turning off BitLocker or reserved storage
+
+**What people claim:** turning off BitLocker device encryption, or reserved storage,
+frees space and speeds up the disk.
+
+**What actually happens:** turning off BitLocker leaves the data on the disk readable
+by anyone who takes it. Reserved storage keeps space for updates; without it, feature
+updates can fail for lack of space, so it has to be turned back on before one.
+
+**How `cleanup check` reports it:** it does **not** detect either, because it has no
+rule for them.
+
 ## Tweaks left out because Microsoft does not document them
 
 These were planned for the catalog but dropped, because Microsoft documentation
-could not confirm where Windows stores them or what they do. FormatKit does not
-apply them, and `cleanup check` does **not** detect them, for the same reason.
+could not confirm where Windows stores them or what they do, or because the value
+could not be checked. FormatKit does not apply them, and `cleanup check` does **not**
+detect them, for the same reason.
 
-- **Suggestions and ads in Start, the lock screen and Settings, tips notifications,
-  and silently installed suggested apps** (`ContentDeliveryManager` values such as
-  `SubscribedContent-338388Enabled` and `SilentInstalledAppsEnabled`). The documented
-  policies for these work only on Enterprise and Education. Turn them off in Settings
-  instead.
+- **Suggestions in Settings and the "welcome experience" after updates**
+  (`ContentDeliveryManager` values `SubscribedContent-338393Enabled`,
+  `SubscribedContent-353694Enabled`, `SubscribedContent-353696Enabled` and
+  `SubscribedContent-310093Enabled`). These values are not present on a clean
+  Windows 11, so FormatKit cannot confirm what Windows reads. The same goes for
+  `SubscribedContent-338388Enabled` (Start) and `SubscribedContent-338387Enabled`
+  (lock screen), so the Start and lock screen items set only the values that are
+  present. Turn the rest off in Settings.
+- **Tips app** (`Microsoft.Getstarted`) and **Dev Home**: they cannot be reinstalled
+  from the Microsoft Store, so removing them could not be undone.
 - **Hardware-accelerated GPU scheduling** (`HwSchMode`). Microsoft documents only the
   switch in Settings > System > Display > Graphics.
 - **Network throttling** (`NetworkThrottlingIndex`). The only Microsoft article was
   retired.
 - **Game Bar background recording** (`AppCaptureEnabled`, `GameDVR_Enabled`). Turn it
   off in Settings > Gaming > Captures.
+- **Taskbar search box mode** (`SearchboxTaskbarMode`), **End task in the taskbar**
+  (`TaskbarEndTask`), **File Explorer opening to This PC** (`LaunchTo`), the
+  **classic context menu** (the `{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}` CLSID key)
+  and **taskbar animations** (`TaskbarAnimations`). Microsoft does not document these
+  values. Change them in Settings or in File Explorer's options.
+- **No volume ducking during calls** (`UserDuckingPreference`). Microsoft does not
+  document the value. Set it in Control Panel > Sound > Communications.
+- **Copilot in Edge** (`HubsSidebarEnabled`). Since Edge 141 that policy no longer
+  controls the Copilot button, and the policy that does applies only to work or school
+  profiles.

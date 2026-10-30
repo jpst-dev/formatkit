@@ -57,6 +57,42 @@ public sealed class CleanupCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task List_marks_opt_in_items()
+    {
+        var exit = await Run("cleanup", "list");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        var lines = _out.ToString().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        Assert.Contains(_catalog.Items, i => i.IsOptIn);
+        foreach (var item in _catalog.Items)
+            Assert.Equal(item.IsOptIn, lines.Single(l => l.StartsWith(item.Id + " ", StringComparison.Ordinal)).Contains("[opt-in]"));
+    }
+
+    [Fact]
+    public async Task List_marks_opt_in_items_in_Portuguese()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("pt-BR");
+
+        var exit = await Run("cleanup", "list", "--category", "appearance");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("appearance.dark-theme", _out.ToString());
+        Assert.Contains("[opcional]", _out.ToString());
+    }
+
+    [Theory]
+    [InlineData("startup")]
+    [InlineData("interface")]
+    [InlineData("power")]
+    public async Task List_accepts_the_new_categories(string category)
+    {
+        var exit = await Run("cleanup", "list", "--category", category);
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains(category + ".", _out.ToString());
+    }
+
+    [Fact]
     public async Task List_filters_by_level()
     {
         var exit = await Run("cleanup", "list", "--level", "safe");

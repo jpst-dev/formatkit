@@ -95,6 +95,8 @@
   <data name="Cat_Gain" xml:space="preserve"><value>Gain: {0}</value></data>
   <data name="Cat_Contested" xml:space="preserve"><value>Contested tweak</value></data>
   <data name="Cat_Laptop" xml:space="preserve"><value>Sensitive on laptops</value></data>
+  <data name="Cat_OptIn" xml:space="preserve"><value>Opt-in: applied only when the profile lists it in include</value></data>
+  <data name="Cat_OptInBadge" xml:space="preserve"><value>opt-in</value></data>
   <data name="Cat_Winget" xml:space="preserve"><value>winget id: {0}</value></data>
   <data name="Cat_Source" xml:space="preserve"><value>Source: {0}</value></data>
   <data name="Cat_Context" xml:space="preserve"><value>Installs for: {0}</value></data>
