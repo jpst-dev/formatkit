@@ -126,9 +126,13 @@ public static partial class CatalogValidator
             RegistryKind.Dword => value.ValueKind == JsonValueKind.Number && value.TryGetUInt32(out _),
             RegistryKind.Qword => value.ValueKind == JsonValueKind.Number && value.TryGetUInt64(out _),
             RegistryKind.String => value.ValueKind == JsonValueKind.String,
+            RegistryKind.Binary => value.ValueKind == JsonValueKind.String && IsHex(value.GetString()!),
             _ => false,
         };
         if (!valid)
             error($"registry value '{registry.Name}' does not match kind {registry.Kind}");
     }
+
+    private static bool IsHex(string text) =>
+        text.Length % 2 == 0 && text.All(Uri.IsHexDigit);
 }

@@ -157,4 +157,66 @@ public class RegistryHandlerTests
         {
         }
     }
+
+    private static RegistryAction Bin(string name, string hex) =>
+        new(Path, name, RegistryKind.Binary, JsonDocument.Parse($"\"{hex}\"").RootElement.Clone(), false);
+
+    [Fact]
+    public async Task Binary_value_is_applied_and_undone()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(Path, "B", RegistryKind.Binary, "0200000000000000");
+        var ctx = TestServices.Context(TestServices.Create(registry: registry));
+        var action = Bin("B", "0300000000000000");
+
+        var captured = await Handler.CaptureAsync(action, ctx, Ct);
+        var applied = await Handler.ApplyAsync(action, captured, ctx, Ct);
+
+        Assert.Equal(new RegistryValue(RegistryKind.Binary, "0300000000000000"), registry.Read(Path, "B"));
+
+        await Handler.UndoAsync(applied, ctx, Ct);
+
+        Assert.Equal(new RegistryValue(RegistryKind.Binary, "0200000000000000"), registry.Read(Path, "B"));
+    }
+
+    [Fact]
+    public async Task Binary_value_is_written_as_lowercase_hex()
+    {
+        var registry = new FakeRegistry();
+        var ctx = TestServices.Context(TestServices.Create(registry: registry));
+        var action = Bin("B", "0A0B");
+
+        await Handler.ApplyAsync(action, await Handler.CaptureAsync(action, ctx, Ct), ctx, Ct);
+
+        Assert.Equal("0a0b", registry.Read(Path, "B")!.Data);
+    }
+
+    [Fact]
+    public async Task Binary_comparison_ignores_hex_case()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(Path, "B", RegistryKind.Binary, "0a0b");
+        var ctx = TestServices.Context(TestServices.Create(registry: registry));
+
+        Assert.True(await Handler.IsAppliedAsync(Bin("B", "0A0B"), ctx, Ct));
+        Assert.False(await Handler.IsAppliedAsync(Bin("B", "0A0C"), ctx, Ct));
+    }
+
+    [Fact]
+    public async Task Default_value_is_written_and_undone_to_absent()
+    {
+        var registry = new FakeRegistry();
+        var ctx = TestServices.Context(TestServices.Create(registry: registry));
+        var action = Str("", "");
+
+        var captured = await Handler.CaptureAsync(action, ctx, Ct);
+        var applied = await Handler.ApplyAsync(action, captured, ctx, Ct);
+
+        Assert.Equal(new RegistryValue(RegistryKind.String, ""), registry.Read(Path, ""));
+        Assert.Equal(Path + "|", applied.Target);
+
+        await Handler.UndoAsync(applied, ctx, Ct);
+
+        Assert.Null(registry.Read(Path, ""));
+    }
 }

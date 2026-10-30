@@ -193,4 +193,19 @@ public class CatalogValidatorTests : IDisposable
         CultureInfo.CurrentUICulture = new CultureInfo("en-US");
         Assert.Equal("Nothing known.", item.LocalizedText().Breaks);
     }
+
+    private static string BinaryAction(string value) =>
+        $$"""{ "type": "registry", "path": "HKCU\\Software\\Test", "name": "B", "kind": "binary", "value": {{value}} }""";
+
+    [Fact]
+    public void Valid_binary_value_is_accepted() =>
+        Assert.Empty(Validate(Item(action: BinaryAction("\"0300000000000000\""))));
+
+    [Theory]
+    [InlineData("\"030\"")]
+    [InlineData("\"zz\"")]
+    [InlineData("\"03 00\"")]
+    [InlineData("3")]
+    public void Odd_length_or_non_hex_binary_value_is_rejected(string value) =>
+        AssertError(Validate(Item(action: BinaryAction(value))), "does not match kind");
 }

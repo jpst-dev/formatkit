@@ -32,8 +32,12 @@ public sealed class WindowsRegistry : IRegistry
             RegistryValueKind.QWord => new RegistryValue(RegistryKind.Qword, unchecked((ulong)(long)raw).ToString(CultureInfo.InvariantCulture)),
             RegistryValueKind.String => new RegistryValue(RegistryKind.String, (string)raw),
             RegistryValueKind.ExpandString => new RegistryValue(RegistryKind.ExpandString, (string)raw),
-            _ => throw new NotSupportedException($"Registry value '{path}|{name}' has unsupported kind {kind}; only REG_DWORD, REG_QWORD, REG_SZ and REG_EXPAND_SZ are supported."),
+            RegistryValueKind.Binary => new RegistryValue(RegistryKind.Binary, Convert.ToHexStringLower((byte[])raw)),
+            _ => throw new NotSupportedException($"Registry value '{path}|{name}' has unsupported kind {kind}; only REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ and REG_BINARY are supported."),
         };
+
+    /// <summary>Converts hex text (either case, no separators) to bytes.</summary>
+    internal static byte[] ToBytes(string hex) => Convert.FromHexString(hex);
 
     public void Write(string path, string name, RegistryValue value)
     {
@@ -52,6 +56,9 @@ public sealed class WindowsRegistry : IRegistry
                 break;
             case RegistryKind.Qword:
                 key.SetValue(name, unchecked((long)ulong.Parse(value.Data, CultureInfo.InvariantCulture)), RegistryValueKind.QWord);
+                break;
+            case RegistryKind.Binary:
+                key.SetValue(name, ToBytes(value.Data), RegistryValueKind.Binary);
                 break;
             default:
                 key.SetValue(name, value.Data, RegistryValueKind.String);
