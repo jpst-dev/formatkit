@@ -53,6 +53,40 @@ public class ItemSelectorTests
         Assert.Equal(["developer.long-paths"], withoutLevel.Select(i => i.Id));
     }
 
+    private static CleanupItem OptInItem(string id) =>
+        Item(id) with { OptIn = true };
+
+    [Fact]
+    public void Select_OptInItem_NotSelectedByLevel()
+    {
+        var catalog = NewCatalog(Item("privacy.safe"), OptInItem("startup.opt"));
+
+        foreach (var level in Enum.GetValues<CleanupLevel>())
+            Assert.Equal(["privacy.safe"], ItemSelector.Select(catalog, new CleanupOptions(true, level, [], [], true)).Select(i => i.Id));
+    }
+
+    [Fact]
+    public void Select_OptInItem_SelectedByInclude()
+    {
+        var catalog = NewCatalog(Item("privacy.safe"), OptInItem("startup.opt"));
+
+        var selected = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Safe, ["startup.opt"], [], false));
+
+        Assert.Equal(["privacy.safe", "startup.opt"], selected.Select(i => i.Id));
+    }
+
+    [Fact]
+    public void Select_DeveloperItem_StillIncludeOnly()
+    {
+        var developer = Item("developer.long-paths");
+        Assert.True(developer.IsOptIn);
+        var catalog = NewCatalog(Item("privacy.safe"), developer);
+
+        Assert.Equal(["privacy.safe"], ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Aggressive, [], [], true)).Select(i => i.Id));
+        Assert.Equal(["privacy.safe", "developer.long-paths"],
+            ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Aggressive, ["developer.long-paths"], [], true)).Select(i => i.Id));
+    }
+
     [Fact]
     public void Only_highest_level_power_scheme_item_is_kept()
     {

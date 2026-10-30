@@ -9,7 +9,7 @@ public static partial class CatalogValidator
 {
     private static readonly string[] Languages = ["en", "pt-BR"];
 
-    [GeneratedRegex("^(apps|privacy|performance|developer)\\.[a-z0-9-]+$")]
+    [GeneratedRegex("^(apps|startup|privacy|ai|interface|appearance|input|sound|performance|power|developer)\\.[a-z0-9-]+$")]
     private static partial Regex IdPattern();
 
     public static IReadOnlyList<string> Validate(CleanupCatalog catalog)

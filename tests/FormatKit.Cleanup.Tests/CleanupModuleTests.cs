@@ -107,6 +107,39 @@ public class CleanupModuleTests
     }
 
     [Fact]
+    public void Validate_IncludedAggressiveOptIn_RequiresConfirmAggressive()
+    {
+        var module = new CleanupModule(
+            NewCatalog(Item("privacy.safe"), Item("startup.opt", CleanupLevel.Aggressive) with { OptIn = true }),
+            new AppPaths(@"C:\FormatKitTest"),
+            new InMemoryFileSystem());
+        var section = Json("""{"enabled":true,"level":"aggressive","include":["startup.opt"]}""");
+
+        var error = Assert.Single(module.Validate(section, "modules.cleanup"));
+
+        Assert.Equal("modules.cleanup.confirmAggressive", error.Path);
+        Assert.Contains("startup.opt", error.Message);
+        Assert.Empty(module.Validate(Json("""{"enabled":true,"level":"aggressive","include":["startup.opt"],"confirmAggressive":true}"""), "modules.cleanup"));
+    }
+
+    [Fact]
+    public void CreateSteps_OrdersStepsByCategoryDeclaration()
+    {
+        var module = new CleanupModule(
+            NewCatalog(
+                Item("developer.a"), Item("power.a") with { OptIn = true }, Item("performance.a"), Item("sound.a") with { OptIn = true },
+                Item("privacy.a"), Item("startup.a") with { OptIn = true }, Item("apps.a")),
+            new AppPaths(@"C:\FormatKitTest"),
+            new InMemoryFileSystem());
+
+        var steps = module.CreateSteps(Json("""{"enabled":true,"level":"safe","include":["developer.a","power.a","sound.a","startup.a"]}"""));
+
+        Assert.Equal(
+            ["cleanup.apps", "cleanup.startup", "cleanup.privacy", "cleanup.sound", "cleanup.performance", "cleanup.power", "cleanup.developer"],
+            steps.Select(s => s.Id));
+    }
+
+    [Fact]
     public void Confirmed_aggressive_is_valid() =>
         Assert.Empty(Validate("""{"enabled":true,"level":"aggressive","confirmAggressive":true}"""));
 

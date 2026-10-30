@@ -11,6 +11,13 @@
   <data name="Step_Title_Apps" xml:space="preserve"><value>Limpeza: remover apps</value></data>
   <data name="Step_Title_Privacy" xml:space="preserve"><value>Limpeza: configurações de privacidade</value></data>
   <data name="Step_Title_Performance" xml:space="preserve"><value>Limpeza: configurações de desempenho</value></data>
+  <data name="Step_Title_Startup" xml:space="preserve"><value>Limpeza: inicialização</value></data>
+  <data name="Step_Title_Ai" xml:space="preserve"><value>Limpeza: IA</value></data>
+  <data name="Step_Title_Interface" xml:space="preserve"><value>Limpeza: interface</value></data>
+  <data name="Step_Title_Appearance" xml:space="preserve"><value>Limpeza: aparência</value></data>
+  <data name="Step_Title_Input" xml:space="preserve"><value>Limpeza: entrada</value></data>
+  <data name="Step_Title_Sound" xml:space="preserve"><value>Limpeza: som</value></data>
+  <data name="Step_Title_Power" xml:space="preserve"><value>Limpeza: energia</value></data>
   <data name="Step_Title_Developer" xml:space="preserve"><value>Limpeza: ajustes para desenvolvedores</value></data>
   <data name="Status_Applied" xml:space="preserve"><value>aplicado</value></data>
   <data name="Status_AlreadyInPlace" xml:space="preserve"><value>já aplicado</value></data>

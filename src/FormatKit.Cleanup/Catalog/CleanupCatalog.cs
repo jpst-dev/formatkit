@@ -4,7 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace FormatKit.Cleanup.Catalog;
 
-public enum CleanupCategory { Apps, Privacy, Performance, Developer }
+/// <summary>Declaration order is the order of the cleanup steps (spec 8).</summary>
+public enum CleanupCategory { Apps, Startup, Privacy, Ai, Interface, Appearance, Input, Sound, Performance, Power, Developer }
+
+/// <summary>A machine fact an item depends on; the item is skipped when it does not hold.</summary>
+public enum ItemCondition { NoPrinter }
 
 /// <summary>Declaration order is the level order: each level includes the ones before it.</summary>
 public enum CleanupLevel { Safe, Balanced, Aggressive }
@@ -20,8 +24,14 @@ public sealed record CleanupItem(
     ItemScope Scope,
     bool LaptopSensitive,
     IReadOnlyDictionary<string, ItemText> Text,
-    IReadOnlyList<CleanupAction> Actions)
+    IReadOnlyList<CleanupAction> Actions,
+    bool OptIn = false,
+    bool RestartsExplorer = false,
+    ItemCondition? Condition = null)
 {
+    /// <summary>Opt-in items are never selected by a level, only by <c>include</c>; developer items always are.</summary>
+    public bool IsOptIn => OptIn || Category == CleanupCategory.Developer;
+
     /// <summary>The pt-BR text when the UI culture is Portuguese, else the English text.</summary>
     public ItemText LocalizedText() =>
         Text[CultureInfo.CurrentUICulture.Name.StartsWith("pt", StringComparison.OrdinalIgnoreCase) ? "pt-BR" : "en"];

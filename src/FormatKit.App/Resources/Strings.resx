@@ -106,6 +106,13 @@
   <data name="CleanupCategory_Apps" xml:space="preserve"><value>Apps</value></data>
   <data name="CleanupCategory_Privacy" xml:space="preserve"><value>Privacy</value></data>
   <data name="CleanupCategory_Performance" xml:space="preserve"><value>Performance</value></data>
+  <data name="CleanupCategory_Startup" xml:space="preserve"><value>Startup</value></data>
+  <data name="CleanupCategory_Ai" xml:space="preserve"><value>AI</value></data>
+  <data name="CleanupCategory_Interface" xml:space="preserve"><value>Interface</value></data>
+  <data name="CleanupCategory_Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="CleanupCategory_Input" xml:space="preserve"><value>Input</value></data>
+  <data name="CleanupCategory_Sound" xml:space="preserve"><value>Sound</value></data>
+  <data name="CleanupCategory_Power" xml:space="preserve"><value>Power</value></data>
   <data name="CleanupCategory_Developer" xml:space="preserve"><value>Developer</value></data>
   <data name="ProgramCategory_Browsers" xml:space="preserve"><value>Browsers</value></data>
   <data name="ProgramCategory_Communication" xml:space="preserve"><value>Communication</value></data>

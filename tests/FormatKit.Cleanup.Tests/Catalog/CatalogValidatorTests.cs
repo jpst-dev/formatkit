@@ -25,7 +25,8 @@ public class CatalogValidatorTests : IDisposable
         bool laptopSensitive = false,
         string? en = null,
         string? ptBr = null,
-        string action = DefaultAction)
+        string action = DefaultAction,
+        string extra = "")
     {
         var texts = $"\"en\": {en ?? Text()}";
         if (ptBr != string.Empty)
@@ -35,6 +36,7 @@ public class CatalogValidatorTests : IDisposable
               "id": "{{id}}", "category": "{{category}}", "level": "{{level}}",
               "contested": {{contested.ToString().ToLowerInvariant()}}, "requiresReboot": false,
               "scope": "{{scope}}", "laptopSensitive": {{laptopSensitive.ToString().ToLowerInvariant()}},
+              {{extra}}
               "text": { {{texts}} },
               "actions": [ {{action}} ]
             }
@@ -59,6 +61,45 @@ public class CatalogValidatorTests : IDisposable
     [Fact]
     public void Id_prefix_must_match_category() =>
         AssertError(Validate(Item(id: "apps.test")), "prefix");
+
+    [Theory]
+    [InlineData("startup")]
+    [InlineData("interface")]
+    [InlineData("ai")]
+    [InlineData("appearance")]
+    [InlineData("input")]
+    [InlineData("sound")]
+    [InlineData("power")]
+    public void New_categories_accept_their_id_prefix(string category) =>
+        Assert.Empty(Validate(Item(id: category + ".x", category: category)));
+
+    [Fact]
+    public void OptIn_RestartsExplorer_And_Condition_Parse()
+    {
+        var catalog = CleanupCatalog.Parse($$"""{ "schemaVersion": 1, "items": [ {{Item(extra: "\"optIn\": true, \"restartsExplorer\": true, \"condition\": \"noPrinter\",")}} ] }""");
+
+        var item = Assert.Single(catalog.Items);
+        Assert.True(item.OptIn);
+        Assert.True(item.IsOptIn);
+        Assert.True(item.RestartsExplorer);
+        Assert.Equal(ItemCondition.NoPrinter, item.Condition);
+        Assert.Empty(CatalogValidator.Validate(catalog));
+    }
+
+    [Fact]
+    public void Item_without_the_new_fields_is_not_opt_in()
+    {
+        var item = Assert.Single(CleanupCatalog.Parse($$"""{ "schemaVersion": 1, "items": [ {{Item()}} ] }""").Items);
+
+        Assert.False(item.IsOptIn);
+        Assert.False(item.RestartsExplorer);
+        Assert.Null(item.Condition);
+    }
+
+    [Fact]
+    public void Unknown_condition_fails_parsing() =>
+        Assert.Throws<System.Text.Json.JsonException>(() => CleanupCatalog.Parse(
+            $$"""{ "schemaVersion": 1, "items": [ {{Item(extra: "\"condition\": \"noScanner\",")}} ] }"""));
 
     [Fact]
     public void Missing_portuguese_text_is_rejected() =>

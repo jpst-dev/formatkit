@@ -17,8 +17,7 @@ public sealed class CleanupModule(CleanupCatalog catalog, AppPaths paths, IFileS
 {
     private static readonly string[] KnownProperties = ["enabled", "level", "include", "exclude", "confirmAggressive"];
 
-    private static readonly CleanupCategory[] CategoryOrder =
-        [CleanupCategory.Apps, CleanupCategory.Privacy, CleanupCategory.Performance, CleanupCategory.Developer];
+    private static readonly CleanupCategory[] CategoryOrder = Enum.GetValues<CleanupCategory>();
 
     public string Name => "cleanup";
 

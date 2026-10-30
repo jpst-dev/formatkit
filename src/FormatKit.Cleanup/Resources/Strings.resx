@@ -11,6 +11,13 @@
   <data name="Step_Title_Apps" xml:space="preserve"><value>Cleanup: remove apps</value></data>
   <data name="Step_Title_Privacy" xml:space="preserve"><value>Cleanup: privacy settings</value></data>
   <data name="Step_Title_Performance" xml:space="preserve"><value>Cleanup: performance settings</value></data>
+  <data name="Step_Title_Startup" xml:space="preserve"><value>Cleanup: startup</value></data>
+  <data name="Step_Title_Ai" xml:space="preserve"><value>Cleanup: AI</value></data>
+  <data name="Step_Title_Interface" xml:space="preserve"><value>Cleanup: interface</value></data>
+  <data name="Step_Title_Appearance" xml:space="preserve"><value>Cleanup: appearance</value></data>
+  <data name="Step_Title_Input" xml:space="preserve"><value>Cleanup: input</value></data>
+  <data name="Step_Title_Sound" xml:space="preserve"><value>Cleanup: sound</value></data>
+  <data name="Step_Title_Power" xml:space="preserve"><value>Cleanup: power</value></data>
   <data name="Step_Title_Developer" xml:space="preserve"><value>Cleanup: developer settings</value></data>
   <data name="Status_Applied" xml:space="preserve"><value>applied</value></data>
   <data name="Status_AlreadyInPlace" xml:space="preserve"><value>already in place</value></data>
