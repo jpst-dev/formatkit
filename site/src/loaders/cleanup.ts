@@ -14,6 +14,7 @@ export type CleanupItem = {
   contested: boolean;
   requiresReboot: boolean;
   laptopSensitive: boolean;
+  optIn: boolean;
   text: Record<'en' | 'pt-BR', ItemText>;
   actions: CleanupAction[];
   evidence: Evidence;
@@ -21,7 +22,7 @@ export type CleanupItem = {
 };
 
 const LANGS = ['en', 'pt-BR'] as const;
-const KNOWN_ACTIONS = ['appx', 'registry', 'named', 'powerScheme'];
+const KNOWN_ACTIONS = ['appx', 'registry', 'named', 'powerScheme', 'powerSetting', 'scheduledTask', 'service', 'startupItem'];
 const FILE = '../src/FormatKit.Cleanup/Catalog/Data/cleanup.json';
 
 type Raw = Record<string, unknown> & { text?: Record<string, Record<string, unknown>> };
@@ -93,6 +94,7 @@ export function loadCleanup(json: unknown): CleanupItem[] {
       contested: r.contested === true,
       requiresReboot: r.requiresReboot === true,
       laptopSensitive: r.laptopSensitive === true,
+      optIn: r.optIn === true,
       text,
       actions,
       evidence: parseEvidence(id, r.evidence),

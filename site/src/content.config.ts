@@ -52,6 +52,7 @@ export const collections = {
       contested: z.boolean(),
       requiresReboot: z.boolean(),
       laptopSensitive: z.boolean(),
+      optIn: z.boolean(),
       text: z.record(z.string(), z.looseObject({ title: z.string(), what: z.string(), breaks: z.string() })),
       actions: z.array(z.looseObject({ type: z.string() })),
       evidence: z

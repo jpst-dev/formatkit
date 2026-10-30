@@ -5,6 +5,7 @@ import { KNOWN_LEVELS } from './labels';
 export function whenToUse(item: CleanupItem, t: (key: string) => string): string[] {
   const known = (KNOWN_LEVELS as readonly string[]).includes(item.level);
   const out = [t(item.category === 'developer' ? 'when.developer' : known ? `when.${item.level}` : 'when.unknown')];
+  if (item.optIn && item.category !== 'developer') out.push(t('when.optIn'));
   if (item.contested) out.push(t('when.contested'));
   if (item.laptopSensitive) out.push(t('when.laptopSensitive'));
   return out;
