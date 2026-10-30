@@ -11,7 +11,11 @@
     <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
     <DebugType>embedded</DebugType>
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
+    <ApplicationIcon>..\..\assets\formatkit.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="..\..\assets\formatkit.ico" Link="Resources\formatkit.ico" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FormatKit.Core\FormatKit.Core.csproj" />
     <ProjectReference Include="..\FormatKit.Hosting\FormatKit.Hosting.csproj" />
