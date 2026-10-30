@@ -12,6 +12,7 @@ namespace FormatKit.Cleanup.Catalog;
 [JsonDerivedType(typeof(OptionalFeatureAction), "optionalFeature")]
 [JsonDerivedType(typeof(ScheduledTaskAction), "scheduledTask")]
 [JsonDerivedType(typeof(StartupItemAction), "startupItem")]
+[JsonDerivedType(typeof(PowerSettingAction), "powerSetting")]
 [JsonDerivedType(typeof(NamedAction), "named")]
 public abstract record CleanupAction;
 
@@ -31,6 +32,12 @@ public sealed record NamedAction(string Handler) : CleanupAction;
 
 /// <param name="Path">Task folder, starting and ending with a backslash (for example <c>\Microsoft\Windows\Application Experience\</c>).</param>
 public sealed record ScheduledTaskAction(string Path, string Name, bool Enabled) : CleanupAction;
+
+/// <param name="Subgroup">Power subgroup GUID.</param>
+/// <param name="Setting">Power setting GUID.</param>
+/// <param name="Ac">Index while plugged in.</param>
+/// <param name="Dc">Index on battery; null leaves it unchanged.</param>
+public sealed record PowerSettingAction(string Subgroup, string Setting, int Ac, int? Dc) : CleanupAction;
 
 /// <param name="Name">Value name under the Run key.</param>
 public sealed record StartupItemAction(string Name, ItemScope Scope) : CleanupAction;

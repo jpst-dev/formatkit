@@ -16,6 +16,8 @@ internal static class ItemSelector
             .Where(i => !exclude.Contains(i.Id))
             .ToList();
 
+        DropDuplicatePowerSettings(selected, log);
+
         var power = selected.Where(i => i.Actions.Any(a => a is PowerSchemeAction)).ToList();
         if (power.Count <= 1)
             return selected;
@@ -28,5 +30,23 @@ internal static class ItemSelector
         }
 
         return selected;
+    }
+
+    /// <summary>Items that set the same power setting conflict; only the last one in catalog order is kept.</summary>
+    private static void DropDuplicatePowerSettings(List<CleanupItem> selected, Serilog.ILogger? log)
+    {
+        static IEnumerable<(string, string)> Settings(CleanupItem item) => item.Actions
+            .OfType<PowerSettingAction>()
+            .Select(a => (a.Subgroup.ToLowerInvariant(), a.Setting.ToLowerInvariant()));
+
+        for (var i = selected.Count - 1; i >= 0; i--)
+        {
+            var item = selected[i];
+            var later = selected.Skip(i + 1).FirstOrDefault(other => Settings(other).Intersect(Settings(item)).Any());
+            if (later is null)
+                continue;
+            log?.Information("Cleanup item {Dropped} not selected: {Kept} sets the same power setting later in the catalog", item.Id, later.Id);
+            selected.RemoveAt(i);
+        }
     }
 }

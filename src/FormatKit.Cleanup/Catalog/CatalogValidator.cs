@@ -61,8 +61,8 @@ public static partial class CatalogValidator
         if (actions.Count == 0)
             Error("item has no actions");
 
-        if (item.LaptopSensitive && !actions.Any(a => a is PowerSchemeAction))
-            Error("laptopSensitive requires a powerScheme action");
+        if (item.LaptopSensitive && !actions.Any(a => a is PowerSchemeAction or PowerSettingAction))
+            Error("laptopSensitive requires a powerScheme or powerSetting action");
 
         foreach (var action in actions)
         {
@@ -104,6 +104,12 @@ public static partial class CatalogValidator
                 case StartupItemAction startup:
                     if (string.IsNullOrWhiteSpace(startup.Name) || startup.Name.Contains('\\'))
                         Error($"startupItem name '{startup.Name}' must be a single Run value name");
+                    break;
+                case PowerSettingAction setting:
+                    if (!Guid.TryParse(setting.Subgroup, out _))
+                        Error($"powerSetting subgroup '{setting.Subgroup}' must be a GUID");
+                    if (!Guid.TryParse(setting.Setting, out _))
+                        Error($"powerSetting setting '{setting.Setting}' must be a GUID");
                     break;
                 case NamedAction named:
                     if (!ProtectedLists.NamedHandlers.Contains(named.Handler))

@@ -12,6 +12,12 @@ public interface IPowerSchemes
     Task SetActiveAsync(Guid scheme, CancellationToken ct);
 
     Task DeleteAsync(Guid scheme, CancellationToken ct);
+
+    /// <summary>The scheme's AC and DC index for a setting; null when the setting does not exist on this machine. <paramref name="subgroup"/> and <paramref name="setting"/> are GUIDs.</summary>
+    Task<(int Ac, int Dc)?> GetValueAsync(Guid scheme, string subgroup, string setting, CancellationToken ct);
+
+    /// <summary>Writes the AC index (and the DC index when <paramref name="dc"/> is set), then re-activates the scheme when it is the active one so the change takes effect.</summary>
+    Task SetValueAsync(Guid scheme, string subgroup, string setting, int ac, int? dc, CancellationToken ct);
 }
 
 public static class BuiltInPowerSchemes

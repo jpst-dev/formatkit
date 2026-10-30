@@ -179,6 +179,22 @@ public class CatalogValidatorTests : IDisposable
             Validate(Item(scope: "machine", action: """{ "type": "named", "handler": "nope" }""")),
             "unknown named handler");
 
+    private const string PowerSettingJson =
+        """{ "type": "powerSetting", "subgroup": "7516b95f-f776-4464-8c53-06167f40cc99", "setting": "3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e", "ac": 900 }""";
+
+    [Fact]
+    public void Laptop_sensitive_is_accepted_on_a_power_setting_item() =>
+        Assert.Empty(Validate(Item(category: "power", id: "power.sleep-test", scope: "machine", laptopSensitive: true, action: PowerSettingJson)));
+
+    [Theory]
+    [InlineData("VIDEOIDLE", "3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e")]
+    [InlineData("7516b95f-f776-4464-8c53-06167f40cc99", "VIDEOIDLE")]
+    public void Power_setting_requires_guids(string subgroup, string setting) =>
+        AssertError(
+            Validate(Item(category: "power", id: "power.sleep-test", scope: "machine", action:
+                $$"""{ "type": "powerSetting", "subgroup": "{{subgroup}}", "setting": "{{setting}}", "ac": 0 }""")),
+            "must be a GUID");
+
     [Fact]
     public void Laptop_sensitive_without_power_action_is_rejected() =>
         AssertError(Validate(Item(laptopSensitive: true)), "laptopSensitive");
