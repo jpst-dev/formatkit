@@ -43,10 +43,9 @@ public sealed class WindowsRegistryToValueTests
         Assert.Equal(new byte[] { 0x03, 0, 0xAB, 0xFF }, WindowsRegistry.ToBytes("0300AbFF"));
     }
 
-    [Fact]
-    public void Write_rejects_expand_string()
-    {
-        Assert.Throws<NotSupportedException>(() =>
-            new WindowsRegistry().Write(@"HKCU\Software\FormatKitTests\never-written", "v", new RegistryValue(RegistryKind.ExpandString, "x")));
-    }
+    [Theory]
+    [InlineData(RegistryKind.String, RegistryValueKind.String)]
+    [InlineData(RegistryKind.ExpandString, RegistryValueKind.ExpandString)]
+    public void Write_kind_maps_string_kinds_including_expand_string(RegistryKind kind, RegistryValueKind expected) =>
+        Assert.Equal(expected, WindowsRegistry.ToStringValueKind(kind));
 }

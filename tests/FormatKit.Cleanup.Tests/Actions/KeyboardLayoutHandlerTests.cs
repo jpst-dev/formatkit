@@ -86,6 +86,27 @@ public class KeyboardLayoutHandlerTests
     }
 
     [Fact]
+    public async Task Apply_replaces_abnt2_and_us_international_with_us_international_only_and_keeps_en_us()
+    {
+        var (handler, runner, ctx) = Setup();
+        runner.Enqueue("powershell.exe", Ok("""
+            [ { "LanguageTag": "pt-BR", "InputMethodTips": [ "0416:00010416", "0416:00020409" ] },
+              { "LanguageTag": "en-US", "InputMethodTips": [ "0409:00000409" ] } ]
+            """));
+        var captured = await handler.CaptureAsync(Action, ctx, Ct);
+        runner.Enqueue("powershell.exe", Ok());
+        runner.Enqueue("powershell.exe", Ok(Mixed.Replace("\"0416:00010416\", ", "")));
+
+        await handler.ApplyAsync(Action, captured, ctx, Ct);
+
+        var script = Script(runner.Calls[1]);
+        Assert.DoesNotContain("0416:00010416", script);
+        Assert.Equal(1, script.Split("'0416:00020409'").Length - 1);
+        Assert.Contains("(New-WinUserLanguageList 'en-US')[0]", script);
+        Assert.Contains("'0409:00000409'", script);
+    }
+
+    [Fact]
     public async Task Apply_adds_ptbr_first_when_the_list_has_none()
     {
         var (handler, runner, ctx) = Setup();

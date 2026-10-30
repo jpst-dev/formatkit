@@ -54,26 +54,14 @@ internal sealed class SoundSchemeHandler : IActionHandler
     public Task UndoAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
     {
         var registry = ctx.Services.Registry;
-        RestoreValue(registry, SchemesPath, recorded.Previous.GetProperty("scheme"));
+        RegistryHandler.Restore(registry, SchemesPath, "", recorded.Previous.GetProperty("scheme"));
         foreach (var current in recorded.Previous.GetProperty("currents").EnumerateArray())
         {
-            RestoreValue(registry, current.GetProperty("path").GetString()!, current.GetProperty("value"));
+            RegistryHandler.Restore(registry, current.GetProperty("path").GetString()!, "", current.GetProperty("value"));
         }
 
         ctx.Log.Information("Sound scheme restored");
         return Task.CompletedTask;
-    }
-
-    /// <summary>IRegistry cannot write REG_EXPAND_SZ, so one is restored as REG_SZ with the same (unexpanded) text.</summary>
-    private static void RestoreValue(IRegistry registry, string path, JsonElement previous)
-    {
-        if (previous.TryGetProperty("kind", out var kind) && string.Equals(kind.GetString(), "expandstring", StringComparison.OrdinalIgnoreCase))
-        {
-            registry.Write(path, "", new RegistryValue(RegistryKind.String, previous.GetProperty("data").GetString()!));
-            return;
-        }
-
-        RegistryHandler.Restore(registry, path, "", previous);
     }
 
     private static bool IsEmpty(RegistryValue? value) => value is null || value.Data.Length == 0;

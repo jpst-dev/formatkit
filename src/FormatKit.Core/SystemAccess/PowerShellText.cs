@@ -2,7 +2,7 @@ using System.Text;
 
 namespace FormatKit.Core.SystemAccess;
 
-internal static class PowerShellText
+public static class PowerShellText
 {
     /// <summary>
     /// A PowerShell single-quoted literal. PowerShell's tokenizer treats U+2018, U+2019, U+201A and U+201B as

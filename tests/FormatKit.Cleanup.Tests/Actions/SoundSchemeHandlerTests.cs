@@ -67,8 +67,7 @@ public class SoundSchemeHandlerTests
 
         Assert.Equal(new RegistryValue(RegistryKind.String, ".Default"), registry.Read(Schemes, ""));
         Assert.Equal(new RegistryValue(RegistryKind.String, @"C:\WINDOWS\media\Windows Background.wav"), registry.Read(Asterisk, ""));
-        // REG_EXPAND_SZ cannot be written back by IRegistry; the unexpanded text is restored as REG_SZ.
-        Assert.Equal(new RegistryValue(RegistryKind.String, @"%SystemRoot%\media\Windows Exclamation.wav"), registry.Read(Exclamation, ""));
+        Assert.Equal(new RegistryValue(RegistryKind.ExpandString, @"%SystemRoot%\media\Windows Exclamation.wav"), registry.Read(Exclamation, ""));
         Assert.Equal(new RegistryValue(RegistryKind.String, ""), registry.Read(Explorer, ""));
     }
 }

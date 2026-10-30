@@ -3,7 +3,6 @@
     <InternalsVisibleTo Include="FormatKit.Core.Tests" />
     <InternalsVisibleTo Include="FormatKit.Drivers.Tests" />
     <InternalsVisibleTo Include="FormatKit.Cli.Tests" />
-    <InternalsVisibleTo Include="FormatKit.Cleanup" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Serilog" Version="4.4.0" />

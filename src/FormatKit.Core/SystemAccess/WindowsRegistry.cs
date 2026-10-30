@@ -41,11 +41,6 @@ public sealed class WindowsRegistry : IRegistry
 
     public void Write(string path, string name, RegistryValue value)
     {
-        if (value.Kind == RegistryKind.ExpandString)
-        {
-            throw new NotSupportedException("REG_EXPAND_SZ values are read-only.");
-        }
-
         var (hive, subKey) = Split(path);
         using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
         using var key = baseKey.CreateSubKey(subKey, writable: true);
@@ -61,10 +56,13 @@ public sealed class WindowsRegistry : IRegistry
                 key.SetValue(name, ToBytes(value.Data), RegistryValueKind.Binary);
                 break;
             default:
-                key.SetValue(name, value.Data, RegistryValueKind.String);
+                key.SetValue(name, value.Data, ToStringValueKind(value.Kind));
                 break;
         }
     }
+
+    internal static RegistryValueKind ToStringValueKind(RegistryKind kind) =>
+        kind == RegistryKind.ExpandString ? RegistryValueKind.ExpandString : RegistryValueKind.String;
 
     public void Delete(string path, string name)
     {
