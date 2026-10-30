@@ -1,0 +1,211 @@
+---
+import CatalogTexture from './CatalogTexture.astro';
+import { siteHref } from '../../lib/catalogPaths';
+import { localeFromAstro, t } from '../../lib/text';
+import type { SiteLocale } from '../../lib/text';
+
+interface Props {
+  locale?: SiteLocale;
+  title: string;
+  subtitle: string;
+  lead: string;
+  logLines?: { status: 'ok' | 'run'; text: string }[];
+}
+
+const props = Astro.props;
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+const base = import.meta.env.BASE_URL;
+const lines =
+  props.logLines ??
+  [1, 2, 3, 4, 5].map((n) => ({
+    status: (n === 5 ? 'run' : 'ok') as 'ok' | 'run',
+    text: t(locale, `home.log.${n}`),
+  }));
+const hasWarn = Astro.slots.has('warn');
+---
+
+<section class="fk-hero">
+  <CatalogTexture />
+  <div class="fk-hero-grid">
+    <div class="fk-hero-copy">
+      <a class="fk-label" href={siteHref(base, locale, 'download')}>{t(locale, 'home.label')}</a>
+      <h1>{props.title}</h1>
+      <p class="fk-sub">{props.subtitle}</p>
+      <p class="fk-hero-lead">{props.lead}</p>
+      <div class="fk-hero-cta">
+        <a class="fk-btn" href={siteHref(base, locale, 'download')}>{t(locale, 'home.cta.download')}</a>
+        <a class="fk-link-dim" href={siteHref(base, locale, 'guide/before')}>{t(locale, 'home.cta.guide')}</a>
+        <a class="fk-link-dim" href={siteHref(base, locale, 'catalog')}>{t(locale, 'home.cta.catalog')}</a>
+        <a class="fk-link-dim" href="https://github.com/jpst-dev/formatkit">GitHub</a>
+      </div>
+    </div>
+    <div class="fk-log fk-panel">
+      <p class="fk-log-prompt"><span aria-hidden="true">&gt; </span><code>{t(locale, 'home.log.prompt')}</code></p>
+      <ul class="fk-log-lines">
+        {
+          lines.map((l, i) => (
+            <li style={`--i:${i + 1}`}>
+              <span class={l.status === 'ok' ? 'fk-ok' : 'fk-run'}>{l.status === 'ok' ? '[ OK ]' : '[ .. ]'}</span>{' '}
+              {l.text}
+              {i === lines.length - 1 && <span class="fk-cursor" aria-hidden="true" />}
+            </li>
+          ))
+        }
+        {hasWarn && <li class="fk-warn" style={`--i:${lines.length + 1}`}><slot name="warn" /></li>}
+      </ul>
+    </div>
+  </div>
+  <button
+    type="button"
+    class="fk-motion"
+    hidden
+    data-pause={t(locale, 'home.motion.pause')}
+    data-play={t(locale, 'home.motion.play')}>{t(locale, 'home.motion.pause')}</button
+  >
+</section>
+
+<script is:inline>
+  (function () {
+    var btn = document.querySelector('.fk-motion');
+    var root = document.documentElement;
+    try {
+      if (localStorage.getItem('fk-motion') === 'off') root.dataset.motion = 'off';
+    } catch (e) {}
+    if (!btn) return;
+    function sync() {
+      var off = root.dataset.motion === 'off';
+      btn.textContent = off ? btn.getAttribute('data-play') : btn.getAttribute('data-pause');
+      btn.setAttribute('aria-pressed', off ? 'true' : 'false');
+    }
+    sync();
+    btn.hidden = false;
+    btn.addEventListener('click', function () {
+      var off = root.dataset.motion === 'off';
+      if (off) delete root.dataset.motion;
+      else root.dataset.motion = 'off';
+      sync();
+      try {
+        localStorage.setItem('fk-motion', off ? 'on' : 'off');
+      } catch (e) {}
+    });
+  })();
+</script>
+
+<style>
+  .fk-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 1.5rem 3rem;
+    border-bottom: 1px solid var(--fk-line);
+  }
+  .fk-hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+  .fk-hero-lead {
+    color: var(--fk-body);
+    max-width: 38rem;
+  }
+  .fk-hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+  .fk-log {
+    font-family: var(--fk-mono);
+    font-size: 0.85rem;
+    padding: 1rem 1.25rem;
+    background: var(--fk-panel);
+    border: 1px solid var(--fk-line);
+  }
+  .fk-log-prompt {
+    margin: 0 0 0.75rem;
+    color: var(--fk-text);
+    overflow-wrap: anywhere;
+  }
+  .fk-log-lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .fk-log-lines li {
+    color: var(--fk-body);
+    animation: fk-line-in 400ms ease both;
+    animation-delay: calc(var(--i) * 450ms);
+  }
+  .fk-ok {
+    color: var(--fk-green);
+  }
+  .fk-run {
+    color: var(--fk-dim);
+  }
+  .fk-warn {
+    color: var(--fk-amber);
+    background: var(--fk-amber-bg);
+  }
+  .fk-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 0.25em;
+    vertical-align: text-bottom;
+    background: var(--fk-green);
+    animation: fk-blink 1s steps(2, start) infinite;
+  }
+  .fk-motion {
+    position: relative;
+    display: block;
+    margin: 1.5rem auto 0;
+    max-width: 72rem;
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--fk-dim);
+    font-family: var(--fk-mono);
+    font-size: 0.8rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .fk-motion[hidden] {
+    display: none;
+  }
+  @keyframes fk-line-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fk-blink {
+    to {
+      visibility: hidden;
+    }
+  }
+  @media (max-width: 50rem) {
+    .fk-hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fk-hero *,
+    .fk-texture {
+      animation: none !important;
+      opacity: 1;
+    }
+  }
+  :global(html[data-motion='off']) .fk-hero *,
+  :global(html[data-motion='off']) .fk-texture {
+    animation: none !important;
+    opacity: 1;
+  }
+</style>

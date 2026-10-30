@@ -64,5 +64,17 @@
   "item.technical.show": "Mostrar as ações",
   "item.technical.none": "Sem ações técnicas neste item.",
   "item.back": "Voltar ao catálogo",
-  "home.stat.items": "ajustes no catálogo"
+  "home.stat.items": "ajustes no catálogo",
+  "home.label": "FormatKit · Windows 11 x64 →",
+  "home.cta.download": "Baixar",
+  "home.cta.guide": "Ler o guia ↓",
+  "home.cta.catalog": "Ver o catálogo",
+  "home.log.1": "Hardware detectado",
+  "home.log.2": "Drivers que faltam: plano pronto",
+  "home.log.3": "Programas do perfil: plano pronto",
+  "home.motion.pause": "Pausar animação",
+  "home.motion.play": "Retomar animação",
+  "home.log.prompt": "formatkit run --profile cleanup-balanced.json --dry-run",
+  "home.log.4": "privacy.advertising-id",
+  "home.log.5": "performance.game-mode"
 }
