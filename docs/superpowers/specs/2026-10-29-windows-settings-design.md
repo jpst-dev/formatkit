@@ -109,7 +109,7 @@ scope user, and the user-scope named handlers (`keyboardLayout`,
 | Type | Fields | Check | Journal | Undo |
 |---|---|---|---|---|
 | `scheduledTask` | `path` (folder, `\Microsoft\Windows\...\`), `name`, `enabled` (bool) | task state equals target; a missing task is "skipped: not present" | previous enabled state | restore enabled state |
-| `startupItem` | `name` (value name under the Run key), `scope` (`user` or `machine`) | the StartupApproved entry under `...\Explorer\StartupApproved\Run` marks it disabled (first byte `03`); a missing Run value is "already in place" | previous StartupApproved bytes or "absent" | restore bytes or delete the StartupApproved value; the Run value itself is never touched |
+| `startupItem` | `name` (value name under the Run key), `scope` (`user` or `machine`) | the StartupApproved entry under `...\Explorer\StartupApproved\Run` marks it disabled (first byte `03`); a missing Run value is "skipped: not present" (the program may not have registered itself yet; a later run picks it up) | previous StartupApproved bytes or "absent" | restore bytes or delete the StartupApproved value; the Run value itself is never touched |
 | `powerSetting` | `subgroup`, `setting` (GUIDs or powercfg aliases), `ac` (int), `dc` (int, optional) | the active scheme's AC/DC indexes equal target | scheme GUID and previous AC/DC indexes | restore the indexes on that scheme if it still exists |
 
 `powerSetting` writes the scheme that is active when the item is applied.
@@ -407,8 +407,8 @@ Behavior worth knowing:
 - On a fresh `clean`, OneDrive's first-logon setup was still running in one
   run (`HKCU\...\Run` held `OneDriveSetup`, not `OneDrive`). By the time the
   `startup` step ran, the `OneDrive` value existed and the item applied. If a
-  run is faster than OneDrive setup, `startup.onedrive` is "already in place"
-  (missing Run value, section 5.3) and OneDrive starts at the next logon; run
+  run is faster than OneDrive setup, `startup.onedrive` is "skipped: not present"
+  (missing Run value, section 5.3; changed after the final review, it used to say "already in place") and OneDrive starts at the next logon; run
   the profile again.
 - Undo leaves the empty keys apply created (the policy keys `Dsh`, `Edge`,
   `WindowsAI`, `Paint`, `WindowsNotepad`, `DeliveryOptimization`,

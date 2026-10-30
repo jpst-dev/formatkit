@@ -1,6 +1,7 @@
 using FormatKit.Cleanup.Actions;
 using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Journal;
+using FormatKit.Cleanup.Localization;
 using FormatKit.Core;
 using FormatKit.Core.Steps;
 using FormatKit.Core.SystemAccess;
@@ -110,13 +111,14 @@ public class ItemApplierTests
     }
 
     [Fact]
-    public async Task Startup_item_with_missing_run_value_is_already_in_place_and_journals_nothing()
+    public async Task Startup_item_with_missing_run_value_is_not_present_and_journals_nothing()
     {
         var outcome = await NewApplier().ApplyAsync(
             Item("startup.user", scope: ItemScope.User, actions: [new StartupItemAction("Gone", ItemScope.User)]),
             Context(new FakeRegistry()), Ct);
 
-        Assert.Equal(ItemStatus.AlreadyInPlace, outcome.Status);
+        Assert.Equal(ItemStatus.Skipped, outcome.Status);
+        Assert.Equal(Strings.Get("Skip_NotPresent"), outcome.Message);
         Assert.False(_files.FileExists(_journal.Path));
     }
 

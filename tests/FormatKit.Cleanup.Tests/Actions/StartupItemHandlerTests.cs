@@ -40,10 +40,10 @@ public class StartupItemHandlerTests
     }
 
     [Fact]
-    public async Task Missing_run_value_is_already_in_place()
+    public async Task Missing_run_value_is_not_applied_so_capture_reports_it_not_present()
     {
         var (handler, _, ctx) = Create(run: null);
-        Assert.True(await handler.IsAppliedAsync(User, ctx, Ct));
+        Assert.False(await handler.IsAppliedAsync(User, ctx, Ct));
     }
 
     [Fact]

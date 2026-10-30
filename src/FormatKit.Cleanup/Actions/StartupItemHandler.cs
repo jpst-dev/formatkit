@@ -20,14 +20,17 @@ internal sealed class StartupItemHandler : IActionHandler
     /// <summary>Twelve bytes: <c>03</c> marks the entry disabled, the rest is the (unused) disable timestamp.</summary>
     private const string DisabledData = "030000000000000000000000";
 
-    /// <summary>A missing Run value counts as applied: there is nothing to disable.</summary>
+    /// <summary>
+    /// A missing Run value is not applied, so capture reports the item as not present: the program may not have
+    /// registered itself yet (OneDrive's first-logon setup), and a later run then picks it up.
+    /// </summary>
     public Task<bool> IsAppliedAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
     {
         var a = (StartupItemAction)action;
         var registry = ctx.Services.Registry;
         if (registry.Read(Root(a.Scope) + RunSubKey, a.Name) is null)
         {
-            return Task.FromResult(true);
+            return Task.FromResult(false);
         }
 
         var approval = registry.Read(Root(a.Scope) + ApprovedSubKey, a.Name);
