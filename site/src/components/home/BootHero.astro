@@ -200,12 +200,16 @@ const hasWarn = Astro.slots.has('warn');
     .fk-hero *,
     .fk-texture {
       animation: none !important;
+    }
+    .fk-log-lines li {
       opacity: 1;
     }
   }
   :global(html[data-motion='off']) .fk-hero *,
   :global(html[data-motion='off']) .fk-texture {
     animation: none !important;
+  }
+  :global(html[data-motion='off']) .fk-log-lines li {
     opacity: 1;
   }
 </style>

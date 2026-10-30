@@ -44,3 +44,16 @@ test('warn slot rendered', async () => {
   const html = await render({ locale: 'en' }, { warn: '<span>WARNSLOT</span>' });
   expect(html).toContain('WARNSLOT');
 });
+
+test('motion-off rules do not force opacity on the texture or on all hero children', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../../../src/components/home/BootHero.astro', import.meta.url), 'utf8');
+  const rules = [...src.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(
+    (m) => /prefers-reduced-motion|data-motion|\.fk-hero \*|\.fk-texture|\.fk-log-lines li/.test(m[1]) && /opacity/.test(m[2]),
+  );
+  expect(rules.length).toBeGreaterThan(0);
+  for (const r of rules) {
+    expect(r[1]).not.toMatch(/\.fk-texture|\.fk-hero \*/);
+    expect(r[1]).toMatch(/\.fk-log-lines li/);
+  }
+});
