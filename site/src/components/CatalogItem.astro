@@ -86,8 +86,12 @@ const undoCommand = `formatkit cleanup undo ${item.id}`;
 </div>
 
 <style>
+  .fk-item pre {
+    overflow-x: auto;
+  }
   .fk-item-id {
     margin: 0 0 0.5rem;
+    overflow-wrap: anywhere;
   }
   .fk-item-id code {
     font-family: var(--fk-mono);

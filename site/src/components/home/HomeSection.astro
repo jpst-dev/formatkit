@@ -35,7 +35,7 @@ const { num, label, id } = Astro.props;
   }
   @media (max-width: 50rem) {
     .fk-home-section {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 1rem;
     }
     .fk-home-section-head {

@@ -4,10 +4,21 @@
 ---
 
 <style is:global>
+  /* Starlight caps splash content at --sl-content-width; the home runs edge to edge instead.
+     Hero and sections bleed over the panel padding; their content stays in a 72rem column. */
+  .sl-container:has(.fk-home) {
+    max-width: none;
+  }
+  .fk-hero,
   .fk-home {
-    max-width: 72rem;
-    margin: 0 auto;
-    padding: 0 1.5rem 3rem;
+    margin-inline: calc(-1 * var(--sl-content-pad-x));
+  }
+  .fk-home {
+    padding-bottom: 3rem;
+  }
+  .fk-home > .fk-home-section,
+  .fk-home > .fk-closing {
+    padding-inline: max(1.5rem, calc((100% - 72rem) / 2));
   }
   .fk-home .fk-home-section-body > * {
     margin-top: 0;
