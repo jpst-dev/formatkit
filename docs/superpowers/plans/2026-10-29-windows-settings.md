@@ -196,7 +196,7 @@ Each line has its test in the owning task (Tasks 1, 3, 4, 5, 7).
 ### Task 11: VM scenarios
 
 **Files:**
-- Modify: `docs/testing.md` (scenarios from spec 11), `docs/superpowers/specs/2026-10-29-windows-settings-design.md` section 12
+- Modify: `docs/testing.md` (scenarios from spec 11, numbered 28-30 there; 23-27 belong to the installation media sub-project), `docs/superpowers/specs/2026-10-29-windows-settings-design.md` section 12
 
 - [ ] **Step 1:** Publish (`dotnet publish src/FormatKit.Cli -c Release -o artifacts`), restore the `clean` checkpoint, copy `formatkit.exe` and `profiles/windows-setup-example.json`.
 - [ ] **Step 2: Scenario 1.** `vm.ps1 job` runs `formatkit run --profile windows-setup-example.json` on the user's desktop; after it ends, `vmshot.ps1 -Name settings-desktop` shows the left taskbar, dark theme and search icon; `Get-WinUserLanguageList` shows pt-BR with `0416:00020409`; `cleanup check` reports nothing under "Reverted by Windows"; the research `measure.ps1` sample is recorded next to G4r.

@@ -629,9 +629,9 @@ Record what the scenarios find in the "Found while running" section of the [prep
    **Expected:** the console prints `Warning: C:\fk\c.md is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.` and the file is written anyway. Then run it with `--output Z:\nope\c.md` (a drive that does not exist): the report is printed first, then `Could not write ...`, and the exit code is **2**.
 4. Switch the VM display language to Brazilian Portuguese (skip if it already is, as the test VM made from a Portuguese ISO) and repeat step 2. **Expected:** the console and the Markdown file are in Portuguese.
 
-## Windows settings scenarios (23-25)
+## Windows settings scenarios (28-30)
 
-These scenarios apply `profiles/windows-setup-example.json` (the `balanced` level plus the opt-in items `interface.taskbar-left`, `appearance.dark-theme`, `input.ptbr-us-international`, `power.monitor-off-15`, `power.sleep-never` and `performance.formatkit-plan`), check it on the desktop, re-run it and undo it. Run them in order on one restore of `clean`: 23 applies, 24 re-runs (it needs the applied state), 25 undoes. Most items are per user (HKCU, the language list), so FormatKit runs through `vm.ps1 job` as the signed-in user, never through `vm.ps1 run` (that is the admin account, without a desktop). Keep `fktest` signed in and connected (a basic session in Virtual Machine Connection). The VM needs internet, because undo reinstalls the removed apps through winget.
+These scenarios apply `profiles/windows-setup-example.json` (the `balanced` level plus the opt-in items `interface.taskbar-left`, `appearance.dark-theme`, `input.ptbr-us-international`, `power.monitor-off-15`, `power.sleep-never` and `performance.formatkit-plan`), check it on the desktop, re-run it and undo it. Run them in order on one restore of `clean`: 28 applies, 29 re-runs (it needs the applied state), 30 undoes. Most items are per user (HKCU, the language list), so FormatKit runs through `vm.ps1 job` as the signed-in user, never through `vm.ps1 run` (that is the admin account, without a desktop). Keep `fktest` signed in and connected (a basic session in Virtual Machine Connection). The VM needs internet, because undo reinstalls the removed apps through winget.
 
 ```powershell
 .\tools\vm\vm.ps1 restore
@@ -649,11 +649,11 @@ cmd /c "C:\fk\formatkit.exe run --profile windows-setup-example.json < NUL 2>&1"
 
 Run it with `.\tools\vm\vm.ps1 job -File ws-run.ps1 -TimeoutSec 2400`. The job runs elevated, so there is no UAC prompt; `< NUL` keeps a prompt from waiting for a keyboard nobody uses.
 
-Before scenario 23, export the registry targets for the compare in scenario 25, from a job (as the desktop user): one `reg export <key> before\kN.reg /y` per distinct key of the catalog's `registry` actions and of its `service` actions (`HKLM\SYSTEM\CurrentControlSet\Services\<name>`), plus `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run`, `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, `HKLM\SYSTEM\CurrentControlSet\Control\Power` and `HKCU\AppEvents\Schemes`. Exporting only these keys is enough and takes seconds; parsing whole-hive exports line by line in Windows PowerShell took more than half an hour. Also record `Get-WinUserLanguageList`, `powercfg /list` and `Get-ScheduledTask` for the tasks of `privacy.telemetry-tasks`.
+Before scenario 28, export the registry targets for the compare in scenario 30, from a job (as the desktop user): one `reg export <key> before\kN.reg /y` per distinct key of the catalog's `registry` actions and of its `service` actions (`HKLM\SYSTEM\CurrentControlSet\Services\<name>`), plus `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run`, `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, `HKLM\SYSTEM\CurrentControlSet\Control\Power` and `HKCU\AppEvents\Schemes`. Exporting only these keys is enough and takes seconds; parsing whole-hive exports line by line in Windows PowerShell took more than half an hour. Also record `Get-WinUserLanguageList`, `powercfg /list` and `Get-ScheduledTask` for the tasks of `privacy.telemetry-tasks`.
 
-Last run in a VM (2026-10-30, Windows 11 Pro build 26300, Brazilian Portuguese UI): scenarios 23-25 passed after two fixes, each found by these scenarios: Explorer did not come back after the restart (Winlogon did not restart it after `taskkill`; FormatKit now starts it as the signed-in user), and `PcaPatchDbTask` was dropped from `privacy.telemetry-tasks` (Windows turns it back on at every boot, so `cleanup check` listed the item under "Reverted by Windows" after the reboot and a re-run applied it again). Record what the scenarios find in section 12 of the [Windows settings spec](superpowers/specs/2026-10-29-windows-settings-design.md).
+Last run in a VM (2026-10-30, Windows 11 Pro build 26300, Brazilian Portuguese UI): scenarios 28-30 passed after two fixes, each found by these scenarios: Explorer did not come back after the restart (Winlogon did not restart it after `taskkill`; FormatKit now starts it as the signed-in user), and `PcaPatchDbTask` was dropped from `privacy.telemetry-tasks` (Windows turns it back on at every boot, so `cleanup check` listed the item under "Reverted by Windows" after the reboot and a re-run applied it again). Record what the scenarios find in section 12 of the [Windows settings spec](superpowers/specs/2026-10-29-windows-settings-design.md).
 
-## 23. Windows settings: apply the author's profile, reboot, check
+## 28. Windows settings: apply the author's profile, reboot, check
 
 1. Restore `clean`, copy the files, export the targets (see above). Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe run --profile windows-setup-example.json --dry-run; "exit=$LASTEXITCODE"'`.
 
@@ -679,13 +679,13 @@ Last run in a VM (2026-10-30, Windows 11 Pro build 26300, Brazilian Portuguese U
 
    **Expected (2026-10-30):** 125 processes, 98 running services, 2292 MB in use, 2.2 % CPU, against G4r's 117, 88, 2111 and 2.5 %. The profile keeps the services G3 changed (decision D4) and Windows Update was still scanning, which explains the difference; Widgets, WidgetService and OneDrive are absent from the top processes, as in G4r.
 
-## 24. Windows settings: re-run the same profile
+## 29. Windows settings: re-run the same profile
 
-Right after scenario 23 (same VM state), note the journal's hash (`Get-FileHash C:\ProgramData\FormatKit\cleanup-journal.json`) and run `ws-run.ps1` again.
+Right after scenario 28 (same VM state), note the journal's hash (`Get-FileHash C:\ProgramData\FormatKit\cleanup-journal.json`) and run `ws-run.ps1` again.
 
 **Expected:** exit code 0; every step says `Nothing to do: already in order` (in Portuguese `Nada a fazer: já estava em ordem.`); the journal hash is unchanged; Explorer is not restarted (its start time does not change). If a step applies an item again instead, Windows reverted it, and `cleanup check` lists it under "Reverted by Windows". The first run showed this for `privacy.telemetry-tasks` (`PcaPatchDbTask` back to `Ready` after every boot); the re-run then added a second journal entry with only that task, and undo handled both entries.
 
-## 25. Windows settings: undo everything and compare
+## 30. Windows settings: undo everything and compare
 
 1. Run `cleanup undo --all` through a job (`cmd /c "C:\fk\formatkit.exe cleanup undo --all < NUL 2>&1"`).
 

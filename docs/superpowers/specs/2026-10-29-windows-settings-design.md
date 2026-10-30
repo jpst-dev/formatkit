@@ -359,7 +359,7 @@ As in the cleanup spec 12, plus:
 
 ## 12. Found while running
 
-VM runs of scenarios 23-25 (`docs/testing.md`) on 2026-10-29/30 (Windows 11
+VM runs of scenarios 28-30 (`docs/testing.md`) on 2026-10-29/30 (Windows 11
 Pro build 26300, Brazilian Portuguese UI, user `fktest` signed in, FormatKit
 run through `vm.ps1 job`). An exploratory run on the Task 10 build found the
 two bugs below; a full run on the fixed build and a second one without the
@@ -377,9 +377,9 @@ Fixed:
   elevated, started during the run, no warning. Explorer started this way
   opens the Start menu once. (`fix(cleanup): start Explorer as the signed-in
   user when it does not restart`.)
-- **`PcaPatchDbTask` turns itself back on.** After the reboot of scenario 23,
+- **`PcaPatchDbTask` turns itself back on.** After the reboot of scenario 28,
   `cleanup check` listed `privacy.telemetry-tasks` under "Reverted by
-  Windows", and scenario 24 applied the item again. `PcaPatchDbTask` stays
+  Windows", and scenario 29 applied the item again. `PcaPatchDbTask` stays
   `Disabled` after `Disable-ScheduledTask` and after a restart of `PcaSvc`,
   and is `Ready` again after every reboot. It was dropped from the item (now
   nine tasks, section 7.5) and described in `docs/cleanup-not-included.md`.
@@ -387,7 +387,7 @@ Fixed:
 
 Behavior worth knowing:
 
-- Scenario 24 on a reverted item: the re-run journals a second entry for the
+- Scenario 29 on a reverted item: the re-run journals a second entry for the
   same item holding only the reverted action; `undo --all` reverts both,
   newest first, and the compare stayed clean.
 - The dark theme reaches the taskbar only after the reboot (or a sign-out):
