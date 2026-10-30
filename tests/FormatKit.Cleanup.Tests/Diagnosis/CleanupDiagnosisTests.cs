@@ -267,6 +267,31 @@ public class CleanupDiagnosisTests
         Assert.Equal(1, KnownIssues.LoadEmbedded().SchemaVersion);
 
     [Fact]
+    public async Task Embedded_rules_report_a_disabled_SysMain_as_information()
+    {
+        _services.Services["SysMain"] = ServiceStartType.Disabled;
+        _services.Services["WSearch"] = ServiceStartType.Manual;
+
+        var report = await Run(KnownIssues.LoadEmbedded());
+
+        var finding = Assert.Single(report.Findings, f => f.Issue.Rule is ServiceDisabledRule);
+        Assert.Equal(("service.sysmain", IssueSeverity.Info, "SysMain"), (finding.Issue.Id, finding.Issue.Severity, finding.Detail));
+    }
+
+    [Theory]
+    [InlineData("255", true)]
+    [InlineData("32", false)]
+    public async Task Embedded_rules_report_IPv6_off_but_not_prefer_IPv4(string value, bool reported)
+    {
+        const string tcpip6 = @"HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters";
+        _registry.Set(tcpip6, "DisabledComponents", RegistryKind.Dword, value);
+
+        var report = await Run(KnownIssues.LoadEmbedded());
+
+        Assert.Equal(reported, report.Findings.Any(f => f.Issue.Id == "network.ipv6-off" && f.Detail == tcpip6));
+    }
+
+    [Fact]
     public void Parse_rejects_integer_severity() =>
         Assert.Throws<System.Text.Json.JsonException>(() => KnownIssues.Parse(
             """{ "schemaVersion": 1, "issues": [ { "id": "b", "severity": 3, "rule": { "kind": "nonBuiltInPowerScheme" }, "text": {} } ] }"""));

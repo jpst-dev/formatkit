@@ -1066,6 +1066,332 @@
       }
     },
     {
+      "id": "service.sysmain",
+      "severity": "info",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "SysMain"
+      },
+      "text": {
+        "en": {
+          "title": "The SysMain service is disabled",
+          "breaks": "Windows no longer preloads the apps you use often, so they open a little slower from cold. FormatKit's test VM measured no memory gain from disabling it. The fix sets it back to Automatic, the Windows default.",
+          "fix": "sc.exe config SysMain start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço SysMain está desativado",
+          "breaks": "O Windows deixa de pré-carregar os apps que você usa com frequência, então eles abrem um pouco mais devagar a frio. A VM de teste do FormatKit não mediu ganho de memória ao desativá-lo. A correção volta o serviço para Automático, o padrão do Windows.",
+          "fix": "sc.exe config SysMain start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.wsearch",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "WSearch"
+      },
+      "text": {
+        "en": {
+          "title": "The Windows Search service (WSearch) is disabled",
+          "breaks": "Start and File Explorer search become slow or find nothing in file contents. The fix sets it back to Automatic (delayed start), the Windows default.",
+          "fix": "sc.exe config WSearch start= delayed-auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Windows Search (WSearch) está desativado",
+          "breaks": "A pesquisa do Iniciar e do Explorador de Arquivos fica lenta ou não encontra nada no conteúdo dos arquivos. A correção volta o serviço para Automático (início atrasado), o padrão do Windows.",
+          "fix": "sc.exe config WSearch start= delayed-auto"
+        }
+      }
+    },
+    {
+      "id": "service.wpnservice",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "WpnService"
+      },
+      "text": {
+        "en": {
+          "title": "The Windows Push Notifications service (WpnService) is disabled",
+          "breaks": "Notifications from the Microsoft Store, Xbox, Teams and other apps stop arriving. The fix sets it back to Automatic, the Windows default.",
+          "fix": "sc.exe config WpnService start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço de Notificações por Push do Windows (WpnService) está desativado",
+          "breaks": "As notificações da Microsoft Store, do Xbox, do Teams e de outros apps deixam de chegar. A correção volta o serviço para Automático, o padrão do Windows.",
+          "fix": "sc.exe config WpnService start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.cdpsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "CDPSvc"
+      },
+      "text": {
+        "en": {
+          "title": "The Connected Devices Platform service (CDPSvc) is disabled",
+          "breaks": "Phone Link, Nearby sharing and the clipboard across devices stop working. The fix sets it back to Automatic (delayed start), the Windows default.",
+          "fix": "sc.exe config CDPSvc start= delayed-auto"
+        },
+        "pt-BR": {
+          "title": "O serviço de Plataforma de Dispositivos Conectados (CDPSvc) está desativado",
+          "breaks": "O Vincular ao Celular, o Compartilhamento por proximidade e a área de transferência entre dispositivos param de funcionar. A correção volta o serviço para Automático (início atrasado), o padrão do Windows.",
+          "fix": "sc.exe config CDPSvc start= delayed-auto"
+        }
+      }
+    },
+    {
+      "id": "service.lanmanserver",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "LanmanServer"
+      },
+      "text": {
+        "en": {
+          "title": "The Server service (LanmanServer) is disabled",
+          "breaks": "Other PCs can no longer open this PC's shared folders and printers. The fix sets it back to Automatic, the Windows default.",
+          "fix": "sc.exe config LanmanServer start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Servidor (LanmanServer) está desativado",
+          "breaks": "Outros PCs não conseguem mais abrir as pastas e impressoras compartilhadas deste PC. A correção volta o serviço para Automático, o padrão do Windows.",
+          "fix": "sc.exe config LanmanServer start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.iphlpsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "iphlpsvc"
+      },
+      "text": {
+        "en": {
+          "title": "The IP Helper service (iphlpsvc) is disabled",
+          "breaks": "IPv6 transition technologies such as Teredo stop working, which Xbox online play can use. The fix sets it back to Automatic, the Windows default.",
+          "fix": "sc.exe config iphlpsvc start= auto"
+        },
+        "pt-BR": {
+          "title": "O serviço Auxiliar de IP (iphlpsvc) está desativado",
+          "breaks": "As tecnologias de transição do IPv6, como o Teredo, param de funcionar, e o jogo online do Xbox pode usá-las. A correção volta o serviço para Automático, o padrão do Windows.",
+          "fix": "sc.exe config iphlpsvc start= auto"
+        }
+      }
+    },
+    {
+      "id": "service.dosvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "DoSvc"
+      },
+      "text": {
+        "en": {
+          "title": "The Delivery Optimization service (DoSvc) is disabled",
+          "breaks": "Windows Update and Microsoft Store downloads can fail. To stop sharing downloads with other PCs, use the privacy.delivery-optimization-no-peers item instead. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "sc.exe config DoSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço Otimização de Entrega (DoSvc) está desativado",
+          "breaks": "Downloads do Windows Update e da Microsoft Store podem falhar. Para parar de compartilhar downloads com outros PCs, use o item privacy.delivery-optimization-no-peers. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "sc.exe config DoSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.wersvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "WerSvc"
+      },
+      "text": {
+        "en": {
+          "title": "The Windows Error Reporting service (WerSvc) is disabled",
+          "breaks": "Crash reports are no longer collected, so Microsoft and app vendors cannot see the crashes on this PC. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "sc.exe config WerSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço de Relatórios de Erros do Windows (WerSvc) está desativado",
+          "breaks": "Os relatórios de falhas deixam de ser coletados, então a Microsoft e os fabricantes de apps não veem as falhas deste PC. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "sc.exe config WerSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.bthserv",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "bthserv"
+      },
+      "text": {
+        "en": {
+          "title": "The Bluetooth Support service (bthserv) is disabled",
+          "breaks": "Bluetooth devices cannot be found or paired, and paired ones may stop working. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "sc.exe config bthserv start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço de Suporte a Bluetooth (bthserv) está desativado",
+          "breaks": "Dispositivos Bluetooth não são encontrados nem pareados, e os já pareados podem parar de funcionar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "sc.exe config bthserv start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.btagservice",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "BTAGService"
+      },
+      "text": {
+        "en": {
+          "title": "The Bluetooth Audio Gateway service (BTAGService) is disabled",
+          "breaks": "Bluetooth headsets lose the microphone and call audio. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "sc.exe config BTAGService start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço de Gateway de Áudio Bluetooth (BTAGService) está desativado",
+          "breaks": "Fones Bluetooth perdem o microfone e o áudio de chamadas. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "sc.exe config BTAGService start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.bthavctpsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "BthAvctpSvc"
+      },
+      "text": {
+        "en": {
+          "title": "The AVCTP service (BthAvctpSvc) is disabled",
+          "breaks": "Bluetooth audio devices lose their media controls, and some stop playing sound. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "sc.exe config BthAvctpSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço AVCTP (BthAvctpSvc) está desativado",
+          "breaks": "Dispositivos de áudio Bluetooth perdem os controles de mídia, e alguns deixam de tocar som. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "sc.exe config BthAvctpSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.xboxnetapisvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "XboxNetApiSvc"
+      },
+      "text": {
+        "en": {
+          "title": "The Xbox Live Networking service (XboxNetApiSvc) is disabled",
+          "breaks": "Online multiplayer in Xbox games and the network check in Settings > Gaming may fail. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "sc.exe config XboxNetApiSvc start= demand"
+        },
+        "pt-BR": {
+          "title": "O serviço de Rede Xbox Live (XboxNetApiSvc) está desativado",
+          "breaks": "O multijogador online em jogos Xbox e a verificação de rede em Configurações > Jogos podem falhar. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "sc.exe config XboxNetApiSvc start= demand"
+        }
+      }
+    },
+    {
+      "id": "service.waasmedicsvc",
+      "severity": "breaks",
+      "rule": {
+        "kind": "serviceDisabled",
+        "service": "WaaSMedicSvc"
+      },
+      "text": {
+        "en": {
+          "title": "The Windows Update Medic service (WaaSMedicSvc) is disabled",
+          "breaks": "Windows can no longer repair the Windows Update components when they break, so updates can stop for good. The fix sets it to Manual, and Windows starts it when needed.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\" /v Start /t REG_DWORD /d 3 /f"
+        },
+        "pt-BR": {
+          "title": "O serviço Windows Update Medic (WaaSMedicSvc) está desativado",
+          "breaks": "O Windows não consegue mais reparar os componentes do Windows Update quando eles quebram, então as atualizações podem parar de vez. A correção deixa o serviço como Manual, e o Windows o inicia quando precisa.",
+          "fix": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\" /v Start /t REG_DWORD /d 3 /f"
+        }
+      }
+    },
+    {
+      "id": "contested.game-dvr-off",
+      "severity": "contested",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+        "name": "AllowGameDVR",
+        "equals": "0"
+      },
+      "text": {
+        "en": {
+          "title": "Game recording and broadcasting are off by policy",
+          "breaks": "Game Bar recording and broadcasting are blocked, and turning the Game Bar integration off has been reported to cause stutter on some CPUs. No gain is documented by Microsoft.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR\" /v AllowGameDVR /f"
+        },
+        "pt-BR": {
+          "title": "A gravação e a transmissão de jogos estão desativadas por política",
+          "breaks": "A gravação e a transmissão pela Game Bar ficam bloqueadas, e há relatos de engasgos em alguns processadores com a integração da Game Bar desligada. A Microsoft não documenta nenhum ganho.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR\" /v AllowGameDVR /f"
+        }
+      }
+    },
+    {
+      "id": "policy.background-apps-off",
+      "severity": "breaks",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+        "name": "LetAppsRunInBackground",
+        "equals": "2"
+      },
+      "text": {
+        "en": {
+          "title": "Windows apps are blocked from running in the background by policy",
+          "breaks": "Microsoft warns that text message, email and voicemail notifications can stop, and email may not sync in the background. Some app features, such as the Snipping Tool overlay, also stop working.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy\" /v LetAppsRunInBackground /f"
+        },
+        "pt-BR": {
+          "title": "Os apps do Windows estão impedidos de rodar em segundo plano por política",
+          "breaks": "A Microsoft avisa que notificações de mensagens, e-mail e correio de voz podem parar, e o e-mail pode não sincronizar em segundo plano. Alguns recursos de apps, como a sobreposição da Ferramenta de Captura, também param de funcionar.",
+          "fix": "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy\" /v LetAppsRunInBackground /f"
+        }
+      }
+    },
+    {
+      "id": "network.ipv6-off",
+      "severity": "breaks",
+      "rule": {
+        "kind": "registryValue",
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+        "name": "DisabledComponents",
+        "equals": "255"
+      },
+      "text": {
+        "en": {
+          "title": "IPv6 is turned off (DisabledComponents = 255)",
+          "breaks": "Microsoft does not recommend turning IPv6 off: some Windows components might not work. To prefer IPv4 instead, Microsoft documents the value 32. The fix takes effect after a restart.",
+          "fix": "reg delete \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters\" /v DisabledComponents /f"
+        },
+        "pt-BR": {
+          "title": "O IPv6 está desativado (DisabledComponents = 255)",
+          "breaks": "A Microsoft não recomenda desativar o IPv6: alguns componentes do Windows podem não funcionar. Para preferir o IPv4, a Microsoft documenta o valor 32. A correção vale depois de reiniciar.",
+          "fix": "reg delete \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters\" /v DisabledComponents /f"
+        }
+      }
+    },
+    {
       "id": "info.non-built-in-power-scheme",
       "severity": "info",
       "rule": {

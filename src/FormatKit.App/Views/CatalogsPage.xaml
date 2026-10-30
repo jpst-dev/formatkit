@@ -5,6 +5,7 @@
              xmlns:views="clr-namespace:FormatKit.App.Views">
     <UserControl.Resources>
         <views:CatalogTitleConverter x:Key="Title" />
+        <views:CatalogAutomationNameConverter x:Key="AutomationName" />
         <DataTemplate x:Key="ItemTemplate">
             <StackPanel Margin="0,4">
                 <TextBlock Text="{Binding Converter={StaticResource Title}}" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -70,7 +71,7 @@
                              ItemTemplate="{StaticResource CleanupItemTemplate}">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource Title}}" />
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource AutomationName}}" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                     </ListBox>

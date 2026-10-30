@@ -215,10 +215,13 @@ use. Each of these services backs a feature:
 The Xbox and Windows Update services are on FormatKit's protected list (see
 "Disabling services").
 
-**How `cleanup check` reports it:** disabled Xbox and Windows Update services are
-listed under **Breaks Windows features** (see "Disabling services"). `cleanup check`
-does **not** detect the other services above when disabled, because it has no rule
-for them yet.
+**How `cleanup check` reports it:** each of the services above, when disabled, is
+listed under **Breaks Windows features** with a fix that sets it back to its Windows
+default start type, as are the Xbox and Windows Update services, including Xbox Live
+Networking (`XboxNetApiSvc`) and Windows Update Medic (`WaaSMedicSvc`). A disabled
+`SysMain` is listed under **For your information** instead, because the only cost is a slower
+cold start of apps. Windows refuses `sc.exe` for `WaaSMedicSvc`, so its fix uses
+`reg add` on the service's `Start` value.
 
 ## Turning off Game Bar integration
 
@@ -231,8 +234,12 @@ been reported to cause stutter on CPUs with performance and efficiency cores
 `ms-gamebar` error popup when a game opens the Game Bar. To stop background
 recording, turn it off in Settings > Gaming > Captures.
 
-**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
-for it.
+**How `cleanup check` reports it:** the documented policy that turns game recording
+and broadcasting off
+([`AllowGameDVR`](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement)
+= 0 under `HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR`) is listed under
+**Contested tweaks**. `cleanup check` does **not** detect the per-user Game Bar
+values, because Microsoft does not document them.
 
 ## Turning off background apps globally
 
@@ -242,10 +249,15 @@ resources.
 **What actually happens:** no gain is measured, and apps that need to run in the
 background stop working; the Snipping Tool overlay is one reported case
 ([winutil #3401](https://github.com/ChrisTitusTech/winutil/issues/3401)). Turn it off
-per app in Settings > Apps > Installed apps > Advanced options instead.
+per app in Settings > Apps > Installed apps > Advanced options instead. Microsoft
+warns that blocking background activity can stop message, email and voicemail
+notifications.
 
-**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
-for it.
+**How `cleanup check` reports it:** the documented policy that denies every app
+([`LetAppsRunInBackground`](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy)
+= 2 under `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy`) is listed under
+**Breaks Windows features**. `cleanup check` does **not** detect the per-user switch,
+because Microsoft does not document its value.
 
 ## Turning off multiplane overlay (MPO)
 
@@ -265,11 +277,15 @@ for it.
 **What people claim:** turning off IPv6 (`DisabledComponents` = 255) and Teredo makes
 the network faster.
 
-**What actually happens:** no gain is measured. Windows prefers IPv6 and some
-features depend on it, such as Xbox online networking.
+**What actually happens:** no gain is measured. Windows prefers IPv6, and Microsoft
+does not recommend turning it off because some Windows components might not work
+([Microsoft Learn](https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/configure-ipv6-in-windows)).
+To prefer IPv4, Microsoft documents `DisabledComponents` = 32 instead.
 
-**How `cleanup check` reports it:** it does **not** detect it, because it has no rule
-for it.
+**How `cleanup check` reports it:** `DisabledComponents` = 255 under
+`HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters` is listed under **Breaks
+Windows features**. Other values, such as 32, are not reported. `cleanup check` does
+**not** detect Teredo turned off on its own, because it has no rule for it.
 
 ## Blocking telemetry in the hosts file
 
@@ -332,11 +348,18 @@ detect them, for the same reason.
 - **Suggestions in Settings and the "welcome experience" after updates**
   (`ContentDeliveryManager` values `SubscribedContent-338393Enabled`,
   `SubscribedContent-353694Enabled`, `SubscribedContent-353696Enabled` and
-  `SubscribedContent-310093Enabled`). These values are not present on a clean
-  Windows 11, so FormatKit cannot confirm what Windows reads. The same goes for
-  `SubscribedContent-338388Enabled` (Start) and `SubscribedContent-338387Enabled`
-  (lock screen), so the Start and lock screen items set only the values that are
-  present. Turn the rest off in Settings.
+  `SubscribedContent-310093Enabled`). These values are not present in the test VM,
+  so FormatKit cannot confirm what Windows reads. Turn them off in Settings.
+- **Suggestions in Start and tips on the lock screen** (`SystemPaneSuggestionsEnabled`,
+  `SubscribedContent-338388Enabled`, `RotatingLockScreenOverlayEnabled` and
+  `SubscribedContent-338387Enabled`). Not verified: the Settings toggle may use values
+  that are absent until it is first used, so writing only the values present in the
+  test VM may change nothing. Turn them off in Settings > Personalization > Start and
+  > Lock screen. The Start recommendations are turned off by
+  `interface.start-recommendations-off`.
+- **Cross Device Experience Host** (`MicrosoftWindows.CrossDevice`), which the design
+  planned to remove with Phone Link. No Microsoft Store id was found for it, so its
+  removal could not be undone; `apps.phone-link` removes only Phone Link.
 - **Tips app** (`Microsoft.Getstarted`) and **Dev Home**: they cannot be reinstalled
   from the Microsoft Store, so removing them could not be undone.
 - **Hardware-accelerated GPU scheduling** (`HwSchMode`). Microsoft documents only the

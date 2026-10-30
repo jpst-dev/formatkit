@@ -343,13 +343,13 @@
         "en": {
           "title": "Remove Widgets",
           "what": "Uninstalls the Windows Web Experience Pack, which runs Widgets, stops Windows from installing it for new users, and sets the policy that turns Widgets off.",
-          "breaks": "The Widgets board, its taskbar button and the widgets on the lock screen are gone. Windows can bring the package back when it repairs WebView2; cleanup check reports it. Undo reinstalls it from the Microsoft Store and removes the policy.",
+          "breaks": "The Widgets board, its taskbar button and the widgets on the lock screen are gone. Windows updates can bring it back; cleanup check reports it. Undo reinstalls it from the Microsoft Store and removes the policy.",
           "gain": "Widgets and its WebView2 processes stop running; the test VM measured about 90 MB less in use."
         },
         "pt-BR": {
           "title": "Remover os Widgets",
           "what": "Desinstala o Windows Web Experience Pack, que executa os Widgets, impede que o Windows o instale para novos usuários e define a política que desativa os Widgets.",
-          "breaks": "O painel de Widgets, o botão na barra de tarefas e os widgets da tela de bloqueio somem. O Windows pode trazer o pacote de volta ao reparar o WebView2; o cleanup check avisa. Desfazer reinstala o pacote pela Microsoft Store e remove a política.",
+          "breaks": "O painel de Widgets, o botão na barra de tarefas e os widgets da tela de bloqueio somem. Atualizações do Windows podem trazê-lo de volta; o cleanup check avisa. Desfazer reinstala o pacote pela Microsoft Store e remove a política.",
           "gain": "Os Widgets e seus processos do WebView2 param de rodar; a VM de teste mediu cerca de 90 MB a menos em uso."
         }
       },
@@ -408,15 +408,15 @@
       "laptopSensitive": false,
       "text": {
         "en": {
-          "title": "Remove Microsoft Bing",
-          "what": "Uninstalls the Microsoft Bing app and stops Windows from installing it for new users.",
-          "breaks": "The Microsoft Bing app is gone. Searching the web in your browser keeps working. Undo reinstalls it from the Microsoft Store.",
+          "title": "Remove Microsoft Bing from Windows Search",
+          "what": "Uninstalls Microsoft Bing, the component that adds web results and answers to Windows Search, and stops Windows from installing it for new users.",
+          "breaks": "Start and taskbar search stop showing web results and answers from Bing; apps, files and settings are still found. The privacy.start-web-search item turns web results off by policy too. Undo reinstalls it from the Microsoft Store.",
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
-          "title": "Remover o app Microsoft Bing",
-          "what": "Desinstala o app Microsoft Bing e impede que o Windows o instale para novos usuários.",
-          "breaks": "O app Microsoft Bing some. Pesquisar na web pelo navegador continua funcionando. Desfazer reinstala o app pela Microsoft Store.",
+          "title": "Remover o Microsoft Bing da Pesquisa do Windows",
+          "what": "Desinstala o Microsoft Bing, o componente que adiciona resultados da web e respostas à Pesquisa do Windows, e impede que o Windows o instale para novos usuários.",
+          "breaks": "A pesquisa do Iniciar e da barra de tarefas deixa de mostrar resultados da web e respostas do Bing; apps, arquivos e configurações continuam sendo encontrados. O item privacy.start-web-search também desliga os resultados da web por política. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
         }
       },
@@ -440,13 +440,13 @@
         "en": {
           "title": "Remove the Copilot app",
           "what": "Uninstalls the Microsoft Copilot app and stops Windows from installing it for new users.",
-          "breaks": "The Copilot chat app is gone. Windows updates can bring it back; cleanup check reports it. The Copilot key on some keyboards opens the Microsoft 365 Copilot app, which this item keeps. Undo reinstalls it from the Microsoft Store.",
+          "breaks": "The Copilot chat app is gone. On personal PCs the Copilot key, on keyboards that have one, opens this app, so the key does nothing until you pick another app in Settings > Personalization > Text input > Copilot key. On work or school (Entra ID) PCs the key opens Microsoft 365 Copilot instead, which this item keeps. Windows updates can bring the app back; cleanup check reports it. Undo reinstalls it from the Microsoft Store.",
           "gain": "One less app running in the background and getting updates."
         },
         "pt-BR": {
           "title": "Remover o app Copilot",
           "what": "Desinstala o app Microsoft Copilot e impede que o Windows o instale para novos usuários.",
-          "breaks": "O app de chat Copilot some. Atualizações do Windows podem trazê-lo de volta; o cleanup check avisa. A tecla Copilot de alguns teclados abre o app Microsoft 365 Copilot, que este item mantém. Desfazer reinstala o app pela Microsoft Store.",
+          "breaks": "O app de chat Copilot some. Em PCs pessoais, a tecla Copilot, nos teclados que a têm, abre este app, então ela não faz nada até você escolher outro app em Configurações > Personalização > Entrada de texto > Tecla Copilot. Em PCs de trabalho ou escola (Entra ID), a tecla abre o Microsoft 365 Copilot, que este item mantém. Atualizações do Windows podem trazer o app de volta; o cleanup check avisa. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "Um app a menos rodando em segundo plano e recebendo atualizações."
         }
       },
@@ -470,13 +470,13 @@
         "en": {
           "title": "Remove Microsoft 365 Copilot",
           "what": "Uninstalls the Microsoft 365 Copilot app (formerly the Microsoft 365 or Office app) and stops Windows from installing it for new users.",
-          "breaks": "The Copilot key, on keyboards that have one, opens this app, so the key does nothing until you pick another app for it in Settings. Microsoft 365 apps such as Word and Excel stay. Undo reinstalls it from the Microsoft Store.",
+          "breaks": "On work or school (Entra ID) PCs the Copilot key, on keyboards that have one, opens this app, so the key does nothing until you pick another app in Settings > Personalization > Text input > Copilot key. On personal PCs the key opens the Copilot app and does not change. Microsoft 365 apps such as Word and Excel stay. Undo reinstalls it from the Microsoft Store.",
           "gain": "No gain is documented by Microsoft."
         },
         "pt-BR": {
           "title": "Remover o Microsoft 365 Copilot",
           "what": "Desinstala o app Microsoft 365 Copilot (antigo app Microsoft 365 ou Office) e impede que o Windows o instale para novos usuários.",
-          "breaks": "A tecla Copilot, nos teclados que a têm, abre este app, então ela não faz nada até você escolher outro app para ela em Configurações. Os apps do Microsoft 365, como Word e Excel, continuam. Desfazer reinstala o app pela Microsoft Store.",
+          "breaks": "Em PCs de trabalho ou escola (Entra ID), a tecla Copilot, nos teclados que a têm, abre este app, então ela não faz nada até você escolher outro app em Configurações > Personalização > Entrada de texto > Tecla Copilot. Em PCs pessoais, a tecla abre o app Copilot e não muda. Os apps do Microsoft 365, como Word e Excel, continuam. Desfazer reinstala o app pela Microsoft Store.",
           "gain": "A Microsoft não documenta nenhum ganho."
         }
       },
@@ -807,13 +807,13 @@
         "en": {
           "title": "Turn off web results in Start search",
           "what": "Sets the user policy that stops Start search from showing web suggestions and results.",
-          "breaks": "Searching from Start only finds things on this PC, and File Explorer search no longer shows suggestions. Search the web in your browser instead.",
+          "breaks": "Searching from Start only finds things on this PC, and File Explorer search no longer shows suggestions. Search the web in your browser instead. Start search can come up blank with this policy; if it does, undo this item.",
           "gain": "What you type in Start search is not sent to Bing."
         },
         "pt-BR": {
           "title": "Desativar resultados da web na pesquisa do Iniciar",
           "what": "Define a política de usuário que impede a pesquisa do Iniciar de mostrar sugestões e resultados da web.",
-          "breaks": "A pesquisa do Iniciar só encontra itens deste PC, e a pesquisa do Explorador de Arquivos deixa de mostrar sugestões. Pesquise na web pelo navegador.",
+          "breaks": "A pesquisa do Iniciar só encontra itens deste PC, e a pesquisa do Explorador de Arquivos deixa de mostrar sugestões. Pesquise na web pelo navegador. A pesquisa do Iniciar pode ficar em branco com esta política; se isso acontecer, desfaça este item.",
           "gain": "O que você digita na pesquisa do Iniciar não é enviado ao Bing."
         }
       },
@@ -854,70 +854,6 @@
           "type": "registry",
           "path": "HKCU\\Software\\Microsoft\\Speech_OneCore\\Settings\\OnlineSpeechPrivacy",
           "name": "HasAccepted",
-          "kind": "dword",
-          "value": 0
-        }
-      ]
-    },
-    {
-      "id": "privacy.start-suggestions",
-      "category": "privacy",
-      "level": "safe",
-      "contested": false,
-      "requiresReboot": false,
-      "scope": "user",
-      "laptopSensitive": false,
-      "text": {
-        "en": {
-          "title": "Turn off suggestions in Start",
-          "what": "Turns off the setting that lets Windows show suggested apps and content in Start.",
-          "breaks": "Nothing known. A Windows update can turn suggestions back on; cleanup check reports it.",
-          "gain": "Start does not show promoted apps."
-        },
-        "pt-BR": {
-          "title": "Desativar sugestões no Iniciar",
-          "what": "Desativa a configuração que permite ao Windows mostrar apps e conteúdo sugeridos no Iniciar.",
-          "breaks": "Nada conhecido. Uma atualização do Windows pode reativar as sugestões; o cleanup check avisa.",
-          "gain": "O Iniciar não mostra apps promovidos."
-        }
-      },
-      "actions": [
-        {
-          "type": "registry",
-          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
-          "name": "SystemPaneSuggestionsEnabled",
-          "kind": "dword",
-          "value": 0
-        }
-      ]
-    },
-    {
-      "id": "privacy.lock-screen-tips",
-      "category": "privacy",
-      "level": "safe",
-      "contested": false,
-      "requiresReboot": false,
-      "scope": "user",
-      "laptopSensitive": false,
-      "text": {
-        "en": {
-          "title": "Turn off tips on the lock screen",
-          "what": "Turns off the fun facts, tips and tricks that Windows shows over the lock screen picture.",
-          "breaks": "Nothing known. The lock screen picture itself does not change.",
-          "gain": "No promoted content on the lock screen."
-        },
-        "pt-BR": {
-          "title": "Desativar dicas na tela de bloqueio",
-          "what": "Desativa as curiosidades, dicas e truques que o Windows mostra sobre a imagem da tela de bloqueio.",
-          "breaks": "Nada conhecido. A imagem da tela de bloqueio não muda.",
-          "gain": "Sem conteúdo promovido na tela de bloqueio."
-        }
-      },
-      "actions": [
-        {
-          "type": "registry",
-          "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
-          "name": "RotatingLockScreenOverlayEnabled",
           "kind": "dword",
           "value": 0
         }
@@ -1599,13 +1535,13 @@
         "en": {
           "title": "Turn off the Sticky Keys shortcut",
           "what": "Turns off the shortcut that turns Sticky Keys on when you press Shift five times.",
-          "breaks": "Pressing Shift five times no longer turns Sticky Keys on; you can still turn it on in Settings > Accessibility > Keyboard. The other Sticky Keys options are set to the Windows defaults. Takes effect after you sign out and back in.",
+          "breaks": "If Sticky Keys is on, this turns it off. Pressing Shift five times no longer turns Sticky Keys on; you can still turn it on in Settings > Accessibility > Keyboard. The other Sticky Keys options are set to the Windows defaults. Takes effect after you sign out and back in.",
           "gain": "No Sticky Keys prompt in the middle of a game or while typing."
         },
         "pt-BR": {
           "title": "Desativar o atalho das Teclas de Aderência",
           "what": "Desativa o atalho que liga as Teclas de Aderência quando você pressiona Shift cinco vezes.",
-          "breaks": "Pressionar Shift cinco vezes não liga mais as Teclas de Aderência; você ainda pode ligá-las em Configurações > Acessibilidade > Teclado. As outras opções das Teclas de Aderência voltam ao padrão do Windows. Passa a valer depois de sair e entrar de novo na conta.",
+          "breaks": "Se as Teclas de Aderência estiverem ligadas, isto as desliga. Pressionar Shift cinco vezes não liga mais as Teclas de Aderência; você ainda pode ligá-las em Configurações > Acessibilidade > Teclado. As outras opções das Teclas de Aderência voltam ao padrão do Windows. Passa a valer depois de sair e entrar de novo na conta.",
           "gain": "Sem o aviso das Teclas de Aderência no meio de um jogo ou da digitação."
         }
       },

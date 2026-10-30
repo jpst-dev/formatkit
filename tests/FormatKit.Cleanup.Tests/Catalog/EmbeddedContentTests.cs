@@ -57,6 +57,7 @@ public class EmbeddedContentTests
         "interface.classic-context-menu", "interface.start-web-results-off",
         "ai.edge-copilot-off",
         "privacy.welcome-experience",
+        "privacy.start-suggestions", "privacy.lock-screen-tips",
         "sound.communications-no-ducking",
     ];
 
@@ -84,8 +85,6 @@ public class EmbeddedContentTests
         new("ai.paint-off", CleanupLevel.Safe),
         new("ai.notepad-off", CleanupLevel.Safe),
         new("ai.fabric-service-manual", CleanupLevel.Aggressive, Contested: true),
-        new("privacy.start-suggestions", CleanupLevel.Safe),
-        new("privacy.lock-screen-tips", CleanupLevel.Safe),
         new("privacy.tips-notifications", CleanupLevel.Safe),
         new("privacy.silent-app-installs", CleanupLevel.Safe),
         new("privacy.delivery-optimization-no-peers", CleanupLevel.Safe),
@@ -113,7 +112,7 @@ public class EmbeddedContentTests
     [
         "startup.onedrive",
         "interface.taskbar-left", "interface.taskbar-task-view-off", "interface.start-recommendations-off",
-        "privacy.start-suggestions", "privacy.lock-screen-tips", "privacy.tips-notifications", "privacy.silent-app-installs",
+        "privacy.tips-notifications", "privacy.silent-app-installs",
         "appearance.dark-theme", "appearance.transparency-off", "appearance.animations-off",
         "input.ptbr-us-international", "input.sticky-keys-shortcut-off",
         "sound.no-sounds",
@@ -146,6 +145,16 @@ public class EmbeddedContentTests
         (@"HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\*", "TcpAckFrequency"),
         (@"HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate"),
         (@"HKLM\SOFTWARE\Policies\Microsoft\Windows Defender", "DisableAntiSpyware"),
+        (@"HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR"),
+        (@"HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy", "LetAppsRunInBackground"),
+        (@"HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters", "DisabledComponents"),
+    ];
+
+    /// <summary>Services from docs/cleanup-not-included.md (spec 7.11) that cleanup check reports when disabled.</summary>
+    private static readonly string[] NotIncludedServices =
+    [
+        "SysMain", "WSearch", "WpnService", "CDPSvc", "LanmanServer", "iphlpsvc", "DoSvc", "WerSvc",
+        "bthserv", "BTAGService", "BthAvctpSvc", "XboxNetApiSvc", "WaaSMedicSvc",
     ];
 
     /// <summary>Hardware ids of the devices docs/cleanup-not-included.md names.</summary>
@@ -337,5 +346,47 @@ public class EmbeddedContentTests
 
         var devices = rules.OfType<DeviceDisabledRule>().Select(r => r.HardwareId).ToList();
         Assert.All(NotIncludedDevices, id => Assert.Contains(id, devices, StringComparer.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Every_not_included_service_has_a_rule_and_only_SysMain_is_informational()
+    {
+        var rules = KnownIssues.LoadEmbedded().Issues
+            .Where(i => i.Rule is ServiceDisabledRule)
+            .ToDictionary(i => ((ServiceDisabledRule)i.Rule).Service, StringComparer.OrdinalIgnoreCase);
+
+        Assert.All(NotIncludedServices, service =>
+        {
+            Assert.True(rules.TryGetValue(service, out var issue), service + " has no rule");
+            Assert.Equal(service == "SysMain" ? IssueSeverity.Info : IssueSeverity.Breaks, issue.Severity);
+        });
+    }
+
+    [Theory]
+    [InlineData(@"HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", "0")]
+    [InlineData(@"HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy", "LetAppsRunInBackground", "2")]
+    [InlineData(@"HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters", "DisabledComponents", "255")]
+    public void Not_included_registry_rules_match_only_the_documented_value(string path, string name, string value)
+    {
+        var rule = Assert.Single(KnownIssues.LoadEmbedded().Issues.Select(i => i.Rule).OfType<RegistryValueRule>(),
+            r => string.Equals(r.Path, path, StringComparison.OrdinalIgnoreCase) && r.Name == name);
+
+        Assert.Equal(value, rule.EqualsValue);
+        Assert.Null(rule.NotEqualsValue);
+    }
+
+    /// <summary>Texts the Task 10 review asked to say what the item really changes.</summary>
+    [Theory]
+    [InlineData("apps.bing-search", "web results", "resultados da web")]
+    [InlineData("apps.copilot", "work or school", "trabalho ou escola")]
+    [InlineData("apps.office-hub", "work or school", "trabalho ou escola")]
+    [InlineData("privacy.start-web-search", "blank", "em branco")]
+    [InlineData("input.sticky-keys-shortcut-off", "turns it off", "desliga")]
+    public void Breaks_text_names_the_real_effect(string id, string en, string pt)
+    {
+        var item = CleanupCatalog.LoadEmbedded().Find(id)!;
+
+        Assert.Contains(en, item.Text["en"].Breaks, StringComparison.Ordinal);
+        Assert.Contains(pt, item.Text["pt-BR"].Breaks, StringComparison.Ordinal);
     }
 }

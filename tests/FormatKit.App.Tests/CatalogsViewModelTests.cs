@@ -171,6 +171,19 @@ public class CatalogsViewModelTests
     }
 
     [Fact]
+    public void AutomationName_AnnouncesTheOptInBadge()
+    {
+        var text = new ItemText("Dark theme", "what", "breaks", "gain");
+        var optIn = new CleanupItem("appearance.dark", CleanupCategory.Appearance, CleanupLevel.Safe, false, false, ItemScope.User, false,
+            new Dictionary<string, ItemText> { ["en"] = text, ["pt-BR"] = text }, [], OptIn: true);
+        var converter = new FormatKit.App.Views.CatalogAutomationNameConverter();
+        object Name(object item) => converter.Convert(item, typeof(string), null, System.Globalization.CultureInfo.InvariantCulture);
+
+        Assert.Equal("Dark theme, " + FormatKit.App.Localization.Strings.Get("Cat_OptInBadge"), Name(optIn));
+        Assert.Equal("Remove Bloat", Name(Cleanup("apps.bloat", CleanupLevel.Safe, "Remove Bloat")));
+    }
+
+    [Fact]
     public void EveryFilterValue_HasAResourceInBothLanguages()
     {
         var keys = Enum.GetValues<CleanupLevel>().Select(v => "Level_" + v)
