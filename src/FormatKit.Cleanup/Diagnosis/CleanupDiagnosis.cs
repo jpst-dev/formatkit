@@ -1,4 +1,5 @@
 using FormatKit.Cleanup.Actions;
+using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Journal;
 using FormatKit.Core;
 using FormatKit.Core.Steps;
@@ -12,16 +13,26 @@ public sealed record Finding(KnownIssue Issue, string Detail);
 /// <param name="CanUndo">False when another user applied the item's per-user settings, so only that user can undo it (R15).</param>
 public sealed record AppliedItem(string ItemId, bool CanUndo);
 
+/// <summary>A journaled, unreverted item whose state was looked at. <paramref name="Checked"/> is false when the check could not run (needs admin, target absent), so it is not known to be reverted.</summary>
+public sealed record RevertedItem(string ItemId, bool Checked);
+
 /// <param name="NotChecked">Rules whose evaluation threw; each is logged (R16).</param>
-public sealed record DiagnosisReport(IReadOnlyList<Finding> Findings, IReadOnlyList<AppliedItem> Applied, string? JournalError, int NotChecked);
+/// <param name="RevertedByWindows">Applied items whose target no longer matches (informational), plus those that could not be checked.</param>
+public sealed record DiagnosisReport(
+    IReadOnlyList<Finding> Findings, IReadOnlyList<AppliedItem> Applied, string? JournalError, int NotChecked)
+{
+    public IReadOnlyList<RevertedItem> RevertedByWindows { get; init; } = [];
+}
 
 /// <summary>Read-only: evaluates the known-issue rules and lists what the journal can still undo. Never writes to the system.</summary>
 /// <param name="log">Hears rules that could not be evaluated.</param>
-public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog.ILogger? log = null)
+/// <param name="catalog">When given, journaled items still in it are checked for state Windows reverted.</param>
+public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog.ILogger? log = null, CleanupCatalog? catalog = null)
 {
     public async Task<DiagnosisReport> RunAsync(ServiceSet services, CancellationToken ct)
     {
-        var load = new JournalStore(services.Files, paths).Load();
+        var store = new JournalStore(services.Files, paths);
+        var load = store.Load();
         // A scheme cleanup itself created (ultimate-plan) is not a foreign import worth reporting.
         var ownSchemes = PowerSchemeHandler.CreatedSchemes(load.Journal);
         var findings = new List<Finding>();
@@ -59,11 +70,68 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
                 .Select(g => new AppliedItem(g.Key, g.All(e => e.CanBeUndoneBy(currentSid))))
                 .ToList();
 
+        var reverted = catalog is null || load.Journal is null
+            ? []
+            : await FindRevertedAsync(load.Journal, catalog, currentSid, services, store, ct);
+
         return new DiagnosisReport(
             sorted,
             applied,
             load.Status == JournalLoadStatus.Corrupt ? load.Error : null,
-            notChecked);
+            notChecked)
+        {
+            RevertedByWindows = reverted,
+        };
+    }
+
+    /// <summary>Unreverted journaled items still in the catalog whose actions no longer hold. Items another user applied are skipped: their per-user state is not ours to read.</summary>
+    private async Task<IReadOnlyList<RevertedItem>> FindRevertedAsync(
+        CleanupJournal journal, CleanupCatalog catalog, string? currentSid, ServiceSet services, JournalStore store, CancellationToken ct)
+    {
+        var handlers = new ActionHandlers(() => PowerSchemeHandler.CreatedSchemes(store.Load().Journal), () => PowerSchemeHandler.FormatKitSchemes(store.Load().Journal));
+        var applier = new ItemApplier(handlers, store);
+        var ctx = new StepContext(services, log ?? Serilog.Core.Logger.None);
+        var result = new List<RevertedItem>();
+        foreach (var group in journal.Entries.Where(e => e.RevertedAt is null).GroupBy(e => e.ItemId, StringComparer.Ordinal))
+        {
+            ct.ThrowIfCancellationRequested();
+            if (catalog.Find(group.Key) is not { } item || !group.All(e => e.CanBeUndoneBy(currentSid)))
+                continue;
+            try
+            {
+                if (!await applier.IsAppliedAsync(item, ctx, ct))
+                    result.Add(new RevertedItem(item.Id, await TargetsStillCheckedAsync(group, handlers, ctx, ct)));
+            }
+            catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
+            {
+                // Access denied or an absent target: not known to be reverted.
+                log?.Warning(ex, "Could not check whether Windows reverted cleanup item {Item}", item.Id);
+                result.Add(new RevertedItem(item.Id, false));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// False when a journaled target moved or disappeared (a power setting written to a scheme that is no longer active,
+    /// a removed task, an uninstalled startup program): the item is then not known to be reverted. The newest record of
+    /// each target counts, since a re-run journals a second entry.
+    /// </summary>
+    private static async Task<bool> TargetsStillCheckedAsync(
+        IEnumerable<JournalEntry> entries, ActionHandlers handlers, StepContext ctx, CancellationToken ct)
+    {
+        var latest = entries
+            .SelectMany(e => e.Actions)
+            .GroupBy(a => (a.Type, a.Target))
+            .Select(g => g.Last());
+        foreach (var recorded in latest)
+        {
+            if (handlers.For(recorded) is IRevertCheckable checkable && !await checkable.CanCheckAsync(recorded, ctx, ct))
+                return false;
+        }
+
+        return true;
     }
 
     private static async Task<IReadOnlyList<string>> EvaluateAsync(IssueRule rule, ServiceSet services, IReadOnlyDictionary<Guid, Guid?> ownSchemes, CancellationToken ct)

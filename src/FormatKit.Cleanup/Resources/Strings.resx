@@ -11,6 +11,13 @@
   <data name="Step_Title_Apps" xml:space="preserve"><value>Cleanup: remove apps</value></data>
   <data name="Step_Title_Privacy" xml:space="preserve"><value>Cleanup: privacy settings</value></data>
   <data name="Step_Title_Performance" xml:space="preserve"><value>Cleanup: performance settings</value></data>
+  <data name="Step_Title_Startup" xml:space="preserve"><value>Cleanup: startup</value></data>
+  <data name="Step_Title_Ai" xml:space="preserve"><value>Cleanup: AI</value></data>
+  <data name="Step_Title_Interface" xml:space="preserve"><value>Cleanup: interface</value></data>
+  <data name="Step_Title_Appearance" xml:space="preserve"><value>Cleanup: appearance</value></data>
+  <data name="Step_Title_Input" xml:space="preserve"><value>Cleanup: input</value></data>
+  <data name="Step_Title_Sound" xml:space="preserve"><value>Cleanup: sound</value></data>
+  <data name="Step_Title_Power" xml:space="preserve"><value>Cleanup: power</value></data>
   <data name="Step_Title_Developer" xml:space="preserve"><value>Cleanup: developer settings</value></data>
   <data name="Status_Applied" xml:space="preserve"><value>applied</value></data>
   <data name="Status_AlreadyInPlace" xml:space="preserve"><value>already in place</value></data>
@@ -27,4 +34,9 @@
   <data name="Validation_UnknownItem" xml:space="preserve"><value>unknown cleanup item &quot;{0}&quot;</value></data>
   <data name="Validation_IncludeExcludeOverlap" xml:space="preserve"><value>Cleanup item &quot;{0}&quot; is in both include and exclude.</value></data>
   <data name="Validation_ConfirmAggressive" xml:space="preserve"><value>Aggressive cleanup items are selected ({0}); set &quot;confirmAggressive&quot; to true to apply them.</value></data>
+  <data name="PowerScheme_FormatKit_Name" xml:space="preserve"><value>FormatKit Performance</value></data>
+  <data name="PowerScheme_FormatKit_Description" xml:space="preserve"><value>High performance tuned by FormatKit: no core parking, no link or USB power saving, disk never sleeps.</value></data>
+  <data name="Skip_PrinterInstalled" xml:space="preserve"><value>skipped: a printer is installed on this machine (the print spooler is needed)</value></data>
+  <data name="Warning_ExplorerRestartFailed" xml:space="preserve"><value>Windows Explorer did not come back after being restarted</value></data>
+  <data name="NextAction_SignOutAndIn" xml:space="preserve"><value>Sign out and back in to bring the taskbar back.</value></data>
 </root>

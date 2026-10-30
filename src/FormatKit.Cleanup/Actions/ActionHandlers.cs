@@ -3,14 +3,21 @@ using FormatKit.Cleanup.Journal;
 
 namespace FormatKit.Cleanup.Actions;
 
-internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> createdSchemes)
+/// <param name="formatKitSchemes">The created schemes that are FormatKit performance plans; none when omitted.</param>
+internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> createdSchemes, Func<IReadOnlySet<Guid>>? formatKitSchemes = null)
 {
     private readonly RegistryHandler _registry = new();
     private readonly ServiceHandler _service = new();
     private readonly AppxHandler _appx = new();
-    private readonly PowerSchemeHandler _power = new(createdSchemes);
+    private readonly PowerSchemeHandler _power = new(createdSchemes, formatKitSchemes);
     private readonly OptionalFeatureHandler _feature = new();
+    private readonly ScheduledTaskHandler _scheduledTask = new();
+    private readonly StartupItemHandler _startupItem = new();
+    private readonly PowerSettingHandler _powerSetting = new();
     private readonly MemoryIntegrityHandler _memoryIntegrity = new();
+    private readonly KeyboardLayoutHandler _keyboardLayout = new();
+    private readonly SoundSchemeHandler _soundScheme = new();
+    private readonly HibernateHandler _hibernate = new();
 
     public IActionHandler For(CleanupAction action) => action switch
     {
@@ -19,7 +26,13 @@ internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> crea
         AppxAction => _appx,
         PowerSchemeAction => _power,
         OptionalFeatureAction => _feature,
+        ScheduledTaskAction => _scheduledTask,
+        StartupItemAction => _startupItem,
+        PowerSettingAction => _powerSetting,
         NamedAction { Handler: MemoryIntegrityHandler.Name } => _memoryIntegrity,
+        NamedAction { Handler: KeyboardLayoutHandler.Name } => _keyboardLayout,
+        NamedAction { Handler: SoundSchemeHandler.Name } => _soundScheme,
+        NamedAction { Handler: HibernateHandler.Name } => _hibernate,
         NamedAction named => throw new ArgumentException($"Unknown named action handler '{named.Handler}'.", nameof(action)),
         _ => throw new ArgumentException($"Unsupported action type '{action.GetType().Name}'.", nameof(action)),
     };
@@ -31,7 +44,13 @@ internal sealed class ActionHandlers(Func<IReadOnlyDictionary<Guid, Guid?>> crea
         AppxHandler.Type => _appx,
         PowerSchemeHandler.Type => _power,
         OptionalFeatureHandler.Type => _feature,
+        ScheduledTaskHandler.Type => _scheduledTask,
+        StartupItemHandler.Type => _startupItem,
+        PowerSettingHandler.Type => _powerSetting,
         MemoryIntegrityHandler.Name => _memoryIntegrity,
+        KeyboardLayoutHandler.Name => _keyboardLayout,
+        SoundSchemeHandler.Name => _soundScheme,
+        HibernateHandler.Name => _hibernate,
         _ => throw new ArgumentException($"Unknown journal action type '{recorded.Type}'.", nameof(recorded)),
     };
 }

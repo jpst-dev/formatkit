@@ -1,6 +1,7 @@
 using FormatKit.Cleanup.Actions;
 using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Journal;
+using FormatKit.Cleanup.Localization;
 using FormatKit.Core;
 using FormatKit.Core.Steps;
 using FormatKit.Core.SystemAccess;
@@ -38,6 +39,20 @@ public class ItemApplierTests
     }
 
     [Fact]
+    public async Task Absent_power_setting_is_skipped_as_not_present()
+    {
+        var power = new FakePowerSchemes();
+        var ctx = TestServices.Context(TestServices.Create(files: _files, power: power));
+        var item = Item("power.absent", actions: [new PowerSettingAction("7516b95f-f776-4464-8c53-06167f40cc99", "3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e", 900, null)]);
+
+        var outcome = await NewApplier().ApplyAsync(item, ctx, Ct);
+
+        Assert.Equal(ItemStatus.Skipped, outcome.Status);
+        Assert.Equal(Localization.Strings.Get("Skip_NotPresent"), outcome.Message);
+        Assert.Empty(power.Writes);
+    }
+
+    [Fact]
     public async Task Hkcu_item_records_the_user_sid_and_hklm_item_does_not()
     {
         var registry = new FakeRegistry();
@@ -50,6 +65,61 @@ public class ItemApplierTests
         var entries = _journal.Load().Journal!.Entries;
         Assert.Equal("S-1-5-21-1-2-3-1001", entries.Single(e => e.ItemId == "privacy.user").UserSid);
         Assert.Null(entries.Single(e => e.ItemId == "privacy.machine").UserSid);
+    }
+
+    [Fact]
+    public async Task User_scope_startup_item_records_the_user_sid_and_machine_scope_does_not()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(@"HKCU\Software\Microsoft\Windows\CurrentVersion\Run", "App", RegistryKind.String, "app.exe");
+        registry.Set(@"HKLM\Software\Microsoft\Windows\CurrentVersion\Run", "App", RegistryKind.String, "app.exe");
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("startup.user", scope: ItemScope.User, actions: [new StartupItemAction("App", ItemScope.User)]), ctx, Ct);
+        await NewApplier().ApplyAsync(Item("startup.machine", actions: [new StartupItemAction("App", ItemScope.Machine)]), ctx, Ct);
+
+        var entries = _journal.Load().Journal!.Entries;
+        Assert.Equal("S-1-5-21-1-2-3-1001", entries.Single(e => e.ItemId == "startup.user").UserSid);
+        Assert.Null(entries.Single(e => e.ItemId == "startup.machine").UserSid);
+    }
+
+    [Fact]
+    public async Task User_scope_sound_scheme_records_the_user_sid()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(@"HKCU\AppEvents\Schemes", "", RegistryKind.String, ".Default");
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("sound.user", scope: ItemScope.User, actions: [new NamedAction("soundScheme")]), ctx, Ct);
+
+        Assert.Equal("S-1-5-21-1-2-3-1001", _journal.Load().Journal!.Entries.Single(e => e.ItemId == "sound.user").UserSid);
+    }
+
+    [Fact]
+    public async Task Machine_scope_named_handler_does_not_record_a_user_sid()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(@"HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard", "EnableVirtualizationBasedSecurity", RegistryKind.Dword, "1");
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("performance.named", actions: [new NamedAction("memoryIntegrity")]), ctx, Ct);
+
+        Assert.Null(_journal.Load().Journal!.Entries.Single(e => e.ItemId == "performance.named").UserSid);
+    }
+
+    [Fact]
+    public async Task Startup_item_with_missing_run_value_is_not_present_and_journals_nothing()
+    {
+        var outcome = await NewApplier().ApplyAsync(
+            Item("startup.user", scope: ItemScope.User, actions: [new StartupItemAction("Gone", ItemScope.User)]),
+            Context(new FakeRegistry()), Ct);
+
+        Assert.Equal(ItemStatus.Skipped, outcome.Status);
+        Assert.Equal(Strings.Get("Skip_NotPresent"), outcome.Message);
+        Assert.False(_files.FileExists(_journal.Path));
     }
 
     [Fact]

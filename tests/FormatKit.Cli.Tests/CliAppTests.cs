@@ -568,6 +568,22 @@ public sealed class CliAppTests : IDisposable
     }
 
     [Fact]
+    public void Windows_setup_example_profile_is_valid_and_includes_only_opt_in_items()
+    {
+        var catalog = CleanupCatalog.LoadEmbedded();
+        var loader = new ProfileLoader([new CleanupModule(catalog, _paths, _fs)]);
+
+        var result = loader.Load(ProfilePath("windows-setup-example.json"));
+
+        Assert.True(result.IsValid, string.Join("; ", result.Errors.Select(e => e.Message)));
+        var include = result.Value!.Profile.Modules["cleanup"].GetProperty("include").EnumerateArray().Select(e => e.GetString()!).ToList();
+        Assert.All(include, id => Assert.True(catalog.Find(id)!.IsOptIn, id + " is not opt-in"));
+        Assert.Contains("appearance.dark-theme", include);
+        Assert.Contains("input.ptbr-us-international", include);
+        Assert.Contains("performance.formatkit-plan", include);
+    }
+
+    [Fact]
     public void Programs_example_profile_is_valid()
     {
         var programs = new ProgramsModule(ProgramCatalog.LoadEmbedded(), _paths, _fs);

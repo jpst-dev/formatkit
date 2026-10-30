@@ -5,10 +5,25 @@
              xmlns:views="clr-namespace:FormatKit.App.Views">
     <UserControl.Resources>
         <views:CatalogTitleConverter x:Key="Title" />
+        <views:CatalogAutomationNameConverter x:Key="AutomationName" />
         <DataTemplate x:Key="ItemTemplate">
             <StackPanel Margin="0,4">
                 <TextBlock Text="{Binding Converter={StaticResource Title}}" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock Text="{Binding Id}" Opacity="0.6" FontSize="11" />
+            </StackPanel>
+        </DataTemplate>
+        <BooleanToVisibilityConverter x:Key="Visible" />
+        <DataTemplate x:Key="CleanupItemTemplate">
+            <StackPanel Margin="0,4">
+                <TextBlock Text="{Binding Converter={StaticResource Title}}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Id}" Opacity="0.6" FontSize="11" />
+                    <Border Margin="8,0,0,0" Padding="4,0" CornerRadius="2" BorderThickness="1" BorderBrush="Gray"
+                            Visibility="{Binding IsOptIn, Converter={StaticResource Visible}}">
+                        <TextBlock Text="{Binding DataContext.OptInBadge, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                   FontSize="11" />
+                    </Border>
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
@@ -53,10 +68,10 @@
                         </ComboBox>
                     </StackPanel>
                     <ListBox ItemsSource="{Binding CleanupItems}" SelectedItem="{Binding SelectedCleanup, Mode=TwoWay}"
-                             ItemTemplate="{StaticResource ItemTemplate}">
+                             ItemTemplate="{StaticResource CleanupItemTemplate}">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource Title}}" />
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Converter={StaticResource AutomationName}}" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                     </ListBox>

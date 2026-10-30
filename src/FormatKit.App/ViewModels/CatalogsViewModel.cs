@@ -33,6 +33,9 @@ public sealed partial class CatalogsViewModel : ObservableObject
 
     public IReadOnlyList<FilterOption<ProgramCategory>> ProgramCategoryOptions { get; }
 
+    /// <summary>The badge the cleanup list shows next to items whose <see cref="CleanupItem.IsOptIn"/> is true.</summary>
+    public string OptInBadge { get; } = Strings.Get("Cat_OptInBadge");
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LevelOption))]
     private CleanupLevel? _levelFilter;
@@ -140,6 +143,8 @@ public sealed partial class CatalogsViewModel : ObservableObject
             lines.Add(Strings.Get("Cat_Contested"));
         if (item.LaptopSensitive)
             lines.Add(Strings.Get("Cat_Laptop"));
+        if (item.IsOptIn)
+            lines.Add(Strings.Get("Cat_OptIn"));
         return new CatalogDetails(text.Title, lines);
     }
 

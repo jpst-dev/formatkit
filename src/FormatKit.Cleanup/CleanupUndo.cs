@@ -27,7 +27,7 @@ public sealed class CleanupUndo(CleanupCatalog catalog, AppPaths paths, IFileSys
             throw new JournalCorruptException(store.Path, loaded.Error ?? "unknown error");
         var journal = loaded.Journal ?? new CleanupJournal(JournalSchemaVersion, []);
 
-        var handlers = new ActionHandlers(() => PowerSchemeHandler.CreatedSchemes(store.Load().Journal));
+        var handlers = new ActionHandlers(() => PowerSchemeHandler.CreatedSchemes(store.Load().Journal), () => PowerSchemeHandler.FormatKitSchemes(store.Load().Journal));
 
         var latest = journal.Entries
             .Where(e => e.RevertedAt is null)
