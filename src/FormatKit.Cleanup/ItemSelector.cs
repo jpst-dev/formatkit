@@ -6,13 +6,14 @@ namespace FormatKit.Cleanup;
 internal static class ItemSelector
 {
     /// <summary>Items at or below the level, plus <c>include</c> (the only way to select an opt-in or developer item), minus <c>exclude</c>, in catalog order.</summary>
-    /// <remarks>Power scheme items share one target, so only one is kept (R14): an item named in <c>include</c> beats one the level selected, then the highest level wins; <paramref name="log"/> hears which were dropped.</remarks>
+    /// <remarks>Power scheme items share one target, so only one is kept (R14): an item selected only by <c>include</c> beats one the level selected, then the highest level wins; <paramref name="log"/> hears which were dropped.</remarks>
     public static IReadOnlyList<CleanupItem> Select(CleanupCatalog catalog, CleanupOptions options, Serilog.ILogger? log = null)
     {
         var include = new HashSet<string>(options.Include, StringComparer.Ordinal);
         var exclude = new HashSet<string>(options.Exclude, StringComparer.Ordinal);
+        bool SelectedByLevel(CleanupItem i) => options.Level is { } level && i.Level <= level && !i.IsOptIn;
         var selected = catalog.Items
-            .Where(i => (options.Level is { } level && i.Level <= level && !i.IsOptIn) || include.Contains(i.Id))
+            .Where(i => SelectedByLevel(i) || include.Contains(i.Id))
             .Where(i => !exclude.Contains(i.Id))
             .ToList();
 
@@ -22,11 +23,14 @@ internal static class ItemSelector
         if (power.Count <= 1)
             return selected;
 
+        // Only an item the level would not have selected counts as an explicit choice; otherwise the higher level wins as before.
+        bool OnlyByInclude(CleanupItem i) => include.Contains(i.Id) && !SelectedByLevel(i);
         var kept = power.Aggregate((best, next) =>
-            (include.Contains(next.Id), next.Level).CompareTo((include.Contains(best.Id), best.Level)) >= 0 ? next : best);
+            (OnlyByInclude(next), next.Level).CompareTo((OnlyByInclude(best), best.Level)) >= 0 ? next : best);
         foreach (var dropped in power.Where(i => i != kept))
         {
-            log?.Information("Cleanup item {Dropped} not selected: {Kept} sets the power scheme at a higher level or was included", dropped.Id, kept.Id);
+            var rule = OnlyByInclude(kept) && !OnlyByInclude(dropped) ? "it was explicitly included" : "it has a higher level";
+            log?.Information("Cleanup item {Dropped} not selected: {Kept} sets the power scheme and {Rule}", dropped.Id, kept.Id, rule);
             selected.Remove(dropped);
         }
 

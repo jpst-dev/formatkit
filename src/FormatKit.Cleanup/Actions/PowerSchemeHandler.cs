@@ -39,6 +39,10 @@ internal sealed class PowerSchemeHandler(
         if (IsFormatKit(action))
             return FormatKitSet().Contains(active) && await FormatKitValuesMatchAsync(active, ctx, ct).ConfigureAwait(false);
 
+        // The FormatKit scheme duplicates High performance but is not the plain plan, so it never satisfies another item.
+        if (FormatKitSet().Contains(active))
+            return false;
+
         return active == target
             || (createdSchemes().TryGetValue(active, out var source) && (source is null || source == target));
     }

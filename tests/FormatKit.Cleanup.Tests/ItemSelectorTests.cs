@@ -124,6 +124,20 @@ public class ItemSelectorTests
     }
 
     [Fact]
+    public void Including_an_item_the_level_already_selects_does_not_change_which_plan_wins()
+    {
+        var catalog = NewCatalog(
+            Item("performance.high", CleanupLevel.Balanced, actions: new PowerSchemeAction("highPerformance")),
+            Item("performance.ultimate", CleanupLevel.Aggressive, actions: new PowerSchemeAction("ultimate")));
+
+        var includedHigh = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Aggressive, ["performance.high"], [], true));
+        var includedUltimateLow = ItemSelector.Select(catalog, new CleanupOptions(true, CleanupLevel.Balanced, ["performance.ultimate"], [], true));
+
+        Assert.Equal(["performance.ultimate"], includedHigh.Select(i => i.Id));
+        Assert.Equal(["performance.ultimate"], includedUltimateLow.Select(i => i.Id));
+    }
+
+    [Fact]
     public void Only_the_last_item_for_the_same_power_setting_is_kept()
     {
         const string display = "7516b95f-f776-4464-8c53-06167f40cc99";

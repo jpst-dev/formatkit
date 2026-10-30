@@ -321,6 +321,19 @@ public class PowerSchemeHandlerTests
     }
 
     [Fact]
+    public async Task High_performance_check_is_false_while_the_formatkit_scheme_is_active()
+    {
+        var created = Guid.NewGuid();
+        var power = new FakePowerSchemes { Active = created };
+        power.Schemes.Add(created);
+        var ctx = TestServices.Context(TestServices.Create(power: power));
+
+        Assert.False(await FormatKitHandler(created).IsAppliedAsync(new PowerSchemeAction("highPerformance"), ctx, Ct));
+        // A plain duplicate of High performance still counts.
+        Assert.True(await NewHandler(created, BuiltInPowerSchemes.HighPerformance).IsAppliedAsync(new PowerSchemeAction("highPerformance"), ctx, Ct));
+    }
+
+    [Fact]
     public async Task FormatKit_check_is_false_when_the_active_scheme_is_not_the_formatkit_one()
     {
         var created = Guid.NewGuid();
