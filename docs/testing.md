@@ -701,7 +701,7 @@ Right after scenario 28 (same VM state), note the journal's hash (`Get-FileHash 
    Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Power | Select-Object HibernateEnabled, HibernateEnabledDefault
    ```
 
-   **Expected:** `pt-BR: 0416:00010416,0416:00000416` (ABNT2 and ABNT, as at `clean`); Balanced (active), High performance and Power saver, and no FormatKit plan; `HibernateEnabled` is empty (it was absent before and undo deleted it) and `HibernateEnabledDefault` is 1. The telemetry tasks are `Ready`, DiagTrack and TrkWks are Automatic and running, and the removed apps are back (`Get-AppxPackage`), apart from Solitaire.
+   **Expected:** `pt-BR: 0416:00010416,0416:00000416` (ABNT2 and ABNT, as at `clean`); Balanced (active), High performance and Power saver, and no FormatKit plan; `HibernateEnabled` is empty (it was absent before and undo deleted it) and `HibernateEnabledDefault` is 1; undo first ran `powercfg /hibernate on`, which fails on the VM firmware (no hibernation), so the log has a warning for it and the undo still succeeds. The telemetry tasks are `Ready`, DiagTrack and TrkWks are Automatic and running, and the removed apps are back (`Get-AppxPackage`), apart from Solitaire.
 
 ## Hardware-only checklist (cannot be verified in a VM)
 
