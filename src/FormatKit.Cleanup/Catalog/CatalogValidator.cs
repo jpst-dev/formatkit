@@ -61,8 +61,8 @@ public static partial class CatalogValidator
         if (actions.Count == 0)
             Error("item has no actions");
 
-        if (item.LaptopSensitive && !actions.Any(a => a is PowerSchemeAction or PowerSettingAction))
-            Error("laptopSensitive requires a powerScheme or powerSetting action");
+        if (item.LaptopSensitive && !actions.Any(a => a is PowerSchemeAction or PowerSettingAction or NamedAction { Handler: "hibernate" }))
+            Error("laptopSensitive requires a powerScheme or powerSetting action or the hibernate handler");
 
         foreach (var action in actions)
         {
@@ -120,8 +120,9 @@ public static partial class CatalogValidator
 
         if (item.Scope == ItemScope.User
             && !actions.All(a => a is RegistryAction r && r.Path.StartsWith("HKCU\\", StringComparison.OrdinalIgnoreCase)
-                || a is StartupItemAction { Scope: ItemScope.User }))
-            Error("scope user requires only HKCU registry or user-scope startupItem actions");
+                || a is StartupItemAction { Scope: ItemScope.User }
+                || a is NamedAction named && ProtectedLists.UserScopeNamedHandlers.Contains(named.Handler)))
+            Error("scope user requires only HKCU registry, user-scope startupItem or user-scope named handler actions");
     }
 
     private static void ValidateRegistry(RegistryAction registry, Action<string> error)

@@ -84,6 +84,32 @@ public class ItemApplierTests
     }
 
     [Fact]
+    public async Task User_scope_sound_scheme_records_the_user_sid()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(@"HKCU\AppEvents\Schemes", "", RegistryKind.String, ".Default");
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("sound.user", scope: ItemScope.User, actions: [new NamedAction("soundScheme")]), ctx, Ct);
+
+        Assert.Equal("S-1-5-21-1-2-3-1001", _journal.Load().Journal!.Entries.Single(e => e.ItemId == "sound.user").UserSid);
+    }
+
+    [Fact]
+    public async Task Machine_scope_named_handler_does_not_record_a_user_sid()
+    {
+        var registry = new FakeRegistry();
+        registry.Set(@"HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard", "EnableVirtualizationBasedSecurity", RegistryKind.Dword, "1");
+        var session = new FakeUserSession { CurrentUserSid = "S-1-5-21-1-2-3-1001" };
+        var ctx = TestServices.Context(TestServices.Create(files: _files, registry: registry, session: session));
+
+        await NewApplier().ApplyAsync(Item("performance.named", actions: [new NamedAction("memoryIntegrity")]), ctx, Ct);
+
+        Assert.Null(_journal.Load().Journal!.Entries.Single(e => e.ItemId == "performance.named").UserSid);
+    }
+
+    [Fact]
     public async Task Startup_item_with_missing_run_value_is_already_in_place_and_journals_nothing()
     {
         var outcome = await NewApplier().ApplyAsync(

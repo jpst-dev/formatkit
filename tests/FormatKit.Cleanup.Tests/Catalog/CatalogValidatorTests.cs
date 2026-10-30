@@ -299,4 +299,28 @@ public class CatalogValidatorTests : IDisposable
     [InlineData(@"\Microsoft\Windows\Application Experience\", "[P]rogramDataUpdater")]
     public void Scheduled_task_wildcards_are_rejected(string path, string name) =>
         AssertError(Validate(Item(scope: "machine", action: TaskAction(path, name))), "wildcard");
+
+    [Theory]
+    [InlineData("keyboardLayout")]
+    [InlineData("soundScheme")]
+    public void User_scope_accepts_the_user_scope_named_handlers(string handler) =>
+        Assert.Empty(Validate(Item(scope: "user", action: $$"""{ "type": "named", "handler": "{{handler}}" }""")));
+
+    [Theory]
+    [InlineData("memoryIntegrity")]
+    [InlineData("hibernate")]
+    public void User_scope_rejects_other_named_handlers(string handler) =>
+        AssertError(
+            Validate(Item(scope: "user", action: $$"""{ "type": "named", "handler": "{{handler}}" }""")),
+            "scope user");
+
+    [Fact]
+    public void Laptop_sensitive_is_accepted_on_a_hibernate_item() =>
+        Assert.Empty(Validate(Item(category: "power", id: "power.hibernation-test", scope: "machine", laptopSensitive: true, action: """{ "type": "named", "handler": "hibernate" }""")));
+
+    [Fact]
+    public void Laptop_sensitive_is_rejected_on_another_named_handler() =>
+        AssertError(
+            Validate(Item(scope: "machine", laptopSensitive: true, action: """{ "type": "named", "handler": "memoryIntegrity" }""")),
+            "laptopSensitive");
 }

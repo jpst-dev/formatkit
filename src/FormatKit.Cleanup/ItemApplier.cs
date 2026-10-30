@@ -117,7 +117,8 @@ internal sealed class ItemApplier(ActionHandlers handlers, JournalStore journal)
 
     private static bool IsPerUser(CleanupAction action) =>
         action is RegistryAction registry && registry.Path.StartsWith(@"HKCU\", StringComparison.OrdinalIgnoreCase)
-        || action is StartupItemAction { Scope: ItemScope.User };
+        || action is StartupItemAction { Scope: ItemScope.User }
+        || action is NamedAction named && ProtectedLists.UserScopeNamedHandlers.Contains(named.Handler);
 
     /// <summary>Undoes this attempt's actions, newest first (the failing one included). Best effort: an undo failure is logged, not thrown. Returns whether every undo succeeded.</summary>
     private async Task<bool> RollBackAsync(CleanupItem item, List<JournalAction> applied, StepContext ctx)

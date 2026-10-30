@@ -52,7 +52,10 @@ public static class ProtectedLists
         "Microsoft.GamingApp", "Microsoft.YourPhone", "Microsoft.Todos");
 
     /// <summary>Handler names a <c>named</c> action may use.</summary>
-    public static IReadOnlySet<string> NamedHandlers { get; } = Set("memoryIntegrity");
+    public static IReadOnlySet<string> NamedHandlers { get; } = Set("memoryIntegrity", "keyboardLayout", "soundScheme", "hibernate");
+
+    /// <summary>Named handlers that change the signed-in user's settings, so a scope-user item may use them.</summary>
+    public static IReadOnlySet<string> UserScopeNamedHandlers { get; } = Set("keyboardLayout", "soundScheme");
 
     /// <summary>True when <paramref name="package"/> equals or is prefixed by a never-remove entry.</summary>
     internal static bool IsNeverRemove(string package) =>

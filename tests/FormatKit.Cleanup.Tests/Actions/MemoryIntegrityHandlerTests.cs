@@ -52,6 +52,12 @@ public class MemoryIntegrityHandlerTests
 
         Assert.IsType<MemoryIntegrityHandler>(handlers.For(Action));
         Assert.IsType<MemoryIntegrityHandler>(handlers.For(new FormatKit.Cleanup.Journal.JournalAction("memoryIntegrity", "memoryIntegrity", default)));
+        Assert.IsType<KeyboardLayoutHandler>(handlers.For(new NamedAction("keyboardLayout")));
+        Assert.IsType<SoundSchemeHandler>(handlers.For(new NamedAction("soundScheme")));
+        Assert.IsType<HibernateHandler>(handlers.For(new NamedAction("hibernate")));
+        Assert.IsType<KeyboardLayoutHandler>(handlers.For(new FormatKit.Cleanup.Journal.JournalAction("keyboardLayout", "keyboardLayout", default)));
+        Assert.IsType<SoundSchemeHandler>(handlers.For(new FormatKit.Cleanup.Journal.JournalAction("soundScheme", "soundScheme", default)));
+        Assert.IsType<HibernateHandler>(handlers.For(new FormatKit.Cleanup.Journal.JournalAction("hibernate", "hibernate", default)));
         Assert.IsType<PowerSchemeHandler>(handlers.For(new PowerSchemeAction("balanced")));
         Assert.IsType<AppxHandler>(handlers.For(new FormatKit.Cleanup.Journal.JournalAction("appx", "x", default)));
         Assert.Throws<ArgumentException>(() => handlers.For(new NamedAction("nope")));
