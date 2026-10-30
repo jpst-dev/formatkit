@@ -118,10 +118,13 @@ public class EmbeddedContentTests
         "sound.no-sounds",
     ];
 
-    /// <summary>The telemetry tasks of spec 7.5 (the Compatibility Appraiser has its own contested item).</summary>
+    /// <summary>
+    /// The telemetry tasks of spec 7.5 (the Compatibility Appraiser has its own contested item). PcaPatchDbTask is left
+    /// out: in the VM Windows turned it back on at every boot, so it always showed as "Reverted by Windows" (spec 12).
+    /// </summary>
     private static readonly string[] TelemetryTasks =
     [
-        "MareBackup", "StartupAppTask", "PcaPatchDbTask", "Consolidator", "UsbCeip",
+        "MareBackup", "StartupAppTask", "Consolidator", "UsbCeip",
         "Microsoft-Windows-DiskDiagnosticDataCollector", "DmClient", "DmClientOnScenarioDownload",
         "UsageDataReporting", "BootstrapUsageDataReporting",
     ];
@@ -275,6 +278,7 @@ public class EmbeddedContentTests
 
         Assert.Equal(TelemetryTasks.Order(StringComparer.Ordinal), tasks.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.All(tasks, t => Assert.False(t.Enabled));
+        Assert.DoesNotContain(catalog.Items.SelectMany(i => i.Actions).OfType<ScheduledTaskAction>(), t => t.Name == "PcaPatchDbTask");
         var appraiser = Assert.IsType<ScheduledTaskAction>(Assert.Single(catalog.Find("privacy.compatibility-appraiser")!.Actions));
         Assert.Equal((@"\Microsoft\Windows\Application Experience\", "Microsoft Compatibility Appraiser Exp", false),
             (appraiser.Path, appraiser.Name, appraiser.Enabled));

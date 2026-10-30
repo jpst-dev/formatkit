@@ -996,13 +996,13 @@
       "text": {
         "en": {
           "title": "Turn off telemetry scheduled tasks",
-          "what": "Disables ten scheduled tasks that collect compatibility, usage and customer experience data: Application Experience, Customer Experience Improvement Program, disk diagnostics, feedback and flighting tasks.",
+          "what": "Disables nine scheduled tasks that collect compatibility, usage and customer experience data: Application Experience, Customer Experience Improvement Program, disk diagnostics, feedback and flighting tasks.",
           "breaks": "Windows sends less data about app compatibility and use; nothing else was seen to break in the test VM. Undo turns the tasks back on.",
           "gain": "These tasks no longer wake up to collect and upload data."
         },
         "pt-BR": {
           "title": "Desativar tarefas agendadas de telemetria",
-          "what": "Desativa dez tarefas agendadas que coletam dados de compatibilidade, de uso e de experiência do usuário: tarefas de Experiência de Aplicativos, do Programa de Aperfeiçoamento da Experiência do Usuário, de diagnóstico de disco, de comentários e de flighting.",
+          "what": "Desativa nove tarefas agendadas que coletam dados de compatibilidade, de uso e de experiência do usuário: tarefas de Experiência de Aplicativos, do Programa de Aperfeiçoamento da Experiência do Usuário, de diagnóstico de disco, de comentários e de flighting.",
           "breaks": "O Windows envia menos dados sobre compatibilidade e uso de apps; nada mais deixou de funcionar na VM de teste. Desfazer reativa as tarefas.",
           "gain": "Essas tarefas deixam de acordar para coletar e enviar dados."
         }
@@ -1018,12 +1018,6 @@
           "type": "scheduledTask",
           "path": "\\Microsoft\\Windows\\Application Experience\\",
           "name": "StartupAppTask",
-          "enabled": false
-        },
-        {
-          "type": "scheduledTask",
-          "path": "\\Microsoft\\Windows\\Application Experience\\",
-          "name": "PcaPatchDbTask",
           "enabled": false
         },
         {

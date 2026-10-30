@@ -338,6 +338,20 @@ updates can fail for lack of space, so it has to be turned back on before one.
 **How `cleanup check` reports it:** it does **not** detect either, because it has no
 rule for them.
 
+## Turning off the `PcaPatchDbTask` scheduled task
+
+**What people claim:** the Program Compatibility Assistant's `PcaPatchDbTask` is one
+more telemetry task to turn off.
+
+**What actually happens:** Windows turns it back on at every boot. In the test VM
+(Windows 11 build 26300) the task was `Disabled` after `Disable-ScheduledTask` and
+after a restart of `PcaSvc`, and `Ready` again after the next reboot. Turning it off
+changes nothing that lasts, and `cleanup check` would list it under "Reverted by
+Windows" after every boot, so `privacy.telemetry-tasks` leaves it alone.
+
+**How `cleanup check` reports it:** it does **not** detect it; there is nothing to
+report, because Windows keeps it on.
+
 ## Tweaks left out because Microsoft does not document them
 
 These were planned for the catalog but dropped, because Microsoft documentation

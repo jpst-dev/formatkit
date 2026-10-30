@@ -246,7 +246,7 @@ are the research's; D9 applies to each.
 | `privacy.welcome-experience` | S | `SubscribedContent-310093Enabled=0` |
 | `privacy.delivery-optimization-no-peers` | S | machine, `DeliveryOptimization\DODownloadMode=0` |
 | `privacy.diagtrack-manual` | B | machine, `service DiagTrack manual` |
-| `privacy.telemetry-tasks` | B | machine, `scheduledTask` off: `MareBackup`, `StartupAppTask`, `PcaPatchDbTask`, `Consolidator`, `UsbCeip`, `Microsoft-Windows-DiskDiagnosticDataCollector`, `DmClient`, `DmClientOnScenarioDownload`, `UsageDataReporting`, `BootstrapUsageDataReporting` |
+| `privacy.telemetry-tasks` | B | machine, `scheduledTask` off: `MareBackup`, `StartupAppTask`, `Consolidator`, `UsbCeip`, `Microsoft-Windows-DiskDiagnosticDataCollector`, `DmClient`, `DmClientOnScenarioDownload`, `UsageDataReporting`, `BootstrapUsageDataReporting` (`PcaPatchDbTask` dropped: Windows turns it back on at every boot, section 12) |
 | `privacy.compatibility-appraiser` | A, c | machine, `scheduledTask` off: `Microsoft Compatibility Appraiser Exp` (one report of a blocked feature update) |
 
 ### 7.6 `performance` (new items, machine)
