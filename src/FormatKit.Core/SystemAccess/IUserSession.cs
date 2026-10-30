@@ -10,4 +10,7 @@ public interface IUserSession
 
     /// <summary>True when the WTS console session has a signed-in user.</summary>
     bool HasInteractiveUser { get; }
+
+    /// <summary>The WTS session id of the physical console, or null when there is none (for example during a session switch).</summary>
+    uint? ConsoleSessionId => null;
 }

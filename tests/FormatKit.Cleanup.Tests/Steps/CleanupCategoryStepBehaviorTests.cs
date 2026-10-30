@@ -23,6 +23,7 @@ public class CleanupCategoryStepBehaviorTests
     private readonly FakeProcessRunner _processes = new();
     private readonly FakePrinters _printers = new();
     private readonly FakeUserContextRunner _userContext = new();
+    private readonly FakeUserSession _session = new() { ConsoleSessionId = 1 };
     private readonly List<TimeSpan> _delays = [];
     private readonly StepContext _ctx;
     private readonly JournalStore _journal;
@@ -30,7 +31,7 @@ public class CleanupCategoryStepBehaviorTests
     public CleanupCategoryStepBehaviorTests()
     {
         _journal = new JournalStore(_files, new AppPaths(@"C:\FormatKitTest"));
-        _ctx = TestServices.Context(TestServices.Create(files: _files, registry: _registry, processes: _processes, printers: _printers, userContext: _userContext));
+        _ctx = TestServices.Context(TestServices.Create(files: _files, registry: _registry, processes: _processes, printers: _printers, userContext: _userContext, session: _session));
     }
 
     private CleanupCategoryStep Step(params CleanupItem[] items) =>
@@ -58,10 +59,43 @@ public class CleanupCategoryStepBehaviorTests
 
         Assert.Equal(StepOutcome.Succeeded, result.Outcome);
         Assert.Equal(["taskkill.exe", "tasklist.exe"], order);
-        Assert.Equal(["/f", "/im", "explorer.exe"], _processes.Calls[0].Arguments);
-        Assert.Equal(["/fi", "imagename eq explorer.exe", "/fo", "csv", "/nh"], _processes.Calls[1].Arguments);
+        Assert.Equal(["/f", "/fi", "imagename eq explorer.exe", "/fi", "session eq 1"], _processes.Calls[0].Arguments);
+        Assert.Equal(["/fi", "imagename eq explorer.exe", "/fi", "session eq 1", "/fo", "csv", "/nh"], _processes.Calls[1].Arguments);
         Assert.Equal(2, result.Messages.Count);
         Assert.Null(result.NextAction);
+    }
+
+    // Final review M4: an unfiltered taskkill also ended the shells of other users signed in through fast user switching.
+    [Fact]
+    public async Task Restart_kills_and_polls_only_the_console_session_explorer()
+    {
+        _session.ConsoleSessionId = 3;
+        _processes.Enqueue("taskkill.exe", Ok());
+        for (var i = 0; i < 3; i++)
+            _processes.Enqueue("tasklist.exe", Ok(NoTasks));
+        _processes.Enqueue("tasklist.exe", Ok(ExplorerLine));
+
+        var result = await Step(Restarting("interface.a")).ExecuteAsync(_ctx, Ct);
+
+        Assert.Null(result.NextAction);
+        Assert.Equal(["/f", "/fi", "imagename eq explorer.exe", "/fi", "session eq 3"], _processes.Calls[0].Arguments);
+        Assert.All(_processes.Calls.Where(c => c.FileName == "tasklist.exe"),
+            c => Assert.Equal(["/fi", "imagename eq explorer.exe", "/fi", "session eq 3", "/fo", "csv", "/nh"], c.Arguments));
+        Assert.DoesNotContain(_processes.Calls, c => c.Arguments.Contains("/im"));
+    }
+
+    [Fact]
+    public async Task Unknown_console_session_kills_nothing_and_gives_the_warning()
+    {
+        _session.ConsoleSessionId = null;
+
+        var result = await Step(Restarting("interface.a")).ExecuteAsync(_ctx, Ct);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Empty(_processes.Calls);
+        Assert.Empty(_userContext.Calls);
+        Assert.Equal(Strings.Get("Warning_ExplorerRestartFailed"), result.Messages[^1]);
+        Assert.Equal(Strings.Get("NextAction_SignOutAndIn"), result.NextAction);
     }
 
     [Fact]

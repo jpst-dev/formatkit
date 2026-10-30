@@ -122,17 +122,25 @@ internal sealed class CleanupCategoryStep(
     /// </summary>
     private async Task<bool> RestartExplorerAsync(StepContext ctx, CancellationToken ct)
     {
+        // Only the console session's Explorer: other users signed in through fast user switching keep their shell.
+        if (ctx.Services.UserSession.ConsoleSessionId is not { } session)
+        {
+            ctx.Log.Warning("No console session found; Explorer was not restarted");
+            return false;
+        }
+
+        var sessionFilter = $"session eq {session.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         try
         {
             var kill = await ctx.Services.Processes.RunAsync(
-                new ProcessSpec("taskkill.exe", ["/f", "/im", "explorer.exe"], Timeouts.Query), ct).ConfigureAwait(false);
+                new ProcessSpec("taskkill.exe", ["/f", "/fi", "imagename eq explorer.exe", "/fi", sessionFilter], Timeouts.Query), ct).ConfigureAwait(false);
             if (kill.ExitCode != 0 || kill.TimedOut)
             {
                 ctx.Log.Warning("taskkill explorer.exe failed (exit {Exit}): {Error}", kill.ExitCode, kill.StdErr.Trim());
                 return false;
             }
 
-            if (await WaitForExplorerAsync(ctx, AutoRestartPolls, ct).ConfigureAwait(false))
+            if (await WaitForExplorerAsync(ctx, sessionFilter, AutoRestartPolls, ct).ConfigureAwait(false))
                 return true;
 
             ctx.Log.Information("Explorer did not restart by itself; starting it as the signed-in user");
@@ -144,7 +152,7 @@ internal sealed class CleanupCategoryStep(
                 return false;
             }
 
-            return await WaitForExplorerAsync(ctx, StartedPolls, ct).ConfigureAwait(false);
+            return await WaitForExplorerAsync(ctx, sessionFilter, StartedPolls, ct).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -153,14 +161,14 @@ internal sealed class CleanupCategoryStep(
         }
     }
 
-    private async Task<bool> WaitForExplorerAsync(StepContext ctx, int polls, CancellationToken ct)
+    private async Task<bool> WaitForExplorerAsync(StepContext ctx, string sessionFilter, int polls, CancellationToken ct)
     {
         // Wait first: right after a forced kill the dying process can still be listed.
         for (var poll = 0; poll < polls; poll++)
         {
             await _delay(ExplorerPollInterval, ct).ConfigureAwait(false);
             var list = await ctx.Services.Processes.RunAsync(
-                new ProcessSpec("tasklist.exe", ["/fi", "imagename eq explorer.exe", "/fo", "csv", "/nh"], Timeouts.Query), ct).ConfigureAwait(false);
+                new ProcessSpec("tasklist.exe", ["/fi", "imagename eq explorer.exe", "/fi", sessionFilter, "/fo", "csv", "/nh"], Timeouts.Query), ct).ConfigureAwait(false);
             if (list.ExitCode == 0 && list.StdOut.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
                     .Any(l => l.TrimStart().StartsWith("\"explorer.exe\"", StringComparison.OrdinalIgnoreCase)))
                 return true;
