@@ -22,6 +22,7 @@ public class CleanupDiagnosisTests
     private readonly FakeRegistry _registry = new();
     private readonly FakeServiceControl _services = new();
     private readonly FakePowerSchemes _power = new();
+    private readonly FakeScheduledTaskControl _tasks = new();
     private readonly FakeHardwareInfo _hardware = new(FakeHardwareInfo.Sample());
 
     private static IssueText T(string s) => new(s, s + " breaks", s + " fix");
@@ -360,7 +361,7 @@ public class CleanupDiagnosisTests
 
     private Task<DiagnosisReport> RunWithCatalog(CleanupCatalog catalog, FakeRegistry registry) =>
         new CleanupDiagnosis(Rules(), _paths, null, catalog).RunAsync(
-            TestServices.Create(files: _files, registry: registry, services: _services, power: _power, hardware: _hardware), Ct);
+            TestServices.Create(files: _files, registry: registry, services: _services, power: _power, hardware: _hardware, taskControl: _tasks), Ct);
 
     [Fact]
     public async Task Reverted_by_windows_lists_only_the_drifted_item()
@@ -442,6 +443,85 @@ public class CleanupDiagnosisTests
         var report = await RunWithCatalog(catalog, registry);
 
         Assert.Equal([new RevertedItem("privacy.a", false), new RevertedItem("privacy.b", false)], report.RevertedByWindows);
+    }
+
+    private const string Sub = "238c9fa8-0aad-41ed-83f4-97be242c8f20";
+    private const string Set = "29f6c1db-86da-48c5-9fdb-f2b67b1f44da";
+    private static readonly Guid FormatKitScheme = Guid.Parse("11111111-2222-3333-4444-555555555555");
+
+    private static CleanupCatalog PowerCatalog() => FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+        FormatKit.Cleanup.Tests.TestItems.Item("power.sleep", actions: [new PowerSettingAction(Sub, Set, 0, null)]));
+
+    private static JournalEntry PowerEntry(Guid scheme) =>
+        new("power.sleep", DateTimeOffset.UtcNow,
+            [new JournalAction("powerSetting", $"power:{Sub}/{Set}", System.Text.Json.JsonSerializer.SerializeToElement(new { scheme = scheme.ToString(), ac = 1800, dc = 900 }))],
+            null);
+
+    // Final review M5: after a plan switch (or undoing the FormatKit plan) the active plan is not the one written to.
+    [Fact]
+    public async Task Reverted_by_windows_lists_a_power_setting_on_a_scheme_no_longer_active_as_not_checked()
+    {
+        SaveJournal(PowerEntry(FormatKitScheme));
+        _power.SetStored(BuiltInPowerSchemes.Balanced, Sub, Set, 1800, 900);
+
+        var report = await RunWithCatalog(PowerCatalog(), _registry);
+
+        Assert.Equal(new RevertedItem("power.sleep", false), Assert.Single(report.RevertedByWindows));
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_a_drifted_power_setting_on_the_active_scheme_as_reverted()
+    {
+        SaveJournal(PowerEntry(BuiltInPowerSchemes.Balanced));
+        _power.SetStored(BuiltInPowerSchemes.Balanced, Sub, Set, 1800, 900);
+
+        var report = await RunWithCatalog(PowerCatalog(), _registry);
+
+        Assert.Equal(new RevertedItem("power.sleep", true), Assert.Single(report.RevertedByWindows));
+    }
+
+    private static CleanupCatalog TaskCatalog() => FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+        FormatKit.Cleanup.Tests.TestItems.Item("privacy.tasks", actions: [new ScheduledTaskAction(@"\Microsoft\Windows\Test\", "Task", false)]));
+
+    private static JournalEntry TaskEntry() =>
+        new("privacy.tasks", DateTimeOffset.UtcNow,
+            [new JournalAction("scheduledTask", @"\Microsoft\Windows\Test\Task",
+                System.Text.Json.JsonSerializer.SerializeToElement(new { path = @"\Microsoft\Windows\Test\", name = "Task", enabled = true }))],
+            null);
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_a_scheduled_task_that_no_longer_exists_as_not_checked()
+    {
+        SaveJournal(TaskEntry());
+
+        var report = await RunWithCatalog(TaskCatalog(), _registry);
+
+        Assert.Equal(new RevertedItem("privacy.tasks", false), Assert.Single(report.RevertedByWindows));
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_a_re_enabled_scheduled_task_as_reverted()
+    {
+        SaveJournal(TaskEntry());
+        _tasks.Tasks[@"\Microsoft\Windows\Test\Task"] = true;
+
+        var report = await RunWithCatalog(TaskCatalog(), _registry);
+
+        Assert.Equal(new RevertedItem("privacy.tasks", true), Assert.Single(report.RevertedByWindows));
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_a_startup_item_whose_run_value_is_gone_as_not_checked()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("startup.app", actions: [new StartupItemAction("App", ItemScope.Machine)]));
+        SaveJournal(new JournalEntry("startup.app", DateTimeOffset.UtcNow,
+            [new JournalAction("startupItem", "startup:machine:App", System.Text.Json.JsonSerializer.SerializeToElement(new { absent = true }))],
+            null));
+
+        var report = await RunWithCatalog(catalog, _registry);
+
+        Assert.Equal(new RevertedItem("startup.app", false), Assert.Single(report.RevertedByWindows));
     }
 
     [Fact]

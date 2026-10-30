@@ -10,7 +10,7 @@ namespace FormatKit.Cleanup.Actions;
 /// Disables a startup program the way Task Manager does: it marks the StartupApproved entry as disabled.
 /// The Run value itself is never written or deleted.
 /// </summary>
-internal sealed class StartupItemHandler : IActionHandler
+internal sealed class StartupItemHandler : IActionHandler, IRevertCheckable
 {
     public const string Type = "startupItem";
 
@@ -61,15 +61,28 @@ internal sealed class StartupItemHandler : IActionHandler
 
     public Task UndoAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
     {
-        var parts = recorded.Target.Split(':', 3);
+        var (scope, name) = ParseTarget(recorded.Target);
+        RegistryHandler.Restore(ctx.Services.Registry, Root(scope) + ApprovedSubKey, name, recorded.Previous);
+        ctx.Log.Information("Startup item {Name} ({Scope}) approval restored", name, scope);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>A Run value that is gone (the program was uninstalled) was not reverted.</summary>
+    public Task<bool> CanCheckAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
+    {
+        var (scope, name) = ParseTarget(recorded.Target);
+        return Task.FromResult(ctx.Services.Registry.Read(Root(scope) + RunSubKey, name) is not null);
+    }
+
+    private static (ItemScope Scope, string Name) ParseTarget(string target)
+    {
+        var parts = target.Split(':', 3);
         if (parts.Length != 3 || parts[0] != "startup" || !Enum.TryParse<ItemScope>(parts[1], ignoreCase: true, out var scope))
         {
-            throw new InvalidOperationException($"Invalid startup item journal target '{recorded.Target}'.");
+            throw new InvalidOperationException($"Invalid startup item journal target '{target}'.");
         }
 
-        RegistryHandler.Restore(ctx.Services.Registry, Root(scope) + ApprovedSubKey, parts[2], recorded.Previous);
-        ctx.Log.Information("Startup item {Name} ({Scope}) approval restored", parts[2], scope);
-        return Task.CompletedTask;
+        return (scope, parts[2]);
     }
 
     private static string Root(ItemScope scope) => scope == ItemScope.User ? @"HKCU\" : @"HKLM\";

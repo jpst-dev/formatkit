@@ -100,7 +100,7 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
             try
             {
                 if (!await applier.IsAppliedAsync(item, ctx, ct))
-                    result.Add(new RevertedItem(item.Id, true));
+                    result.Add(new RevertedItem(item.Id, await TargetsStillCheckedAsync(group, handlers, ctx, ct)));
             }
             catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
@@ -111,6 +111,27 @@ public sealed class CleanupDiagnosis(KnownIssues issues, AppPaths paths, Serilog
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// False when a journaled target moved or disappeared (a power setting written to a scheme that is no longer active,
+    /// a removed task, an uninstalled startup program): the item is then not known to be reverted. The newest record of
+    /// each target counts, since a re-run journals a second entry.
+    /// </summary>
+    private static async Task<bool> TargetsStillCheckedAsync(
+        IEnumerable<JournalEntry> entries, ActionHandlers handlers, StepContext ctx, CancellationToken ct)
+    {
+        var latest = entries
+            .SelectMany(e => e.Actions)
+            .GroupBy(a => (a.Type, a.Target))
+            .Select(g => g.Last());
+        foreach (var recorded in latest)
+        {
+            if (handlers.For(recorded) is IRevertCheckable checkable && !await checkable.CanCheckAsync(recorded, ctx, ct))
+                return false;
+        }
+
+        return true;
     }
 
     private static async Task<IReadOnlyList<string>> EvaluateAsync(IssueRule rule, ServiceSet services, IReadOnlyDictionary<Guid, Guid?> ownSchemes, CancellationToken ct)

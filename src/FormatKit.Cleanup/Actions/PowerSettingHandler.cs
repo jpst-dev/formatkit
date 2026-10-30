@@ -6,9 +6,16 @@ using FormatKit.Core.Steps;
 namespace FormatKit.Cleanup.Actions;
 
 /// <summary>Sets one power setting (AC and optionally DC index) on the scheme that is active when the item is applied.</summary>
-internal sealed class PowerSettingHandler : IActionHandler
+internal sealed class PowerSettingHandler : IActionHandler, IRevertCheckable
 {
     public const string Type = "powerSetting";
+
+    /// <summary>The check reads the active scheme, so it says nothing about a journaled scheme that is no longer active.</summary>
+    public async Task<bool> CanCheckAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
+    {
+        var scheme = Guid.Parse(recorded.Previous.GetProperty("scheme").GetString()!);
+        return await ctx.Services.Power.GetActiveAsync(ct).ConfigureAwait(false) == scheme;
+    }
 
     /// <summary>A setting this machine does not have is not applied; capturing it reports the item as not present.</summary>
     public async Task<bool> IsAppliedAsync(CleanupAction action, StepContext ctx, CancellationToken ct)

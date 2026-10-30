@@ -320,6 +320,12 @@ reserved storage off. Each with the reason and source from the research.
   update turned the setting back or reinstalled the app). Each line names the
   item and the fix `formatkit run --profile <profile>` (re-applying is
   idempotent).
+  An item whose journaled target moved or disappeared is listed as "not
+  checked", not reverted: a `powerSetting` written to a scheme that is no
+  longer active (the user switched plans, or undid
+  `performance.formatkit-plan`), a `scheduledTask` that no longer exists, a
+  `startupItem` whose Run value is gone. The newest journal record of each
+  target counts.
 - Rules for 7.11's not-included changes when detectable (`serviceDisabled`
   for SysMain is informational, not "breaks").
 

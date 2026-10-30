@@ -5,9 +5,17 @@ using FormatKit.Core.Steps;
 
 namespace FormatKit.Cleanup.Actions;
 
-internal sealed class ScheduledTaskHandler : IActionHandler
+internal sealed class ScheduledTaskHandler : IActionHandler, IRevertCheckable
 {
     public const string Type = "scheduledTask";
+
+    /// <summary>A task that no longer exists (an update removed it) was not reverted.</summary>
+    public async Task<bool> CanCheckAsync(JournalAction recorded, StepContext ctx, CancellationToken ct)
+    {
+        var path = recorded.Previous.GetProperty("path").GetString()!;
+        var name = recorded.Previous.GetProperty("name").GetString()!;
+        return await ctx.Services.TaskControl.IsEnabledAsync(path, name, ct).ConfigureAwait(false) is not null;
+    }
 
     /// <summary>A missing task is not applied: capture then reports it as "not present".</summary>
     public async Task<bool> IsAppliedAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
