@@ -13,6 +13,7 @@ const item: CleanupItem = {
   contested: true,
   requiresReboot: true,
   laptopSensitive: true,
+  optIn: false,
   text: {
     en: { title: 'Remove X', what: String.raw`Use <b> & HKLM:\SOFTWARE\X`, breaks: 'Nothing & more', gain: 'Frees space' },
     'pt-BR': { title: 'Remover X', what: String.raw`Usa <b> & HKLM:\SOFTWARE\X`, breaks: 'Nada' },
@@ -130,4 +131,11 @@ test('index flags carry the same tones', async () => {
     const html = await render(CatalogIndex, { items: [{ ...item, level, contested: false, laptopSensitive: false, requiresReboot: false }], locale: 'en' });
     expect(html).toMatch(new RegExp(`class="fk-badge[^"]*"[^>]*data-tone="${tone}"|data-tone="${tone}"[^>]*class="fk-badge`));
   }
+});
+
+test('opt-in items show an amber Opt-in badge on the item page and the index', async () => {
+  const optIn = { ...item, contested: false, optIn: true };
+  expect(await render(CatalogItem, { item: optIn, locale: 'en' })).toMatch(/data-tone="amber">Opt-in</);
+  expect(await render(CatalogIndex, { items: [optIn], locale: 'pt-BR' })).toMatch(/data-tone="amber">Opcional</);
+  expect(await render(CatalogItem, { item: { ...optIn, optIn: false }, locale: 'en' })).not.toMatch(/Opt-in</);
 });

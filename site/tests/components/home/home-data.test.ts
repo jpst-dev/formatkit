@@ -14,6 +14,7 @@ function mk(id: string, category: string, order: number): CleanupItem {
     contested: false,
     requiresReboot: false,
     laptopSensitive: false,
+    optIn: false,
     text: { en: { title: id, what: 'w', breaks: 'b' }, 'pt-BR': { title: id, what: 'w', breaks: 'b' } },
     actions: [],
     evidence: null,
