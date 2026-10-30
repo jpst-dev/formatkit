@@ -1500,13 +1500,13 @@
         "en": {
           "title": "Use pt-BR with the US-International keyboard",
           "what": "Makes Portuguese (Brazil) the first language with only the United States-International keyboard, removing the ABNT and ABNT2 layouts from it. Other languages keep their order and keyboards.",
-          "breaks": "The ABNT2 layout is gone from Portuguese (Brazil): on an ABNT2 keyboard, keys such as Ç and the accents type other characters. Undo restores the previous language list.",
+          "breaks": "The ABNT2 layout is gone from Portuguese (Brazil): on an ABNT2 keyboard, keys such as Ç and the accents type other characters. Undo restores the previous languages, their order and keyboards. Apply and undo rebuild the list, so the spelling and handwriting options of each language go back to the Windows defaults.",
           "gain": "Accents typed on a US keyboard work as dead keys (' then a gives á), without switching layouts."
         },
         "pt-BR": {
           "title": "Usar pt-BR com o teclado Estados Unidos-Internacional",
           "what": "Deixa Português (Brasil) como primeiro idioma só com o teclado Estados Unidos-Internacional, removendo dele os layouts ABNT e ABNT2. Os outros idiomas mantêm a ordem e os teclados.",
-          "breaks": "O layout ABNT2 some do Português (Brasil): num teclado ABNT2, teclas como Ç e os acentos digitam outros caracteres. Desfazer restaura a lista de idiomas anterior.",
+          "breaks": "O layout ABNT2 some do Português (Brasil): num teclado ABNT2, teclas como Ç e os acentos digitam outros caracteres. Desfazer restaura os idiomas anteriores, a ordem e os teclados. Aplicar e desfazer recriam a lista, então as opções de ortografia e de escrita à mão de cada idioma voltam ao padrão do Windows.",
           "gain": "Acentos num teclado americano funcionam como teclas mortas (' e depois a dá á), sem trocar de layout."
         }
       },

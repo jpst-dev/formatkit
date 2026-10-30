@@ -475,3 +475,38 @@ processes, 98 running services, 2292 MB in use, 2.2 % CPU, against G4r's
 was still scanning 27 minutes after the restore; Widgets, WidgetService and
 OneDrive were not running, as in G4r. Recorded next to G4r in the research
 notes (`vm_measurements.md`, row WS1).
+
+Final review (2026-10-30), fixed without a VM run (unit tests with fakes):
+
+- `power.hibernation-off` undo runs `powercfg /hibernate on` when hibernation
+  was effectively on before (the journal now keeps the effective state), then
+  deletes `HibernateEnabled` if it was absent; a powercfg failure is a logged
+  warning (section 5.5).
+- `performance.spooler-off` re-run: the `noPrinter` condition is evaluated
+  only for an item not yet applied (section 5.1).
+- `startup.onedrive` with no Run value is "skipped: not present", not
+  "already in place" (section 5.3).
+- The Explorer restart kills and polls only the console session's
+  `explorer.exe` (section 5.1).
+- "Reverted by Windows" lists a moved or missing target as "not checked"
+  (section 9).
+- VM scenarios renumbered 28-30 in `docs/testing.md` (23-27 belong to the
+  installation media sub-project).
+
+Final review, accepted as is:
+
+- The dark theme leaves the taskbar light until the next sign-out or reboot
+  (described above). Section 7.7 flags are unchanged: `appearance.dark-theme`
+  does not restart Explorer, and its breaks text says some parts change only
+  after signing out.
+- `ServiceHandler` treats an absent service as applied (pre-existing, outside
+  this sub-project): `ai.fabric-service-manual` on a PC without
+  `WSAIFabricSvc` says "already in place". No harm; a later cleanup pass may
+  align it with `scheduledTask` ("not present").
+- With the journal missing, `info.non-built-in-power-scheme` names the
+  FormatKit plan (informational only; FormatKit's own schemes are recognized
+  through the journal, which is gone).
+- `input.ptbr-us-international`: the journal keeps each language's tag and
+  input methods only, so apply and undo rebuild the list from Windows defaults
+  and per-language spelling and handwriting options are lost. The item's
+  breaks text says so in `en` and `pt-BR`.
