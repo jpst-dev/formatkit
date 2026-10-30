@@ -9,7 +9,7 @@ public class PrepareChecksTests
 
         Assert.Equal(
             [
-                "security.bitlocker", "security.activation", "data.user-folders", "data.other-users", "data.volumes",
+                "security.bitlocker", "security.activation", "security.windows11-requirements", "data.user-folders", "data.other-users", "data.volumes",
                 "dev.git-repos", "dev.wsl", "dev.keys", "dev.devdrive",
                 "apps.programs-export", "apps.network-drivers", "apps.profile-inputs", "apps.browsers",
             ],

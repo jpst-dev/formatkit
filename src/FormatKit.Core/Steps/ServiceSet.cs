@@ -28,4 +28,8 @@ public sealed record ServiceSet(
     IVolumes Volumes,
     ILicensing Licensing,
     IScheduledTaskControl TaskControl,
-    IPrinters Printers);
+    IPrinters Printers,
+    IDiskImages DiskImages,
+    IWindowsImages WindowsImages,
+    IDisks Disks,
+    IWindowsReadiness Readiness);

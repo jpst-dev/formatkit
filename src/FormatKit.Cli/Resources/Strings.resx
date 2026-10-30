@@ -16,6 +16,7 @@
   <data name="Opt_Output" xml:space="preserve"><value>Folder that receives the exported drivers.</value></data>
   <data name="Opt_Profile" xml:space="preserve"><value>Path to the profile JSON file.</value></data>
   <data name="Opt_Resume" xml:space="preserve"><value>Resume the interrupted run.</value></data>
+  <data name="Opt_Countdown" xml:space="preserve"><value>Seconds to wait before starting; press Esc to cancel (used at first logon).</value></data>
   <data name="Cancelled" xml:space="preserve"><value>Cancelled.</value></data>
   <data name="Cancelled_Run" xml:space="preserve"><value>Cancelled. Run 'formatkit run --resume' to continue the run.</value></data>
   <data name="Elevation_Declined" xml:space="preserve"><value>The administrator permission was declined. Run the command again and accept the prompt, or start formatkit from an elevated terminal.</value></data>
@@ -45,6 +46,8 @@
   <data name="Profile_Errors" xml:space="preserve"><value>The profile has {0} problem(s); nothing was run:</value></data>
   <data name="Run_UsageBoth" xml:space="preserve"><value>Use either --profile or --resume, not both.</value></data>
   <data name="Run_UsageNeither" xml:space="preserve"><value>Specify --profile with a file, or --resume.</value></data>
+  <data name="Run_CountdownUsage" xml:space="preserve"><value>--countdown needs a number of seconds (0 or more) and cannot be combined with --resume or --dry-run.</value></data>
+  <data name="Run_CountdownCancelled" xml:space="preserve"><value>Automatic run cancelled. To run it later, use:&#10;  {0}</value></data>
   <data name="Run_NothingToResume" xml:space="preserve"><value>There is no interrupted run to resume.</value></data>
   <data name="Run_StateCorrupt" xml:space="preserve"><value>The saved run state is unreadable ({0}). Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
   <data name="Run_ProfileChanged" xml:space="preserve"><value>The profile changed since the run started, so it cannot be resumed. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
@@ -144,4 +147,55 @@
   <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Warning: {0} is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.</value></data>
   <data name="Prepare_OutputFailed" xml:space="preserve"><value>Could not write {0}: {1}</value></data>
   <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist saved to {0}</value></data>
+  <data name="Cmd_Media" xml:space="preserve"><value>Create Windows installation media.</value></data>
+  <data name="Cmd_MediaBuild" xml:space="preserve"><value>Build the installation media in a folder.</value></data>
+  <data name="Cmd_MediaUsb" xml:space="preserve"><value>Write the installation media to a USB stick (erases it).</value></data>
+  <data name="Opt_MediaIso" xml:space="preserve"><value>Windows 11 ISO file.</value></data>
+  <data name="Opt_MediaProfile" xml:space="preserve"><value>Profile JSON to run on the first logon (optional).</value></data>
+  <data name="Opt_MediaOutput" xml:space="preserve"><value>Folder to write the media to. It must not exist or be empty.</value></data>
+  <data name="Opt_MediaDisk" xml:space="preserve"><value>Number of the USB disk to erase and write.</value></data>
+  <data name="Opt_MediaAllowHardDisk" xml:space="preserve"><value>Also allow an external hard disk.</value></data>
+  <data name="Media_OutputNotEmpty" xml:space="preserve"><value>{0} already holds files. Choose a folder that does not exist or is empty.</value></data>
+  <data name="Media_NotEnoughSpace" xml:space="preserve"><value>Not enough free space on {0}: the media needs {1} and {2} is free.</value></data>
+  <data name="Media_OutputDriveUnreadable" xml:space="preserve"><value>Could not read the free space of {0}: {1}</value></data>
+  <data name="Media_MissingInput" xml:space="preserve"><value>{0}: the file or folder does not exist.</value></data>
+  <data name="Media_UnreadableInput" xml:space="preserve"><value>Could not read the folder {0}.</value></data>
+  <data name="Media_Phase_Copying" xml:space="preserve"><value>Copying the Windows files...</value></data>
+  <data name="Media_Phase_Splitting" xml:space="preserve"><value>Splitting install.wim for FAT32 (this takes a few minutes)...</value></data>
+  <data name="Media_Phase_WritingFormatKit" xml:space="preserve"><value>Writing FormatKit and the profile...</value></data>
+  <data name="Media_Phase_WritingAnswerFile" xml:space="preserve"><value>Writing autounattend.xml...</value></data>
+  <data name="Media_Phase_Done" xml:space="preserve"><value>Done.</value></data>
+  <data name="Media_Percent" xml:space="preserve"><value>  {0} %</value></data>
+  <data name="Media_BuildDone" xml:space="preserve"><value>The installation media is ready in {0}.</value></data>
+  <data name="Media_BuildIncomplete" xml:space="preserve"><value>The media in {0} is incomplete ({1}). Delete the folder and run the command again.</value></data>
+  <data name="Media_PrepareReminder" xml:space="preserve"><value>Before formatting a PC from this media, run 'formatkit prepare check' on that PC.</value></data>
+  <data name="Media_UsbListHeader" xml:space="preserve"><value>USB disks (choose one with --disk &lt;number&gt;):</value></data>
+  <data name="Media_UsbDiskTitle" xml:space="preserve"><value>Disk {0} - {1} {2} ({3}, {4})</value></data>
+  <data name="Media_UsbRemovable" xml:space="preserve"><value>removable</value></data>
+  <data name="Media_UsbFixed" xml:space="preserve"><value>not removable</value></data>
+  <data name="Media_UsbVolume" xml:space="preserve"><value>    {0}: {1}</value></data>
+  <data name="Media_UsbVolumeNoLetter" xml:space="preserve"><value>    (no letter) {0}</value></data>
+  <data name="Media_UsbNoVolumes" xml:space="preserve"><value>    (no volumes)</value></data>
+  <data name="Media_UsbEligible" xml:space="preserve"><value>    Can be used.</value></data>
+  <data name="Media_UsbNotUsable" xml:space="preserve"><value>    Cannot be used: {0}</value></data>
+  <data name="Media_UsbNoDisks" xml:space="preserve"><value>No USB disk was found.</value></data>
+  <data name="Media_UsbHardDisksHidden" xml:space="preserve"><value>{0} external hard disk(s) are hidden. Use --allow-hard-disk to include them.</value></data>
+  <data name="Media_UsbDiskNotFound" xml:space="preserve"><value>Disk {0} was not found.</value></data>
+  <data name="Media_UsbRefused" xml:space="preserve"><value>Disk {0} cannot be used: {1}</value></data>
+  <data name="Media_UsbRefusal_NotUsb" xml:space="preserve"><value>it is not on the USB bus.</value></data>
+  <data name="Media_UsbRefusal_BootOrSystem" xml:space="preserve"><value>it is the boot or system disk.</value></data>
+  <data name="Media_UsbRefusal_HardDisk" xml:space="preserve"><value>it is an external hard disk (use --allow-hard-disk to allow it).</value></data>
+  <data name="Media_UsbRefusal_HoldsSourceFiles" xml:space="preserve"><value>it holds files the media needs ({0}). Copy them to another drive first.</value></data>
+  <data name="Media_UsbRefusal_TooSmall" xml:space="preserve"><value>it is too small for the media.</value></data>
+  <data name="Media_UsbRefusal_NoUniqueId" xml:space="preserve"><value>Windows reports no unique ID for it, so it cannot be told apart from another stick plugged in later. Try another USB stick or port.</value></data>
+  <data name="Media_UsbEraseWarning" xml:space="preserve"><value>EVERYTHING on it will be erased.</value></data>
+  <data name="Media_UsbIsHardDisk" xml:space="preserve"><value>This is an external hard disk.</value></data>
+  <data name="Media_UsbTypeNumber" xml:space="preserve"><value>Type the disk number ({0}) to erase it and write the media. Anything else cancels: </value></data>
+  <data name="Media_UsbCancelled" xml:space="preserve"><value>Cancelled. Nothing was erased.</value></data>
+  <data name="Media_UsbNoConsole" xml:space="preserve"><value>Erasing a USB stick needs a console to type the confirmation. Nothing was erased.</value></data>
+  <data name="Media_UsbDiskChanged" xml:space="preserve"><value>Disk {0} changed or was unplugged since it was chosen. Nothing was erased. Run the command again.</value></data>
+  <data name="Media_UsbIncomplete" xml:space="preserve"><value>The USB stick is incomplete ({0}). Run the command again to fix it.</value></data>
+  <data name="Media_UsbDone" xml:space="preserve"><value>The USB stick is ready. Boot the PC to format from it.</value></data>
+  <data name="Media_UsbEraseFailed" xml:space="preserve"><value>The erase did not complete</value></data>
+  <data name="Media_UsbInterrupted" xml:space="preserve"><value>The USB write was interrupted</value></data>
 </root>

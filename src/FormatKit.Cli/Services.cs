@@ -19,7 +19,8 @@ public sealed record CliEnvironment(
     TimeSpan RebootCountdown,
     TimeSpan NetworkRetryDelay,
     string? SimulateRebootAfterStep = null,
-    FormatKit.Dev.DevEnvironment? Dev = null)
+    FormatKit.Dev.DevEnvironment? Dev = null,
+    StartCountdown? Countdown = null)
 {
     public HostEnvironment ToHost() => new(
         Services, Elevation, ScheduledTasks, Rebooter, Reports, StateStore, Log,

@@ -8,7 +8,7 @@ A clean install beats a cloned or "migrated" one. FormatKit does not restore an 
 
 ## Status
 
-Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist + graphical interface**.
+Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist + installation media + graphical interface**.
 
 Implemented:
 
@@ -20,9 +20,8 @@ Implemented:
 
 - Preparation checklist: `formatkit prepare check` lists what a reinstall would lose and what to save first (read-only, no elevation).
 
+- Installation media: `formatkit media build` and `formatkit media usb` make a Windows 11 installation folder or USB stick from the official ISO that installs Windows with an answer file and starts your profile on the first logon. See [Make the installation media](#make-the-installation-media).
 - Graphical interface: `FormatKitUI.exe`, a WPF window over the same engine (see [Graphical interface](#graphical-interface)).
-
-Planned (not available yet): installation media.
 
 ## **WARNING: this tool changes your system**
 
@@ -42,7 +41,7 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit drivers scan` | Scans for devices missing drivers. |
 | `formatkit drivers install [--dry-run]` | Installs drivers; with `--dry-run` only prints the plan. |
 | `formatkit drivers backup-network --output <dir>` | Exports the working network drivers to a folder (do this before formatting). |
-| `formatkit run --profile <file> [--dry-run]` | Runs a profile; with `--dry-run` prints the plan without changing anything. |
+| `formatkit run --profile <file> [--dry-run] [--countdown <s>]` | Runs a profile; with `--dry-run` prints the plan without changing anything. `--countdown <s>` waits that many seconds first and Esc cancels (used on the first logon after the installation media; not valid with `--resume` or `--dry-run`). |
 | `formatkit run --resume` | Resumes an interrupted run (used automatically after a reboot). |
 | `formatkit cleanup list [--level <l>] [--category <c>]` | Lists the cleanup catalog (`--verbose` adds what each item does, what it breaks and the gain). |
 | `formatkit cleanup check` | Diagnoses tweaks that already break or weaken this PC. Changes nothing, needs no elevation. |
@@ -53,6 +52,8 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit dev wsl-user [--profile <file>]` | Creates the WSL Linux user, lets you type its password and makes it the default user. Finishes an item a run left pending. |
 | `formatkit dev ssh-key [--profile <file>]` | Creates the SSH key (you type the passphrase), starts ssh-agent and loads the key. Asks for elevation to set ssh-agent to Automatic. |
 | `formatkit prepare check [--profile <file>] [--output <file.md>]` | Answers "is it safe to format?": lists what a reinstall would lose and what to save first. Changes nothing, needs no elevation. See [Before you format](#before-you-format). |
+| `formatkit media build --iso <iso> --output <folder> [--profile <file>]` | Writes the Windows 11 installation media to a folder. See [Make the installation media](#make-the-installation-media). |
+| `formatkit media usb --iso <iso> [--profile <file>] [--disk <n>] [--allow-hard-disk]` | Erases a USB stick you choose and writes the same media to it. Asks for elevation. |
 | `--verbose` (global) | Shows detailed logging. |
 
 Output language follows the Windows UI language (English and Brazilian Portuguese).
@@ -92,9 +93,21 @@ Output language follows the Windows UI language (English and Brazilian Portugues
   "name": "Example",
   "modules": {
     "drivers": { "enabled": true, "sources": ["windowsUpdate", "oem", "gpu"] }
+  },
+  // Used only by "formatkit media build" and "formatkit media usb"; "run" ignores it.
+  "setup": {
+    // "local" asks for a local account in Setup; "microsoft" keeps the online account screens. No password goes here.
+    "account": "local"
+    // "edition": "Windows 11 Pro",      // an edition in the ISO; omit to use the firmware key or Setup's edition screen
+    // "computerName": "PC-JOAO",        // 1-15 letters, digits or '-'
+    // "language": "pt-BR",              // must be a language of the ISO; default: your Windows language if the ISO has it
+    // "keyboard": "0416:00010416",      // default: this PC's keyboard
+    // "timeZone": "E. South America Standard Time"  // default: this PC's time zone
   }
 }
 ```
+
+Profiles may contain comments and trailing commas. The `setup` section is explained under [Make the installation media](#make-the-installation-media).
 
 Optional `modules.drivers.networkDriverBackup`: path to a folder created by `drivers backup-network`. If the machine is offline, the network check step installs the drivers from that folder with `pnputil`. Without it, an offline run stops with exit code 3. In JSON, backslashes must be doubled:
 
@@ -400,10 +413,12 @@ The check only looks at the user folders (Desktop, Documents, Pictures, Videos, 
 
 The checks, by group:
 
-- **Security and licenses:** `security.bitlocker`, `security.activation`.
+- **Security and licenses:** `security.bitlocker`, `security.activation`, `security.windows11-requirements`.
 - **Personal data:** `data.user-folders`, `data.other-users`, `data.volumes`.
 - **Developer:** `dev.git-repos`, `dev.wsl`, `dev.keys`, `dev.devdrive`.
 - **Apps and FormatKit:** `apps.programs-export`, `apps.network-drivers`, `apps.profile-inputs`, `apps.browsers`.
+
+`security.windows11-requirements` matters on Windows 10 only: it warns when this PC would not install Windows 11 as is (RAM below 4 GB, warned under 3.5 GiB as Windows reports it; not UEFI, Secure Boot off, no TPM 2.0), because the installation media does not bypass those requirements. FormatKit keeps no list of supported processors, so every warning points you to the PC Health Check app for the processor. The TPM version is read only in an administrator terminal; otherwise (or when it cannot be read) the item is Not checked and suggests `tpm.msc`. On Windows 11 it is Ok.
 
 In an elevated terminal the command also reads the BitLocker recovery protectors; otherwise it reports them as Not checked with the `manage-bde` command to run. It never elevates by itself.
 
@@ -417,6 +432,74 @@ In an elevated terminal the command also reads the BitLocker recovery protectors
 **Privacy:** the output and the log never contain Git remote URLs (only whether a remote exists), Windows product keys, BitLocker recovery keys or passwords. Only names, paths, sizes and counts are printed.
 
 **Known limitation:** on a PC whose Windows Storage provider is broken, a Dev Drive VHDX is not detected (disk numbers still come from a Win32 fallback), so `dev.devdrive` does not list it. Check any virtual disk stored on `C:` by hand.
+
+## Make the installation media
+
+After [Before you format](#before-you-format), FormatKit can make the stick you boot from. It builds an installation folder or USB stick from the **official Windows 11 x64 ISO** (you download it from Microsoft; FormatKit does not). Windows installs with an answer file, and after the first logon your profile runs by itself from `C:\FormatKit`. It covers one case: a UEFI Windows 11 x64 PC, using only tools that ship with Windows.
+
+```powershell
+formatkit media build --iso C:\iso\Win11.iso --profile E:\my-profile.json --output D:\media
+formatkit media usb   --iso C:\iso\Win11.iso --profile E:\my-profile.json            # lists the USB disks
+formatkit media usb   --iso C:\iso\Win11.iso --profile E:\my-profile.json --disk 3    # erases disk 3 after you type 3
+```
+
+Both commands ask for elevation first (UAC), so the work and the confirmation run in the elevated window, which waits for Enter at the end. Without `--profile` you get a plain Windows 11 stick that runs nothing on the first logon. `media build` needs an `--output` folder that does not exist or is empty, on any drive; it checks the free space first. Run `formatkit prepare check` on the target PC before you format it.
+
+### What the media contains
+
+- The files of the ISO, with `autounattend.xml` at the root.
+- `sources\install.wim` copied as is, or split into 3800 MB `install*.swm` parts when it is larger than 4 GiB minus 1 byte (FAT32 limit). An `install.esd` (Media Creation Tool ISOs) that large cannot be split and is refused.
+- With `--profile`, under `sources\$OEM$\$1\FormatKit` (Setup copies it to `C:\FormatKit`): `formatkit.exe`, `profile.json` and `inputs\`, a copy of every file and folder the profile reads (`programs.importFile`, `programs.direct[].path`, `drivers.networkDriverBackup`, `dev.dotfiles.path`). Paths in the copied profile point at `inputs\<n>-<name>`, so the run never depends on the stick. Symbolic links and junctions inside a copied folder are skipped. A missing or unreadable input is an error (exit code 2) and nothing is written.
+
+The ISO must be Windows 11 x64 (a Windows 10 or ARM64 ISO is refused). Setup is not told which disk to use and never gets a password.
+
+### Screens you still answer
+
+- The **disk** screen: choosing where Windows goes is the one decision that can destroy data, so you make it.
+- The **local account** screen (name and password), unless `setup.account` is `microsoft`, which keeps the online account screens.
+- The **edition** screen, unless the PC has a firmware key or the profile sets `setup.edition`.
+
+Everything else (language, keyboard, time zone, license terms, privacy choices) comes from the answer file.
+
+### The `setup` section
+
+Optional, at the top level of the profile next to `modules`. `run` ignores it; only `media` reads it.
+
+| Field | Rule | Default |
+| --- | --- | --- |
+| `account` | `local` or `microsoft`. | `local` |
+| `edition` | An image name in the ISO, such as `Windows 11 Pro`; Setup gets Microsoft's public generic installation key for it, which installs but does not activate. | none: the firmware key picks the edition, or Setup asks |
+| `computerName` | 1-15 letters, digits or `-`, not only digits. | none: Windows picks one |
+| `language` | A culture name such as `pt-BR`; must be a language of the image (an English ISO has no Portuguese display language). | your Windows language if the image has it, else the image's default language |
+| `keyboard` | An input locale (`0416:00010416`) or a culture name. | this PC's first keyboard layout |
+| `timeZone` | A Windows time zone id. | this PC's time zone |
+
+Unknown fields are errors, and there is no password field. A bad value or an edition or language the ISO does not have exits with code 2 before anything is written.
+
+### First logon
+
+With a profile, the first logon starts FormatKit in a visible console: "Starting the profile ... in 60 s (press Esc to cancel)...". Do nothing and the run proceeds (the UAC prompt appears only after the countdown, and reboots resume as usual). Esc prints the command to run later, waits for Enter and exits with code 0. Without a console the countdown is skipped. `C:\FormatKit` stays after the run; once it succeeds you can delete it.
+
+### Writing a USB stick: `media usb`
+
+`media usb` **erases the whole disk you choose**. It is built so it cannot erase one you did not clearly pick:
+
+- Without `--disk` it only lists the USB disks (number, model, size, bus, drive letters and labels) and exits with code 2. Nothing is erased.
+- It offers only removable USB sticks. External USB hard disks are hidden from the listing (it says how many) and need `--allow-hard-disk`. The boot and system disk are never offered.
+- It refuses a disk that holds the ISO, the profile or any input (copy them elsewhere first), or that is too small.
+- With `--disk <n>` it shows the disk and its volumes, then you must **type the disk number** at a console. Anything else cancels, and with no console it refuses. There is no `--yes`.
+- It lists the disks again after you answer and erases only if the same disk (number and unique id) still passes every rule, so a stick swapped meanwhile is not touched.
+- A failure or Ctrl+C after the erase starts reports an incomplete stick; run the command again to fix it. The erase itself cannot be undone.
+
+The stick is MBR with one active FAT32 partition labeled `FORMATKIT`, up to 32 GiB (Windows cannot format larger FAT32 volumes), which UEFI firmware boots with Secure Boot on. The rest of a larger stick stays unallocated. **Ventoy and similar multi-boot tools are not supported**: Ventoy ignores `autounattend.xml` at the root of the media.
+
+| Exit code | Meaning |
+| --- | --- |
+| 0 | Media written. |
+| 1 | Failed while writing (delete a partial `--output` folder and run again; a stick needs the command again). |
+| 2 | Invalid arguments, ISO, profile or `setup`; a missing input; not enough space; a disk that cannot be used; a refused or missing confirmation. |
+| 5 | The UAC prompt was declined. |
+| 130 | Cancelled with Ctrl+C. |
 
 ## Building
 
@@ -435,6 +518,6 @@ Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes an
 
 ## Resumo em português
 
-O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). A interface gráfica (`FormatKitUI.exe`, uma janela WPF sobre o mesmo motor, que só pede UAC ao executar um perfil) já está disponível; a mídia de instalação é planejada.
+O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). A interface gráfica (`FormatKitUI.exe`, uma janela WPF sobre o mesmo motor, que só pede UAC ao executar um perfil) já está disponível, assim como a mídia de instalação (`formatkit media build` e `formatkit media usb`: pendrive ou pasta de instalação do Windows 11 a partir da ISO oficial, com resposta automática e execução do perfil no primeiro logon).
 
-**Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. Códigos de saída: veja a tabela acima. Licença MIT.
+**Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. O `media usb` apaga o disco inteiro que você escolher, só depois de você digitar o número do disco. Códigos de saída: veja a tabela acima. Licença MIT.
