@@ -58,11 +58,11 @@ public class PowerSettingHandlerTests
     }
 
     [Fact]
-    public async Task Absent_setting_counts_as_applied_but_cannot_be_captured()
+    public async Task Absent_setting_is_not_applied_and_cannot_be_captured()
     {
         var (handler, power, ctx) = Create(absent: true);
 
-        Assert.True(await handler.IsAppliedAsync(Monitor15, ctx, Ct));
+        Assert.False(await handler.IsAppliedAsync(Monitor15, ctx, Ct));
         await Assert.ThrowsAsync<TargetNotPresentException>(() => handler.CaptureAsync(Monitor15, ctx, Ct));
         Assert.Empty(power.Writes);
     }

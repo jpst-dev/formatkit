@@ -10,14 +10,14 @@ internal sealed class PowerSettingHandler : IActionHandler
 {
     public const string Type = "powerSetting";
 
-    /// <summary>A setting this machine does not have counts as applied: there is nothing to change.</summary>
+    /// <summary>A setting this machine does not have is not applied; capturing it reports the item as not present.</summary>
     public async Task<bool> IsAppliedAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
     {
         var a = (PowerSettingAction)action;
         var power = ctx.Services.Power;
         var active = await power.GetActiveAsync(ct).ConfigureAwait(false);
         var current = await power.GetValueAsync(active, a.Subgroup, a.Setting, ct).ConfigureAwait(false);
-        return current is not { } value || Matches(a, value);
+        return current is { } value && Matches(a, value);
     }
 
     public async Task<JournalAction> CaptureAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
