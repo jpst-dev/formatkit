@@ -63,5 +63,6 @@
   "item.technical": "Detalhes técnicos",
   "item.technical.show": "Mostrar as ações",
   "item.technical.none": "Sem ações técnicas neste item.",
-  "item.back": "Voltar ao catálogo"
+  "item.back": "Voltar ao catálogo",
+  "home.stat.items": "ajustes no catálogo"
 }

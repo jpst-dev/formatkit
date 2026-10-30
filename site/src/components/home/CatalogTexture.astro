@@ -1,0 +1,56 @@
+---
+interface Props {
+  ids?: string[];
+}
+
+const props = Astro.props;
+let ids = props.ids;
+if (!ids) {
+  const { getCollection } = await import('astro:content');
+  ids = (await getCollection('cleanup')).map((e) => (e.data as { id: string }).id);
+}
+const sorted = [...ids].sort();
+let text = '';
+if (sorted.length > 0) {
+  const joined = sorted.join('  ');
+  while (text.length < 4000) text += joined + '  ';
+}
+---
+
+<div class="fk-texture" aria-hidden="true"><span class="fk-texture-text">{text}</span></div>
+
+<style>
+  .fk-texture {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.07;
+    color: var(--fk-green);
+    font-family: var(--fk-mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    word-break: break-all;
+  }
+  .fk-texture-text {
+    display: block;
+    animation: fk-texture-drift 60s linear infinite alternate;
+  }
+  @keyframes fk-texture-drift {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-20%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fk-texture-text {
+      animation: none;
+    }
+  }
+  :global(html[data-motion='off']) .fk-texture-text {
+    animation: none;
+  }
+</style>

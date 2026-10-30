@@ -1,0 +1,47 @@
+---
+interface Props {
+  num: string;
+  label: string;
+  id?: string;
+}
+const { num, label, id } = Astro.props;
+---
+
+<section class="fk-home-section" id={id}>
+  <div class="fk-home-section-head">
+    <span class="fk-home-section-num">{num}</span>
+    <span class="fk-label">{label}</span>
+  </div>
+  <div class="fk-home-section-body"><slot /></div>
+</section>
+
+<style>
+  .fk-home-section {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1.5rem;
+    padding: 3rem 0;
+    border-top: 1px solid var(--fk-rule);
+  }
+  .fk-home-section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .fk-home-section-num {
+    font-family: var(--fk-mono);
+    font-weight: 700;
+    color: var(--fk-green);
+  }
+  @media (max-width: 50rem) {
+    .fk-home-section {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .fk-home-section-head {
+      flex-direction: row;
+      gap: 0.75rem;
+      align-items: baseline;
+    }
+  }
+</style>

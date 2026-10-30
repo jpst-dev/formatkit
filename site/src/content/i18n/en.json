@@ -63,5 +63,6 @@
   "item.technical": "Technical details",
   "item.technical.show": "Show the actions",
   "item.technical.none": "No technical actions for this item.",
-  "item.back": "Back to the catalog"
+  "item.back": "Back to the catalog",
+  "home.stat.items": "tweaks in the catalog"
 }
