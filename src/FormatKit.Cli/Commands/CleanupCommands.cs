@@ -67,7 +67,7 @@ internal static class CleanupCommands
         var check = new Command("check", Strings.Get("Cmd_CleanupCheck"));
         check.SetAction(async (_, ct) => await Output.GuardSystemQueryAsync(context.Out, async () =>
         {
-            var report = await new CleanupDiagnosis(context.Issues, AppPaths.Default, context.Env.Log)
+            var report = await new CleanupDiagnosis(context.Issues, AppPaths.Default, context.Env.Log, context.Cleanup)
                 .RunAsync(context.Env.Services, ct);
             PrintCheck(context.Out, report);
             return report.Findings.Any(f => f.Issue.Severity is IssueSeverity.Breaks or IssueSeverity.Security)
@@ -91,6 +91,16 @@ internal static class CleanupCommands
                 o.WriteLine("  " + Strings.Format("Check_Finding", text.Title, finding.Detail));
                 o.WriteLine("    " + Strings.Format("Check_Breaks", text.Breaks));
                 o.WriteLine("    " + Strings.Format("Check_Fix", text.Fix));
+            }
+        }
+
+        if (report.RevertedByWindows.Count > 0)
+        {
+            o.WriteLine(Strings.Get("Check_Reverted"));
+            foreach (var item in report.RevertedByWindows)
+            {
+                o.WriteLine("  " + item.ItemId + (item.Checked ? "" : " " + Strings.Get("Check_Reverted_NotChecked")));
+                o.WriteLine("    " + Strings.Get("Check_Reverted_Fix"));
             }
         }
 

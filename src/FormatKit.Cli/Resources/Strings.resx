@@ -99,6 +99,9 @@
   <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
   <data name="Check_Applied" xml:space="preserve"><value>Applied cleanup items (revert with: formatkit cleanup undo &lt;id&gt;):</value></data>
+  <data name="Check_Reverted" xml:space="preserve"><value>Reverted by Windows (applied by cleanup, but the setting changed back):</value></data>
+  <data name="Check_Reverted_Fix" xml:space="preserve"><value>Fix: formatkit run --profile &lt;profile&gt;</value></data>
+  <data name="Check_Reverted_NotChecked" xml:space="preserve"><value>(not checked: could not read its current state)</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
   <data name="Check_UndoOtherUser" xml:space="preserve"><value>(undo as the user who applied it)</value></data>
   <data name="Check_NotChecked" xml:space="preserve"><value>{0} checks could not be run (see log).</value></data>

@@ -1,3 +1,5 @@
+using FormatKit.Cleanup.Actions;
+using FormatKit.Cleanup.Catalog;
 using FormatKit.Cleanup.Diagnosis;
 using FormatKit.Cleanup.Journal;
 using FormatKit.Core;
@@ -287,5 +289,90 @@ public class CleanupDiagnosisTests
         Assert.Equal("1", rule.NotEqualsValue);
         Assert.Equal(IssueSeverity.Security, issues.Issues[0].Severity);
         Assert.IsType<NonBuiltInPowerSchemeRule>(issues.Issues[1].Rule);
+    }
+
+    private const string Key = @"HKLM\Software\Test";
+
+    private sealed class ThrowingRegistry(Exception failure) : FakeRegistry
+    {
+        public override RegistryValue? Read(string path, string name) => throw failure;
+    }
+
+    private void SaveJournal(params JournalEntry[] entries) =>
+        new JournalStore(_files, _paths).Save(new CleanupJournal(1, [.. entries]));
+
+    private static JournalEntry Entry(string id, string? sid = null, DateTimeOffset? reverted = null) =>
+        new(id, DateTimeOffset.UtcNow, [], reverted, sid);
+
+    private Task<DiagnosisReport> RunWithCatalog(CleanupCatalog catalog, FakeRegistry registry) =>
+        new CleanupDiagnosis(Rules(), _paths, null, catalog).RunAsync(
+            TestServices.Create(files: _files, registry: registry, services: _services, power: _power, hardware: _hardware), Ct);
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_only_the_drifted_item()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]),
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.b", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "B", 0)]));
+        SaveJournal(Entry("privacy.a"), Entry("privacy.b"));
+        _registry.Set(Key, "A", RegistryKind.Dword, "0");
+        _registry.Set(Key, "B", RegistryKind.Dword, "1"); // Windows put it back
+
+        var report = await RunWithCatalog(catalog, _registry);
+
+        var item = Assert.Single(report.RevertedByWindows);
+        Assert.Equal(new RevertedItem("privacy.b", true), item);
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_ignores_items_missing_from_the_catalog_and_undone_entries()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]));
+        SaveJournal(Entry("privacy.gone"), Entry("privacy.a", reverted: DateTimeOffset.UtcNow));
+        _registry.Set(Key, "A", RegistryKind.Dword, "1");
+
+        var report = await RunWithCatalog(catalog, _registry);
+
+        Assert.Empty(report.RevertedByWindows);
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_an_unreadable_item_as_not_checked()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]));
+        SaveJournal(Entry("privacy.a"));
+
+        var report = await RunWithCatalog(catalog, new ThrowingRegistry(new UnauthorizedAccessException()));
+
+        Assert.Equal(new RevertedItem("privacy.a", false), Assert.Single(report.RevertedByWindows));
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_lists_an_absent_target_as_not_checked()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]));
+        SaveJournal(Entry("privacy.a"));
+
+        var report = await RunWithCatalog(catalog, new ThrowingRegistry(new TargetNotPresentException("A")));
+
+        Assert.Equal(new RevertedItem("privacy.a", false), Assert.Single(report.RevertedByWindows));
+    }
+
+    [Fact]
+    public async Task Reverted_by_windows_skips_items_applied_by_another_user()
+    {
+        var catalog = FormatKit.Cleanup.Tests.TestItems.NewCatalog(
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.a", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "A", 0)]),
+            FormatKit.Cleanup.Tests.TestItems.Item("privacy.b", actions: [FormatKit.Cleanup.Tests.TestItems.Dword(Key, "B", 0)]));
+        SaveJournal(Entry("privacy.a", "S-1-5-21-9-9-9-1002"), Entry("privacy.b", new FakeUserSession().CurrentUserSid));
+        _registry.Set(Key, "A", RegistryKind.Dword, "1");
+        _registry.Set(Key, "B", RegistryKind.Dword, "1");
+
+        var report = await RunWithCatalog(catalog, _registry);
+
+        Assert.Equal(["privacy.b"], report.RevertedByWindows.Select(r => r.ItemId));
     }
 }
