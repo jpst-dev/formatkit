@@ -1,0 +1,100 @@
+import { expect, test, vi } from 'vitest';
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import BootHero from '../../../src/components/home/BootHero.astro';
+
+vi.stubEnv('BASE_URL', '/formatkit/');
+
+async function render(props: Record<string, unknown>, slots?: Record<string, string>) {
+  const c = await AstroContainer.create();
+  return c.renderToString(BootHero, { props: { title: 'T', subtitle: 'S', lead: 'L', ...props }, slots });
+}
+
+test('en: links, prompt and default log', async () => {
+  const html = await render({ locale: 'en' });
+  expect(html).toContain('href="/formatkit/en/download/"');
+  expect(html).toContain('/formatkit/en/guide/before/');
+  expect(html).toContain('/formatkit/en/catalog/');
+  const code = html.match(/<code[^>]*>(.*?)<\/code>/s)![1];
+  expect(code.replace(/<[^>]+>/g, '')).toBe('formatkit run --profile cleanup-balanced.json --dry-run');
+  expect(code.match(/<span[^>]*class="[^"]*fk-tok/g)?.length).toBe(5);
+  expect(code).toContain('>--dry-run</span>');
+  expect(html).toContain('Hardware detected');
+  expect(html).toContain('Cleanup level balanced: plan ready');
+  expect(html.match(/\[ OK \]/g)?.length).toBe(4);
+  expect(html.match(/\[ \.\. \]/g)?.length).toBe(1);
+});
+
+test('pt-BR links and text', async () => {
+  const html = await render({ locale: 'pt-BR' });
+  expect(html).toContain('href="/formatkit/download/"');
+  expect(html).toContain('/formatkit/guide/before/');
+  expect(html).toContain('Hardware detectado');
+});
+
+test('custom logLines replace defaults', async () => {
+  const html = await render({ locale: 'en', logLines: [{ status: 'ok', text: 'Custom line' }] });
+  expect(html).toContain('Custom line');
+  expect(html).not.toContain('Hardware detected');
+  expect(html.match(/\[ OK \]/g)?.length).toBe(1);
+});
+
+test('motion button hidden and script reads fk-motion in try', async () => {
+  const html = await render({ locale: 'en' });
+  expect(html).toMatch(/<button[^>]*class="fk-motion[^"]*"[^>]*hidden[^>]*>\s*Pause motion\s*<\/button>/);
+  expect(html).toMatch(/try\s*\{[^}]*fk-motion/);
+});
+
+test('warn slot rendered', async () => {
+  const html = await render({ locale: 'en' }, { warn: '<span>WARNSLOT</span>' });
+  expect(html).toContain('WARNSLOT');
+});
+
+test('motion-off rules do not force opacity on the texture or on all hero children', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../../../src/components/home/BootHero.astro', import.meta.url), 'utf8');
+  const rules = [...src.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(
+    (m) => /prefers-reduced-motion|data-motion|\.fk-hero \*|\.fk-log-lines li/.test(m[1]) && /opacity/.test(m[2]),
+  );
+  expect(rules.length).toBeGreaterThan(0);
+  for (const r of rules) {
+    expect(r[1]).not.toMatch(/\.fk-hero \*/);
+    expect(r[1]).toMatch(/\.fk-log-lines li/);
+  }
+});
+
+test('warn line sits below the hero grid, outside the log box', async () => {
+  const html = await render({ locale: 'en' }, { warn: '<span>WARNSLOT</span>' });
+  const warn = html.indexOf('WARNSLOT');
+  expect(warn).toBeGreaterThan(html.indexOf('fk-hero-grid'));
+  expect(html.slice(html.indexOf('fk-log-lines'), html.indexOf('</ul>'))).not.toContain('WARNSLOT');
+  expect(html).toMatch(/<p class="fk-warn[^"]*"[^>]*>\s*<span>WARNSLOT/);
+});
+
+test('guide link text has no arrow of its own', async () => {
+  const html = await render({ locale: 'en' });
+  expect(html).not.toContain('↓');
+});
+
+test('motion button has no aria-pressed (label swap only)', async () => {
+  const html = await render({ locale: 'en' });
+  expect(html).not.toContain('aria-pressed');
+});
+
+test('hero h1 size rule, reduced-motion hides the toggle, no dead texture selectors', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../../../src/components/home/BootHero.astro', import.meta.url), 'utf8');
+  expect(src).toMatch(/\.fk-hero h1\s*\{[^}]*clamp\(2\.25rem, 7vw, 4\.5rem\)/);
+  expect(src).not.toContain('.fk-texture');
+  expect(src).toMatch(/prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.fk-motion\s*\{\s*display: none/);
+});
+
+test('no literal arrow inside .fk-link-dim links (the ::after adds it)', async () => {
+  const { readFileSync } = await import('node:fs');
+  for (const f of ['../../../src/content/docs/index.mdx', '../../../src/content/docs/en/index.mdx', '../../../src/components/home/BootHero.astro']) {
+    const src = readFileSync(new URL(f, import.meta.url), 'utf8');
+    const links = [...src.matchAll(/<a[^>]*fk-link-dim[^>]*>([^<]*)<\/a>/g)];
+    for (const m of links) expect(m[1]).not.toMatch(/[→↓]/);
+  }
+  const html = await render({ locale: 'en' });
+  expect(html).not.toMatch(/fk-link-dim[^>]*>[^<]*[→↓]\s*<\/a>/);
+});

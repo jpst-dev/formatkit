@@ -1,0 +1,21 @@
+---
+title: Recomendações
+description: Boas práticas antes e depois de reinstalar o Windows, e o catálogo de programas do FormatKit.
+---
+
+import ProgramList from '../../components/ProgramList.astro';
+
+## Boas práticas
+
+- **Guarde seus dados fora do disco do Windows** antes de formatar. Rode `formatkit prepare check` no Windows antigo; veja o [passo a passo](/formatkit/guide/before/).
+- **Faça backup com regularidade**, não só antes de reinstalar. Mantenha uma cópia em outro disco ou na nuvem.
+- **Use um gerenciador de senhas** e anote onde está a chave de recuperação do BitLocker, se você usa BitLocker.
+- **Mantenha o Windows e os drivers atualizados.** O FormatKit instala drivers; o Windows Update continua cuidando das atualizações.
+- **Comece pelo nível `safe` na limpeza.** Só suba para `balanced` ou `aggressive` se você souber o que cada item muda. Rode `formatkit cleanup list --verbose` para ver o que cada um faz e o que pode quebrar, e leia a página [Segurança e desfazer](/formatkit/safety/).
+- **Teste em uma máquina virtual** e use `--dry-run` antes de uma execução de verdade.
+
+## Catálogo de programas
+
+Estes são os programas do catálogo embutido, agrupados por categoria. A lista é gerada do arquivo `programs.json` do FormatKit: nome, descrição e origem, sem ordem de preferência. Você usa o `id` do catálogo no perfil (`formatkit programs list` mostra todos) ou instala qualquer outro pacote do winget pela seção `winget`.
+
+<ProgramList />

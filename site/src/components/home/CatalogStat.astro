@@ -1,0 +1,81 @@
+---
+import type { CleanupItem } from '../../loaders/cleanup';
+import { sortForIndex } from '../../loaders/cleanup';
+import { labelFor } from '../../lib/labels';
+import { labelsFor, localeFromAstro, t } from '../../lib/text';
+import type { SiteLocale } from '../../lib/text';
+
+interface Props {
+  locale?: SiteLocale;
+  items?: CleanupItem[];
+}
+
+const props = Astro.props;
+let items = props.items;
+if (!items) {
+  const { getCollection } = await import('astro:content');
+  items = (await getCollection('cleanup')).map((e) => e.data as CleanupItem);
+}
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+const cats = [...sortForIndex(items)].map(([category, list]) => ({
+  label: labelFor('category', category, labels),
+  count: list.length,
+}));
+---
+
+<div class="fk-stat">
+  <p class="fk-stat-total">{items.length}</p>
+  <p class="fk-stat-caption">{t(locale, 'home.stat.items')}</p>
+  <ul class="fk-stat-cats">
+    {
+      cats.map((c) => (
+        <li class="fk-stat-cat">
+          <span class="fk-stat-name">{c.label}</span>
+          <span class="fk-stat-count">{c.count}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .fk-stat-total {
+    margin: 0;
+    font-family: var(--fk-mono);
+    font-weight: 900;
+    font-size: clamp(5rem, 18vw, 10rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fk-green);
+    background-image: repeating-linear-gradient(0deg, var(--fk-green) 0 1px, transparent 1px 4px);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .fk-stat-caption {
+    margin: 0.5rem 0 1.5rem;
+    font-family: var(--fk-mono);
+    color: var(--fk-dim);
+  }
+  .fk-stat-cats {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+  }
+  .fk-stat-cat {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    font-family: var(--fk-mono);
+  }
+  .fk-stat-name {
+    color: var(--fk-body);
+  }
+  .fk-stat-count {
+    color: var(--fk-green);
+    font-weight: 700;
+  }
+</style>

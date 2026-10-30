@@ -17,7 +17,6 @@
   <data name="Opt_Profile" xml:space="preserve"><value>Path to the profile JSON file.</value></data>
   <data name="Opt_Resume" xml:space="preserve"><value>Resume the interrupted run.</value></data>
   <data name="Opt_Countdown" xml:space="preserve"><value>Seconds to wait before starting; press Esc to cancel (used at first logon).</value></data>
-  <data name="Error_Wmi" xml:space="preserve"><value>Could not read the system information: {0}</value></data>
   <data name="Cancelled" xml:space="preserve"><value>Cancelled.</value></data>
   <data name="Cancelled_Run" xml:space="preserve"><value>Cancelled. Run 'formatkit run --resume' to continue the run.</value></data>
   <data name="Elevation_Declined" xml:space="preserve"><value>The administrator permission was declined. Run the command again and accept the prompt, or start formatkit from an elevated terminal.</value></data>
@@ -87,10 +86,11 @@
   <data name="Cmd_CleanupCheck" xml:space="preserve"><value>Check for known problems left by tweaks and list applied cleanup items (read-only).</value></data>
   <data name="Cmd_CleanupUndo" xml:space="preserve"><value>Revert cleanup items recorded in the journal.</value></data>
   <data name="Opt_CleanupLevel" xml:space="preserve"><value>Show items up to this level (safe, balanced or aggressive).</value></data>
-  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Show only this category (apps, privacy, performance or developer).</value></data>
+  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Show only this category (apps, startup, privacy, ai, interface, appearance, input, sound, performance, power or developer).</value></data>
   <data name="Opt_UndoAll" xml:space="preserve"><value>Revert every applied cleanup item.</value></data>
   <data name="Arg_UndoIds" xml:space="preserve"><value>Ids of the cleanup items to revert.</value></data>
   <data name="Marker_Contested" xml:space="preserve"><value>contested</value></data>
+  <data name="Marker_OptIn" xml:space="preserve"><value>opt-in</value></data>
   <data name="List_What" xml:space="preserve"><value>What: {0}</value></data>
   <data name="List_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
   <data name="List_Gain" xml:space="preserve"><value>Gain: {0}</value></data>
@@ -103,6 +103,9 @@
   <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
   <data name="Check_Applied" xml:space="preserve"><value>Applied cleanup items (revert with: formatkit cleanup undo &lt;id&gt;):</value></data>
+  <data name="Check_Reverted" xml:space="preserve"><value>Reverted by Windows (applied by cleanup, but the setting changed back):</value></data>
+  <data name="Check_Reverted_Fix" xml:space="preserve"><value>Fix: formatkit run --profile &lt;profile&gt;</value></data>
+  <data name="Check_Reverted_NotChecked" xml:space="preserve"><value>(not checked: could not read its current state)</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
   <data name="Check_UndoOtherUser" xml:space="preserve"><value>(undo as the user who applied it)</value></data>
   <data name="Check_NotChecked" xml:space="preserve"><value>{0} checks could not be run (see log).</value></data>

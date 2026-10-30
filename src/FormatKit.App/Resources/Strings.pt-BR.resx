@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>FormatKit</value></data>
+  <data name="Reboot_Title" xml:space="preserve"><value>Reinicialização necessária</value></data>
+  <data name="Reboot_Countdown" xml:space="preserve"><value>O PC reinicia em {0} segundos para continuar a execução.</value></data>
+  <data name="Reboot_Now" xml:space="preserve"><value>Reiniciar agora</value></data>
+  <data name="Reboot_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Error_Unhandled" xml:space="preserve"><value>Erro inesperado: {0}</value></data>
+  <data name="Nav_Home" xml:space="preserve"><value>Início</value></data>
+  <data name="Nav_Checklist" xml:space="preserve"><value>Checklist</value></data>
+  <data name="Nav_RunProfile" xml:space="preserve"><value>Executar perfil</value></data>
+  <data name="Nav_Hardware" xml:space="preserve"><value>Hardware</value></data>
+  <data name="Nav_CleanupDiagnosis" xml:space="preserve"><value>Diagnóstico de limpeza</value></data>
+  <data name="Nav_Catalogs" xml:space="preserve"><value>Catálogos</value></data>
+  <data name="Nav_Media" xml:space="preserve"><value>Mídia de instalação</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>Sobre</value></data>
+  <data name="Home_Intro" xml:space="preserve"><value>O FormatKit prepara a reinstalação do Windows e reconstrói a máquina depois. Ele verifica o que poderia ser perdido antes de formatar e depois instala drivers, programas e configurações a partir de um perfil JSON.</value></data>
+  <data name="Home_Before_Title" xml:space="preserve"><value>Antes de formatar</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Rode o checklist para ver o que seria perdido.</value></data>
+  <data name="Home_Before_Checklist" xml:space="preserve"><value>Abrir Checklist</value></data>
+  <data name="Home_After_Title" xml:space="preserve"><value>Depois de formatar</value></data>
+  <data name="Home_After_Text" xml:space="preserve"><value>Execute o seu perfil para instalar drivers e programas e aplicar as configurações.</value></data>
+  <data name="Home_After_Run" xml:space="preserve"><value>Abrir Executar perfil</value></data>
+  <data name="Home_Warning" xml:space="preserve"><value>O FormatKit altera o sistema e pode reiniciar o computador. Teste primeiro em uma máquina virtual.</value></data>
+  <data name="Home_Interrupted" xml:space="preserve"><value>Uma execução foi interrompida antes de terminar. Você pode retomá-la de onde parou.</value></data>
+  <data name="Home_Resume" xml:space="preserve"><value>Retomar</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Versão</value></data>
+  <data name="About_Repository" xml:space="preserve"><value>Repositório</value></data>
+  <data name="About_OpenLogs" xml:space="preserve"><value>Abrir pasta de logs</value></data>
+  <data name="About_CliTitle" xml:space="preserve"><value>Comandos disponíveis só na linha de comando (por enquanto)</value></data>
+  <data name="About_Cli_cleanup_undo" xml:space="preserve"><value>Desfaz as alterações de uma limpeza a partir do diário.</value></data>
+  <data name="About_Cli_drivers_backup_network" xml:space="preserve"><value>Salva os drivers de rede para reinstalar sem internet.</value></data>
+  <data name="About_Cli_programs_export" xml:space="preserve"><value>Grava os programas instalados em uma lista reutilizável em um perfil.</value></data>
+  <data name="About_Cli_programs_search" xml:space="preserve"><value>Procura um programa no catálogo de pacotes.</value></data>
+  <data name="About_Cli_dev_wsl_user" xml:space="preserve"><value>Cria o usuário Linux dentro de uma distribuição WSL.</value></data>
+  <data name="About_Cli_dev_ssh_key" xml:space="preserve"><value>Cria uma chave SSH e mostra a parte pública.</value></data>
+  <data name="Placeholder_Soon" xml:space="preserve"><value>Esta página chega em uma etapa posterior.</value></data>
+  <data name="Hw_Machine" xml:space="preserve"><value>Máquina</value></data>
+  <data name="Hw_Board" xml:space="preserve"><value>Placa-mãe</value></data>
+  <data name="Hw_Bios" xml:space="preserve"><value>BIOS</value></data>
+  <data name="Hw_Gpus" xml:space="preserve"><value>GPUs</value></data>
+  <data name="Hw_ProblemDevices" xml:space="preserve"><value>Dispositivos com problema</value></data>
+  <data name="Hw_NetworkAdapters" xml:space="preserve"><value>Adaptadores de rede</value></data>
+  <data name="Hw_None" xml:space="preserve"><value>nenhum</value></data>
+  <data name="Hw_Unknown" xml:space="preserve"><value>desconhecido</value></data>
+  <data name="Hw_Gpu" xml:space="preserve"><value>{0} (driver {1})</value></data>
+  <data name="Hw_Problem" xml:space="preserve"><value>{0} (código de erro {1})</value></data>
+  <data name="Hw_Adapter" xml:space="preserve"><value>{0} (inf {1}, driver {2})</value></data>
+  <data name="Hw_Refresh" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="Hw_ScanButton" xml:space="preserve"><value>Procurar drivers</value></data>
+  <data name="Hw_ScanTitle" xml:space="preserve"><value>Busca de drivers</value></data>
+  <data name="Scan_MachineType" xml:space="preserve"><value>Tipo de máquina</value></data>
+  <data name="Scan_Oem" xml:space="preserve"><value>OEM ({0})</value></data>
+  <data name="Scan_Board" xml:space="preserve"><value>Montada (suporte da placa: {0})</value></data>
+  <data name="Scan_Custom" xml:space="preserve"><value>Montada (sem ferramenta OEM)</value></data>
+  <data name="Scan_Online" xml:space="preserve"><value>Online</value></data>
+  <data name="Scan_Updates" xml:space="preserve"><value>Drivers do Windows Update</value></data>
+  <data name="Scan_GpuPackages" xml:space="preserve"><value>Pacotes de GPU</value></data>
+  <data name="Scan_WuError" xml:space="preserve"><value>A busca no Windows Update falhou: {0}</value></data>
+  <data name="Value_Yes" xml:space="preserve"><value>sim</value></data>
+  <data name="Value_No" xml:space="preserve"><value>não</value></data>
+  <data name="Check_Group_Breaks" xml:space="preserve"><value>Quebra recursos do Windows:</value></data>
+  <data name="Check_Group_Security" xml:space="preserve"><value>Riscos de segurança:</value></data>
+  <data name="Check_Group_Contested" xml:space="preserve"><value>Ajustes contestados:</value></data>
+  <data name="Check_Group_Info" xml:space="preserve"><value>Para sua informação:</value></data>
+  <data name="Check_NoFindings" xml:space="preserve"><value>Nenhum problema conhecido encontrado.</value></data>
+  <data name="Check_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
+  <data name="Check_Fix" xml:space="preserve"><value>Correção: {0}</value></data>
+  <data name="Diag_Refresh" xml:space="preserve"><value>Verificar novamente</value></data>
+  <data name="Checklist_Intro" xml:space="preserve"><value>Verifica o que a formatação apagaria ou quebraria. Escolha um perfil para verificar também os arquivos que ele usa.</value></data>
+  <data name="Checklist_Profile" xml:space="preserve"><value>Perfil (opcional)</value></data>
+  <data name="Checklist_NoProfile" xml:space="preserve"><value>Nenhum perfil selecionado</value></data>
+  <data name="Checklist_Browse" xml:space="preserve"><value>Escolher perfil...</value></data>
+  <data name="Checklist_Clear" xml:space="preserve"><value>Limpar</value></data>
+  <data name="Checklist_Check" xml:space="preserve"><value>Verificar</value></data>
+  <data name="Checklist_Save" xml:space="preserve"><value>Salvar como Markdown...</value></data>
+  <data name="Checklist_ProfileErrors" xml:space="preserve"><value>O perfil não é válido:</value></data>
+  <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Aviso: {0} está em uma unidade que a formatação vai apagar, então o checklist será perdido. Copie-o para outro lugar.</value></data>
+  <data name="Prepare_OutputFailed" xml:space="preserve"><value>Não foi possível gravar {0}: {1}</value></data>
+  <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist salvo em {0}</value></data>
+  <data name="Cat_TabCleanup" xml:space="preserve"><value>Limpeza</value></data>
+  <data name="Cat_TabPrograms" xml:space="preserve"><value>Programas</value></data>
+  <data name="Cat_All" xml:space="preserve"><value>Todos</value></data>
+  <data name="Cat_Level" xml:space="preserve"><value>Nível: {0}</value></data>
+  <data name="Cat_LevelFilter" xml:space="preserve"><value>Nível</value></data>
+  <data name="Cat_CategoryFilter" xml:space="preserve"><value>Categoria</value></data>
+  <data name="Cat_Search" xml:space="preserve"><value>Buscar por id ou título</value></data>
+  <data name="Cat_SelectHint" xml:space="preserve"><value>Selecione um item para ver os detalhes.</value></data>
+  <data name="Cat_What" xml:space="preserve"><value>O que faz: {0}</value></data>
+  <data name="Cat_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
+  <data name="Cat_Gain" xml:space="preserve"><value>Ganho: {0}</value></data>
+  <data name="Cat_Contested" xml:space="preserve"><value>Ajuste contestado</value></data>
+  <data name="Cat_Laptop" xml:space="preserve"><value>Sensível em notebooks</value></data>
+  <data name="Cat_OptIn" xml:space="preserve"><value>Opcional: só é aplicado quando o perfil o lista em include</value></data>
+  <data name="Cat_OptInBadge" xml:space="preserve"><value>opcional</value></data>
+  <data name="Cat_Winget" xml:space="preserve"><value>id do winget: {0}</value></data>
+  <data name="Cat_Source" xml:space="preserve"><value>Fonte: {0}</value></data>
+  <data name="Cat_Context" xml:space="preserve"><value>Instala para: {0}</value></data>
+  <data name="Cat_Context_Machine" xml:space="preserve"><value>a máquina</value></data>
+  <data name="Cat_Context_User" xml:space="preserve"><value>o usuário atual</value></data>
+  <data name="Level_Safe" xml:space="preserve"><value>Seguro</value></data>
+  <data name="Level_Balanced" xml:space="preserve"><value>Equilibrado</value></data>
+  <data name="Level_Aggressive" xml:space="preserve"><value>Agressivo</value></data>
+  <data name="CleanupCategory_Apps" xml:space="preserve"><value>Aplicativos</value></data>
+  <data name="CleanupCategory_Privacy" xml:space="preserve"><value>Privacidade</value></data>
+  <data name="CleanupCategory_Performance" xml:space="preserve"><value>Desempenho</value></data>
+  <data name="CleanupCategory_Startup" xml:space="preserve"><value>Inicialização</value></data>
+  <data name="CleanupCategory_Ai" xml:space="preserve"><value>IA</value></data>
+  <data name="CleanupCategory_Interface" xml:space="preserve"><value>Interface</value></data>
+  <data name="CleanupCategory_Appearance" xml:space="preserve"><value>Aparência</value></data>
+  <data name="CleanupCategory_Input" xml:space="preserve"><value>Entrada</value></data>
+  <data name="CleanupCategory_Sound" xml:space="preserve"><value>Som</value></data>
+  <data name="CleanupCategory_Power" xml:space="preserve"><value>Energia</value></data>
+  <data name="CleanupCategory_Developer" xml:space="preserve"><value>Desenvolvedor</value></data>
+  <data name="ProgramCategory_Browsers" xml:space="preserve"><value>Navegadores</value></data>
+  <data name="ProgramCategory_Communication" xml:space="preserve"><value>Comunicação</value></data>
+  <data name="ProgramCategory_Games" xml:space="preserve"><value>Jogos</value></data>
+  <data name="ProgramCategory_Media" xml:space="preserve"><value>Mídia</value></data>
+  <data name="ProgramCategory_Utilities" xml:space="preserve"><value>Utilitários</value></data>
+  <data name="ProgramCategory_Productivity" xml:space="preserve"><value>Produtividade</value></data>
+  <data name="ProgramCategory_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
+  <data name="Check_NotChecked" xml:space="preserve"><value>{0} verificações não puderam ser executadas (veja o log).</value></data>
+  <data name="Check_JournalError" xml:space="preserve"><value>O diário de limpeza não pôde ser lido: {0}</value></data>
+  <data name="Worker_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde que você o revisou. Revise-o novamente.</value></data>
+  <data name="Worker_ProfileErrors" xml:space="preserve"><value>O perfil tem {0} problema(s); nada foi executado:</value></data>
+  <data name="Worker_Stopped" xml:space="preserve"><value>Parado após a etapa atual. Use Retomar para continuar a execução.</value></data>
+  <data name="Worker_InvalidJob" xml:space="preserve"><value>O processo de execução foi iniciado com uma tarefa inválida: {0}</value></data>
+  <data name="Worker_Error" xml:space="preserve"><value>A execução parou por causa de um erro: {0}</value></data>
+  <data name="RunProfile_Intro" xml:space="preserve"><value>Escolha o perfil a executar. Você revisa o plano antes de qualquer alteração.</value></data>
+  <data name="RunProfile_Open" xml:space="preserve"><value>Abrir um perfil...</value></data>
+  <data name="RunProfile_DriversOnly" xml:space="preserve"><value>Somente drivers</value></data>
+  <data name="RunProfile_DriversOnlyHint" xml:space="preserve"><value>Instala os drivers de que esta máquina precisa, sem um arquivo de perfil.</value></data>
+  <data name="RunProfile_LastProfile" xml:space="preserve"><value>Último perfil</value></data>
+  <data name="RunProfile_UseLast" xml:space="preserve"><value>Usar</value></data>
+  <data name="RunProfile_Errors" xml:space="preserve"><value>Este perfil tem erros</value></data>
+  <data name="RunProfile_Plan" xml:space="preserve"><value>Plano</value></data>
+  <data name="RunProfile_Admin" xml:space="preserve"><value>administrador</value></data>
+  <data name="RunProfile_NeedsAdmin" xml:space="preserve"><value>Este plano exige direitos de administrador. O Windows pede permissão quando a execução começa.</value></data>
+  <data name="RunProfile_NoSteps" xml:space="preserve"><value>Este perfil não habilita nada para executar.</value></data>
+  <data name="RunProfile_Reload" xml:space="preserve"><value>Recarregar</value></data>
+  <data name="RunProfile_ChooseAnother" xml:space="preserve"><value>Escolher outro perfil</value></data>
+  <data name="RunProfile_Run" xml:space="preserve"><value>Executar</value></data>
+  <data name="RunProfile_ConfirmTitle" xml:space="preserve"><value>Executar o perfil</value></data>
+  <data name="RunProfile_ConfirmRun" xml:space="preserve"><value>Isto altera o sistema e pode reiniciar o computador. Executar o perfil agora?</value></data>
+  <data name="RunProfile_StepDoneBefore" xml:space="preserve"><value>Concluído antes da parada ou do reinício.</value></data>
+  <data name="RunProfile_UacDeclined" xml:space="preserve"><value>A permissão de administrador foi recusada. Nada foi alterado.</value></data>
+  <data name="RunProfile_StartFailed" xml:space="preserve"><value>Não foi possível iniciar a execução: {0}</value></data>
+  <data name="RunProfile_Progress" xml:space="preserve"><value>Executando</value></data>
+  <data name="RunProfile_Result" xml:space="preserve"><value>Resultado</value></data>
+  <data name="RunProfile_Stop" xml:space="preserve"><value>Parar</value></data>
+  <data name="RunProfile_StopHint" xml:space="preserve"><value>Parar espera a etapa atual terminar.</value></data>
+  <data name="RunProfile_StopTitle" xml:space="preserve"><value>Há uma execução em andamento</value></data>
+  <data name="RunProfile_StopQuestion" xml:space="preserve"><value>Parar após a etapa atual?</value></data>
+  <data name="RunProfile_UnexpectedEnd" xml:space="preserve"><value>A execução terminou inesperadamente.</value></data>
+  <data name="RunProfile_CanResume" xml:space="preserve"><value>A execução pode ser retomada de onde parou.</value></data>
+  <data name="RunProfile_OpenReport" xml:space="preserve"><value>Abrir pasta do relatório</value></data>
+  <data name="RunProfile_OpenLogs" xml:space="preserve"><value>Abrir pasta de logs</value></data>
+  <data name="StepState_Pending" xml:space="preserve"><value>Pendente</value></data>
+  <data name="StepState_Running" xml:space="preserve"><value>Executando</value></data>
+  <data name="StepState_Succeeded" xml:space="preserve"><value>Sucesso</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>Ignorado</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>Falhou</value></data>
+  <data name="StepState_RebootRequired" xml:space="preserve"><value>Requer reinício</value></data>
+  <data name="Run_NothingToResume" xml:space="preserve"><value>Não há execução interrompida para retomar.</value></data>
+  <data name="Run_StateCorrupt" xml:space="preserve"><value>O estado salvo da execução está ilegível ({0}). Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_ProfileChanged" xml:space="preserve"><value>O perfil mudou desde o início da execução, então ela não pode ser retomada. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>Não foi possível usar o perfil registrado para a execução interrompida. Inicie uma nova execução com: formatkit run --profile &lt;arquivo&gt;</value></data>
+  <data name="Run_Status_Completed" xml:space="preserve"><value>Execução concluída.</value></data>
+  <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Execução concluída com falhas.</value></data>
+  <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Execução interrompida por uma falha crítica.</value></data>
+  <data name="Run_RebootPending" xml:space="preserve"><value>A execução continuará automaticamente no próximo logon. Você pode reiniciar agora ou depois.</value></data>
+  <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Não foi possível agendar a retomada automática. Após reiniciar, execute `formatkit run --resume`.</value></data>
+  <data name="Run_NextAction" xml:space="preserve"><value>Próximo passo: {0}</value></data>
+  <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>Se a janela de console que abriu pedir algo, digite lá.</value></data>
+  <data name="RunProfile_Resume" xml:space="preserve"><value>Retomar</value></data>
+</root>

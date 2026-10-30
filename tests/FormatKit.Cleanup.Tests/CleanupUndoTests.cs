@@ -167,6 +167,57 @@ public class CleanupUndoTests
         Assert.All(_journal.Load().Journal!.Entries, e => Assert.NotNull(e.RevertedAt));
     }
 
+    private ItemApplier PowerApplier() => new(
+        new ActionHandlers(
+            () => PowerSchemeHandler.CreatedSchemes(_journal.Load().Journal),
+            () => PowerSchemeHandler.FormatKitSchemes(_journal.Load().Journal)),
+        _journal);
+
+    private static CleanupItem FormatKitItem() =>
+        Item("performance.formatkit-plan", CleanupLevel.Aggressive, actions: new PowerSchemeAction("formatkit"));
+
+    [Fact]
+    public async Task FormatKit_plan_applied_then_drift_repaired_then_undone_ends_on_the_original_scheme()
+    {
+        var power = new FakePowerSchemes();
+        foreach (var s in PowerSchemeHandler.FormatKitSettings)
+            power.SetStored(power.NextCreated, s.Subgroup, s.Setting, 1, 1);
+        var ctx = TestServices.Context(TestServices.Create(files: _files, power: power));
+        var item = FormatKitItem();
+
+        await PowerApplier().ApplyAsync(item, ctx, Ct);
+        var created = power.Active;
+        var drifted = PowerSchemeHandler.FormatKitSettings[0];
+        power.SetStored(created, drifted.Subgroup, drifted.Setting, 5, 5);
+        var repair = await PowerApplier().ApplyAsync(item, ctx, Ct);
+        Assert.Equal(ItemStatus.Applied, repair.Status);
+        Assert.Equal(2, _journal.Load().Journal!.Entries.Count);
+
+        var outcomes = await new CleanupUndo(NewCatalog(item), _paths, _files).UndoAsync(null, ctx, Ct);
+
+        Assert.Equal(ItemStatus.Applied, Assert.Single(outcomes).Status);
+        Assert.Equal(BuiltInPowerSchemes.Balanced, power.Active);
+        Assert.Equal([BuiltInPowerSchemes.Balanced], power.Schemes);
+        Assert.Equal([created], power.Deleted);
+    }
+
+    [Fact]
+    public async Task FormatKit_plan_applied_twice_adds_no_second_journal_entry()
+    {
+        var power = new FakePowerSchemes();
+        foreach (var s in PowerSchemeHandler.FormatKitSettings)
+            power.SetStored(power.NextCreated, s.Subgroup, s.Setting, 1, 1);
+        var ctx = TestServices.Context(TestServices.Create(files: _files, power: power));
+        var item = FormatKitItem();
+
+        await PowerApplier().ApplyAsync(item, ctx, Ct);
+        var second = await PowerApplier().ApplyAsync(item, ctx, Ct);
+
+        Assert.Equal(ItemStatus.AlreadyInPlace, second.Status);
+        Assert.Single(_journal.Load().Journal!.Entries);
+        Assert.Single(power.Duplicated);
+    }
+
     [Fact]
     public async Task Journal_save_failure_keeps_the_outcomes()
     {

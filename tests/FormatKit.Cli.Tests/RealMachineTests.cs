@@ -1,4 +1,5 @@
 using FormatKit.Core;
+using FormatKit.Hosting;
 
 namespace FormatKit.Cli.Tests;
 
@@ -9,7 +10,9 @@ public sealed class RealMachineTests
     public async Task Prepare_check_runs_on_this_machine_and_prints_a_summary()
     {
         var output = new StringWriter();
-        var env = Services.CreateReal(verbose: false) with { Out = output };
+        var env = CliEnvironment.FromHost(
+            Services.CreateReal(verbose: false, new HostOptions(["run", "--resume", "--wait-on-exit"], ConsoleLog: true)),
+            output);
 
         var exit = await new CliApp(env).RunAsync(["prepare", "check"], CancellationToken.None);
 

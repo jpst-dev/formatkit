@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>FormatKit</value></data>
+  <data name="Reboot_Title" xml:space="preserve"><value>Restart required</value></data>
+  <data name="Reboot_Countdown" xml:space="preserve"><value>The PC restarts in {0} seconds to continue the run.</value></data>
+  <data name="Reboot_Now" xml:space="preserve"><value>Restart now</value></data>
+  <data name="Reboot_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Error_Unhandled" xml:space="preserve"><value>Unexpected error: {0}</value></data>
+  <data name="Nav_Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Nav_Checklist" xml:space="preserve"><value>Checklist</value></data>
+  <data name="Nav_RunProfile" xml:space="preserve"><value>Run profile</value></data>
+  <data name="Nav_Hardware" xml:space="preserve"><value>Hardware</value></data>
+  <data name="Nav_CleanupDiagnosis" xml:space="preserve"><value>Cleanup diagnosis</value></data>
+  <data name="Nav_Catalogs" xml:space="preserve"><value>Catalogs</value></data>
+  <data name="Nav_Media" xml:space="preserve"><value>Installation media</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>About</value></data>
+  <data name="Home_Intro" xml:space="preserve"><value>FormatKit prepares a Windows reinstall and rebuilds the machine afterwards. It checks what could be lost before you format, then installs drivers, programs and settings from a JSON profile.</value></data>
+  <data name="Home_Before_Title" xml:space="preserve"><value>Before formatting</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Run the checklist to find what would be lost.</value></data>
+  <data name="Home_Before_Checklist" xml:space="preserve"><value>Open Checklist</value></data>
+  <data name="Home_After_Title" xml:space="preserve"><value>After formatting</value></data>
+  <data name="Home_After_Text" xml:space="preserve"><value>Run your profile to install drivers and programs and apply your settings.</value></data>
+  <data name="Home_After_Run" xml:space="preserve"><value>Open Run profile</value></data>
+  <data name="Home_Warning" xml:space="preserve"><value>FormatKit changes the system and can restart the computer. Try it in a virtual machine first.</value></data>
+  <data name="Home_Interrupted" xml:space="preserve"><value>A run was interrupted before it finished. You can resume it where it stopped.</value></data>
+  <data name="Home_Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Version</value></data>
+  <data name="About_Repository" xml:space="preserve"><value>Repository</value></data>
+  <data name="About_OpenLogs" xml:space="preserve"><value>Open log folder</value></data>
+  <data name="About_CliTitle" xml:space="preserve"><value>Commands available only in the command line (for now)</value></data>
+  <data name="About_Cli_cleanup_undo" xml:space="preserve"><value>Reverts the changes of a cleanup run from its journal.</value></data>
+  <data name="About_Cli_drivers_backup_network" xml:space="preserve"><value>Saves the network drivers so they can be reinstalled without internet.</value></data>
+  <data name="About_Cli_programs_export" xml:space="preserve"><value>Writes the installed programs to a list you can reuse in a profile.</value></data>
+  <data name="About_Cli_programs_search" xml:space="preserve"><value>Searches the package catalog for a program.</value></data>
+  <data name="About_Cli_dev_wsl_user" xml:space="preserve"><value>Creates the Linux user inside a WSL distribution.</value></data>
+  <data name="About_Cli_dev_ssh_key" xml:space="preserve"><value>Creates an SSH key and shows the public part.</value></data>
+  <data name="Placeholder_Soon" xml:space="preserve"><value>This page arrives in a later step.</value></data>
+  <data name="Hw_Machine" xml:space="preserve"><value>Machine</value></data>
+  <data name="Hw_Board" xml:space="preserve"><value>Board</value></data>
+  <data name="Hw_Bios" xml:space="preserve"><value>BIOS</value></data>
+  <data name="Hw_Gpus" xml:space="preserve"><value>GPUs</value></data>
+  <data name="Hw_ProblemDevices" xml:space="preserve"><value>Problem devices</value></data>
+  <data name="Hw_NetworkAdapters" xml:space="preserve"><value>Network adapters</value></data>
+  <data name="Hw_None" xml:space="preserve"><value>none</value></data>
+  <data name="Hw_Unknown" xml:space="preserve"><value>unknown</value></data>
+  <data name="Hw_Gpu" xml:space="preserve"><value>{0} (driver {1})</value></data>
+  <data name="Hw_Problem" xml:space="preserve"><value>{0} (error code {1})</value></data>
+  <data name="Hw_Adapter" xml:space="preserve"><value>{0} (inf {1}, driver {2})</value></data>
+  <data name="Hw_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Hw_ScanButton" xml:space="preserve"><value>Scan for drivers</value></data>
+  <data name="Hw_ScanTitle" xml:space="preserve"><value>Driver scan</value></data>
+  <data name="Scan_MachineType" xml:space="preserve"><value>Machine type</value></data>
+  <data name="Scan_Oem" xml:space="preserve"><value>OEM ({0})</value></data>
+  <data name="Scan_Board" xml:space="preserve"><value>Custom build (board support: {0})</value></data>
+  <data name="Scan_Custom" xml:space="preserve"><value>Custom build (no OEM tool)</value></data>
+  <data name="Scan_Online" xml:space="preserve"><value>Online</value></data>
+  <data name="Scan_Updates" xml:space="preserve"><value>Windows Update drivers</value></data>
+  <data name="Scan_GpuPackages" xml:space="preserve"><value>GPU packages</value></data>
+  <data name="Scan_WuError" xml:space="preserve"><value>Windows Update search failed: {0}</value></data>
+  <data name="Value_Yes" xml:space="preserve"><value>yes</value></data>
+  <data name="Value_No" xml:space="preserve"><value>no</value></data>
+  <data name="Check_Group_Breaks" xml:space="preserve"><value>Breaks Windows features:</value></data>
+  <data name="Check_Group_Security" xml:space="preserve"><value>Security risks:</value></data>
+  <data name="Check_Group_Contested" xml:space="preserve"><value>Contested tweaks:</value></data>
+  <data name="Check_Group_Info" xml:space="preserve"><value>For your information:</value></data>
+  <data name="Check_NoFindings" xml:space="preserve"><value>No known problems found.</value></data>
+  <data name="Check_Breaks" xml:space="preserve"><value>Breaks: {0}</value></data>
+  <data name="Check_Fix" xml:space="preserve"><value>Fix: {0}</value></data>
+  <data name="Diag_Refresh" xml:space="preserve"><value>Check again</value></data>
+  <data name="Checklist_Intro" xml:space="preserve"><value>Checks what a format would erase or break. Pick a profile to also check the files it needs.</value></data>
+  <data name="Checklist_Profile" xml:space="preserve"><value>Profile (optional)</value></data>
+  <data name="Checklist_NoProfile" xml:space="preserve"><value>No profile selected</value></data>
+  <data name="Checklist_Browse" xml:space="preserve"><value>Choose profile...</value></data>
+  <data name="Checklist_Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Checklist_Check" xml:space="preserve"><value>Check</value></data>
+  <data name="Checklist_Save" xml:space="preserve"><value>Save as Markdown...</value></data>
+  <data name="Checklist_ProfileErrors" xml:space="preserve"><value>The profile is not valid:</value></data>
+  <data name="Prepare_OutputOnWindows" xml:space="preserve"><value>Warning: {0} is on a drive the format will erase, so the checklist will be lost. Copy it elsewhere.</value></data>
+  <data name="Prepare_OutputFailed" xml:space="preserve"><value>Could not write {0}: {1}</value></data>
+  <data name="Prepare_OutputWritten" xml:space="preserve"><value>Checklist saved to {0}</value></data>
+  <data name="Cat_TabCleanup" xml:space="preserve"><value>Cleanup</value></data>
+  <data name="Cat_TabPrograms" xml:space="preserve"><value>Programs</value></data>
+  <data name="Cat_All" xml:space="preserve"><value>All</value></data>
+  <data name="Cat_Level" xml:space="preserve"><value>Level: {0}</value></data>
+  <data name="Cat_LevelFilter" xml:space="preserve"><value>Level</value></data>
+  <data name="Cat_CategoryFilter" xml:space="preserve"><value>Category</value></data>
+  <data name="Cat_Search" xml:space="preserve"><value>Search by id or title</value></data>
+  <data name="Cat_SelectHint" xml:space="preserve"><value>Select an item to see its details.</value></data>
+  <data name="Cat_What" xml:space="preserve"><value>What it does: {0}</value></data>
+  <data name="Cat_Breaks" xml:space="preserve"><value>What it breaks: {0}</value></data>
+  <data name="Cat_Gain" xml:space="preserve"><value>Gain: {0}</value></data>
+  <data name="Cat_Contested" xml:space="preserve"><value>Contested tweak</value></data>
+  <data name="Cat_Laptop" xml:space="preserve"><value>Sensitive on laptops</value></data>
+  <data name="Cat_OptIn" xml:space="preserve"><value>Opt-in: applied only when the profile lists it in include</value></data>
+  <data name="Cat_OptInBadge" xml:space="preserve"><value>opt-in</value></data>
+  <data name="Cat_Winget" xml:space="preserve"><value>winget id: {0}</value></data>
+  <data name="Cat_Source" xml:space="preserve"><value>Source: {0}</value></data>
+  <data name="Cat_Context" xml:space="preserve"><value>Installs for: {0}</value></data>
+  <data name="Cat_Context_Machine" xml:space="preserve"><value>the machine</value></data>
+  <data name="Cat_Context_User" xml:space="preserve"><value>the current user</value></data>
+  <data name="Level_Safe" xml:space="preserve"><value>Safe</value></data>
+  <data name="Level_Balanced" xml:space="preserve"><value>Balanced</value></data>
+  <data name="Level_Aggressive" xml:space="preserve"><value>Aggressive</value></data>
+  <data name="CleanupCategory_Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="CleanupCategory_Privacy" xml:space="preserve"><value>Privacy</value></data>
+  <data name="CleanupCategory_Performance" xml:space="preserve"><value>Performance</value></data>
+  <data name="CleanupCategory_Startup" xml:space="preserve"><value>Startup</value></data>
+  <data name="CleanupCategory_Ai" xml:space="preserve"><value>AI</value></data>
+  <data name="CleanupCategory_Interface" xml:space="preserve"><value>Interface</value></data>
+  <data name="CleanupCategory_Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="CleanupCategory_Input" xml:space="preserve"><value>Input</value></data>
+  <data name="CleanupCategory_Sound" xml:space="preserve"><value>Sound</value></data>
+  <data name="CleanupCategory_Power" xml:space="preserve"><value>Power</value></data>
+  <data name="CleanupCategory_Developer" xml:space="preserve"><value>Developer</value></data>
+  <data name="ProgramCategory_Browsers" xml:space="preserve"><value>Browsers</value></data>
+  <data name="ProgramCategory_Communication" xml:space="preserve"><value>Communication</value></data>
+  <data name="ProgramCategory_Games" xml:space="preserve"><value>Games</value></data>
+  <data name="ProgramCategory_Media" xml:space="preserve"><value>Media</value></data>
+  <data name="ProgramCategory_Utilities" xml:space="preserve"><value>Utilities</value></data>
+  <data name="ProgramCategory_Productivity" xml:space="preserve"><value>Productivity</value></data>
+  <data name="ProgramCategory_Development" xml:space="preserve"><value>Development</value></data>
+  <data name="Check_NotChecked" xml:space="preserve"><value>{0} checks could not be run (see log).</value></data>
+  <data name="Check_JournalError" xml:space="preserve"><value>The cleanup journal is unreadable: {0}</value></data>
+  <data name="Worker_ProfileChanged" xml:space="preserve"><value>The profile changed since you reviewed it. Review it again.</value></data>
+  <data name="Worker_ProfileErrors" xml:space="preserve"><value>The profile has {0} problem(s); nothing was run:</value></data>
+  <data name="Worker_Stopped" xml:space="preserve"><value>Stopped after the current step. Use Resume to continue the run.</value></data>
+  <data name="Worker_InvalidJob" xml:space="preserve"><value>The worker was started with an invalid job: {0}</value></data>
+  <data name="Worker_Error" xml:space="preserve"><value>The run stopped because of an error: {0}</value></data>
+  <data name="RunProfile_Intro" xml:space="preserve"><value>Choose the profile to run. You review the plan before anything changes.</value></data>
+  <data name="RunProfile_Open" xml:space="preserve"><value>Open a profile...</value></data>
+  <data name="RunProfile_DriversOnly" xml:space="preserve"><value>Drivers only</value></data>
+  <data name="RunProfile_DriversOnlyHint" xml:space="preserve"><value>Installs the drivers this machine needs, without a profile file.</value></data>
+  <data name="RunProfile_LastProfile" xml:space="preserve"><value>Last profile</value></data>
+  <data name="RunProfile_UseLast" xml:space="preserve"><value>Use it</value></data>
+  <data name="RunProfile_Errors" xml:space="preserve"><value>This profile has errors</value></data>
+  <data name="RunProfile_Plan" xml:space="preserve"><value>Plan</value></data>
+  <data name="RunProfile_Admin" xml:space="preserve"><value>administrator</value></data>
+  <data name="RunProfile_NeedsAdmin" xml:space="preserve"><value>This plan needs administrator rights. Windows asks for permission when the run starts.</value></data>
+  <data name="RunProfile_NoSteps" xml:space="preserve"><value>This profile enables nothing to run.</value></data>
+  <data name="RunProfile_Reload" xml:space="preserve"><value>Reload</value></data>
+  <data name="RunProfile_ChooseAnother" xml:space="preserve"><value>Choose another profile</value></data>
+  <data name="RunProfile_Run" xml:space="preserve"><value>Run</value></data>
+  <data name="RunProfile_ConfirmTitle" xml:space="preserve"><value>Run the profile</value></data>
+  <data name="RunProfile_ConfirmRun" xml:space="preserve"><value>This changes the system and can restart the computer. Run the profile now?</value></data>
+  <data name="RunProfile_StepDoneBefore" xml:space="preserve"><value>Done before the stop or reboot.</value></data>
+  <data name="RunProfile_UacDeclined" xml:space="preserve"><value>The administrator permission was declined. Nothing was changed.</value></data>
+  <data name="RunProfile_StartFailed" xml:space="preserve"><value>The run could not start: {0}</value></data>
+  <data name="RunProfile_Progress" xml:space="preserve"><value>Running</value></data>
+  <data name="RunProfile_Result" xml:space="preserve"><value>Result</value></data>
+  <data name="RunProfile_Stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="RunProfile_StopHint" xml:space="preserve"><value>Stop waits for the current step to finish.</value></data>
+  <data name="RunProfile_StopTitle" xml:space="preserve"><value>A run is in progress</value></data>
+  <data name="RunProfile_StopQuestion" xml:space="preserve"><value>Stop after the current step?</value></data>
+  <data name="RunProfile_UnexpectedEnd" xml:space="preserve"><value>The run ended unexpectedly.</value></data>
+  <data name="RunProfile_CanResume" xml:space="preserve"><value>The run can be resumed where it stopped.</value></data>
+  <data name="RunProfile_OpenReport" xml:space="preserve"><value>Open report folder</value></data>
+  <data name="RunProfile_OpenLogs" xml:space="preserve"><value>Open log folder</value></data>
+  <data name="StepState_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="StepState_Running" xml:space="preserve"><value>Running</value></data>
+  <data name="StepState_Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="StepState_RebootRequired" xml:space="preserve"><value>Reboot required</value></data>
+  <data name="Run_NothingToResume" xml:space="preserve"><value>There is no interrupted run to resume.</value></data>
+  <data name="Run_StateCorrupt" xml:space="preserve"><value>The saved run state is unreadable ({0}). Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_ProfileChanged" xml:space="preserve"><value>The profile changed since the run started, so it cannot be resumed. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_ResumeProfileInvalid" xml:space="preserve"><value>The profile recorded for the interrupted run could not be used. Start a new run with: formatkit run --profile &lt;file&gt;</value></data>
+  <data name="Run_Status_Completed" xml:space="preserve"><value>Run completed.</value></data>
+  <data name="Run_Status_CompletedWithFailures" xml:space="preserve"><value>Run completed with failures.</value></data>
+  <data name="Run_Status_StoppedOnCriticalFailure" xml:space="preserve"><value>Run stopped on a critical failure.</value></data>
+  <data name="Run_RebootPending" xml:space="preserve"><value>The run will resume automatically at the next logon. You can reboot now or later.</value></data>
+  <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Automatic resume could not be scheduled. After rebooting, run `formatkit run --resume`.</value></data>
+  <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
+  <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>If the console window that opened asks for something, type it there.</value></data>
+  <data name="RunProfile_Resume" xml:space="preserve"><value>Resume</value></data>
+</root>

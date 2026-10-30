@@ -15,7 +15,7 @@ internal sealed class RegistryHandler : IActionHandler
     {
         var a = (RegistryAction)action;
         var current = ctx.Services.Registry.Read(a.Path, a.Name);
-        return Task.FromResult(a.Delete ? current is null : current == Desired(a));
+        return Task.FromResult(a.Delete ? current is null : Same(current, Desired(a)));
     }
 
     public Task<JournalAction> CaptureAsync(CleanupAction action, StepContext ctx, CancellationToken ct)
@@ -77,7 +77,7 @@ internal sealed class RegistryHandler : IActionHandler
         }
 
         var actual = registry.Read(path, name);
-        if (actual != value)
+        if (!Same(actual, value))
         {
             throw new InvalidOperationException(
                 $"Registry value '{path}|{name}' did not take the expected state (expected {Describe(value)}, found {Describe(actual)}).");
@@ -108,10 +108,18 @@ internal sealed class RegistryHandler : IActionHandler
         {
             RegistryKind.Dword => value.GetUInt32().ToString(CultureInfo.InvariantCulture),
             RegistryKind.Qword => value.GetUInt64().ToString(CultureInfo.InvariantCulture),
+            RegistryKind.Binary => value.GetString()!.ToLowerInvariant(),
             _ => value.GetString()!,
         };
         return new RegistryValue(a.Kind.Value, data);
     }
+
+    /// <summary>Binary hex compares case-insensitively; every other kind compares exactly.</summary>
+    private static bool Same(RegistryValue? a, RegistryValue? b) =>
+        a is null || b is null
+            ? a is null && b is null
+            : a.Kind == b.Kind
+                && string.Equals(a.Data, b.Data, a.Kind == RegistryKind.Binary ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
     private static string Describe(RegistryValue? value) => value is null ? "absent" : $"{value.Kind} {value.Data}";
 }

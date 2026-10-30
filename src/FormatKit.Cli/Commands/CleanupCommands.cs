@@ -12,7 +12,7 @@ namespace FormatKit.Cli.Commands;
 internal static class CleanupCommands
 {
     private static readonly string[] Levels = ["safe", "balanced", "aggressive"];
-    private static readonly string[] Categories = ["apps", "privacy", "performance", "developer"];
+    private static readonly string[] Categories = Enum.GetNames<CleanupCategory>().Select(n => n.ToLowerInvariant()).ToArray();
 
     public static Command Create(CommandContext context)
     {
@@ -22,10 +22,6 @@ internal static class CleanupCommands
         cleanup.Subcommands.Add(CreateUndo(context));
         return cleanup;
     }
-
-    /// <summary>The ` [level]` and ` [contested]` suffix shown after an item's title in the dry-run plan.</summary>
-    internal static string Markers(CleanupItem item) =>
-        $" [{LevelName(item.Level)}]" + (item.Contested ? $" [{Strings.Get("Marker_Contested")}]" : "");
 
     private static string LevelName(CleanupLevel level) => level.ToString().ToLowerInvariant();
 
@@ -43,19 +39,18 @@ internal static class CleanupCommands
             var only = parse.GetValue(category) is { } c ? Enum.Parse<CleanupCategory>(c, ignoreCase: true) : (CleanupCategory?)null;
             var verbose = parse.GetValue<bool>("--verbose");
 
-            var items = context.Cleanup.Items
-                .Where(i => maxLevel is null || i.Level <= maxLevel)
-                .Where(i => only is null || i.Category == only)
-                .ToList();
+            var items = context.Cleanup.Filter(maxLevel, only);
 
             var idWidth = items.Count == 0 ? 0 : items.Max(i => i.Id.Length);
             var contested = $"[{Strings.Get("Marker_Contested")}]";
+            var optIn = $"[{Strings.Get("Marker_OptIn")}]";
             foreach (var item in items)
             {
                 var text = item.LocalizedText();
                 context.Out.WriteLine(
                     $"{item.Id.PadRight(idWidth)}  {LevelName(item.Level).PadRight(10)}  " +
-                    $"{(item.Contested ? contested : "").PadRight(contested.Length)}  {text.Title}");
+                    $"{(item.Contested ? contested : "").PadRight(contested.Length)}  " +
+                    $"{(item.IsOptIn ? optIn : "").PadRight(optIn.Length)}  {text.Title}");
                 if (!verbose)
                     continue;
 
@@ -74,7 +69,7 @@ internal static class CleanupCommands
         var check = new Command("check", Strings.Get("Cmd_CleanupCheck"));
         check.SetAction(async (_, ct) => await Output.GuardSystemQueryAsync(context.Out, async () =>
         {
-            var report = await new CleanupDiagnosis(context.Issues, AppPaths.Default, context.Env.Log)
+            var report = await new CleanupDiagnosis(context.Issues, AppPaths.Default, context.Env.Log, context.Cleanup)
                 .RunAsync(context.Env.Services, ct);
             PrintCheck(context.Out, report);
             return report.Findings.Any(f => f.Issue.Severity is IssueSeverity.Breaks or IssueSeverity.Security)
@@ -98,6 +93,23 @@ internal static class CleanupCommands
                 o.WriteLine("  " + Strings.Format("Check_Finding", text.Title, finding.Detail));
                 o.WriteLine("    " + Strings.Format("Check_Breaks", text.Breaks));
                 o.WriteLine("    " + Strings.Format("Check_Fix", text.Fix));
+            }
+        }
+
+        if (report.RevertedByWindows.Count > 0)
+        {
+            o.WriteLine(Strings.Get("Check_Reverted"));
+            foreach (var item in report.RevertedByWindows)
+            {
+                if (item.Checked)
+                {
+                    o.WriteLine("  " + item.ItemId);
+                    o.WriteLine("    " + Strings.Get("Check_Reverted_Fix"));
+                }
+                else
+                {
+                    o.WriteLine("  " + item.ItemId + " " + Strings.Get("Check_Reverted_NotChecked"));
+                }
             }
         }
 

@@ -1,6 +1,6 @@
 # FormatKit
 
-FormatKit is a Windows command-line tool (.NET 10, a single `formatkit.exe`) that automates the tedious part of a clean Windows reinstall: after you format and install Windows, it detects your hardware and gets the machine to a fully working state with minimal clicking.
+FormatKit is a Windows tool (.NET 10: a command-line `formatkit.exe` and a graphical `FormatKitUI.exe`) that automates the tedious part of a clean Windows reinstall: after you format and install Windows, it detects your hardware and gets the machine to a fully working state with minimal clicking.
 
 ## Philosophy
 
@@ -8,7 +8,7 @@ A clean install beats a cloned or "migrated" one. FormatKit does not restore an 
 
 ## Status
 
-Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist + installation media**.
+Current release: **core + drivers + cleanup + programs + dev environment + preparation checklist + installation media + graphical interface**.
 
 Implemented:
 
@@ -21,8 +21,7 @@ Implemented:
 - Preparation checklist: `formatkit prepare check` lists what a reinstall would lose and what to save first (read-only, no elevation).
 
 - Installation media: `formatkit media build` and `formatkit media usb` make a Windows 11 installation folder or USB stick from the official ISO that installs Windows with an answer file and starts your profile on the first logon. See [Make the installation media](#make-the-installation-media).
-
-Planned (not available yet): WPF UI.
+- Graphical interface: `FormatKitUI.exe`, a WPF window over the same engine (see [Graphical interface](#graphical-interface)).
 
 ## **WARNING: this tool changes your system**
 
@@ -121,17 +120,37 @@ formatkit run --profile profiles\example.json --dry-run
 formatkit run --profile profiles\example.json
 ```
 
+## Graphical interface
+
+`FormatKitUI.exe` is a Windows window over the same engine as the command line. Download it from the [Releases](../../releases) page next to `formatkit.exe`; it is also self-contained and not code-signed (see Installation). The two files are independent, and the window does not replace the CLI.
+
+The window runs without administrator rights. It asks for UAC only when you start a run whose plan has a step that needs it; a plan with no such step runs unelevated. Opening a profile, the checklist, the queries and the catalogs never prompt.
+
+| Page | What it does |
+| --- | --- |
+| Home | Shows what is available and a **Resume** banner when an interrupted run is found. |
+| Checklist | `prepare check`: an optional profile, the results by status, and **Save as Markdown**. |
+| Run profile | Open a profile (or the built-in "Drivers only"), review the plan, confirm, then follow each step with a **Stop** button, the result and a reboot countdown. A run resumes in this same window after a reboot. |
+| Hardware | The detected hardware, as `formatkit hardware`. |
+| Cleanup diagnosis | `cleanup check`: tweaks that break or weaken this PC, with the fix. |
+| Catalogs | The cleanup and programs catalogs. |
+| About | Version, repository, **Open log folder** and the CLI-only commands. |
+
+Profiles are opened and shown, not edited. The window runs the profile you reviewed: if the file changes before the run starts, it is refused and you review it again. Installation media is not in the window yet.
+
 ## Cleanup
 
-The `cleanup` module removes preinstalled apps and applies privacy and performance tweaks. Every item has a level, and every change is recorded in a journal so it can be undone.
+The `cleanup` module removes preinstalled apps and sets up Windows: what starts with it, privacy, AI features, the taskbar and Start, appearance, keyboard, sound, performance and power. Its categories are `apps`, `startup`, `privacy`, `ai`, `interface`, `appearance`, `input`, `sound`, `performance`, `power` and `developer`. Every item has a level, and every change is recorded in a journal so it can be undone.
 
 | Level | What it holds |
 | --- | --- |
-| `safe` | Removes the bundled apps almost nobody uses (Clipchamp, Solitaire, News, Weather, Feedback Hub, Power Automate), turns off advertising ID, tailored experiences, activity history and similar, and turns Game Mode on. |
-| `balanced` | Everything in `safe`, plus more apps (Teams personal, Get Help, Xbox app, Phone Link, To Do), minimal diagnostic data, no web search in Start, online speech recognition off, the High performance power plan and pointer precision off. |
+| `safe` | Removes the bundled apps almost nobody uses (Clipchamp, Solitaire, News, Weather, Feedback Hub, Power Automate), stops OneDrive and Edge from starting on their own, turns off advertising ID, tailored experiences, activity history, tips notifications and silent installs of suggested apps, Recall and the AI features of Paint and Notepad, hides the Task View button and Start recommendations, turns off Fast Startup and turns Game Mode on. |
+| `balanced` | Everything in `safe`, plus more apps (Teams personal, Get Help, Xbox app, Phone Link, To Do, Widgets, the new Outlook, Bing web results in Windows Search, Copilot), minimal diagnostic data, the telemetry service and tasks, no web search in Start, online speech recognition off, hibernation off, the High performance power plan and pointer precision off. |
 | `aggressive` | Everything in `balanced`, plus the Ultimate Performance power plan, Memory Integrity and VBS off (reduces security) and the contested tweaks. |
 
-Levels are cumulative: `safe` is inside `balanced`, which is inside `aggressive`. Run `formatkit cleanup list --verbose` to see every item with what it does and what it can break. Items marked contested have no gain that Microsoft documents; they are always `aggressive`. Power plan items are skipped on laptops unless you list them in `include`. The `developer` category (Developer Mode, long paths, file extensions, hidden files, sudo, PowerShell execution policy) is never selected by a level; list its items in `include`, with or without `level`.
+Levels are cumulative: `safe` is inside `balanced`, which is inside `aggressive`. Run `formatkit cleanup list --verbose` to see every item with what it does and what it can break. Items marked contested have no gain that Microsoft documents; they are always `aggressive`. Power plan, sleep and hibernation items are skipped on laptops unless you list them in `include`. The `developer` category (Developer Mode, long paths, file extensions, hidden files, sudo, PowerShell execution policy) is never selected by a level; list its items in `include`, with or without `level`.
+
+Personal preferences are opt-in in the same way: dark mode, transparency and animations off, the taskbar on the left, pt-BR with the US-International keyboard, the No Sounds scheme, display and sleep timeouts, the FormatKit Performance power plan and the Print Spooler off (skipped when a printer is installed). `cleanup list` and the app mark them `opt-in`; a level never selects them.
 
 Profile section:
 
@@ -149,7 +168,7 @@ Profile section:
 - `include` and `exclude` take item ids from `cleanup list`. The selection is every item at or below `level`, plus `include`, minus `exclude`. An unknown id, or an id in both lists, is a profile error.
 - `confirmAggressive` must be `true` when the selection contains any `aggressive` item (including one added through `include`). Without it the profile is rejected and the message names those items.
 
-A ready profile is in `profiles/cleanup-balanced.json`. Preview it with `formatkit run --profile profiles\cleanup-balanced.json --dry-run`.
+A ready profile is in `profiles/cleanup-balanced.json`. Preview it with `formatkit run --profile profiles\cleanup-balanced.json --dry-run`. `profiles/windows-setup-example.json` adds opt-in items through `include`.
 
 ```powershell
 formatkit cleanup list --level balanced
@@ -488,9 +507,10 @@ The stick is MBR with one active FAT32 partition labeled `FORMATKIT`, up to 32 G
 dotnet build -c Release
 dotnet test -c Release -- --filter-not-trait "Category=Integration"
 dotnet publish src/FormatKit.Cli -c Release -o artifacts   # artifacts\formatkit.exe
+dotnet publish src/FormatKit.App -c Release -o artifacts   # artifacts\FormatKitUI.exe
 ```
 
-Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes and attaches `formatkit.exe` to a GitHub release.
+Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes and attaches `formatkit.exe` and `FormatKitUI.exe` to a GitHub release.
 
 ## License
 
@@ -498,6 +518,6 @@ Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes an
 
 ## Resumo em português
 
-O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). Mídia de instalação (`formatkit media build` e `formatkit media usb`: pendrive ou pasta de instalação do Windows 11 a partir da ISO oficial, com resposta automática e execução do perfil no primeiro logon) já existe; a interface WPF é planejada.
+O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). A interface gráfica (`FormatKitUI.exe`, uma janela WPF sobre o mesmo motor, que só pede UAC ao executar um perfil) já está disponível, assim como a mídia de instalação (`formatkit media build` e `formatkit media usb`: pendrive ou pasta de instalação do Windows 11 a partir da ISO oficial, com resposta automática e execução do perfil no primeiro logon).
 
 **Atenção: a ferramenta altera o sistema, instala drivers e pode reiniciar o computador. Teste primeiro em uma máquina virtual** e use `--dry-run`. O executável não é assinado, então o SmartScreen pode exibir um aviso. Os textos aparecem em português quando o Windows está em pt-BR. O `media usb` apaga o disco inteiro que você escolher, só depois de você digitar o número do disco. Códigos de saída: veja a tabela acima. Licença MIT.

@@ -1,0 +1,11 @@
+---
+// The site is dark only. Starlight code still calls updatePickers, so keep a no-op.
+---
+
+<script is:inline>
+	document.documentElement.dataset.theme = 'dark';
+	try {
+		if (localStorage.getItem('fk-motion') === 'off') document.documentElement.dataset.motion = 'off';
+	} catch (e) {}
+	window.StarlightThemeProvider = { updatePickers() {} };
+</script>

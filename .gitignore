@@ -24,6 +24,7 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+!site/tests/fixtures/releases/
 x64/
 x86/
 [Ww][Ii][Nn]32/
@@ -483,3 +484,9 @@ $RECYCLE.BIN/
 
 # Local test VM credentials (tools/New-TestVm.ps1)
 .vm/
+
+# Website (site/)
+site/node_modules/
+site/dist/
+site/.astro/
+site/.fk-warnings.json

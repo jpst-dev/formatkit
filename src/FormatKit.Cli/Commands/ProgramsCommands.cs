@@ -23,22 +23,6 @@ internal static class ProgramsCommands
     internal static string UserMarker(InstallContext installContext) =>
         installContext == InstallContext.User ? $" [{Strings.Get("Marker_User")}]" : "";
 
-    /// <summary>The indented dry-run lines that list the programs of a programs step.</summary>
-    internal static IEnumerable<string> DryRunLines(IStep step)
-    {
-        switch (step)
-        {
-            case WingetProgramsStep winget:
-                foreach (var p in winget.Programs)
-                    yield return $"    {p.Key}  {p.DisplayName}{UserMarker(p.Package.Context)}";
-                break;
-            case DirectProgramsStep direct:
-                foreach (var e in direct.Entries)
-                    yield return $"    {e.Name} ({e.Url ?? e.Path})";
-                break;
-        }
-    }
-
     private static string CategoryName(ProgramCategory category)
     {
         var name = category.ToString();

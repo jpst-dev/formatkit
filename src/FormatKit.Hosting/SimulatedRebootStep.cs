@@ -1,13 +1,13 @@
 using FormatKit.Core.Steps;
 
-namespace FormatKit.Cli.Commands;
+namespace FormatKit.Hosting;
 
 /// <summary>
 /// Test-only wrapper (FORMATKIT_TEST_REBOOT_AFTER=&lt;step id&gt;): runs the step, then reports that a reboot
 /// is required, so the reboot countdown, resume task and resume can be tested in a VM that has nothing
 /// to install.
 /// </summary>
-internal sealed class SimulatedRebootStep(IStep inner) : IStep
+public sealed class SimulatedRebootStep(IStep inner) : IStep
 {
     public const string EnvironmentVariable = "FORMATKIT_TEST_REBOOT_AFTER";
 

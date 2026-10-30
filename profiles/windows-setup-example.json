@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "name": "Windows setup example",
+  "modules": {
+    "cleanup": {
+      "enabled": true,
+      "level": "balanced",
+      "include": [
+        "interface.taskbar-left",
+        "appearance.dark-theme",
+        "input.ptbr-us-international",
+        "power.monitor-off-15",
+        "power.sleep-never",
+        "performance.formatkit-plan"
+      ],
+      "confirmAggressive": true
+    }
+  }
+}

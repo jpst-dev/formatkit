@@ -1,0 +1,49 @@
+---
+title: Perguntas frequentes
+description: Respostas curtas sobre SmartScreen, antivírus, desempenho, notebooks, desfazer, uso sem internet e imagem clonada.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## O Windows mostrou "O Windows protegeu o computador". É seguro?
+
+O FormatKit **não é assinado digitalmente**, e por isso o SmartScreen avisa. Se você confia na origem, clique em **Mais informações** e depois em **Executar assim mesmo**. Baixe sempre da [página Baixar](/formatkit/download/) e confira o SHA-256 do arquivo. Se preferir, compile você mesmo a partir do código-fonte.
+
+## O antivírus reclamou do arquivo. O que faço?
+
+O programa não é assinado e muda o sistema (instala drivers e programas, pode reiniciar o PC), o que alguns antivírus tratam com desconfiança. Confira o SHA-256 do arquivo na página Baixar. Se os valores não baterem, não execute. Na dúvida, compile a partir do código-fonte ou teste antes em uma máquina virtual.
+
+## O FormatKit deixa os jogos mais rápidos?
+
+O FormatKit não afirma isso. Ele reinstala e configura o Windows; não promete mais FPS. A página Medições (em breve) vai mostrar os números de uma máquina virtual, junto com os limites dessa medição.
+
+## Posso usar em notebook?
+
+Pode. Os itens de energia da limpeza, como os planos de desempenho alto e máximo, são **pulados em notebooks**, a não ser que você os liste em `include` no perfil. Eles só entram se você pedir.
+
+## Como desfaço o que o FormatKit fez na limpeza?
+
+Cada mudança da limpeza fica registrada em um diário, e dá para reverter:
+
+```powershell
+formatkit cleanup undo apps.clipchamp
+formatkit cleanup undo --all
+```
+
+O primeiro reverte um item (o `id` vem de `formatkit cleanup list`); o segundo, tudo o que o FormatKit aplicou. O comando pede permissão de administrador. Para ver o que já quebra ou enfraquece o seu PC, use `formatkit cleanup check`, que não muda nada.
+
+## Funciona sem internet?
+
+Em parte. Se a rede estiver fora durante uma execução, o FormatKit tenta instalar o driver de rede do backup que você fez com `formatkit drivers backup-network --output <pasta>` e indicou no perfil. Sem esse backup, uma execução sem internet para com o código de saída 3. Drivers do Windows Update, programas e downloads dependem de conexão.
+
+## Por que não restaurar uma imagem clonada do sistema antigo?
+
+Uma instalação limpa é melhor do que uma clonada ou "migrada": a clonada leva junto a bagunça do sistema antigo. O FormatKit parte de um Windows novo e monta o ambiente a partir de um perfil, um arquivo pequeno que você pode ler, revisar e reaproveitar. Cada passo fica no log e pode ser visto antes com `--dry-run`.
+
+## Tenho que testar em máquina virtual?
+
+É o recomendado. O FormatKit instala drivers e programas, precisa de administrador e **pode reiniciar o computador**. Teste primeiro em uma máquina virtual e use `--dry-run` antes de uma execução de verdade.
+
+<Aside type="note">
+Veja o [guia passo a passo](/formatkit/guide/before/).
+</Aside>

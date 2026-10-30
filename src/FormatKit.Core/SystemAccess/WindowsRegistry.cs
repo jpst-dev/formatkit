@@ -32,16 +32,15 @@ public sealed class WindowsRegistry : IRegistry
             RegistryValueKind.QWord => new RegistryValue(RegistryKind.Qword, unchecked((ulong)(long)raw).ToString(CultureInfo.InvariantCulture)),
             RegistryValueKind.String => new RegistryValue(RegistryKind.String, (string)raw),
             RegistryValueKind.ExpandString => new RegistryValue(RegistryKind.ExpandString, (string)raw),
-            _ => throw new NotSupportedException($"Registry value '{path}|{name}' has unsupported kind {kind}; only REG_DWORD, REG_QWORD, REG_SZ and REG_EXPAND_SZ are supported."),
+            RegistryValueKind.Binary => new RegistryValue(RegistryKind.Binary, Convert.ToHexStringLower((byte[])raw)),
+            _ => throw new NotSupportedException($"Registry value '{path}|{name}' has unsupported kind {kind}; only REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ and REG_BINARY are supported."),
         };
+
+    /// <summary>Converts hex text (either case, no separators) to bytes.</summary>
+    internal static byte[] ToBytes(string hex) => Convert.FromHexString(hex);
 
     public void Write(string path, string name, RegistryValue value)
     {
-        if (value.Kind == RegistryKind.ExpandString)
-        {
-            throw new NotSupportedException("REG_EXPAND_SZ values are read-only.");
-        }
-
         var (hive, subKey) = Split(path);
         using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
         using var key = baseKey.CreateSubKey(subKey, writable: true);
@@ -53,11 +52,17 @@ public sealed class WindowsRegistry : IRegistry
             case RegistryKind.Qword:
                 key.SetValue(name, unchecked((long)ulong.Parse(value.Data, CultureInfo.InvariantCulture)), RegistryValueKind.QWord);
                 break;
+            case RegistryKind.Binary:
+                key.SetValue(name, ToBytes(value.Data), RegistryValueKind.Binary);
+                break;
             default:
-                key.SetValue(name, value.Data, RegistryValueKind.String);
+                key.SetValue(name, value.Data, ToStringValueKind(value.Kind));
                 break;
         }
     }
+
+    internal static RegistryValueKind ToStringValueKind(RegistryKind kind) =>
+        kind == RegistryKind.ExpandString ? RegistryValueKind.ExpandString : RegistryValueKind.String;
 
     public void Delete(string path, string name)
     {

@@ -1,0 +1,77 @@
+---
+// Layout for the home page blocks written in MDX (step cards, link cards, closing call to action).
+// Global but scoped under .fk-home so it neutralises Starlight's prose spacing and link styling.
+---
+
+<style is:global>
+  /* Starlight caps splash content at --sl-content-width; the home runs edge to edge instead.
+     Hero and sections bleed over the panel padding; their content stays in a 72rem column. */
+  .sl-container:has(.fk-home) {
+    max-width: none;
+  }
+  .fk-hero,
+  .fk-home {
+    margin-inline: calc(-1 * var(--sl-content-pad-x));
+  }
+  .fk-home {
+    padding-bottom: 3rem;
+  }
+  .fk-home > .fk-home-section,
+  .fk-home > .fk-closing {
+    padding-inline: max(1.5rem, calc((100% - 72rem) / 2));
+  }
+  .fk-home .fk-home-section-body > * {
+    margin-top: 0;
+  }
+  .fk-home .fk-home-section-body > * + * {
+    margin-top: 1rem;
+  }
+  .fk-home .fk-steps,
+  .fk-home .fk-cards {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+  .fk-home .fk-steps > *,
+  .fk-home .fk-cards > * {
+    margin: 0;
+  }
+  .fk-home .fk-steps .fk-panel {
+    padding: 1rem 1.25rem;
+  }
+  .fk-home .fk-steps p {
+    margin: 0.35rem 0 0;
+    color: var(--fk-body);
+  }
+  .fk-home a.fk-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: var(--fk-body);
+  }
+  .fk-home a.fk-card:hover {
+    border-color: var(--fk-green);
+  }
+  .fk-home a.fk-card strong {
+    color: var(--fk-text);
+  }
+  .fk-home .fk-closing {
+    padding: 3rem 0;
+    border-top: 1px solid var(--fk-rule);
+    text-align: center;
+  }
+  .fk-home .fk-closing > * {
+    margin-top: 0;
+  }
+  .fk-home .fk-closing p {
+    margin: 0.75rem 0 1.5rem;
+    color: var(--fk-dim);
+    font-family: var(--fk-mono);
+  }
+  .fk-home .fk-btn,
+  .fk-home .fk-link-dim {
+    text-decoration: none;
+  }
+</style>

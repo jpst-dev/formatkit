@@ -40,6 +40,15 @@ public sealed class WindowsUserSession : IUserSession
         }
     }
 
+    public uint? ConsoleSessionId
+    {
+        get
+        {
+            var sessionId = WTSGetActiveConsoleSessionId();
+            return sessionId == NoSession ? null : sessionId;
+        }
+    }
+
     public string? CurrentUserSid
     {
         get

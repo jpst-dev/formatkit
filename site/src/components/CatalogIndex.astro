@@ -1,0 +1,84 @@
+---
+import type { CleanupItem } from '../loaders/cleanup';
+import { sortForIndex } from '../loaders/cleanup';
+import { labelFor } from '../lib/labels';
+import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+import { levelTone } from '../lib/badges';
+import type { Badge } from '../lib/badges';
+import { siteHref } from '../lib/catalogPaths';
+
+interface Props {
+  items?: CleanupItem[];
+  locale?: SiteLocale;
+}
+
+const props = Astro.props;
+let items = props.items;
+if (!items) {
+  const { getCollection } = await import('astro:content');
+  items = (await getCollection('cleanup')).map((e) => e.data as CleanupItem);
+}
+const locale = props.locale ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+const base = import.meta.env.BASE_URL;
+const groups = [...sortForIndex(items)];
+---
+
+<div class="fk-catalog">
+  {
+    groups.map(([category, list]) => (
+      <section>
+        <h2>{labelFor('category', category, labels)}</h2>
+        <ul>
+          {list.map((i) => {
+            const flags: Badge[] = [
+              { text: labelFor('level', i.level, labels), tone: levelTone(i.level) },
+              ...(i.contested ? [{ text: t(locale, 'badge.contested'), tone: 'amber' as const }] : []),
+              ...(i.laptopSensitive ? [{ text: t(locale, 'badge.laptopSensitive'), tone: 'plain' as const }] : []),
+              ...(i.requiresReboot ? [{ text: t(locale, 'badge.reboot'), tone: 'plain' as const }] : []),
+            ];
+            return (
+              <li>
+                <a href={siteHref(base, locale, `catalog/${i.id}`)}>{pickText(i.text, locale).title}</a>
+                {flags.map((f) => <span class="fk-badge" data-tone={f.tone}>{f.text}</span>)}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .fk-catalog ul {
+    list-style: none;
+    padding: 0;
+  }
+  .fk-catalog li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+    margin: 0.4rem 0;
+  }
+  .fk-badge {
+    border: 1px solid var(--fk-line);
+    border-radius: 3px;
+    padding: 0 0.5rem;
+    font-family: var(--fk-mono);
+    font-size: var(--sl-text-sm);
+  }
+  .fk-badge[data-tone='green'] {
+    border-color: var(--fk-green);
+    color: var(--fk-green);
+  }
+  .fk-badge[data-tone='green']::before {
+    content: '● ';
+  }
+  .fk-badge[data-tone='amber'] {
+    border-color: var(--fk-amber);
+    color: var(--fk-amber);
+  }
+</style>

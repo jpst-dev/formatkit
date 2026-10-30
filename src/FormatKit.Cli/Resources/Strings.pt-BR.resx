@@ -17,7 +17,6 @@
   <data name="Opt_Profile" xml:space="preserve"><value>Caminho do arquivo JSON do perfil.</value></data>
   <data name="Opt_Resume" xml:space="preserve"><value>Retoma a execução interrompida.</value></data>
   <data name="Opt_Countdown" xml:space="preserve"><value>Segundos de espera antes de iniciar; pressione Esc para cancelar (usado no primeiro logon).</value></data>
-  <data name="Error_Wmi" xml:space="preserve"><value>Não foi possível ler as informações do sistema: {0}</value></data>
   <data name="Cancelled" xml:space="preserve"><value>Cancelado.</value></data>
   <data name="Cancelled_Run" xml:space="preserve"><value>Cancelado. Execute 'formatkit run --resume' para continuar a execução.</value></data>
   <data name="Elevation_Declined" xml:space="preserve"><value>A permissão de administrador foi recusada. Execute o comando novamente e aceite a solicitação, ou inicie o formatkit em um terminal elevado.</value></data>
@@ -87,10 +86,11 @@
   <data name="Cmd_CleanupCheck" xml:space="preserve"><value>Procura problemas conhecidos deixados por ajustes e lista os itens de limpeza aplicados (somente leitura).</value></data>
   <data name="Cmd_CleanupUndo" xml:space="preserve"><value>Reverte itens de limpeza registrados no diário.</value></data>
   <data name="Opt_CleanupLevel" xml:space="preserve"><value>Mostra os itens até este nível (safe, balanced ou aggressive).</value></data>
-  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Mostra somente esta categoria (apps, privacy, performance ou developer).</value></data>
+  <data name="Opt_CleanupCategory" xml:space="preserve"><value>Mostra somente esta categoria (apps, startup, privacy, ai, interface, appearance, input, sound, performance, power ou developer).</value></data>
   <data name="Opt_UndoAll" xml:space="preserve"><value>Reverte todos os itens de limpeza aplicados.</value></data>
   <data name="Arg_UndoIds" xml:space="preserve"><value>IDs dos itens de limpeza a reverter.</value></data>
   <data name="Marker_Contested" xml:space="preserve"><value>contestado</value></data>
+  <data name="Marker_OptIn" xml:space="preserve"><value>opcional</value></data>
   <data name="List_What" xml:space="preserve"><value>O que faz: {0}</value></data>
   <data name="List_Breaks" xml:space="preserve"><value>O que pode quebrar: {0}</value></data>
   <data name="List_Gain" xml:space="preserve"><value>Ganho: {0}</value></data>
@@ -103,6 +103,9 @@
   <data name="Check_Breaks" xml:space="preserve"><value>O que quebra: {0}</value></data>
   <data name="Check_Fix" xml:space="preserve"><value>Correção: {0}</value></data>
   <data name="Check_Applied" xml:space="preserve"><value>Itens de limpeza aplicados (reverta com: formatkit cleanup undo &lt;id&gt;):</value></data>
+  <data name="Check_Reverted" xml:space="preserve"><value>Revertidos pelo Windows (aplicados pela limpeza, mas a configuração voltou ao que era):</value></data>
+  <data name="Check_Reverted_Fix" xml:space="preserve"><value>Correção: formatkit run --profile &lt;profile&gt;</value></data>
+  <data name="Check_Reverted_NotChecked" xml:space="preserve"><value>(não verificado: não foi possível ler o estado atual)</value></data>
   <data name="Check_JournalError" xml:space="preserve"><value>O diário de limpeza não pôde ser lido: {0}</value></data>
   <data name="Check_UndoOtherUser" xml:space="preserve"><value>(reverta com o usuário que o aplicou)</value></data>
   <data name="Check_NotChecked" xml:space="preserve"><value>{0} verificações não puderam ser executadas (veja o log).</value></data>

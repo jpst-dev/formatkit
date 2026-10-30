@@ -27,6 +27,8 @@ public sealed record ServiceSet(
     IVirtualDisks VirtualDisks,
     IVolumes Volumes,
     ILicensing Licensing,
+    IScheduledTaskControl TaskControl,
+    IPrinters Printers,
     IDiskImages DiskImages,
     IWindowsImages WindowsImages,
     IDisks Disks,

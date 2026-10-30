@@ -693,6 +693,80 @@ Run this one yourself, on the host, in an elevated PowerShell. **Use a spare sti
 5. **Success.** Run again and type the right number. **Expected:** the phases and percentages, then `The USB stick is ready. Boot the PC to format from it.`, exit **0**. In Explorer the stick is `FORMATKIT`, FAT32, about 32 GiB at most (the rest of a larger stick is unallocated), and `Get-Disk <n> | Get-Partition` shows one active partition with the MBR style. `sources` holds `install.swm` parts when the image was split. Record the size shown by `Get-Partition` against the stick's size (spec: partition is the disk size minus 1 MiB, up to 32 GiB).
 6. **Boot.** Boot a UEFI PC (a spare one if possible; Secure Boot on) from the stick, choose the one-time boot menu entry. **Expected:** Windows Setup starts; the screens are the ones of scenario 23 and, with a profile, the first logon behaves as in scenario 24. Stop at the disk screen if the PC holds data you want to keep: this scenario does not need to install.
 
+## Windows settings scenarios (28-30)
+
+These scenarios apply `profiles/windows-setup-example.json` (the `balanced` level plus the opt-in items `interface.taskbar-left`, `appearance.dark-theme`, `input.ptbr-us-international`, `power.monitor-off-15`, `power.sleep-never` and `performance.formatkit-plan`), check it on the desktop, re-run it and undo it. Run them in order on one restore of `clean`: 28 applies, 29 re-runs (it needs the applied state), 30 undoes. Most items are per user (HKCU, the language list), so FormatKit runs through `vm.ps1 job` as the signed-in user, never through `vm.ps1 run` (that is the admin account, without a desktop). Keep `fktest` signed in and connected (a basic session in Virtual Machine Connection). The VM needs internet, because undo reinstalls the removed apps through winget.
+
+```powershell
+.\tools\vm\vm.ps1 restore
+.\tools\vm\vm.ps1 copy -File artifacts\formatkit.exe
+.\tools\vm\vm.ps1 copy -File profiles\windows-setup-example.json
+```
+
+A job script for these scenarios, for example `ws-run.ps1`, holds:
+
+```powershell
+Set-Location C:\fk
+cmd /c "C:\fk\formatkit.exe run --profile windows-setup-example.json < NUL 2>&1"
+"EXIT=$LASTEXITCODE"
+```
+
+Run it with `.\tools\vm\vm.ps1 job -File ws-run.ps1 -TimeoutSec 2400`. The job runs elevated, so there is no UAC prompt; `< NUL` keeps a prompt from waiting for a keyboard nobody uses.
+
+Before scenario 28, export the registry targets for the compare in scenario 30, from a job (as the desktop user): one `reg export <key> before\kN.reg /y` per distinct key of the catalog's `registry` actions and of its `service` actions (`HKLM\SYSTEM\CurrentControlSet\Services\<name>`), plus `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run`, `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, `HKLM\SYSTEM\CurrentControlSet\Control\Power` and `HKCU\AppEvents\Schemes`. Exporting only these keys is enough and takes seconds; parsing whole-hive exports line by line in Windows PowerShell took more than half an hour. Also record `Get-WinUserLanguageList`, `powercfg /list` and `Get-ScheduledTask` for the tasks of `privacy.telemetry-tasks`.
+
+Last run in a VM (2026-10-30, Windows 11 Pro build 26300, Brazilian Portuguese UI): scenarios 28-30 passed after two fixes, each found by these scenarios: Explorer did not come back after the restart (Winlogon did not restart it after `taskkill`; FormatKit now starts it as the signed-in user), and `PcaPatchDbTask` was dropped from `privacy.telemetry-tasks` (Windows turns it back on at every boot, so `cleanup check` listed the item under "Reverted by Windows" after the reboot and a re-run applied it again). Record what the scenarios find in section 12 of the [Windows settings spec](superpowers/specs/2026-10-29-windows-settings-design.md).
+
+## 28. Windows settings: apply the author's profile, reboot, check
+
+1. Restore `clean`, copy the files, export the targets (see above). Run `.\tools\vm\vm.ps1 run -Command '.\formatkit.exe run --profile windows-setup-example.json --dry-run; "exit=$LASTEXITCODE"'`.
+
+   **Expected:** exit code 0; the plan lists the steps `cleanup.apps`, `startup`, `privacy`, `ai`, `interface`, `appearance`, `input`, `performance` and `power`, with the opt-in items among them and `performance.formatkit-plan` marked aggressive and contested. There is no sound step (`sound.no-sounds` is opt-in and not in the profile).
+2. Run the profile through `vm.ps1 job` (`ws-run.ps1` above).
+
+   **Expected:** exit code **0** in about 3.5 minutes, no reboot. Every item is `applied`, except `apps.copilot` (`already in place`: the Copilot app is not in the build 26300 image) and `power.monitor-off-15` and `power.sleep-never` (`already in place`: they land on the FormatKit plan, a copy of High performance, which already ships a 15-minute display timeout and no sleep on AC). The interface step has no "Explorer did not come back" warning, and right after the run `Get-Process explorer -IncludeUserName` shows one Explorer owned by the user, started during the run. The taskbar is on the left at once; it stays light until the reboot, because the dark theme is applied after the interface step restarted Explorer.
+3. Reboot from inside Windows (`Restart-Computer`), let `fktest` sign in, then take `.\tools\vm\vmshot.ps1 -Name settings-desktop`.
+
+   **Expected:** the taskbar is dark and left aligned, with no Task View button. The search box stays a box: the search icon item was left out of the catalog (see [cleanup-not-included.md](cleanup-not-included.md)).
+4. From a job, check:
+
+   ```powershell
+   Get-WinUserLanguageList | ForEach-Object { "$($_.LanguageTag): $($_.InputMethodTips -join ',')" }
+   $k = Get-Item 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+   'TaskbarAl', 'ShowTaskViewButton' | ForEach-Object { "$_ = $($k.GetValueKind($_)):$($k.GetValue($_))" }
+   powercfg /list
+   cmd /c "C:\fk\formatkit.exe cleanup check < NUL 2>&1"; "exit=$LASTEXITCODE"
+   ```
+
+   **Expected:** `pt-BR: 0416:00020409` (the only language and input method); `TaskbarAl = DWord:0` and `ShowTaskViewButton = DWord:0`; a `FormatKit Desempenho` plan, active (the name has a space, so `powercfg /changename` got it whole). `cleanup check` reports no known issue, **no** "Reverted by Windows" group, lists the applied items and exits with code **0**. `HibernateEnabled` is 0, `StartupApproved\Run\OneDrive` is the 12-byte binary `03` followed by zeros, and the nine tasks of `privacy.telemetry-tasks` are `Disabled`.
+5. Wait 15 minutes, then sample the idle cost with the research script `measure.ps1` (10 minutes, every 5 s, CIM performance classes; it only reads) through `vm.ps1 run`, and add the result next to the G4r row of the research notes' `vm_measurements.md`.
+
+   **Expected (2026-10-30):** 125 processes, 98 running services, 2292 MB in use, 2.2 % CPU, against G4r's 117, 88, 2111 and 2.5 %. The profile keeps the services G3 changed (decision D4) and Windows Update was still scanning, which explains the difference; Widgets, WidgetService and OneDrive are absent from the top processes, as in G4r.
+
+## 29. Windows settings: re-run the same profile
+
+Right after scenario 28 (same VM state), note the journal's hash (`Get-FileHash C:\ProgramData\FormatKit\cleanup-journal.json`) and run `ws-run.ps1` again.
+
+**Expected:** exit code 0; every step says `Nothing to do: already in order` (in Portuguese `Nada a fazer: já estava em ordem.`); the journal hash is unchanged; Explorer is not restarted (its start time does not change). If a step applies an item again instead, Windows reverted it, and `cleanup check` lists it under "Reverted by Windows". The first run showed this for `privacy.telemetry-tasks` (`PcaPatchDbTask` back to `Ready` after every boot); the re-run then added a second journal entry with only that task, and undo handled both entries.
+
+## 30. Windows settings: undo everything and compare
+
+1. Run `cleanup undo --all` through a job (`cmd /c "C:\fk\formatkit.exe cleanup undo --all < NUL 2>&1"`).
+
+   **Expected:** a `reverted` line per item and exit code **1**, only because `apps.solitaire` fails with the Store link (winget cannot reinstall it, as in scenario 7). A winget network error on another app (exit code `-2147012889`, name not resolved) is transient: run `cleanup undo <id>` for it again.
+2. Reboot from inside Windows, let the user sign in, export the same keys again into `after\` and compare each catalog target (`path|name`) between the two exports, plus every `.Current` default value under `HKCU\AppEvents\Schemes\Apps`.
+
+   **Expected:** every catalog target has the same value as before, or is absent as before. The one difference seen, `HKCU\...\Run\OneDrive`, is OneDrive setup finishing its first-logon install after the `before` export (FormatKit never writes the Run value). The 142 `.Current` lines are identical. Empty keys that apply created stay (the policy keys `Dsh`, `Edge`, `WindowsAI`, `Paint`, `WindowsNotepad`, `DeliveryOptimization` and others, and `StartupApproved\Run`): undo removes the values it added and keeps the keys, which Windows reads as "not configured".
+3. Check the rest:
+
+   ```powershell
+   Get-WinUserLanguageList | ForEach-Object { "$($_.LanguageTag): $($_.InputMethodTips -join ',')" }
+   powercfg /list
+   Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Power | Select-Object HibernateEnabled, HibernateEnabledDefault
+   ```
+
+   **Expected:** `pt-BR: 0416:00010416,0416:00000416` (ABNT2 and ABNT, as at `clean`); Balanced (active), High performance and Power saver, and no FormatKit plan; `HibernateEnabled` is empty (it was absent before and undo deleted it) and `HibernateEnabledDefault` is 1; undo first ran `powercfg /hibernate on`, which fails on the VM firmware (no hibernation), so the log has a warning for it and the undo still succeeds. The telemetry tasks are `Ready`, DiagTrack and TrkWks are Automatic and running, and the removed apps are back (`Get-AppxPackage`), apart from Solitaire.
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:

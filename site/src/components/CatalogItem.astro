@@ -1,0 +1,125 @@
+---
+import type { CleanupItem } from '../loaders/cleanup';
+import { labelFor } from '../lib/labels';
+import { labelsFor, localeFromAstro, pickText, t } from '../lib/text';
+import type { SiteLocale } from '../lib/text';
+import { levelTone } from '../lib/badges';
+import type { Badge } from '../lib/badges';
+import { siteHref } from '../lib/catalogPaths';
+import { whenToUse } from '../lib/whenToUse';
+import ActionDetails from './ActionDetails.astro';
+
+interface Props {
+  item: CleanupItem;
+  locale?: SiteLocale;
+}
+
+const { item, locale: given } = Astro.props;
+const locale = given ?? localeFromAstro(Astro.currentLocale);
+const labels = labelsFor(locale);
+const text = pickText(item.text, locale);
+const base = import.meta.env.BASE_URL;
+const when = whenToUse(item, (k) => t(locale, k));
+const scopeKey = item.scope === 'user' ? 'badge.scope.user' : item.scope === 'machine' ? 'badge.scope.machine' : '';
+const badges: Badge[] = [
+  { text: labelFor('level', item.level, labels), tone: levelTone(item.level) },
+  { text: labelFor('category', item.category, labels), tone: 'plain' },
+  ...(item.contested ? [{ text: t(locale, 'badge.contested'), tone: 'amber' as const }] : []),
+  ...(item.laptopSensitive ? [{ text: t(locale, 'badge.laptopSensitive'), tone: 'plain' as const }] : []),
+  ...(item.requiresReboot ? [{ text: t(locale, 'badge.reboot'), tone: 'plain' as const }] : []),
+  ...(scopeKey ? [{ text: t(locale, scopeKey), tone: 'plain' as const }] : item.scope ? [{ text: item.scope, tone: 'plain' as const }] : []),
+];
+const undoCommand = `formatkit cleanup undo ${item.id}`;
+---
+
+<div class="fk-item">
+  <p class="fk-item-id"><code>{item.id}</code></p>
+  <p class="fk-badges">{badges.map((b) => <span class="fk-badge" data-tone={b.tone}>{b.text}</span>)}</p>
+
+  <h2>{t(locale, 'item.what')}</h2>
+  <p>{text.what}</p>
+
+  <h2>{t(locale, 'item.breaks')}</h2>
+  <p>{text.breaks}</p>
+
+  <h2>{t(locale, 'item.when')}</h2>
+  <p>{when.join(' ')}</p>
+  {text.gain && <p>{text.gain}</p>}
+
+  <h2>{t(locale, 'item.evidence')}</h2>
+  {
+    item.evidence ? (
+      <>
+        <p>{item.evidence.level}</p>
+        {item.evidence.sources.length > 0 && (
+          <ul>
+            {item.evidence.sources.map((s) => (
+              <li>
+                {/^https?:\/\//i.test(s.url) ? <a href={s.url}>{s.title}</a> : s.title}
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
+    ) : (
+      <p>{t(locale, 'item.evidence.none')}</p>
+    )
+  }
+
+  <h2>{t(locale, 'item.undo')}</h2>
+  <pre><code>{undoCommand}</code></pre>
+  <p><a href={siteHref(base, locale, 'safety') + (locale === 'en' ? '#undo' : '#desfazer')}>{t(locale, 'item.undo.journal')}</a></p>
+
+  <h2>{t(locale, 'item.technical')}</h2>
+  {
+    item.actions.length > 0 ? (
+      <details>
+        <summary>{t(locale, 'item.technical.show')}</summary>
+        {item.actions.map((a) => <ActionDetails action={a} />)}
+      </details>
+    ) : (
+      <p>{t(locale, 'item.technical.none')}</p>
+    )
+  }
+
+  <p><a href={siteHref(base, locale, 'catalog')}>{t(locale, 'item.back')}</a></p>
+</div>
+
+<style>
+  .fk-item pre {
+    overflow-x: auto;
+  }
+  .fk-item-id {
+    margin: 0 0 0.5rem;
+    overflow-wrap: anywhere;
+  }
+  .fk-item-id code {
+    font-family: var(--fk-mono);
+    color: var(--fk-green);
+    background: none;
+    padding: 0;
+  }
+  .fk-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .fk-badge {
+    border: 1px solid var(--fk-line);
+    border-radius: 3px;
+    padding: 0 0.5rem;
+    font-family: var(--fk-mono);
+    font-size: var(--sl-text-sm);
+  }
+  .fk-badge[data-tone='green'] {
+    border-color: var(--fk-green);
+    color: var(--fk-green);
+  }
+  .fk-badge[data-tone='green']::before {
+    content: '● ';
+  }
+  .fk-badge[data-tone='amber'] {
+    border-color: var(--fk-amber);
+    color: var(--fk-amber);
+  }
+</style>

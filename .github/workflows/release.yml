@@ -19,8 +19,36 @@ jobs:
       - name: Unit tests
         run: dotnet test -c Release -- --filter-not-trait "Category=Integration"
       - name: Publish
-        run: dotnet publish src/FormatKit.Cli -c Release -o artifacts
+        run: |
+          dotnet publish src/FormatKit.Cli -c Release -o artifacts
+          dotnet publish src/FormatKit.App -c Release -o artifacts
+      - name: SHA-256 sums
+        shell: pwsh
+        run: |
+          $lines = foreach ($name in 'formatkit.exe', 'FormatKitUI.exe') {
+            $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath "artifacts/$name").Hash.ToLowerInvariant()
+            "$hash  $name"
+          }
+          $path = Join-Path $PWD 'artifacts/SHA256SUMS.txt'
+          [System.IO.File]::WriteAllText($path, ($lines -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
+          Get-Content -LiteralPath $path
       - name: Upload to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/formatkit.exe
+          generate_release_notes: true
+          files: |
+            artifacts/formatkit.exe
+            artifacts/FormatKitUI.exe
+            artifacts/SHA256SUMS.txt
+
+  # Deploys the site from the tag ref. Needs a tag rule `v*` under Settings >
+  # Environments > github-pages > Deployment branches and tags, or the deploy is rejected.
+  site:
+    needs: release
+    uses: ./.github/workflows/pages.yml
+    with:
+      require-release: true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

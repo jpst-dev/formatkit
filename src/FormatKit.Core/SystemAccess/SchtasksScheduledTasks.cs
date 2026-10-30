@@ -1,6 +1,6 @@
 namespace FormatKit.Core.SystemAccess;
 
-public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath) : IScheduledTasks
+public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath, IReadOnlyList<string> resumeArguments) : IScheduledTasks
 {
     private const string TaskName = "FormatKit\\Resume";
 
@@ -9,7 +9,7 @@ public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath
         var result = await runner.RunAsync(
             new ProcessSpec(
                 "schtasks.exe",
-                ["/Create", "/TN", TaskName, "/TR", $"\"{exePath}\" run --resume --wait-on-exit", "/SC", "ONLOGON", "/RL", "HIGHEST", "/F"],
+                ["/Create", "/TN", TaskName, "/TR", TaskCommand(), "/SC", "ONLOGON", "/RL", "HIGHEST", "/F"],
                 Timeouts.Query),
             ct).ConfigureAwait(false);
 
@@ -19,6 +19,9 @@ public sealed class SchtasksScheduledTasks(IProcessRunner runner, string exePath
                 $"Failed to register the resume scheduled task (exit {result.ExitCode}): {result.StdErr.Trim()}");
         }
     }
+
+    private string TaskCommand() =>
+        $"\"{exePath}\" " + string.Join(' ', resumeArguments.Select(a => a.Contains(' ', StringComparison.Ordinal) ? $"\"{a}\"" : a));
 
     public async Task<bool> RemoveResumeTaskAsync(CancellationToken ct)
     {

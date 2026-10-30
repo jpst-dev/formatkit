@@ -57,6 +57,42 @@ public sealed class CleanupCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task List_marks_opt_in_items()
+    {
+        var exit = await Run("cleanup", "list");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        var lines = _out.ToString().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        Assert.Contains(_catalog.Items, i => i.IsOptIn);
+        foreach (var item in _catalog.Items)
+            Assert.Equal(item.IsOptIn, lines.Single(l => l.StartsWith(item.Id + " ", StringComparison.Ordinal)).Contains("[opt-in]"));
+    }
+
+    [Fact]
+    public async Task List_marks_opt_in_items_in_Portuguese()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("pt-BR");
+
+        var exit = await Run("cleanup", "list", "--category", "appearance");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("appearance.dark-theme", _out.ToString());
+        Assert.Contains("[opcional]", _out.ToString());
+    }
+
+    [Theory]
+    [InlineData("startup")]
+    [InlineData("interface")]
+    [InlineData("power")]
+    public async Task List_accepts_the_new_categories(string category)
+    {
+        var exit = await Run("cleanup", "list", "--category", category);
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains(category + ".", _out.ToString());
+    }
+
+    [Fact]
     public async Task List_filters_by_level()
     {
         var exit = await Run("cleanup", "list", "--level", "safe");
@@ -189,6 +225,52 @@ public sealed class CleanupCommandsTests : IDisposable
     private void SeedOtherUserEntry() =>
         new JournalStore(_fs, AppPaths.Default).Save(new CleanupJournal(1,
             [new JournalEntry("privacy.theirs", DateTimeOffset.Now, [], null, "S-1-5-21-9-9-9-1002")]));
+
+    private string SeedRegistryOnlyEntry()
+    {
+        var id = _catalog.Items.First(i => i.Actions.All(a => a is RegistryAction { Delete: false })).Id;
+        new JournalStore(_fs, AppPaths.Default).Save(new CleanupJournal(1, [new JournalEntry(id, DateTimeOffset.Now, [], null)]));
+        return id;
+    }
+
+    [Fact]
+    public async Task Check_lists_items_Windows_reverted_before_the_applied_group_without_changing_the_exit_code()
+    {
+        var id = SeedRegistryOnlyEntry(); // the empty fake registry no longer holds the applied value
+
+        var exit = await Run("cleanup", "check");
+
+        var text = _out.ToString();
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("Reverted by Windows", text);
+        Assert.Contains("  " + id + Environment.NewLine + "    Fix: formatkit run --profile <profile>", text);
+        Assert.True(text.IndexOf("Reverted by Windows", StringComparison.Ordinal) < text.IndexOf("Applied cleanup items", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Check_lists_an_unreadable_reverted_candidate_as_not_checked()
+    {
+        _registry = new UnreadableRegistry();
+        var id = SeedRegistryOnlyEntry();
+
+        var exit = await Run("cleanup", "check");
+
+        Assert.Equal(ExitCodes.Ok, exit);
+        Assert.Contains("  " + id + " (not checked: could not read its current state)", _out.ToString());
+        Assert.DoesNotContain("Fix: formatkit run --profile", _out.ToString());
+    }
+
+    [Fact]
+    public async Task Check_lists_items_Windows_reverted_in_Portuguese()
+    {
+        CultureInfo.CurrentUICulture = new CultureInfo("pt-BR");
+        SeedRegistryOnlyEntry();
+
+        await Run("cleanup", "check");
+
+        Assert.Contains("Revertidos pelo Windows", _out.ToString());
+        Assert.Contains("Correção: formatkit run --profile <profile>", _out.ToString());
+    }
 
     [Fact]
     public async Task Undo_requires_ids_or_all()
