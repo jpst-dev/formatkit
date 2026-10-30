@@ -51,10 +51,10 @@ const hasWarn = Astro.slots.has('warn');
             </li>
           ))
         }
-        {hasWarn && <li class="fk-warn" style={`--i:${lines.length + 1}`}><slot name="warn" /></li>}
       </ul>
     </div>
   </div>
+  {hasWarn && <p class="fk-warn"><slot name="warn" /></p>}
   <button
     type="button"
     class="fk-motion"
@@ -146,9 +146,23 @@ const hasWarn = Astro.slots.has('warn');
   .fk-run {
     color: var(--fk-dim);
   }
+  .fk-log-prompt code {
+    overflow-wrap: normal;
+    word-break: keep-all;
+  }
+  .fk-log {
+    overflow-x: auto;
+  }
   .fk-warn {
+    position: relative;
+    max-width: 72rem;
+    margin: 2rem auto 0;
+    padding: 0.75rem 1rem;
+    font-family: var(--fk-mono);
+    font-size: 0.85rem;
     color: var(--fk-amber);
     background: var(--fk-amber-bg);
+    border: 1px solid var(--fk-amber);
   }
   .fk-cursor {
     display: inline-block;

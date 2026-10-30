@@ -57,3 +57,16 @@ test('motion-off rules do not force opacity on the texture or on all hero childr
     expect(r[1]).toMatch(/\.fk-log-lines li/);
   }
 });
+
+test('warn line sits below the hero grid, outside the log box', async () => {
+  const html = await render({ locale: 'en' }, { warn: '<span>WARNSLOT</span>' });
+  const warn = html.indexOf('WARNSLOT');
+  expect(warn).toBeGreaterThan(html.indexOf('fk-hero-grid'));
+  expect(html.slice(html.indexOf('fk-log-lines'), html.indexOf('</ul>'))).not.toContain('WARNSLOT');
+  expect(html).toMatch(/<p class="fk-warn[^"]*"[^>]*>\s*<span>WARNSLOT/);
+});
+
+test('guide link text has no arrow of its own', async () => {
+  const html = await render({ locale: 'en' });
+  expect(html).not.toContain('↓');
+});
