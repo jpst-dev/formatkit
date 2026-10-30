@@ -3,7 +3,8 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getCollection } from 'astro:content';
 import CatalogItem from '../../../components/CatalogItem.astro';
 import { pathsFor } from '../../../lib/catalogPaths';
-import { localeFromAstro, pickText } from '../../../lib/text';
+import { itemHeadings } from '../../../lib/catalogHeadings';
+import { localeFromAstro, pickText, t } from '../../../lib/text';
 import type { CleanupItem } from '../../../loaders/cleanup';
 
 export async function getStaticPaths() {
@@ -15,6 +16,6 @@ const { item } = Astro.props;
 const locale = localeFromAstro(Astro.params.locale);
 ---
 
-<StarlightPage frontmatter={{ title: pickText(item.text, locale).title }}>
+<StarlightPage frontmatter={{ title: pickText(item.text, locale).title }} headings={itemHeadings((k) => t(locale, k))}>
   <CatalogItem item={item} locale={locale} />
 </StarlightPage>

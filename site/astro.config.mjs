@@ -11,6 +11,7 @@ export default defineConfig({
       title: 'FormatKit',
       // Same mark as the exe icon (assets/formatkit.svg, copied by tools/make-icon).
       favicon: '/favicon.svg',
+      logo: { src: './src/assets/logo.svg', alt: '' },
       defaultLocale: 'root',
       locales: {
         root: { label: 'Português', lang: 'pt-BR' },
@@ -37,6 +38,7 @@ export default defineConfig({
         { label: 'Changelog', translations: { 'pt-BR': 'Novidades' }, slug: 'changelog' },
       ],
       customCss: ['./src/styles/theme.css'],
+      routeMiddleware: './src/routeData.ts',
       components: {
         ThemeProvider: './src/components/overrides/ThemeProvider.astro',
         ThemeSelect: './src/components/overrides/ThemeSelect.astro',

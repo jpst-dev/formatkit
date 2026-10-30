@@ -1,5 +1,5 @@
 // Renders assets/formatkit.svg into the multi-size assets/formatkit.ico used by
-// formatkit.exe and FormatKitUI.exe, and copies the SVG to the site favicon.
+// formatkit.exe and FormatKitUI.exe, and copies the SVG to the site favicon and header logo.
 // Usage: npm ci && npm run make (from tools/make-icon).
 import { Resvg } from '@resvg/resvg-js';
 import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
@@ -34,4 +34,5 @@ sizes.forEach((size, i) => {
 
 writeFileSync(`${root}assets/formatkit.ico`, Buffer.concat([header, ...images]));
 copyFileSync(`${root}assets/formatkit.svg`, `${root}site/public/favicon.svg`);
-console.log(`assets/formatkit.ico: ${sizes.join(', ')} px; site/public/favicon.svg updated`);
+copyFileSync(`${root}assets/formatkit.svg`, `${root}site/src/assets/logo.svg`);
+console.log(`assets/formatkit.ico: ${sizes.join(', ')} px; site favicon and logo updated`);

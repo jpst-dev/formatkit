@@ -29,7 +29,7 @@ const groups = [...sortForIndex(items)];
   {
     groups.map(([category, list]) => (
       <section>
-        <h2>{labelFor('category', category, labels)}</h2>
+        <h2 id={category}>{labelFor('category', category, labels)}</h2>
         <ul>
           {list.map((i) => {
             const flags: Badge[] = [
