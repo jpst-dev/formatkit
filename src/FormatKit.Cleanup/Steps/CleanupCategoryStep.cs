@@ -115,33 +115,36 @@ internal sealed class CleanupCategoryStep(
         && await ctx.Services.Hardware.HasBatteryAsync(ct).ConfigureAwait(false);
 
     /// <summary>
-    /// Kills Explorer and waits for Windows (Winlogon's AutoRestartShell) to start it again as the signed-in user; FormatKit
-    /// never starts it, because from this elevated process it would be an elevated shell. False when it did not come back.
+    /// Kills Explorer and waits a moment for Windows (Winlogon's AutoRestartShell) to start it again. When it does not (seen
+    /// in the VM), it is started as the signed-in user through the limited-run-level user-context runner: started from this
+    /// elevated process it would be an elevated shell. <c>cmd /c start</c> returns at once, so the runner does not wait on
+    /// the shell. False when Explorer did not come back.
     /// </summary>
     private async Task<bool> RestartExplorerAsync(StepContext ctx, CancellationToken ct)
     {
         try
         {
-            var runner = ctx.Services.Processes;
-            var kill = await runner.RunAsync(new ProcessSpec("taskkill.exe", ["/f", "/im", "explorer.exe"], Timeouts.Query), ct).ConfigureAwait(false);
+            var kill = await ctx.Services.Processes.RunAsync(
+                new ProcessSpec("taskkill.exe", ["/f", "/im", "explorer.exe"], Timeouts.Query), ct).ConfigureAwait(false);
             if (kill.ExitCode != 0 || kill.TimedOut)
             {
                 ctx.Log.Warning("taskkill explorer.exe failed (exit {Exit}): {Error}", kill.ExitCode, kill.StdErr.Trim());
                 return false;
             }
 
-            // Wait first: right after a forced kill the dying process can still be listed.
-            for (var poll = 0; poll < ExplorerPolls; poll++)
+            if (await WaitForExplorerAsync(ctx, AutoRestartPolls, ct).ConfigureAwait(false))
+                return true;
+
+            ctx.Log.Information("Explorer did not restart by itself; starting it as the signed-in user");
+            var start = await ctx.Services.UserContext.RunAsync(
+                new ProcessSpec("cmd.exe", ["/c", "start", "explorer.exe"], Timeouts.Query), ct).ConfigureAwait(false);
+            if (start.ExitCode != 0 || start.TimedOut)
             {
-                await _delay(ExplorerPollInterval, ct).ConfigureAwait(false);
-                var list = await runner.RunAsync(
-                    new ProcessSpec("tasklist.exe", ["/fi", "imagename eq explorer.exe", "/fo", "csv", "/nh"], Timeouts.Query), ct).ConfigureAwait(false);
-                if (list.ExitCode == 0 && list.StdOut.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-                        .Any(l => l.TrimStart().StartsWith("\"explorer.exe\"", StringComparison.OrdinalIgnoreCase)))
-                    return true;
+                ctx.Log.Warning("Starting explorer.exe as the signed-in user failed (exit {Exit})", start.ExitCode);
+                return false;
             }
 
-            return false;
+            return await WaitForExplorerAsync(ctx, StartedPolls, ct).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -150,7 +153,24 @@ internal sealed class CleanupCategoryStep(
         }
     }
 
-    private const int ExplorerPolls = 15;
+    private async Task<bool> WaitForExplorerAsync(StepContext ctx, int polls, CancellationToken ct)
+    {
+        // Wait first: right after a forced kill the dying process can still be listed.
+        for (var poll = 0; poll < polls; poll++)
+        {
+            await _delay(ExplorerPollInterval, ct).ConfigureAwait(false);
+            var list = await ctx.Services.Processes.RunAsync(
+                new ProcessSpec("tasklist.exe", ["/fi", "imagename eq explorer.exe", "/fo", "csv", "/nh"], Timeouts.Query), ct).ConfigureAwait(false);
+            if (list.ExitCode == 0 && list.StdOut.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                    .Any(l => l.TrimStart().StartsWith("\"explorer.exe\"", StringComparison.OrdinalIgnoreCase)))
+                return true;
+        }
+
+        return false;
+    }
+
+    private const int AutoRestartPolls = 3;
+    private const int StartedPolls = 15;
     private static readonly TimeSpan ExplorerPollInterval = TimeSpan.FromSeconds(1);
 
     private static readonly string[] VirtualPrinters = ["Microsoft Print to PDF", "Microsoft XPS Document Writer", "Fax"];
