@@ -93,6 +93,14 @@ public sealed class MediaViewModelTests : IDisposable
     private static string Row(MediaViewModel vm, string labelKey) =>
         vm.SetupRows.Single(r => r.Label == Strings.Get(labelKey)).Value;
 
+    /// <summary>
+    /// A new list with rows equal to the old ones dropped those rows from the automation tree, so a screen reader lost
+    /// them after a profile was opened (VM scenario 7). WPF's item peers go by item equality: rows compare by reference.
+    /// </summary>
+    [Fact]
+    public void SetupRows_WithTheSameText_AreDifferentItems() =>
+        Assert.NotEqual(new SetupRow("Account", "Local"), new SetupRow("Account", "Local"));
+
     [Fact]
     public void Continue_NeedsTheIso() => Assert.False(Create().ContinueCommand.CanExecute(null));
 

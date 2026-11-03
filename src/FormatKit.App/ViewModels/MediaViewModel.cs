@@ -17,8 +17,16 @@ namespace FormatKit.App.ViewModels;
 
 public enum MediaStage { Inputs, ChooseDisk, Writing, Result }
 
-/// <summary>One line of the read-only <c>setup</c> section.</summary>
-public sealed record SetupRow(string Label, string Value);
+/// <summary>
+/// One line of the read-only <c>setup</c> section. A class, not a record: the list is replaced with rows that often
+/// have the same text, and WPF's item peers go by equality, so equal rows dropped out of the automation tree.
+/// </summary>
+public sealed class SetupRow(string label, string value)
+{
+    public string Label { get; } = label;
+
+    public string Value { get; } = value;
+}
 
 /// <summary>A disk offered on the page; a disk with a <see cref="Reason"/> cannot be selected.</summary>
 public sealed record DiskOption(DiskRow Row)
