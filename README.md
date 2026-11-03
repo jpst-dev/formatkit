@@ -511,7 +511,7 @@ dotnet publish src/FormatKit.Cli -c Release -o artifacts   # artifacts\formatkit
 dotnet publish src/FormatKit.App -c Release -o artifacts   # artifacts\FormatKitUI.exe
 ```
 
-Pushing a tag like `v0.1.0` runs the release workflow, which tests, publishes and attaches `formatkit.exe` and `FormatKitUI.exe` to a GitHub release.
+Pushing a tag like `v0.1.0` (or `v0.1.0-rc.1` for a prerelease, which does not deploy the site) runs the release workflow, which tests, publishes and attaches `formatkit.exe` and `FormatKitUI.exe` to a GitHub release.
 
 ## License
 
