@@ -20,7 +20,7 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
         "Get-CimAssociatedInstance -ResultClassName Win32_DiskPartition | " +
         "Get-CimAssociatedInstance -ResultClassName Win32_LogicalDisk | Select-Object -First 1; " +
         "if ($l) { $letter = ([string]$l.DeviceID).Substring(0, 1); $label = [string]$l.VolumeName } }; " +
-        "[pscustomobject]@{ Attached = [bool]$img.Attached; Letter = $letter; Label = $label } | ConvertTo-Json -Compress }";
+        "[pscustomobject]@{ Attached = [bool]$img.Attached; Letter = $letter; Label = $label; Size = $img.Size } | ConvertTo-Json -Compress }";
 
     public async Task<VirtualDiskState?> GetAsync(string vhdxPath, CancellationToken ct)
     {
@@ -41,7 +41,8 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
             return new VirtualDiskState(
                 root.GetProperty("Attached").GetBoolean(),
                 string.IsNullOrEmpty(letter) ? null : letter[0],
-                label);
+                label,
+                root.TryGetProperty("Size", out var size) && size.ValueKind == JsonValueKind.Number ? size.GetInt64() : null);
         }
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException)
         {

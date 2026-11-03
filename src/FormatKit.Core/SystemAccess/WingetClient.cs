@@ -138,7 +138,8 @@ public partial class WingetClient(IProcessRunner runner)
                 Timeouts.Query),
             ct);
 
-    public async Task<WingetResult> ExportAsync(string outputFile, CancellationToken ct)
+    /// <param name="acceptSourceAgreements">False leaves the source agreements to the user: winget then refuses when they were never accepted.</param>
+    public async Task<WingetResult> ExportAsync(string outputFile, CancellationToken ct, bool acceptSourceAgreements = true)
     {
         ProcessResult result;
         try
@@ -146,7 +147,9 @@ public partial class WingetClient(IProcessRunner runner)
             result = await runner.RunAsync(
                 new ProcessSpec(
                     "winget.exe",
-                    ["export", "-o", outputFile, "--accept-source-agreements", "--disable-interactivity"],
+                    acceptSourceAgreements
+                        ? ["export", "-o", outputFile, "--accept-source-agreements", "--disable-interactivity"]
+                        : ["export", "-o", outputFile, "--disable-interactivity"],
                     Timeouts.Query),
                 ct).ConfigureAwait(false);
         }

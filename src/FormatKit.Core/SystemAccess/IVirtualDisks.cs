@@ -1,6 +1,7 @@
 namespace FormatKit.Core.SystemAccess;
 
-public sealed record VirtualDiskState(bool Attached, char? Letter, string? Label);
+/// <param name="SizeBytes">The virtual size, not the file size; null when unknown.</param>
+public sealed record VirtualDiskState(bool Attached, char? Letter, string? Label, long? SizeBytes = null);
 
 public sealed class VirtualDiskException(string message, Exception? inner = null) : Exception(message, inner);
 
