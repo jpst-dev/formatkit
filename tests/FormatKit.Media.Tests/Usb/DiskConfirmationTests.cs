@@ -85,6 +85,51 @@ public class DiskConfirmationTests
     }
 
     [Fact]
+    public async Task Stop_during_the_recheck_cancels_without_erasing()
+    {
+        using var stop = new CancellationTokenSource();
+        var disks = new FakeDisks(Stick()) { BeforeSecondList = stop.Cancel };
+        await disks.ListAsync(Ct); // The next call is the "second list" that BeforeSecondList watches.
+
+        var root = await new UsbTarget(disks).ConfirmAndPrepareAsync(
+            Candidate(Stick()), new Answer("3"), false, NoSources, 9 * Gb, Ct, stop.Token);
+
+        Assert.Null(root);
+        Assert.Empty(disks.Prepared);
+    }
+
+    /// <summary>The stop lands after the query has already returned, the last moment before the erase.</summary>
+    private sealed class StopAfterTheList(DiskInfo disk, CancellationTokenSource stop) : IDisks
+    {
+        public bool Erased { get; private set; }
+
+        public Task<IReadOnlyList<DiskInfo>> ListAsync(CancellationToken ct)
+        {
+            stop.Cancel();
+            return Task.FromResult<IReadOnlyList<DiskInfo>>([disk]);
+        }
+
+        public Task<string> PrepareUsbAsync(int number, string uniqueId, CancellationToken ct)
+        {
+            Erased = true;
+            return Task.FromResult(@"F:\");
+        }
+    }
+
+    [Fact]
+    public async Task Stop_right_after_the_recheck_cancels_without_erasing()
+    {
+        using var stop = new CancellationTokenSource();
+        var disks = new StopAfterTheList(Stick(), stop);
+
+        var root = await new UsbTarget(disks).ConfirmAndPrepareAsync(
+            Candidate(Stick()), new Answer("3"), false, NoSources, 9 * Gb, Ct, stop.Token);
+
+        Assert.Null(root);
+        Assert.False(disks.Erased);
+    }
+
+    [Fact]
     public void Listing_shows_usb_disks_and_counts_the_hidden_hard_disks()
     {
         var stick = Candidate(Stick());

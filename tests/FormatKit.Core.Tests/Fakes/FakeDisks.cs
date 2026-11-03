@@ -15,6 +15,9 @@ public sealed class FakeDisks(params DiskInfo[] disks) : IDisks
     /// <summary>Runs just before the second <see cref="ListAsync"/> returns, so a test can change the list between calls.</summary>
     public Action? BeforeSecondList { get; set; }
 
+    /// <summary>Runs when <see cref="PrepareUsbAsync"/> starts, so a test can act while the disk is being erased.</summary>
+    public Action? DuringPrepare { get; set; }
+
     public Exception? ThrowOnPrepare { get; set; }
 
     /// <summary>How many times <see cref="ListAsync"/> was called.</summary>
@@ -28,11 +31,15 @@ public sealed class FakeDisks(params DiskInfo[] disks) : IDisks
             BeforeSecondList?.Invoke();
         }
 
+        // As the real query, which is killed when its token is cancelled.
+        ct.ThrowIfCancellationRequested();
         return Task.FromResult<IReadOnlyList<DiskInfo>>([.. Disks]);
     }
 
     public Task<string> PrepareUsbAsync(int number, string uniqueId, CancellationToken ct)
     {
+        DuringPrepare?.Invoke();
+        ct.ThrowIfCancellationRequested();
         if (ThrowOnPrepare is not null)
         {
             return Task.FromException<string>(ThrowOnPrepare);

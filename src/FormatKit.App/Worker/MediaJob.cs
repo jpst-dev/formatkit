@@ -13,8 +13,8 @@ namespace FormatKit.App.Worker;
 /// <summary>
 /// The worker's media job: what <c>media build</c> and <c>media usb</c> do, with pipe messages for the console. The
 /// rules, the typed-number check and the re-check stay in <c>FormatKit.Media</c> and <see cref="MediaRunner"/>.
-/// <paramref name="stop"/> (the window's Cancel, or the window gone) ends the wait for a disk with nothing erased, and
-/// the writing between files; the erase itself gets only <paramref name="ct"/>, because an interrupted <c>diskpart</c>
+/// <paramref name="stop"/> (the window's Cancel, or the window gone) ends the wait for a disk and the re-check with nothing
+/// erased, and the writing between files; the erase itself gets only <paramref name="ct"/>, because an interrupted <c>diskpart</c>
 /// leaves the disk in an unknown state. The ISO stays mounted until the job ends, and the result goes out after the
 /// dismount, so a dismount failure reaches the window first.
 /// </summary>
@@ -148,10 +148,10 @@ internal sealed class MediaJob(
         try
         {
             var erased = await target.ConfirmAndPrepareAsync(
-                disk, new TypedAnswer(choice.TypedNumber), job.AllowHardDisk, sources, prepared.RequiredBytes, ct).ConfigureAwait(false);
+                disk, new TypedAnswer(choice.TypedNumber), job.AllowHardDisk, sources, prepared.RequiredBytes, ct, stop).ConfigureAwait(false);
             if (erased is null)
             {
-                env.Log.Information("Media: disk {Number} was not confirmed; nothing was erased", number);
+                env.Log.Information("Media: disk {Number} was not confirmed, or the job stopped first; nothing was erased", number);
                 return new MediaFinished(MediaFinishedStatus.Cancelled, Strings.Get("Media_Cancelled"));
             }
 

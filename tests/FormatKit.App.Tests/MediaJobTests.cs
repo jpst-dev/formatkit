@@ -451,15 +451,29 @@ public sealed class MediaJobTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Usb_StopDuringTheRecheck_ErasesNothing()
+    {
+        _disks.BeforeSecondList = StopNow;
+
+        var (_, _, rest) = await RunUsb(() => Type("3"));
+
+        Assert.Empty(_disks.Prepared);
+        var finished = Assert.IsType<MediaFinished>(rest[^1]);
+        Assert.Equal(MediaFinishedStatus.Cancelled, finished.Status);
+        Assert.Equal(Strings.Get("Media_Cancelled"), finished.Message);
+    }
+
+    private void StopNow()
+    {
+        _window.SendAsync(new Cancel(), Ct).GetAwaiter().GetResult();
+        _host.StopRequested.WaitAsync(Wait, Ct).GetAwaiter().GetResult();
+    }
+
+    [Fact]
     public async Task Usb_StopDuringTheErase_DoesNotInterruptItAndSaysIncomplete()
     {
-        // The stop arrives while the disk is being re-checked, right before diskpart: the erase still gets a token
-        // that is not cancelled, and the write that follows stops before copying anything.
-        _disks.BeforeSecondList = () =>
-        {
-            _window.SendAsync(new Cancel(), Ct).GetAwaiter().GetResult();
-            _host.StopRequested.WaitAsync(Wait, Ct).GetAwaiter().GetResult();
-        };
+        // The erase gets a token that is not cancelled, and the write that follows stops before copying anything.
+        _disks.DuringPrepare = StopNow;
 
         var (_, _, rest) = await RunUsb(() => Type("3"));
 
