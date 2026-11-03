@@ -545,7 +545,7 @@ Portuguese UI, 1024x768).
 - **V1 (accessibility):** list items were read as their record's `ToString`;
   every list over records names its items, and the About link has a name.
 - **V2 (Home text):** "prepare the installation media" removed until the
-  media phase.
+  media phase; the Home text names the media again now that the page exists.
 - **V3 (window size):** the window opened cut off on 1024x768; it now opens
   centered, clamped to the work area.
 - **V4 (admin badge):** the plan badge read "admin"; it now uses the CLI's
@@ -583,7 +583,7 @@ Automation and the Hyper-V synthetic keyboard:
 - V5 and V6 were checked again on the fixed build: a step done before a
   simulated reboot shows its earlier outcome after the resume, and the hash
   refusal returns to the review with Reload.
-- **7 (media):** not run; waits for the media phase.
+- **7 (media):** see the media phase below.
 
 Polish after merge, 2026-10-29 (unit-tested; P1 and P3 also run in the VM, the others only unit-tested):
 
@@ -592,3 +592,11 @@ Polish after merge, 2026-10-29 (unit-tested; P1 and P3 also run in the VM, the o
 - **P3 (resumed profile name):** a resumed run showed no profile name; `planned` now carries `profileName` (section 6.2); the VM showed "Reboot test" after a real reboot and after a resume in the open window.
 - **P4 (console hint):** the hint showed for consoles that ask nothing; it now reads "If the console window that opened asks for something, type it there." (section 6.5).
 - **P5 (refusal by text):** the window recognized the profile-changed refusal by its localized text; `failed` now carries a `reason` code (section 6.2).
+
+Media phase, VM scenario 7, 2026-11-03 (same VM and UI, driven through UI Automation and keys in the file dialogs; the window ran elevated through the job task, so the media UAC prompt was not seen, unit tests cover the worker start):
+
+- **Folder: passed.** With a real Windows 11 ISO and a profile, a folder with a file in it is refused and the page stays on the inputs with the message; on the empty folder the page goes through checking, copying and splitting `install.wim` and ends in "ready" with the Checklist reminder, in 58 s. The folder has `install.swm` and `install2.swm`, `autounattend.xml` with the profile's computer name, and a bundled `formatkit.exe` identical in size to the CLI next to the window. The ISO is dismounted at the end.
+- **Disk list: passed as far as a VM goes.** Hyper-V cannot present a USB disk, so the page shows "No USB disk found" and only Cancel; Cancel says nothing was erased and dismounts the ISO. The list with disks, the typed number and the erase are unit-tested; on a real stick they are the user's to run (`docs/testing.md`, scenario 27).
+- **Stop while writing: passed.** The page says the folder is incomplete and to delete it, the ISO is dismounted and no worker is left.
+- **Not run here:** installing Windows from a folder built by the page. The page and `media build` share `MediaBuilder`, and media scenarios 23-26 cover that install.
+- **M1 (setup rows):** after a profile was opened, the automation tree kept only the setup rows that changed, so a screen reader lost the others while the screen showed all six. WPF's item peers go by item equality and `SetupRow` was a record; it now compares by reference. The VM reads all six on the fixed build.
