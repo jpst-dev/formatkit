@@ -45,7 +45,7 @@ The user delegated these under the standing authorization of 2026-11-03. Each re
 
 ### `modules.programs`
 
-Source: `WingetClient.ExportAsync`, the flow `programs export` already uses. It must not accept source agreements on the user's behalf; if the existing call does, or if the export cannot run without that, the section stays disabled and the report explains it. The plan verifies this against the current call.
+Source: `winget export` to a temporary file that is always deleted. The existing `WingetClient.ExportAsync` passes `--accept-source-agreements`, which capture must not do, so it gains a parameter `acceptSourceAgreements` (default `true`, keeping `programs export` as it is) and capture passes `false`. If winget refuses because the agreements were never accepted, the section stays disabled and the note tells the user to run `winget list` once and accept them. The VM scenarios record how winget behaves in that state, including whether it returns a partial list.
 
 - A package whose id and source match a catalog program becomes a `catalog` id. Any other becomes a `winget` entry with `id` and `source`, no version (D8).
 - Skipped packages (D9) come from a list in the Programs project. Its starting content comes from what `winget export` prints on the clean VM, plus these patterns: `Microsoft.VCRedist.*`, `Microsoft.VCLibs*`, `Microsoft.UI.Xaml*`, `Microsoft.WindowsAppRuntime*`, `Microsoft.DotNet.*Runtime*`, `Microsoft.DotNet.DesktopRuntime*`, `Microsoft.Edge`, `Microsoft.EdgeWebView2Runtime`, `Microsoft.AppInstaller`.
