@@ -89,4 +89,17 @@ public class DevDriveCheckTests : IDisposable
         Assert.Single(items, i => i.Status == PrepareStatus.NotChecked);
         Assert.Equal(2, items.Count);
     }
+
+    [Fact]
+    public async Task Volume_whose_backing_file_is_unknown_is_not_checked()
+    {
+        var unknown = Vol('D') with { BackingVhdxUnknown = true };
+
+        var item = Assert.Single(await RunAsync(new InMemoryFileSystem(), Vol('C') with { BackingVhdxUnknown = true }, unknown));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+        Assert.Contains("D:", item.Title);
+        Assert.Contains("C:", item.Title);
+        Assert.False(string.IsNullOrEmpty(item.Action));
+    }
 }

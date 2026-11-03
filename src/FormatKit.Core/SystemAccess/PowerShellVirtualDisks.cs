@@ -8,12 +8,19 @@ public sealed class PowerShellVirtualDisks(IProcessRunner processes, IFileSystem
 
     // powershell -Command does not populate $args from trailing arguments, so the path is appended as a
     // single-quoted literal after the script block, which does reach $args[0] intact.
+    // "$img | Get-Volume" finds nothing for a VHDX (it only works for an ISO; seen in the VM), so when Get-Disk answers
+    // nothing (seen on a real PC) the letter comes from the disk number through the Win32 classes.
     private const string GetScript =
         "& { $img = Get-DiskImage -ImagePath $args[0]; " +
         "$vol = if ($img.Attached) { $img | Get-Disk | Get-Partition | Get-Volume | Where-Object DriveLetter | Select-Object -First 1 }; " +
-        "[pscustomobject]@{ Attached = [bool]$img.Attached; " +
-        "Letter = if ($vol) { [string]$vol.DriveLetter } else { $null }; " +
-        "Label = if ($vol) { [string]$vol.FileSystemLabel } else { $null } } | ConvertTo-Json -Compress }";
+        "$letter = if ($vol) { [string]$vol.DriveLetter } else { $null }; " +
+        "$label = if ($vol) { [string]$vol.FileSystemLabel } else { $null }; " +
+        "if ($img.Attached -and -not $letter -and $null -ne $img.Number) { " +
+        "$l = Get-CimInstance -ClassName Win32_DiskDrive -Filter ('Index=' + $img.Number) | " +
+        "Get-CimAssociatedInstance -ResultClassName Win32_DiskPartition | " +
+        "Get-CimAssociatedInstance -ResultClassName Win32_LogicalDisk | Select-Object -First 1; " +
+        "if ($l) { $letter = ([string]$l.DeviceID).Substring(0, 1); $label = [string]$l.VolumeName } }; " +
+        "[pscustomobject]@{ Attached = [bool]$img.Attached; Letter = $letter; Label = $label } | ConvertTo-Json -Compress }";
 
     public async Task<VirtualDiskState?> GetAsync(string vhdxPath, CancellationToken ct)
     {

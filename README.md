@@ -432,7 +432,7 @@ In an elevated terminal the command also reads the BitLocker recovery protectors
 
 **Privacy:** the output and the log never contain Git remote URLs (only whether a remote exists), Windows product keys, BitLocker recovery keys or passwords. Only names, paths, sizes and counts are printed.
 
-**Known limitation:** on a PC whose Windows Storage provider is broken, a Dev Drive VHDX is not detected (disk numbers still come from a Win32 fallback), so `dev.devdrive` does not list it. Check any virtual disk stored on `C:` by hand.
+**Known limitation:** on a PC whose Windows Storage provider is broken, Windows does not say where a virtual disk keeps its file. `dev.devdrive` then lists such a drive as not checked, and its repositories are still inspected: check by hand whether its file is stored on `C:`.
 
 ## Make the installation media
 

@@ -7,8 +7,9 @@ namespace FormatKit.Core.SystemAccess;
 /// numeric shell property System.Volume.BitLockerProtection, so no display text (language dependent) is parsed.
 /// The disk number falls back to Win32_LogicalDiskToPartition (DeviceID "Disk #N", not localized) when the Storage
 /// provider is broken. A failing Get-Volume makes the script exit 3, so the caller reports the volumes as not checked
-/// instead of seeing an empty list. Known limitation: the backing VHDX comes from Get-Disk (BusType 15 = File Backed Virtual), so
-/// on a PC with a broken Storage provider the VHDX is not detected.
+/// instead of seeing an empty list. The backing VHDX comes from Get-Disk (BusType 15, which Windows also returns as the text "File Backed Virtual"). Nothing else
+/// available without elevation gives its path, so when Get-Disk answers nothing (seen on a real PC, with no error) a disk
+/// that Win32_DiskDrive does not rule out as virtual is reported with VhdxKnown false, never as a plain disk.
 /// </summary>
 public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
 {
@@ -22,10 +23,11 @@ public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
         "$disk = $null; try { $disk = (Get-Partition -DriveLetter $l -ErrorAction Stop | Select-Object -First 1).DiskNumber } catch { $disk = $null }; " +
         "if ($null -eq $disk) { try { $m = Get-CimInstance -ClassName Win32_LogicalDiskToPartition -ErrorAction Stop | Where-Object { $_.Dependent.DeviceID -eq ($l + ':') } | Select-Object -First 1; if ($m -and $m.Antecedent.DeviceID -match 'Disk #(\\d+)') { $disk = [int]$Matches[1] } } catch { $disk = $null } }; " +
         "$bl = $null; try { $bl = $shell.NameSpace($l + ':').Self.ExtendedProperty('System.Volume.BitLockerProtection') } catch { $bl = $null }; " +
-        "$vhdx = $null; try { $d = Get-Disk -Number $disk -ErrorAction Stop; if ([int]$d.BusType -eq 15) { $vhdx = $d.Location } } catch { $vhdx = $null }; " +
+        "$vhdx = $null; $vhdxKnown = $false; try { $d = Get-Disk -Number $disk -ErrorAction Stop; if ($d) { $vhdxKnown = $true; if (@('15', 'File Backed Virtual') -contains [string]$d.BusType) { $vhdx = $d.Location } } } catch { $vhdx = $null }; " +
+        "if (-not $vhdxKnown -and $null -ne $disk) { try { $w = Get-CimInstance -ClassName Win32_DiskDrive -Filter (\"Index=\" + $disk) -ErrorAction Stop; if ($w -and $w.Model -notmatch 'Virtual') { $vhdxKnown = $true } } catch { $vhdxKnown = $false } }; " +
         "$rec = $null; if ($elevated) { try { $v = Get-CimInstance -Namespace 'root\\cimv2\\Security\\MicrosoftVolumeEncryption' -ClassName Win32_EncryptableVolume -Filter (\"DriveLetter='\" + $l + \":'\") -ErrorAction Stop; " +
         "$kp = Invoke-CimMethod -InputObject $v -MethodName GetKeyProtectors -Arguments @{ KeyProtectorType = 3 } -ErrorAction Stop; $rec = (@($kp.VolumeKeyProtectorID).Count -gt 0) } catch { $rec = $null } }; " +
-        "[pscustomobject]@{ Letter = $l; Disk = $disk; BitLocker = $bl; Vhdx = $vhdx; Recovery = $rec } }); " +
+        "[pscustomobject]@{ Letter = $l; Disk = $disk; BitLocker = $bl; Vhdx = $vhdx; VhdxKnown = $vhdxKnown; Recovery = $rec } }); " +
         "ConvertTo-Json -InputObject $items -Compress";
 
     public async Task<IReadOnlyList<VolumeInfo>> ListAsync(CancellationToken ct)
@@ -100,7 +102,10 @@ public sealed class PowerShellVolumes(IProcessRunner processes) : IVolumes
             ? r.GetBoolean()
             : null;
         return new VolumeInfo(char.ToUpperInvariant(letter[0]), Number(e, "Disk"), MapBitLocker(Number(e, "BitLocker")),
-            string.IsNullOrEmpty(vhdx) ? null : vhdx, recovery);
+            string.IsNullOrEmpty(vhdx) ? null : vhdx, recovery)
+        {
+            BackingVhdxUnknown = e.TryGetProperty("VhdxKnown", out var known) && known.ValueKind == JsonValueKind.False,
+        };
     }
 
     private static int? Number(JsonElement e, string name) =>

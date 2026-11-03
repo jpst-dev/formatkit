@@ -19,7 +19,8 @@ public sealed class GitReposCheck : IPrepareCheck
         var scanner = new GitRepoInspector(context.Services.Processes, context.Services.Files, "git.exe");
         var unreadable = 0;
         var roots = new List<string> { context.Env.UserProfile };
-        roots.AddRange(context.Windows.LostVhdxVolumes.Select(v => $@"{char.ToUpperInvariant(v.Letter)}:\"));
+        roots.AddRange(context.Windows.LostVhdxVolumes.Concat(context.Windows.UncheckedVhdxVolumes)
+            .Select(v => $@"{char.ToUpperInvariant(v.Letter)}:\"));
 
         var repos = roots
             .SelectMany(root => scanner.Find(root, MaxDepth, _ => unreadable++, ct))

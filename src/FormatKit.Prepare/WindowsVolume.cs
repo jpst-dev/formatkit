@@ -9,7 +9,7 @@ public enum PathLocation { Kept, Lost, Unknown }
 /// Knows which paths a Windows reinstall destroys: the system drive and volumes backed by a VHDX on it. UNC paths are
 /// never lost. The volume list is read once per run and shared here; when it could not be read, or does not include
 /// the system drive, any other drive may be a virtual disk stored on the system drive, so its paths are
-/// <see cref="PathLocation.Unknown"/>. A <c>subst</c> drive or a junction pointing into the system drive is not resolved.
+/// <see cref="PathLocation.Unknown"/>, as are the paths of a volume whose backing file could not be read. A <c>subst</c> drive or a junction pointing into the system drive is not resolved.
 /// </summary>
 public sealed class WindowsVolume
 {
@@ -22,6 +22,7 @@ public sealed class WindowsVolume
         Volumes = volumes ?? [];
         VolumesKnown = volumes is not null && volumes.Any(v => char.ToUpperInvariant(v.Letter) == _system);
         LostVhdxVolumes = [.. Volumes.Where(v => DriveOf(v.BackingVhdx) == _system && char.ToUpperInvariant(v.Letter) != _system)];
+        UncheckedVhdxVolumes = [.. Volumes.Where(v => v.BackingVhdxUnknown && v.BackingVhdx is null && char.ToUpperInvariant(v.Letter) != _system)];
     }
 
     /// <summary>The listed volumes; empty when listing failed.</summary>
@@ -31,6 +32,9 @@ public sealed class WindowsVolume
     public bool VolumesKnown { get; }
 
     public IReadOnlyList<VolumeInfo> LostVhdxVolumes { get; }
+
+    /// <summary>Volumes other than the system drive that may be virtual disks stored on it: nothing says they are safe.</summary>
+    public IReadOnlyList<VolumeInfo> UncheckedVhdxVolumes { get; }
 
     public PathLocation Locate(string path)
     {
@@ -53,6 +57,8 @@ public sealed class WindowsVolume
             return PathLocation.Unknown;
         if (letter == _system || LostVhdxVolumes.Any(v => char.ToUpperInvariant(v.Letter) == letter))
             return PathLocation.Lost;
+        if (UncheckedVhdxVolumes.Any(v => char.ToUpperInvariant(v.Letter) == letter))
+            return PathLocation.Unknown;
         return VolumesKnown ? PathLocation.Kept : PathLocation.Unknown;
     }
 

@@ -94,4 +94,12 @@ public class VolumesCheckTests : IDisposable
 
         Assert.Equal(PrepareStatus.Ok, item.Status);
     }
+
+    [Fact]
+    public async Task A_volume_whose_backing_file_is_unknown_is_never_reported_as_safe()
+    {
+        var items = await RunAsync(Vol('C', 0), Vol('D', 1) with { BackingVhdxUnknown = true });
+
+        Assert.Empty(items);
+    }
 }

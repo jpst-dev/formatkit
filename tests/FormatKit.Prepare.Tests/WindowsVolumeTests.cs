@@ -102,4 +102,21 @@ public class WindowsVolumeTests
     [Fact]
     public void LongUncPathIsNeverLost() =>
         Assert.Equal(PathLocation.Kept, Known().Locate("\\\\?\\UNC\\srv\\share\\x"));
+
+    [Fact]
+    public void A_volume_whose_backing_file_is_unknown_is_of_unknown_location()
+    {
+        var volume = new WindowsVolume('C',
+        [
+            new VolumeInfo('C', 0, BitLockerState.Off, null, null) { BackingVhdxUnknown = true },
+            new VolumeInfo('D', 1, BitLockerState.Off, null, null) { BackingVhdxUnknown = true },
+            new VolumeInfo('E', 2, BitLockerState.Off, null, null),
+        ]);
+
+        Assert.Equal('D', Assert.Single(volume.UncheckedVhdxVolumes).Letter);
+        Assert.Equal(PathLocation.Unknown, volume.Locate(@"D:\code"));
+        Assert.True(volume.MayBeLost(@"D:\code"));
+        Assert.Equal(PathLocation.Lost, volume.Locate(@"C:\code"));
+        Assert.Equal(PathLocation.Kept, volume.Locate(@"E:\code"));
+    }
 }
