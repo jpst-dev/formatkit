@@ -36,13 +36,21 @@ Faça tudo isto no Windows **antigo**, antes de formatar. Depois da formatação
 
    Guarde o arquivo fora do disco do Windows.
 
-5. **Salve os drivers de rede.** Se o Windows novo não tiver driver para a sua placa de rede, você fica sem internet para baixar o resto. Este comando exporta os drivers de rede que funcionam hoje.
+5. **Capture este PC em um perfil.** Isso grava um perfil com seus programas, configurações e ambiente de desenvolvimento, para você não precisar escrever um à mão.
+
+   ```powershell
+   formatkit profile capture E:\meu-pc.json
+   ```
+
+   Ele não muda mais nada. Leia o relatório: para reinstalar os programas, você precisa mudar `acceptAgreements` para `true`, porque aceitar esses contratos é uma decisão sua. O arquivo contém seu nome e e-mail, então não o publique como está.
+
+6. **Salve os drivers de rede.** Se o Windows novo não tiver driver para a sua placa de rede, você fica sem internet para baixar o resto. Este comando exporta os drivers de rede que funcionam hoje.
 
    ```powershell
    formatkit drivers backup-network --output E:\drivers-rede
    ```
 
-6. **Anote as licenças que o checklist não vê.** Chaves de programas pagos, contas, códigos de ativação e qualquer coisa que só exista na sua cabeça ou em um papel.
+7. **Anote as licenças que o checklist não vê.** Chaves de programas pagos, contas, códigos de ativação e qualquer coisa que só exista na sua cabeça ou em um papel.
 
 </Steps>
 

@@ -36,13 +36,21 @@ Do all of this on the **old** Windows, before you format. After the format, anyt
 
    Keep the file off the Windows drive.
 
-5. **Save the network drivers.** If the fresh Windows has no driver for your network card, you have no internet to download the rest. This command exports the network drivers that work today.
+5. **Capture this PC into a profile.** It writes a profile with your programs, settings and dev environment, so you do not have to write one by hand.
+
+   ```powershell
+   formatkit profile capture E:\my-pc.json
+   ```
+
+   It changes nothing else. Read what it reports: to reinstall the programs you must set `acceptAgreements` to `true` yourself, because accepting those agreements is your decision. The file holds your name and e-mail, so do not publish it as is.
+
+6. **Save the network drivers.** If the fresh Windows has no driver for your network card, you have no internet to download the rest. This command exports the network drivers that work today.
 
    ```powershell
    formatkit drivers backup-network --output E:\network-drivers
    ```
 
-6. **Write down the licenses the checklist cannot see.** Keys for paid software, accounts, activation codes and anything that exists only in your head or on paper.
+7. **Write down the licenses the checklist cannot see.** Keys for paid software, accounts, activation codes and anything that exists only in your head or on paper.
 
 </Steps>
 

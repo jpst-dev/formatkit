@@ -199,4 +199,46 @@
   <data name="Media_UsbDone" xml:space="preserve"><value>O pendrive está pronto. Inicie o PC por ele para formatar.</value></data>
   <data name="Media_UsbEraseFailed" xml:space="preserve"><value>O apagamento não foi concluído</value></data>
   <data name="Media_UsbInterrupted" xml:space="preserve"><value>A gravação no pendrive foi interrompida</value></data>
+  <data name="Cmd_Profile" xml:space="preserve">
+    <value>Trabalha com perfis.</value>
+  </data>
+  <data name="Cmd_ProfileCapture" xml:space="preserve">
+    <value>Grava um perfil deste PC. Não muda mais nada e não precisa de elevação.</value>
+  </data>
+  <data name="Arg_ProfileFile" xml:space="preserve">
+    <value>Arquivo que recebe o perfil.</value>
+  </data>
+  <data name="Opt_ProfileForce" xml:space="preserve">
+    <value>Sobrescreve o arquivo se ele existir.</value>
+  </data>
+  <data name="Profile_BadPath" xml:space="preserve">
+    <value>Caminho de arquivo inválido: {0}</value>
+  </data>
+  <data name="Profile_Exists" xml:space="preserve">
+    <value>{0} já existe. Use --force para sobrescrever.</value>
+  </data>
+  <data name="Profile_Invalid" xml:space="preserve">
+    <value>O perfil capturado falhou na validação, então nada foi gravado. Isso é um bug do FormatKit; por favor, reporte:</value>
+  </data>
+  <data name="Profile_WriteFailed" xml:space="preserve">
+    <value>Não foi possível gravar {0}: {1}</value>
+  </data>
+  <data name="Profile_Captured" xml:space="preserve">
+    <value>Capturado:</value>
+  </data>
+  <data name="Profile_NotCaptured" xml:space="preserve">
+    <value>Não capturado:</value>
+  </data>
+  <data name="Profile_Review" xml:space="preserve">
+    <value>Revisar:</value>
+  </data>
+  <data name="Profile_Written" xml:space="preserve">
+    <value>Perfil gravado em {0}</value>
+  </data>
+  <data name="Profile_OnWindowsDrive" xml:space="preserve">
+    <value>Atenção: este arquivo está no drive do Windows, e a formatação o apaga. Copie para outro drive.</value>
+  </data>
+  <data name="Profile_PersonalData" xml:space="preserve">
+    <value>O arquivo contém dados pessoais (nome, e-mail, nome do computador). Não o publique como está.</value>
+  </data>
 </root>

@@ -52,6 +52,7 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit dev wsl-user [--profile <file>]` | Creates the WSL Linux user, lets you type its password and makes it the default user. Finishes an item a run left pending. |
 | `formatkit dev ssh-key [--profile <file>]` | Creates the SSH key (you type the passphrase), starts ssh-agent and loads the key. Asks for elevation to set ssh-agent to Automatic. |
 | `formatkit prepare check [--profile <file>] [--output <file.md>]` | Answers "is it safe to format?": lists what a reinstall would lose and what to save first. Changes nothing, needs no elevation. See [Before you format](#before-you-format). |
+| `formatkit profile capture <file> [--force]` | Writes a profile of this PC to rebuild it after the format. Read-only, no elevation. See [Capture this machine](#capture-this-machine). |
 | `formatkit media build --iso <iso> --output <folder> [--profile <file>]` | Writes the Windows 11 installation media to a folder. See [Make the installation media](#make-the-installation-media). |
 | `formatkit media usb --iso <iso> [--profile <file>] [--disk <n>] [--allow-hard-disk]` | Erases a USB stick you choose and writes the same media to it. Asks for elevation. |
 | `--verbose` (global) | Shows detailed logging. |
@@ -433,6 +434,26 @@ In an elevated terminal the command also reads the BitLocker recovery protectors
 **Privacy:** the output and the log never contain Git remote URLs (only whether a remote exists), Windows product keys, BitLocker recovery keys or passwords. Only names, paths, sizes and counts are printed.
 
 **Known limitation:** on a PC whose Windows Storage provider is broken, Windows does not say where a virtual disk keeps its file. `dev.devdrive` then lists such a drive as not checked, and its repositories are still inspected: check by hand whether its file is stored on `C:`.
+
+## Capture this machine
+
+Instead of writing a profile by hand, run this on the **old** Windows. It changes nothing except the file it writes, and it does not ask for elevation.
+
+```powershell
+formatkit profile capture E:\my-pc.json
+```
+
+It prints what was captured, what was not and why, and what you should review:
+
+| Section | What is captured | What is left to you |
+| --- | --- | --- |
+| `programs` | `winget export`, mapped to the catalog when possible. Runtimes and packages that ship with Windows are skipped. | `acceptAgreements` is written as `false`: `run` rejects the profile until you set it to `true`, because accepting those agreements is your decision. If winget never ran on this PC, run `winget list` once and accept its source agreements first. |
+| `cleanup` | Catalog items already applied here, as `include`. | Aggressive items are reported, not captured, because they need `confirmAggressive`. Contested items are captured and flagged. Items that could not be checked without administrator rights are listed. |
+| `drivers` | The default sources; drivers are detected on the new install. | |
+| `dev` | Git settings, SSH key type and comment, the WSL distro, user and `.wslconfig`, zsh and Oh My Zsh, Oh My Posh, a known Nerd Font, and the Dev Drive with its caches. | Keys are never read: only the `.pub` files are opened, so back up your `.ssh` folder if you want to keep your key. Dotfiles cannot be inferred, so add them yourself. |
+| `setup` | Computer name, language, keyboard and time zone. | The account type and the edition are choices for the new install. |
+
+The profile is validated before it is written, so a capture never leaves a broken file. Keep it off the Windows drive, and do not publish it as is: it holds your name, e-mail and computer name.
 
 ## Make the installation media
 

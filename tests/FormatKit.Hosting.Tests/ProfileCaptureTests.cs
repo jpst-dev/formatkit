@@ -149,8 +149,9 @@ public sealed class ProfileCaptureTests
     public async Task Write_stores_the_file_and_reports_the_windows_drive()
     {
         var files = new InMemoryFileSystem();
-        files.CreateDirectory(@"C:SERSJOAO");
-        VAR CAPTURE = CREATE(SOURCES(), FILES);
+        files.CreateDirectory(@"C:\Users\Joao");
+        files.CreateDirectory(@"E:\");
+        var capture = Create(Sources(), files);
         var result = new ProfileCaptureResult("{}", [], [], []);
 
         var onWindows = await capture.WriteAsync(result, @"C:\Users\Joao\p.json", Ct);
