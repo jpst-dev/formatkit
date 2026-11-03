@@ -42,7 +42,8 @@ public sealed class VolumesCheck : IPrepareCheck
         }
 
         var items = new List<PrepareItem>();
-        foreach (var volume in others)
+        // A volume that may be a virtual disk on the Windows drive is reported by DevDriveCheck, never as "on another disk".
+        foreach (var volume in others.Except(context.Windows.UncheckedVhdxVolumes))
         {
             var letter = char.ToUpperInvariant(volume.Letter);
             var disk = volume.DiskNumber ?? -1;

@@ -248,4 +248,20 @@ public class PowerShellVirtualDisksTests
     private static string Unescape(string value) =>
         System.Text.RegularExpressions.Regex.Replace(
             value, @"\\u([0-9A-Fa-f]{4})", m => ((char)Convert.ToInt32(m.Groups[1].Value, 16)).ToString());
+
+    [Fact]
+    public async Task Get_falls_back_to_Win32_when_Get_Disk_answers_nothing()
+    {
+        var (disks, runner, files) = Create();
+        files.Seed(Vhdx, "vhdx");
+        runner.Enqueue("powershell.exe", Result(0, """{"Attached":true,"Letter":"V","Label":"Dev"}"""));
+
+        var state = await disks.GetAsync(Vhdx, TestContext.Current.CancellationToken);
+
+        Assert.Equal(new VirtualDiskState(true, 'V', "Dev"), state);
+        var script = runner.Calls.Single().Arguments[^1];
+        Assert.Contains("$img | Get-Disk | Get-Partition | Get-Volume", script);
+        Assert.DoesNotContain("$img | Get-Volume", script);
+        Assert.Contains("Win32_LogicalDisk", script);
+    }
 }

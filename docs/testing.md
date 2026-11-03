@@ -768,6 +768,17 @@ Right after scenario 28 (same VM state), note the journal's hash (`Get-FileHash 
 
    **Expected:** `pt-BR: 0416:00010416,0416:00000416` (ABNT2 and ABNT, as at `clean`); Balanced (active), High performance and Power saver, and no FormatKit plan; `HibernateEnabled` is empty (it was absent before and undo deleted it) and `HibernateEnabledDefault` is 1; undo first ran `powercfg /hibernate on`, which fails on the VM firmware (no hibernation), so the log has a warning for it and the undo still succeeds. The telemetry tasks are `Ready`, DiagTrack and TrkWks are Automatic and running, and the removed apps are back (`Get-AppxPackage`), apart from Solitaire.
 
+## 31. Prepare: a virtual disk stored on `C:`
+
+Restore `clean`, copy `formatkit.exe` to `C:\fk` and, in the VM, make a small VHDX on `C:` (elevated PowerShell):
+
+```powershell
+"create vdisk file=`"C:\fk\t.vhdx`" maximum=1024 type=expandable", 'select vdisk file="C:\fk\t.vhdx"', 'attach vdisk', 'convert gpt', 'create partition primary', 'format fs=ntfs quick label=Dev', 'assign letter=V' | diskpart.exe
+.\formatkit.exe prepare check
+```
+
+**Expected:** `V:` is listed as a virtual disk stored on `C:` that is erased with the Windows drive, with `C:\fk\t.vhdx` in its detail. It is never listed as "on another disk".
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:

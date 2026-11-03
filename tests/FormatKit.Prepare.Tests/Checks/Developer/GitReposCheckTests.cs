@@ -347,4 +347,18 @@ public class GitReposCheckTests : IDisposable
         Assert.Contains(@"src\b", missing.Detail);
         Assert.Contains(@"src\c", missing.Detail);
     }
+
+    [Fact]
+    public async Task A_repository_on_a_volume_whose_backing_file_is_unknown_is_inspected()
+    {
+        var files = new InMemoryFileSystem();
+        Repo(files, @"D:\code\app");
+        var runner = new FakeProcessRunner();
+        Queue(runner, status: "? a.txt\n");
+        var unknown = new VolumeInfo('D', 1, BitLockerState.Off, null, null) { BackingVhdxUnknown = true };
+
+        var blocker = Assert.Single(await RunAsync(files, runner, true, unknown));
+
+        Assert.Contains(@"D:\code\app", blocker.Title);
+    }
 }

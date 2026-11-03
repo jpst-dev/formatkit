@@ -28,6 +28,16 @@ public sealed class DevDriveCheck : IPrepareCheck
                 Strings.Format("DevDrive_Action", letter)));
         }
 
+        foreach (var volume in context.Windows.UncheckedVhdxVolumes.OrderBy(v => v.Letter))
+        {
+            var letter = $"{char.ToUpperInvariant(volume.Letter)}:";
+            var drive = $"{char.ToUpperInvariant(context.Env.SystemDrive)}:";
+            items.Add(new PrepareItem(Id, Group, PrepareStatus.NotChecked,
+                Strings.Format("DevDrive_Unverified_Title", letter, drive),
+                Strings.Format("DevDrive_Unverified_Detail", letter, drive),
+                Strings.Format("DevDrive_Unverified_Action", letter, drive)));
+        }
+
         if (!context.Windows.VolumesKnown)
         {
             var drive = $"{char.ToUpperInvariant(context.Env.SystemDrive)}:";

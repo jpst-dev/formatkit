@@ -288,6 +288,24 @@ The input classes most likely to bite users that unit tests can miss:
 
 ## Found while running
 
+VM check on 2026-11-03 (scenario 31), after the installation media run on a real
+PC showed `Get-Disk` answering nothing there:
+
+- `dev.devdrive` never fired on a healthy Windows either. The script cast
+  `[int]$d.BusType`, but `Get-Disk` returns the text "File Backed Virtual", so the
+  cast threw and `data.volumes` told the user that a VHDX on `C:` was on another
+  disk and untouched by the reinstall. The script now accepts both forms. The unit
+  test had pinned the cast, so it could not catch this; only a real VHDX did.
+- When `Get-Disk` answers nothing, a disk that `Win32_DiskDrive` does not rule out
+  as virtual is reported as `BackingVhdxUnknown`: `dev.devdrive` lists it as not
+  checked, `data.volumes` no longer calls it safe, its paths are of unknown location
+  and its repositories are scanned. Nothing available without elevation gives the
+  file's path, and `diskpart list vdisk` needs elevation, which this check avoids.
+- The Dev Drive step: `$img | Get-Volume` works for an ISO but finds nothing for a
+  VHDX, so the planned one-line change would have broken the step. It keeps the
+  `Get-Disk` chain and falls back to the Win32 classes, checked in the VM with
+  `Get-Disk` and `Get-Partition` replaced by empty functions.
+
 VM run of scenarios 17-22 on 2026-10-29 (Windows 11 build 26100, Brazilian
 Portuguese UI, virtual TPM, data disk attached as `D:`). All six pass after the
 fixes below.

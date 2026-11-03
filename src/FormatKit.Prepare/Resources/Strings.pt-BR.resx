@@ -156,6 +156,9 @@
   <data name="DevDrive_Detail_Size" xml:space="preserve"><value>O disco virtual {0} ({1}) será apagado junto com a unidade do Windows.</value></data>
   <data name="DevDrive_Detail" xml:space="preserve"><value>O disco virtual {0} será apagado junto com a unidade do Windows.</value></data>
   <data name="DevDrive_Action" xml:space="preserve"><value>Copie o que precisar de {0} para um disco externo antes de instalar. Os repositórios dentro dela aparecem em itens separados.</value></data>
+  <data name="DevDrive_Unverified_Title" xml:space="preserve"><value>Não foi possível saber se {0} é um disco virtual guardado em {1}</value></data>
+  <data name="DevDrive_Unverified_Detail" xml:space="preserve"><value>O Windows não informou onde o disco de {0} guarda os dados. Se for um arquivo de disco virtual em {1}, {0} é apagada junto com a unidade do Windows.</value></data>
+  <data name="DevDrive_Unverified_Action" xml:space="preserve"><value>Abra o Gerenciamento de Disco: se o disco de {0} for um disco virtual (VHD) guardado em {1}, copie o que precisar para um disco externo.</value></data>
   <data name="DevDrive_Unlisted_Title" xml:space="preserve"><value>Discos virtuais guardados em {0} não verificados</value></data>
   <data name="DevDrive_Unlisted_Detail" xml:space="preserve"><value>Não foi possível ler a lista de volumes, ou ela não incluía a unidade do Windows {0}. Uma unidade que é um disco virtual guardado em {0} (como um Dev Drive) é apagada junto com ela, e os repositórios dentro dela não foram verificados.</value></data>
   <data name="DevDrive_Unlisted_Action" xml:space="preserve"><value>Abra o Gerenciamento de Disco: de cada unidade cujo disco é um disco virtual (VHD) guardado em {0}, copie o que precisar para um disco externo.</value></data>

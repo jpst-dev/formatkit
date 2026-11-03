@@ -156,6 +156,9 @@
   <data name="DevDrive_Detail_Size" xml:space="preserve"><value>The virtual disk {0} ({1}) will be erased with the Windows drive.</value></data>
   <data name="DevDrive_Detail" xml:space="preserve"><value>The virtual disk {0} will be erased with the Windows drive.</value></data>
   <data name="DevDrive_Action" xml:space="preserve"><value>Copy what you need from {0} to an external drive before installing. Repositories inside it are reported separately.</value></data>
+  <data name="DevDrive_Unverified_Title" xml:space="preserve"><value>Could not tell whether {0} is a virtual disk stored on {1}</value></data>
+  <data name="DevDrive_Unverified_Detail" xml:space="preserve"><value>Windows did not say where the disk of {0} keeps its data. If it is a virtual disk file on {1}, {0} is erased with the Windows drive.</value></data>
+  <data name="DevDrive_Unverified_Action" xml:space="preserve"><value>Open Disk Management: if the disk of {0} is a virtual disk (VHD) stored on {1}, copy what you need to an external drive.</value></data>
   <data name="DevDrive_Unlisted_Title" xml:space="preserve"><value>Virtual disks stored on {0} not checked</value></data>
   <data name="DevDrive_Unlisted_Detail" xml:space="preserve"><value>The volume list could not be read, or it did not include the Windows drive {0}. A drive that is a virtual disk stored on {0} (such as a Dev Drive) is erased with it, and the repositories inside it were not scanned.</value></data>
   <data name="DevDrive_Unlisted_Action" xml:space="preserve"><value>Open Disk Management: from every drive whose disk is a virtual disk (VHD) stored on {0}, copy what you need to an external drive.</value></data>

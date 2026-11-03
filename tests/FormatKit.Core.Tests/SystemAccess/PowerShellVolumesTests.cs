@@ -82,7 +82,6 @@ public class PowerShellVolumesTests
         Assert.Contains("Win32_LogicalDiskToPartition", script);
         Assert.Contains("Disk #", script);
         Assert.DoesNotContain("Antecedent.Name", script);
-        Assert.Contains("[int]$d.BusType -eq 15", script);
     }
 
     [Fact]
@@ -109,5 +108,40 @@ public class PowerShellVolumesTests
         var volumes = await Create(Result(0, "[]")).ListAsync(TestContext.Current.CancellationToken);
 
         Assert.Empty(volumes);
+    }
+
+    [Theory]
+    [InlineData("false", true)]
+    [InlineData("true", false)]
+    public async Task VhdxKnown_maps_to_BackingVhdxUnknown(string known, bool expected)
+    {
+        var json = "{\"Letter\":\"D\",\"Disk\":1,\"BitLocker\":2,\"Vhdx\":null,\"VhdxKnown\":" + known + ",\"Recovery\":null}";
+
+        var volumes = await Create(Result(0, json)).ListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(expected, Assert.Single(volumes).BackingVhdxUnknown);
+    }
+
+    [Fact]
+    public void Script_does_not_trust_a_silent_Get_Disk_and_asks_Win32_whether_the_disk_is_virtual()
+    {
+        Assert.Contains("if ($d) { $vhdxKnown = $true;", PowerShellVolumes.Script);
+        Assert.Contains("Win32_DiskDrive", PowerShellVolumes.Script);
+        Assert.Contains("VhdxKnown = $vhdxKnown", PowerShellVolumes.Script);
+    }
+
+    [Fact]
+    public void Script_accepts_the_text_form_of_the_virtual_bus_type()
+    {
+        // Get-Disk returned BusType as the string "File Backed Virtual" in the VM, so an [int] cast hid every VHDX.
+        Assert.Contains("File Backed Virtual", PowerShellVolumes.Script);
+        Assert.DoesNotContain("[int]$d.BusType", PowerShellVolumes.Script);
+    }
+
+    [Fact]
+    public void Script_also_recognizes_a_VHDX_by_its_file_and_never_calls_one_without_a_path_known()
+    {
+        Assert.Contains(@"$d.Location -match '\.vhdx?$'", PowerShellVolumes.Script);
+        Assert.Contains("if (-not $vhdx) { $vhdxKnown = $false }", PowerShellVolumes.Script);
     }
 }

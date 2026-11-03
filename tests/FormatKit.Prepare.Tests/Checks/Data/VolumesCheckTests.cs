@@ -94,4 +94,20 @@ public class VolumesCheckTests : IDisposable
 
         Assert.Equal(PrepareStatus.Ok, item.Status);
     }
+
+    [Fact]
+    public async Task A_volume_whose_backing_file_is_unknown_is_never_reported_as_safe()
+    {
+        var items = await RunAsync(Vol('C', 0), Vol('D', 1) with { BackingVhdxUnknown = true });
+
+        Assert.Empty(items);
+    }
+
+    [Fact]
+    public async Task A_volume_with_no_disk_number_still_means_the_layout_is_not_checked()
+    {
+        var item = Assert.Single(await RunAsync(Vol('C', 0), Vol('D', null) with { BackingVhdxUnknown = true }));
+
+        Assert.Equal(PrepareStatus.NotChecked, item.Status);
+    }
 }
