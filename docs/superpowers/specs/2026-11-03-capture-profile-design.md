@@ -133,4 +133,15 @@ Three groups, in this order, each line with the profile path it concerns:
 
 ## Found while running
 
-To be filled in by the VM scenarios.
+VM runs on 2026-11-03 (Windows 11 build 26300), not elevated through a `RunLevel Limited` task and elevated:
+
+- **Clean VM, agreements never accepted:** `winget export` without the accept flag exits -1978335162 with no list at all, so a partial list is not a risk. The section is disabled and the note points to `winget list`. Nothing was accepted.
+- **Without elevation the 16 `apps.*` items cannot be checked:** `Get-AppxProvisionedPackage -Online` needs admin. This follows D1, and the note now says to run from an elevated terminal to include them. All other items are checked. Elevated, `apps.solitaire` and `apps.copilot` were captured.
+- **An app that was never there counts as applied:** `apps.copilot` was captured with no one having removed it, because it is absent. Accepted: the profile reflects a PC without that app, and the item only removes it if the new Windows brings it.
+- **The console showed one warning per unchecked item:** these now log at Debug, since the report says the same.
+- **Packages that ship with Windows:** OneDrive, Teams, 365 Copilot, Outlook, Windows Terminal and WSL were in the export. They were added to `SkippedPackages`.
+- **It takes about two minutes**, mostly PowerShell per AppX item, so the command says so before it starts.
+- **Without elevation the Dev Drive label is not read.** The size and the letter are. The profile then uses the parser's default label, `Dev`. Left as is: it affects only a custom label, and only when creating a new drive.
+- **Configured VM:** Git, SSH, WSL (distro, default user, `.wslconfig`, zsh, Oh My Zsh, theme, multi-line plugins), Oh My Posh with a theme path reduced to its name, a Nerd Font, and a 60 GB Dev Drive on `E:` with its cache all matched what was set up. `swap=0` was dropped with a note. No temporary file was left.
+- **Non-ASCII:** the JSON holds exactly the characters of `.gitconfig`, in UTF-8 with no BOM. The name was already double-encoded in that file by the test script, which PowerShell 5.1 read as ANSI, so the literal `João` case rests on the unit test plus this byte-for-byte match.
+- **Round trip:** `run --dry-run` rejects the file with the agreements message, and after setting `acceptAgreements` to true it prints the full plan with exit 0. `prepare check --profile` accepts it. `media build` got past the profile to the mount of a missing ISO, so its Windows-side use of the file was not exercised.

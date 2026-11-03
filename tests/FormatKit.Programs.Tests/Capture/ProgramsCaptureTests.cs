@@ -101,6 +101,12 @@ public class ProgramsCaptureTests
     [InlineData("Microsoft.EdgeWebView2Runtime")]
     [InlineData("Microsoft.AppInstaller")]
     [InlineData("microsoft.vcredist.2015+.x64")]
+    [InlineData("Microsoft.OneDrive")]
+    [InlineData("Microsoft.Teams")]
+    [InlineData("Microsoft.365Copilot")]
+    [InlineData("Microsoft.Outlook")]
+    [InlineData("Microsoft.WindowsTerminal")]
+    [InlineData("Microsoft.WSL")]
     public void Skips_runtime_packages(string id) => Assert.True(SkippedPackages.IsSkipped(id));
 
     [Theory]

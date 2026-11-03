@@ -16,6 +16,15 @@ public static class SkippedPackages
         "Microsoft.Edge",
         "Microsoft.EdgeWebView2Runtime",
         "Microsoft.AppInstaller",
+
+        // What winget export listed on a clean Windows 11 (VM, build 26300). Windows brings these, and installing them
+        // would work against a cleanup that removes them. WSL is the dev section's job.
+        "Microsoft.OneDrive",
+        "Microsoft.Teams",
+        "Microsoft.365Copilot",
+        "Microsoft.Outlook",
+        "Microsoft.WindowsTerminal",
+        "Microsoft.WSL",
     ];
 
     public static bool IsSkipped(string wingetId) =>
