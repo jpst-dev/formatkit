@@ -606,4 +606,17 @@ Pro, Pro Education, Pro for Workstations).
     instead of "No USB disk was found".
   - Still using `Get-Disk` and `Get-Partition`, not changed here:
     `PowerShellVolumes` and `PowerShellVirtualDisks`.
-  - Pending: the erase, the write and the boot from the stick.
+  - Rules confirmed with the fix: the stick is listed as `(USB, removable)` and
+    usable (R7); the system disk is not offered. A profile on the stick, the
+    system disk, a missing number and a wrong typed number all exit 2 and
+    erase nothing.
+  - Write: exit 0 through the `diskpart` path. `FORMATKIT`, FAT32, one active
+    partition of exactly 32 GiB (34359738368 bytes) on MBR, the rest of the
+    stick unallocated. `install.swm` and `install2.swm`, no file over 4 GiB,
+    `sources\$OEM$\$1\FormatKit` with the same exe hash as the published one.
+    The drive letter changed from `D:` to `F:`.
+  - Boot on the author's PC (UEFI, Secure Boot on, one-time boot menu): Setup
+    started from the stick and showed the edition, then the product key, then
+    the disk screen, where the test stopped. The VM showed the key before the
+    edition. Windows was not installed from the stick, so the first logon was
+    only checked in the VM (scenario 24).
