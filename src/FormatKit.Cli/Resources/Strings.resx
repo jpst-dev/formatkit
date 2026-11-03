@@ -179,6 +179,7 @@
   <data name="Media_UsbEligible" xml:space="preserve"><value>    Can be used.</value></data>
   <data name="Media_UsbNotUsable" xml:space="preserve"><value>    Cannot be used: {0}</value></data>
   <data name="Media_UsbNoDisks" xml:space="preserve"><value>No USB disk was found.</value></data>
+  <data name="Media_UsbWindowsNoDisks" xml:space="preserve"><value>Windows returned no disks at all, not even the system disk, so USB sticks cannot be listed on this PC. Nothing was erased.</value></data>
   <data name="Media_UsbHardDisksHidden" xml:space="preserve"><value>{0} external hard disk(s) are hidden. Use --allow-hard-disk to include them.</value></data>
   <data name="Media_UsbDiskNotFound" xml:space="preserve"><value>Disk {0} was not found.</value></data>
   <data name="Media_UsbRefused" xml:space="preserve"><value>Disk {0} cannot be used: {1}</value></data>

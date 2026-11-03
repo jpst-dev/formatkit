@@ -664,6 +664,22 @@ public sealed class MediaCommandsTests : IDisposable
         Assert.Equal([Iso], _disk.Dismounted);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Usb_when_windows_returns_no_disks_at_all_says_so(bool withDiskNumber)
+    {
+        // A running Windows always has a disk: an empty list means the query failed, not that no stick is plugged in.
+        var exit = await RunUsb([], withDiskNumber ? ["--disk", "1"] : []);
+
+        Assert.Equal(ExitCodes.InvalidInput, exit);
+        var text = _out.ToString();
+        Assert.Contains("no disks at all", text);
+        Assert.DoesNotContain("No USB disk", text);
+        Assert.Empty(_disks.Prepared);
+        Assert.Equal([Iso], _disk.Dismounted);
+    }
+
     [Fact]
     public async Task Usb_listing_with_only_an_external_hard_disk_says_no_disks_and_keeps_the_hint()
     {

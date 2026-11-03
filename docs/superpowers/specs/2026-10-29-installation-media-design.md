@@ -131,7 +131,7 @@ CIM like `PowerShellVirtualDisks`, with literals through
     by tests, as the BitLocker values were for `prepare`.
   - `Task<string> PrepareUsbAsync(int number, string uniqueId, CancellationToken ct)`:
     fails without changing anything when disk `number` no longer has
-    `uniqueId` or its id is blank; otherwise `Clear-Disk -RemoveData -RemoveOEM`, MBR, one active
+    `uniqueId` or its id is blank; otherwise `diskpart` (`clean`, `convert mbr`), one active
     partition of `min(disk size − 1 MiB, 32 GiB)`, FAT32, label `FORMATKIT`, a drive
     letter; returns the root.
 - Copying uses the existing `IFileSystem` (`EnumerateFileEntries`, `Copy`,
@@ -201,7 +201,7 @@ A disk is eligible when all hold:
    on the stick; copying it to a temporary folder and erasing would lose it if
    the write failed).
 4. Its size fits the needed size (with the 32 GiB partition cap, measured on the usable size: disk size − 1 MiB).
-5. Windows reports a `UniqueId` for it (see "Decided in away mode").
+5. Windows reports an identity for it (`UniqueId` in `DiskInfo`: device id, serial and size; see "Found while running").
 
 With `--disk <n>`:
 
@@ -548,13 +548,9 @@ Pro, Pro Education, Pro for Workstations).
   split, because the image is copied as one step; the inner English text of
   a split failure ("Splitting the Windows image failed (exit 1)") still
   appears inside the localized "incomplete" message.
-- **Risk for scenario 27:** on this host `Get-Disk` and `Get-Partition` return
-  nothing while `Get-PhysicalDisk` and `Win32_DiskDrive` see the NVMe disk
-  (a stale storage provider cache; `Update-HostStorageCache` usually refreshes
-  it). `media usb` lists disks with `Get-Disk`, so on such a PC it would say
-  no USB disk was found. Not changed here: the refresh changes host state and
-  was not run in away mode. If scenario 27 shows it, run
-  `Update-HostStorageCache` first, and consider calling it in the list script.
+- **Scenario 27 found it (see below):** on this host `Get-Disk` and
+  `Get-Partition` return nothing while `Get-PhysicalDisk` and `Win32_DiskDrive`
+  see the disks. This entry first blamed a stale cache; that was wrong.
 - VM runs on 2026-10-29 (Claude drove the `FormatKit-Media` VM through
   screenshots and the Hyper-V virtual keyboard; the local account was made
   with a blank password, so no password was typed):
@@ -588,7 +584,26 @@ Pro, Pro Education, Pro for Workstations).
     product key or edition screen (the generic key picks Pro); OOBE showed
     the online flow (device name, personal or work use, Microsoft sign-in),
     which was not completed.
-- Pending, need the user: scenario 27 on a real stick, which confirms R7
-  (what counts as removable). An 8 GB stick is refused as too small before
-  any prompt, so it only checks the listing; the full run needs a 16 GB or
-  larger stick.
+- Scenario 27 on the author's PC, 2026-11-03 (a 64 GB SanDisk 3.2Gen1):
+  - **Fixed:** the listing said no USB disk was found. `Get-Disk` and
+    `Get-Partition` return nothing on this PC, even elevated, while
+    `Get-PhysicalDisk`, `Win32_DiskDrive` and `diskpart` see the stick.
+    `Update-HostStorageCache` and `Update-StorageProviderCache -DiscoveryLevel
+    Full` do not help. The cause inside Windows is unknown (the volume is named
+    `BWOS11` and many services are disabled, which suggests a customized
+    build; not confirmed). `media usb` now lists with `Get-PhysicalDisk` and
+    `Win32_DiskDrive` and prepares the stick with `diskpart`.
+  - **Fixed:** `Get-PhysicalDisk` reports the UniqueId `" USB"` for this stick,
+    which tells no stick from another. The identity compared before the erase
+    is now `Win32_DiskDrive.PNPDeviceID`, its serial number and the size; it
+    stays blank (rule 5) without Win32 data.
+  - **Accepted limit:** an EFI system partition cannot be matched to the one
+    the PC booted from without `MSFT_Disk`, so a USB disk holding any
+    `GPT: System` partition counts as a system disk and is refused. A disk
+    without Win32 data counts too. The reverse gap: a BIOS-style system
+    partition on a USB disk, with Windows on another disk, is not detected.
+  - **Fixed:** an empty disk list now says Windows returned no disks at all,
+    instead of "No USB disk was found".
+  - Still using `Get-Disk` and `Get-Partition`, not changed here:
+    `PowerShellVolumes` and `PowerShellVirtualDisks`.
+  - Pending: the erase, the write and the boot from the stick.

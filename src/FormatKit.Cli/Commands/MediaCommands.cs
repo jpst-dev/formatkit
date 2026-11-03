@@ -101,6 +101,13 @@ internal static class MediaCommands
         var target = new UsbTarget(context.Env.Services.Disks);
         var candidates = await target.ListAsync(allowHardDisk, sources, prepared.RequiredBytes, ct);
 
+        // A running Windows always has a disk: an empty list means the query failed, not that no stick is plugged in.
+        if (candidates.Count == 0)
+        {
+            o.WriteLine(Strings.Get("Media_UsbWindowsNoDisks"));
+            return ExitCodes.InvalidInput;
+        }
+
         if (diskNumber is null)
         {
             PrintUsbDisks(o, candidates);

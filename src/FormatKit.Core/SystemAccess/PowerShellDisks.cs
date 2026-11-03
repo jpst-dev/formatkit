@@ -4,10 +4,10 @@ using System.Text.Json;
 namespace FormatKit.Core.SystemAccess;
 
 /// <summary>
-/// Lists disks with Get-Disk (joined with partitions, volumes and Win32_DiskDrive) and prepares a USB stick. Removable
-/// follows rule R7: BusType USB and a Win32_DiskDrive whose MediaType contains "Removable", or whose Capabilities contain 7
-/// (removable media) while MediaType does not contain "hard disk". The prepare script compares the UniqueId itself and
-/// exits 4 before any destructive cmdlet runs.
+/// Lists disks with Get-PhysicalDisk and Win32_DiskDrive and prepares a USB stick with diskpart: Get-Disk, Get-Partition and
+/// the cmdlets built on them return nothing on some PCs. Removable follows rule R7: BusType USB and a Win32_DiskDrive whose
+/// MediaType contains "Removable", or whose Capabilities contain 7 (removable media) while MediaType does not contain
+/// "hard disk". The prepare script compares the identity itself and exits 4 before diskpart runs.
 /// </summary>
 public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
 {
@@ -20,16 +20,29 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
     /// <summary>The size of the partition created on a disk of <paramref name="diskSizeBytes"/>: min(size - 1 MiB, 32 GiB).</summary>
     public static long UsableBytes(long diskSizeBytes) => Math.Min(diskSizeBytes - ReservedBytes, MaxPartitionBytes);
 
+    /// <summary>
+    /// Sets $id from the Win32_DiskDrive $c and the physical disk $d. Not Get-PhysicalDisk's UniqueId: a SanDisk stick reports " USB" there.
+    /// </summary>
+    internal const string IdentityScript =
+        "$id = if ($c -and $c.PNPDeviceID) { [string]$c.PNPDeviceID + '|' + ([string]$c.SerialNumber).Trim() + '|' + [string][int64]$d.Size } else { '' }; ";
+
+    // A disk without Win32 data counts as the system disk, so it is never erased. A USB disk holding an EFI system partition
+    // counts too: the partition cannot be matched to the one the PC booted from, so a spare stick with one is refused as well.
     internal const string ListScript =
         "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; " +
-        "$cim = @{}; try { foreach ($c in @(Get-CimInstance -ClassName Win32_DiskDrive -ErrorAction Stop)) { $cim[[int]$c.Index] = $c } } catch { }; " +
-        "$items = @(Get-Disk | ForEach-Object { " +
-        "$d = $_; $n = [int]$d.Number; " +
-        "$vols = @(); try { $vols = @(Get-Partition -DiskNumber $n -ErrorAction Stop | Get-Volume -ErrorAction SilentlyContinue | ForEach-Object { " +
-        "[pscustomobject]@{ Letter = $(if ($_.DriveLetter) { [string]$_.DriveLetter } else { $null }); Label = $_.FileSystemLabel } }) } catch { $vols = @() }; " +
-        "$c = $cim[$n]; " +
-        "[pscustomobject]@{ Number = $n; UniqueId = [string]$d.UniqueId; FriendlyName = [string]$d.FriendlyName; Size = [int64]$d.Size; " +
-        "BusType = [string]$d.BusType; BusTypeValue = [int]$d.BusType; IsBoot = [bool]$d.IsBoot; IsSystem = [bool]$d.IsSystem; " +
+        "$windows = (Get-CimInstance -ClassName Win32_OperatingSystem).SystemDrive; " +
+        "$cim = @{}; foreach ($c in @(Get-CimInstance -ClassName Win32_DiskDrive)) { $cim[[int]$c.Index] = $c }; " +
+        "$items = @(Get-PhysicalDisk | Where-Object { $_.DeviceId -match '^\\d+$' } | ForEach-Object { " +
+        "$d = $_; $n = [int]$d.DeviceId; $c = $cim[$n]; $vols = @(); $isBoot = $false; $isSystem = $true; " +
+        "if ($c) { " +
+        "$parts = @(Get-CimAssociatedInstance -InputObject $c -ResultClassName Win32_DiskPartition); " +
+        "$isSystem = @($parts | Where-Object { $_.Type -eq 'GPT: System' }).Count -gt 0; " +
+        "$vols = @($parts | ForEach-Object { Get-CimAssociatedInstance -InputObject $_ -ResultClassName Win32_LogicalDisk } | ForEach-Object { " +
+        "if ($_.DeviceID -eq $windows) { $isBoot = $true }; " +
+        "[pscustomobject]@{ Letter = [string]$_.DeviceID[0]; Label = $_.VolumeName } }) }; " +
+        IdentityScript +
+        "[pscustomobject]@{ Number = $n; UniqueId = $id; FriendlyName = [string]$d.FriendlyName; Size = [int64]$d.Size; " +
+        "BusType = [string]$d.BusType; IsBoot = $isBoot; IsSystem = $isSystem; " +
         "MediaType = $(if ($c) { [string]$c.MediaType } else { $null }); Capabilities = $(if ($c -and $c.Capabilities) { @($c.Capabilities | ForEach-Object { [int]$_ }) } else { @() }); " +
         "Volumes = @($vols) } }); " +
         "ConvertTo-Json -InputObject $items -Compress -Depth 5";
@@ -81,7 +94,7 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
 
         if (result.ExitCode != 0 || result.TimedOut)
         {
-            throw new InvalidOperationException($"Preparing the USB stick failed (exit {result.ExitCode}).");
+            throw new InvalidOperationException($"Preparing the USB stick failed (exit {result.ExitCode}): {result.StdErr.Trim()}");
         }
 
         var letter = result.StdOut.Trim();
@@ -100,18 +113,23 @@ public sealed class PowerShellDisks(IProcessRunner processes) : IDisks
         var max = MaxPartitionBytes.ToString(CultureInfo.InvariantCulture);
         return
             "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; " +
-            $"$d = $null; try {{ $d = Get-Disk -Number {n} }} catch {{ exit 4 }}; " +
+            $"$d = $null; $c = $null; try {{ $d = Get-PhysicalDisk | Where-Object {{ $_.DeviceId -eq '{n}' }}; $c = Get-CimInstance -ClassName Win32_DiskDrive -Filter 'Index={n}' }} catch {{ exit 4 }}; " +
+            "if ($null -eq $d) { exit 4 }; " +
+            IdentityScript +
             // A blank id would match a blank argument and defeat the swap check; -cne compares case-sensitively.
-            $"if ($null -eq $d -or [string]::IsNullOrWhiteSpace([string]$d.UniqueId) -or [string]$d.UniqueId -cne {id}) {{ exit 4 }}; " +
+            $"if ([string]::IsNullOrWhiteSpace($id) -or $id -cne {id}) {{ exit 4 }}; " +
             // One MiB is left free: a partition as large as the whole disk does not fit after the MBR and alignment.
-            $"$size = [Math]::Min([int64]$d.Size - {ReservedBytes.ToString(CultureInfo.InvariantCulture)}, {max}L); " +
-            // Clear-Disk fails on a disk that was never initialized (RAW), for example one an earlier run already cleared.
-            $"if ($d.PartitionStyle -ne 'RAW') {{ Clear-Disk -Number {n} -RemoveData -RemoveOEM -Confirm:$false }}; " +
-            $"$d = Get-Disk -Number {n}; " +
-            $"if ($d.PartitionStyle -eq 'RAW') {{ Initialize-Disk -Number {n} -PartitionStyle MBR }}; " +
-            $"$p = New-Partition -DiskNumber {n} -Size $size -IsActive -AssignDriveLetter; " +
-            "Format-Volume -Partition $p -FileSystem FAT32 -NewFileSystemLabel 'FORMATKIT' -Confirm:$false | Out-Null; " +
-            "($p | Get-Partition).DriveLetter";
+            $"$mb = [int64][Math]::Floor([Math]::Min([int64]$d.Size - {ReservedBytes.ToString(CultureInfo.InvariantCulture)}, {max}L) / 1048576); " +
+            "$f = [IO.Path]::GetTempFileName(); " +
+            $"@('select disk {n}', 'clean', 'convert mbr', ('create partition primary size=' + $mb), 'active', 'format fs=fat32 label=FORMATKIT quick', 'assign', 'exit') | Set-Content -LiteralPath $f -Encoding Ascii; " +
+            "$o = & diskpart /s $f; $e = $LASTEXITCODE; Remove-Item -LiteralPath $f -ErrorAction SilentlyContinue; " +
+            "if ($e -ne 0) { [Console]::Error.WriteLine(($o -join ' ')); exit 1 }; " +
+            // The letter can take a moment to show up after assign.
+            "$letter = $null; foreach ($i in 1..15) { " +
+            $"$c = Get-CimInstance -ClassName Win32_DiskDrive -Filter 'Index={n}'; " +
+            "$l = @(Get-CimAssociatedInstance -InputObject $c -ResultClassName Win32_DiskPartition | ForEach-Object { Get-CimAssociatedInstance -InputObject $_ -ResultClassName Win32_LogicalDisk }); " +
+            "if ($l.Count -gt 0) { $letter = [string]$l[0].DeviceID[0]; break }; Start-Sleep -Seconds 1 }; " +
+            "if (-not $letter) { exit 1 }; $letter";
     }
 
     internal static bool IsRemovable(string busType, string? mediaType, IReadOnlyList<int> capabilities)

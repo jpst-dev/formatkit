@@ -107,7 +107,53 @@ public class PowerShellDisksTests
     }
 
     [Fact]
-    public async Task Prepare_ScriptChecksUniqueIdBeforeAnyDestructiveCmdlet()
+    public async Task List_ScriptDoesNotDependOnGetDisk()
+    {
+        // Found in scenario 27: on the author's PC Get-Disk and Get-Partition return nothing, even elevated.
+        var (disks, runner) = Create(Result(0, "[]"));
+
+        await disks.ListAsync(TestContext.Current.CancellationToken);
+
+        var script = Script(runner);
+        Assert.DoesNotContain("Get-Disk", script);
+        Assert.DoesNotContain("Get-Partition", script);
+        Assert.Contains("Get-PhysicalDisk", script);
+        Assert.Contains("Win32_DiskDrive", script);
+    }
+
+    [Fact]
+    public async Task List_ScriptTreatsADiskWithoutWin32DataAsSystem()
+    {
+        var (disks, runner) = Create(Result(0, "[]"));
+
+        await disks.ListAsync(TestContext.Current.CancellationToken);
+
+        var script = Script(runner);
+        var assumed = script.IndexOf("$isSystem = $true", StringComparison.Ordinal);
+        Assert.True(assumed >= 0, script);
+        Assert.True(assumed < script.IndexOf("'GPT: System'", StringComparison.Ordinal), script);
+        Assert.Contains("$windows", script);
+    }
+
+    [Fact]
+    public async Task List_And_prepare_compute_the_same_identity_from_the_device_and_its_serial()
+    {
+        // Found in scenario 27: Get-PhysicalDisk gives a SanDisk stick the UniqueId " USB", which tells no stick from another.
+        var (listed, listRunner) = Create(Result(0, "[]"));
+        await listed.ListAsync(TestContext.Current.CancellationToken);
+        var (prepared, prepareRunner) = Create(Result(0, "F\r\n"));
+        await prepared.PrepareUsbAsync(3, "x", TestContext.Current.CancellationToken);
+
+        Assert.Contains(PowerShellDisks.IdentityScript, Script(listRunner));
+        Assert.Contains(PowerShellDisks.IdentityScript, Script(prepareRunner));
+        Assert.Contains("PNPDeviceID", PowerShellDisks.IdentityScript);
+        Assert.Contains("SerialNumber", PowerShellDisks.IdentityScript);
+        Assert.DoesNotContain("$d.UniqueId", Script(listRunner));
+        Assert.DoesNotContain("$d.UniqueId", Script(prepareRunner));
+    }
+
+    [Fact]
+    public async Task Prepare_ScriptChecksTheIdentityBeforeDiskpart()
     {
         var (disks, runner) = Create(Result(0, "F\r\n"));
 
@@ -117,14 +163,19 @@ public class PowerShellDisksTests
         var script = Script(runner);
         var steps = new[]
         {
-            "Get-Disk -Number 3",
-            "[string]::IsNullOrWhiteSpace([string]$d.UniqueId)",
-            "-cne 'ab''cd') { exit 4 }",
-            "if ($d.PartitionStyle -ne 'RAW') { Clear-Disk -Number 3 -RemoveData -RemoveOEM -Confirm:$false }",
-            "if ($d.PartitionStyle -eq 'RAW')",
-            "Initialize-Disk -Number 3 -PartitionStyle MBR",
-            "New-Partition -DiskNumber 3 -Size $size -IsActive -AssignDriveLetter",
-            "Format-Volume -Partition $p -FileSystem FAT32 -NewFileSystemLabel 'FORMATKIT'",
+            "Get-PhysicalDisk",
+            "Win32_DiskDrive -Filter 'Index=3'",
+            "[string]::IsNullOrWhiteSpace($id)",
+            "$id -cne 'ab''cd') { exit 4 }",
+            "'select disk 3'",
+            "'clean'",
+            "'convert mbr'",
+            "('create partition primary size=' + $mb)",
+            "'active'",
+            "'format fs=fat32 label=FORMATKIT quick'",
+            "'assign'",
+            "diskpart /s $f",
+            "Win32_LogicalDisk",
         };
         var last = -1;
         foreach (var step in steps)
@@ -141,18 +192,30 @@ public class PowerShellDisksTests
     }
 
     [Fact]
-    public async Task Prepare_ScriptExits4WhenTheDiskHasNoUniqueId()
+    public async Task Prepare_ScriptDoesNotDependOnGetDisk()
     {
-        // An empty id on both sides would match: the script must refuse it before any destructive cmdlet.
+        var (disks, runner) = Create(Result(0, "F\r\n"));
+
+        await disks.PrepareUsbAsync(3, "x", TestContext.Current.CancellationToken);
+
+        var script = Script(runner);
+        foreach (var cmdlet in new[] { "Get-Disk", "Clear-Disk", "Initialize-Disk", "New-Partition", "Format-Volume", "Get-Partition" })
+            Assert.DoesNotContain(cmdlet, script);
+    }
+
+    [Fact]
+    public async Task Prepare_ScriptExits4WhenTheDiskHasNoIdentity()
+    {
+        // An empty id on both sides would match: the script must refuse it before diskpart.
         var (disks, runner) = Create(Result(0, "F\r\n"));
 
         await disks.PrepareUsbAsync(3, "", TestContext.Current.CancellationToken);
 
         var script = Script(runner);
-        var guard = script.IndexOf("if ($null -eq $d -or [string]::IsNullOrWhiteSpace([string]$d.UniqueId) -or", StringComparison.Ordinal);
+        var guard = script.IndexOf("if ([string]::IsNullOrWhiteSpace($id) -or", StringComparison.Ordinal);
         Assert.True(guard >= 0, script);
-        Assert.True(guard < script.IndexOf("Clear-Disk", StringComparison.Ordinal), script);
-        Assert.True(guard < script.IndexOf("Initialize-Disk", StringComparison.Ordinal), script);
+        Assert.True(guard < script.IndexOf("'clean'", StringComparison.Ordinal), script);
+        Assert.True(guard < script.IndexOf("diskpart /s", StringComparison.Ordinal), script);
     }
 
     [Fact]
@@ -170,6 +233,7 @@ public class PowerShellDisksTests
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => disks.PrepareUsbAsync(1, "x", TestContext.Current.CancellationToken));
         Assert.IsNotType<DiskChangedException>(ex);
+        Assert.Contains("boom", ex.Message);
     }
 
     [Fact]

@@ -179,6 +179,7 @@
   <data name="Media_UsbEligible" xml:space="preserve"><value>    Pode ser usado.</value></data>
   <data name="Media_UsbNotUsable" xml:space="preserve"><value>    Não pode ser usado: {0}</value></data>
   <data name="Media_UsbNoDisks" xml:space="preserve"><value>Nenhum disco USB foi encontrado.</value></data>
+  <data name="Media_UsbWindowsNoDisks" xml:space="preserve"><value>O Windows não retornou nenhum disco, nem o do sistema, então não dá para listar pendrives neste PC. Nada foi apagado.</value></data>
   <data name="Media_UsbHardDisksHidden" xml:space="preserve"><value>{0} HD(s) externo(s) estão ocultos. Use --allow-hard-disk para incluí-los.</value></data>
   <data name="Media_UsbDiskNotFound" xml:space="preserve"><value>O disco {0} não foi encontrado.</value></data>
   <data name="Media_UsbRefused" xml:space="preserve"><value>O disco {0} não pode ser usado: {1}</value></data>
