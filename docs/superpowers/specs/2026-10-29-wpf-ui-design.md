@@ -239,9 +239,9 @@ id, source and context for programs.
 
 ### 5.7 Installation media (last phase)
 
-Designed now from `2026-10-29-installation-media-design.md`; at the start of the
-phase it is checked against the merged code of PR jpst-dev/formatkit#1 and this
-section is corrected where they differ.
+Designed from `2026-10-29-installation-media-design.md`; checked against the
+merged code of PR jpst-dev/formatkit#1 on 2026-11-03 and corrected where they
+differ.
 
 - **Inputs:** the Windows 11 ISO (file picker), an optional profile (without
   one the stick is a plain Windows 11 stick) and the target: **Folder**
@@ -249,32 +249,54 @@ section is corrected where they differ.
   disk** for `--allow-hard-disk`.
 - The profile's `setup` section is shown read-only (account, edition, computer
   name, language, keyboard, time zone), with the default that applies to each
-  missing field.
+  missing field. An invalid profile or `setup` section lists its errors and
+  blocks **Continue**.
 - Mounting the ISO and listing disks need administrator rights, so **Continue**
-  starts the worker (section 6) with a media job: one UAC prompt.
+  starts the worker (section 6) with a media job: one UAC prompt. The worker
+  refuses a profile whose hash differs from the one shown (D7).
+- **The bundled `formatkit.exe`:** the first logon runs `formatkit.exe`
+  (`UnattendBuilder.FirstLogonCommand`), so a stick with a profile bundles the
+  `formatkit.exe` next to `FormatKitUI.exe`, never the running exe. When that
+  file is missing, the job refuses before erasing or writing anything. A stick
+  without a profile needs no `formatkit.exe`.
 - **USB stick:**
   1. The worker validates the ISO, the profile and its inputs, and sends the
-     disks: eligible ones with number, model, size, bus, letters and labels;
-     ineligible ones with the reason (for example "holds the profile; copy it
-     elsewhere first").
+     USB disks, as `media usb` lists them (`UsbListing`): eligible ones with
+     number, model, size, bus, letters and labels; ineligible ones with the
+     reason (for example "holds the profile; copy it elsewhere first"); and how
+     many external hard disks are hidden. Disks on other buses are not sent. An
+     empty answer from Windows (no disk at all, as seen with `Get-Disk` on the
+     author's PC) is a query failure with its own message, not "no stick".
   2. The user selects a disk and **types its number** in a text box. The text
      says EVERYTHING on it will be erased, and adds the external hard disk
      warning when it applies. Anything other than the number cancels.
-  3. The worker lists the disks again and re-checks rules 1-5 for the disk with
+  3. The worker lists the disks again and re-checks the rules for the disk with
      the same `UniqueId` and number; any difference stops without erasing. Then
-     it erases and writes, sending progress.
+     it erases and writes, sending progress. `UniqueId` holds the device id,
+     serial and size (`Get-PhysicalDisk`'s own id was " USB" for a SanDisk
+     stick). The erase goes through `diskpart`.
 - **Folder:** the same without the disk choice; the folder is picked in a
-  dialog and must not exist or be empty.
+  dialog and must not exist or be empty (at a drive root, `System Volume
+  Information` and `$RECYCLE.BIN` do not count, as in `media build`).
 - **Result:** "The USB stick is ready. Boot the PC to format from it." or the
   folder path, and the reminder to run the Checklist on that PC first. A
   failure or stop after the erase says the stick is incomplete and that
   running again fixes it.
+- **Stop:** during the disk choice it ends the job with nothing erased. Once the
+  erase starts it is never interrupted (`diskpart` would leave the disk in an
+  unknown state): the stop takes effect before the first file is copied, or
+  between files, and the stick is reported as incomplete.
+- **One job at a time:** a run and a media job never overlap, because a run can
+  restart the PC in the middle of a write. Closing the window during a media job
+  asks first, as during a run (section 7).
 
-The rules, the confirmation check and the re-check stay in `FormatKit.Media`;
-the worker only replaces console input and output with pipe messages. If the
-media code reads the typed number from the console, the phase adds a seam for
-it (an interface for the confirmation) with tests, without changing the CLI's
-behavior.
+The merged CLI read the typed number in `MediaCommands`, so the phase moved the
+shared parts down, with the CLI's tests unchanged:
+`UsbTarget.ConfirmAndPrepareAsync` with the `IDiskConfirmation` seam (the only
+public way to erase; `PrepareAsync` is internal), `UsbListing` and `MediaFolder`
+in `FormatKit.Media`, and `MediaRunner` (profile, inputs, mount) in `Hosting`.
+The worker only replaces console input and output with pipe messages. The CLI
+and the UI word their own results: the CLI's say "run the command again".
 
 ### 5.8 About
 
@@ -288,7 +310,8 @@ does not cover yet (section 2) with one line each.
 The window creates a pipe name `FormatKit-<guid>` and starts
 `FormatKitUI.exe --worker --pipe <name> --client-pid <pid> <job>` where the job is
 `run --profile <path> --profile-hash <hash>`, `run --resume` or, in the media
-phase, `media ...`. It uses `runas` when the job needs administrator rights and
+phase, `media --iso <path> [--profile <path> --profile-hash <hash>]` with either
+`--output <folder>` or `--usb [--allow-hard-disk]`. It uses `runas` when the job needs administrator rights and
 the window is not elevated, and a plain start otherwise (a resumed window is
 already elevated, so no UAC). A declined UAC prompt shows a message on the page
 and returns to the review; nothing has changed.
@@ -316,7 +339,9 @@ Worker → window:
 | `failed` | a localized message (worker error before or outside the engine) and a reason: `other`, `stopped` or `profileChanged` (optional: missing is `other`); the window acts on the reason, never on the text |
 | `consoleOpened`, `consoleClosed` | a step opened, then closed, a console window for the user to type in (section 6.5) |
 | `consoleLine` | text: a line the step writes for the user (public data only) |
-| `disks`, `mediaProgress`, `mediaFinished` | media phase only |
+| `disks` | media phase: disks (number, uniqueId, friendlyName, sizeBytes, busType, isRemovable, volumes, refusal, sourcesOnDisk) and hiddenHardDisks |
+| `mediaProgress` | media phase: phase, copiedBytes, totalBytes (sent when the phase or the whole percent changes) |
+| `mediaFinished` | media phase: status (`done`, `cancelled`, `diskChanged`, `incomplete`) and a localized message; a media job refused before erasing or writing anything sends `failed` instead |
 
 Window → worker:
 
@@ -324,7 +349,7 @@ Window → worker:
 |---|---|
 | `cancel` | stop after the current step |
 | `rebootNow` / `rebootCancel` | answer to `rebootCountdown` |
-| `confirmDisk` | media phase: the typed disk number and the selected disk's `UniqueId` |
+| `confirmDisk` | media phase: what the user typed (`typedNumber`, unchecked text) and the selected disk's `uniqueId` |
 
 Unknown types are logged and ignored, so a mismatch cannot crash either side.
 Messages carry only what the CLI already prints: never a password, passphrase,
