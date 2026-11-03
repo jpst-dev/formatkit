@@ -31,7 +31,7 @@ public sealed record DevDriveOptions(string Path, int SizeGB, char Letter, strin
 public sealed partial record DevOptions(
     WslOptions? Wsl, GitOptions? Git, SshOptions? Ssh, DotfilesOptions? Dotfiles, ShellOptions? Shell, DevDriveOptions? DevDrive)
 {
-    private static readonly string[] Distros = ["Ubuntu", "Ubuntu-24.04", "Ubuntu-22.04", "Debian"];
+    internal static readonly string[] Distros = ["Ubuntu", "Ubuntu-24.04", "Ubuntu-22.04", "Debian"];
     /// <summary>The only plugins cloned from GitHub; every other plugin name is one Oh My Zsh ships with.</summary>
     internal static readonly string[] ExternalPlugins = ["zsh-autosuggestions", "zsh-syntax-highlighting"];
     private static readonly string[] Fonts = ["Meslo", "CascadiaCode", "FiraCode", "JetBrainsMono", "Hack"];

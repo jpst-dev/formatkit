@@ -59,4 +59,37 @@
   <data name="Detail_Kept" xml:space="preserve"><value>kept {0}</value></data>
   <data name="Validation_SizeMin" xml:space="preserve"><value>sizeGB must be at least 50.</value></data>
   <data name="Validation_Letter" xml:space="preserve"><value>The letter must be a single letter other than C.</value></data>
+  <data name="Capture_PartFailed" xml:space="preserve">
+    <value>Could not be read: {0}</value>
+  </data>
+  <data name="Capture_Dotfiles" xml:space="preserve">
+    <value>The dotfiles repository cannot be inferred from this machine. Add modules.dev.dotfiles yourself if you use one.</value>
+  </data>
+  <data name="Capture_SummaryNone" xml:space="preserve">
+    <value>nothing found</value>
+  </data>
+  <data name="Capture_GitMissing" xml:space="preserve">
+    <value>Git was not found on this PC.</value>
+  </data>
+  <data name="Capture_SshKey" xml:space="preserve">
+    <value>Only the key type and comment are in the profile, never the key. Back up your .ssh folder to keep this key; otherwise a new one is generated and must be registered again.</value>
+  </data>
+  <data name="Capture_OtherDistros" xml:space="preserve">
+    <value>FormatKit cannot install these distros, so they are not in the profile: {0}</value>
+  </data>
+  <data name="Capture_WslFailed" xml:space="preserve">
+    <value>WSL could not read {0} (exit code {1}).</value>
+  </data>
+  <data name="Capture_ThemeReduced" xml:space="preserve">
+    <value>This PC uses "{0}"; the profile holds only the theme name "{1}". A customized theme file must be restored by you.</value>
+  </data>
+  <data name="Capture_OtherDrives" xml:space="preserve">
+    <value>A profile holds one Dev Drive, so these are not in it: {0}</value>
+  </data>
+  <data name="Capture_DriveOnWindows" xml:space="preserve">
+    <value>{0} is on the Windows drive, so the format erases it. Move it to another drive before formatting.</value>
+  </data>
+  <data name="Capture_DriveSizeUnknown" xml:space="preserve">
+    <value>The size of {0} could not be read. Add modules.dev.devDrive yourself.</value>
+  </data>
 </root>

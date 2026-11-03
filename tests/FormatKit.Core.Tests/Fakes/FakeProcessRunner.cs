@@ -27,6 +27,9 @@ public sealed class FakeProcessRunner : IProcessRunner
 
     public void ThrowNotFound(string fileName) => _notFound.Add(fileName);
 
+    /// <summary>Forgets the results still queued for a file.</summary>
+    public void Drain(string fileName) => _results.Remove(fileName);
+
     public Task<ProcessResult> RunAsync(ProcessSpec spec, CancellationToken ct)
     {
         Calls.Add(spec);
