@@ -72,7 +72,11 @@ public static class Services
             new PowerShellVolumes(processes),
             new CimLicensing(processes),
             new PowerShellScheduledTaskControl(processes),
-            new PowerShellPrinters(processes));
+            new PowerShellPrinters(processes),
+            new PowerShellDiskImages(processes),
+            new PowerShellWindowsImages(processes),
+            new PowerShellDisks(processes),
+            new PowerShellWindowsReadiness(processes));
 
         return new HostEnvironment(
             services,

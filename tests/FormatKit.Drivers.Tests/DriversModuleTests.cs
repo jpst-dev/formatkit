@@ -1,5 +1,8 @@
 using System.Text.Json;
 using FormatKit.Core.Profiles;
+using FormatKit.Core.Steps;
+using FormatKit.Core.SystemAccess;
+using FormatKit.Core.Tests.Fakes;
 using FormatKit.Drivers.Catalog;
 
 namespace FormatKit.Drivers.Tests;
@@ -101,5 +104,25 @@ public class DriversModuleTests
         Assert.Equal("drivers.network-check", steps[0].Id);
         Assert.Equal("drivers.leftover-report", steps[^1].Id);
         Assert.Equal(3, steps.Count);
+    }
+
+    [Theory]
+    [InlineData("net", @"E:\usb", @"E:\usb\net")]
+    [InlineData(@"D:\\net", @"E:\usb", @"D:\net")]
+    public async Task Network_check_step_uses_the_backup_folder_resolved_against_the_profile_folder(
+        string backup, string baseDirectory, string expected)
+    {
+        var json = Json($$"""{"enabled":true,"sources":["gpu"],"networkDriverBackup":"{{backup}}"}""");
+        var procs = new FakeProcessRunner();
+        procs.Enqueue("pnputil.exe", new ProcessResult(0, "", "", TimeSpan.Zero, false));
+        var files = new InMemoryFileSystem();
+        files.CreateDirectory(expected);
+        var ctx = TestServices.Context(TestServices.Create(processes: procs, network: new FakeNetworkProbe(true), files: files));
+
+        var step = Module.CreateSteps(json, baseDirectory).First(s => s.Id == "drivers.network-check");
+        var result = await step.ExecuteAsync(ctx, CancellationToken.None);
+
+        Assert.Equal(StepOutcome.Succeeded, result.Outcome);
+        Assert.Contains(Path.Combine(expected, "*.inf"), Assert.Single(procs.Calls).Arguments);
     }
 }

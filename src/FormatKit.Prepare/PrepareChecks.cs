@@ -12,6 +12,7 @@ public static class PrepareChecks
     [
         new BitLockerCheck(),
         new ActivationCheck(),
+        new Windows11RequirementsCheck(),
         new UserFoldersCheck(),
         new OtherUsersCheck(),
         new VolumesCheck(),

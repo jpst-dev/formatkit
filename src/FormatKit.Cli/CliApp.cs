@@ -88,6 +88,7 @@ public sealed class CliApp
         root.Subcommands.Add(ProgramsCommands.Create(context));
         root.Subcommands.Add(DevCommands.Create(context));
         root.Subcommands.Add(PrepareCommands.Create(context));
+        root.Subcommands.Add(MediaCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
 
         var parse = root.Parse(args);
@@ -127,7 +128,7 @@ public sealed class CliApp
         args.Contains(ElevatedChildFlag, StringComparer.Ordinal) ? args : [.. args, ElevatedChildFlag];
 
     /// <summary>
-    /// Makes --profile and --output absolute: an elevated child starts in System32, and the resume
+    /// Makes --profile, --output and --iso absolute: an elevated child starts in System32, and the resume
     /// task starts elsewhere, so relative paths would break.
     /// </summary>
     internal static string[] AbsolutizePaths(string[] args)
@@ -136,14 +137,14 @@ public sealed class CliApp
         for (var i = 0; i < args.Length; i++)
         {
             var arg = args[i];
-            if (i > 0 && args[i - 1] is "--profile" or "--output")
+            if (i > 0 && args[i - 1] is "--profile" or "--output" or "--iso")
             {
                 result[i] = SafeFullPath(arg);
                 continue;
             }
 
             var eq = arg.IndexOf('=', StringComparison.Ordinal);
-            if (eq > 0 && arg[..eq] is "--profile" or "--output")
+            if (eq > 0 && arg[..eq] is "--profile" or "--output" or "--iso")
             {
                 result[i] = arg[..(eq + 1)] + SafeFullPath(arg[(eq + 1)..]);
                 continue;

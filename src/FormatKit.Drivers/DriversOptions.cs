@@ -15,7 +15,9 @@ public sealed record DriversOptions(bool Enabled, IReadOnlyList<DriverSource> So
         };
 
     /// <summary>Reads the section leniently; <see cref="DriversModule.Validate"/> reports malformed input.</summary>
-    internal static DriversOptions From(JsonElement section)
+    /// <param name="baseDirectory">The profile file's directory; a relative networkDriverBackup resolves against it
+    /// (against the current directory when null).</param>
+    internal static DriversOptions From(JsonElement section, string? baseDirectory)
     {
         var enabled = false;
         var sources = new List<DriverSource>();
@@ -36,9 +38,14 @@ public sealed record DriversOptions(bool Enabled, IReadOnlyList<DriverSource> So
             }
 
             if (section.TryGetProperty("networkDriverBackup", out var b) && b.ValueKind == JsonValueKind.String)
-                backup = b.GetString();
+                backup = Resolve(b.GetString(), baseDirectory);
         }
 
         return new DriversOptions(enabled, sources, backup);
     }
+
+    private static string? Resolve(string? path, string? baseDirectory) =>
+        string.IsNullOrWhiteSpace(path) || Path.IsPathRooted(path) || string.IsNullOrEmpty(baseDirectory)
+            ? path
+            : Path.GetFullPath(path, baseDirectory);
 }

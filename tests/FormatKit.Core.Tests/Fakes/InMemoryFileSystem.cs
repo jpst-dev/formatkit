@@ -60,7 +60,10 @@ public sealed class InMemoryFileSystem : IFileSystem
 
     public void Copy(string source, string destination)
     {
-        _files[destination] = ReadAllText(source);
+        if (!_files.ContainsKey(source) && _entries.TryGetValue(source, out var entry))
+            _entries[destination] = entry with { Path = destination };
+        else
+            _files[destination] = ReadAllText(source);
         AddParents(destination);
         WriteCount++;
     }

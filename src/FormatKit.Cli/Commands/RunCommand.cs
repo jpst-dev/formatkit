@@ -14,7 +14,8 @@ internal static class RunCommand
         var profileOption = new Option<string?>("--profile") { Description = Strings.Get("Opt_Profile") };
         var dryRun = new Option<bool>("--dry-run") { Description = Strings.Get("Opt_DryRun") };
         var resume = new Option<bool>("--resume") { Description = Strings.Get("Opt_Resume") };
-        var run = new Command("run", Strings.Get("Cmd_Run")) { Options = { profileOption, dryRun, resume } };
+        var countdown = new Option<int?>("--countdown") { Description = Strings.Get("Opt_Countdown") };
+        var run = new Command("run", Strings.Get("Cmd_Run")) { Options = { profileOption, dryRun, resume, countdown } };
 
         run.SetAction(async (parse, ct) =>
         {
@@ -31,6 +32,13 @@ internal static class RunCommand
             if (path is null && !resuming)
             {
                 o.WriteLine(Strings.Get("Run_UsageNeither"));
+                return ExitCodes.InvalidInput;
+            }
+
+            var wait = parse.GetValue(countdown);
+            if (wait is not null && (resuming || parse.GetValue(dryRun) || wait < 0))
+            {
+                o.WriteLine(Strings.Get("Run_CountdownUsage"));
                 return ExitCodes.InvalidInput;
             }
 
@@ -63,10 +71,29 @@ internal static class RunCommand
             if (profile is null)
                 return ExitCodes.InvalidInput;
 
+            // Before RunFlow, so before elevation: the UAC prompt appears only after the countdown. The elevated
+            // child gets the same arguments, but its parent already counted down: it must not wait again.
+            var elevatedChild = parse.GetValue<bool>(CliApp.ElevatedChildFlag);
+            if (wait is > 0 && !elevatedChild && context.Env.Services.Console.CanPrompt)
+            {
+                var starter = context.Env.Countdown ?? new StartCountdown();
+                if (!await starter.WaitAsync(profile.Profile.Name, TimeSpan.FromSeconds(wait.Value), ct))
+                {
+                    // The answer file passes --wait-on-exit, so the window waits for Enter once, in CliApp.
+                    o.WriteLine(Strings.Format("Run_CountdownCancelled", CommandLine(path!)));
+                    return ExitCodes.Ok;
+                }
+            }
+
             return await RunFlow.ExecuteAsync(context, profile, resuming, parse.GetValue(dryRun), ct);
         });
         return run;
     }
+
+    private static string CommandLine(string profilePath) =>
+        $"{Quote(MediaCommands.ExePath())} run --profile {Quote(Path.GetFullPath(profilePath))}";
+
+    private static string Quote(string path) => path.Contains(' ') ? $"\"{path}\"" : path;
 
     internal static LoadedProfile? LoadProfile(CommandContext context, string path)
     {
@@ -74,15 +101,19 @@ internal static class RunCommand
         if (outcome.Profile is not null)
             return outcome.Profile;
 
-        context.Out.WriteLine(Strings.Format("Profile_Errors", outcome.Errors.Count));
-        foreach (var error in outcome.Errors)
+        PrintErrors(context, outcome.Errors);
+        return null;
+    }
+
+    internal static void PrintErrors(CommandContext context, IReadOnlyList<ProfileError> errors)
+    {
+        context.Out.WriteLine(Strings.Format("Profile_Errors", errors.Count));
+        foreach (var error in errors)
         {
             context.Out.WriteLine(error.Path.Length == 0
                 ? $"  {error.Message}"
                 : $"  {error.Path}: {error.Message}");
         }
-
-        return null;
     }
 }
 

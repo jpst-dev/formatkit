@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Setup_UnknownProperty" xml:space="preserve"><value>Propriedade desconhecida &apos;{0}&apos; na seção setup.</value></data>
+  <data name="Setup_InvalidValue" xml:space="preserve"><value>Valor inválido: esperado {0}.</value></data>
+  <data name="Setup_LanguageNotInImage" xml:space="preserve"><value>A imagem não tem o idioma &apos;{1}&apos; para {0}. Idiomas disponíveis: {2}.</value></data>
+  <data name="Media_NoInstallImage" xml:space="preserve"><value>O ISO não tem sources\install.wim nem sources\install.esd.</value></data>
+  <data name="Media_NoBootFile" xml:space="preserve"><value>O ISO não tem efi\boot\bootx64.efi: não é uma mídia do Windows com boot UEFI.</value></data>
+  <data name="Media_ImageUnreadable" xml:space="preserve"><value>Não foi possível ler a imagem do Windows: {0}</value></data>
+  <data name="Media_NoEditions" xml:space="preserve"><value>A imagem do Windows não lista nenhuma edição.</value></data>
+  <data name="Media_NotAmd64" xml:space="preserve"><value>A edição &apos;{0}&apos; não é de 64 bits (amd64); só há suporte a mídia x64.</value></data>
+  <data name="Media_NotWindows11" xml:space="preserve"><value>A edição &apos;{0}&apos; é da versão {1}; é necessário o Windows 11 (build 22000 ou superior).</value></data>
+  <data name="Media_NoLanguages" xml:space="preserve"><value>A edição &apos;{0}&apos; não informa nenhum idioma.</value></data>
+  <data name="Media_EditionNotInImage" xml:space="preserve"><value>A imagem não tem a edição &apos;{1}&apos; para {0}. Edições disponíveis: {2}.</value></data>
+  <data name="Media_EditionHasNoGenericKey" xml:space="preserve"><value>A edição &apos;{1}&apos; para {0} não tem chave genérica de instalação, então o arquivo de respostas não consegue selecioná-la. Edições desta imagem que podem ser selecionadas: {2}.</value></data>
+  <data name="Media_EsdTooLarge" xml:space="preserve"><value>install.esd é maior que 4 GiB menos 1 byte e não pode ser dividido; não cabe em um pendrive FAT32.</value></data>
+  <data name="Media_MountFailed" xml:space="preserve"><value>Não foi possível montar o ISO: {0}</value></data>
+  <data name="Media_UnreadableFolder" xml:space="preserve"><value>Não foi possível ler a pasta {0} do ISO.</value></data>
+  <data name="Media_DismountFailed" xml:space="preserve"><value>Não foi possível desmontar o ISO ({0}). Execute manualmente: Dismount-DiskImage -ImagePath {1}</value></data>
+  <data name="Media_SplitFailed" xml:space="preserve"><value>Não foi possível dividir o install.wim: {0}</value></data>
+</root>
