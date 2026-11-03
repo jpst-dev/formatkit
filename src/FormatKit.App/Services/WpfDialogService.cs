@@ -15,6 +15,12 @@ public sealed class WpfDialogService : IDialogService
         return dialog.ShowDialog() == true ? dialog.FileName : null;
     }
 
+    public string? PickFolder()
+    {
+        var dialog = new OpenFolderDialog();
+        return dialog.ShowDialog() == true ? dialog.FolderName : null;
+    }
+
     public string? SaveFile(string filter, string defaultName)
     {
         var dialog = new SaveFileDialog { Filter = filter, FileName = defaultName };

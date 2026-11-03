@@ -17,6 +17,14 @@ internal static class TestViewModels
 {
     public static RunStateStore Store(InMemoryFileSystem files) => new(files, new AppPaths(@"C:\FormatKitTest"));
 
+    private static MediaViewModel CreateMedia(InMemoryFileSystem files, RunStateStore? store) =>
+        new(new ProfileService([]), new NoLauncher(), new Elevation(), new FakeDialogService(),
+            new HostEnvironment(
+                TestServices.Create(files: files), new Elevation(), new FakeScheduledTasks(), new FakeRebooter(),
+                new FakeReportWriter(), store ?? Store(files), new Serilog.LoggerConfiguration().CreateLogger(),
+                TimeSpan.Zero, TimeSpan.Zero),
+            () => new FormatKit.Media.Setup.MachineLocale("en-US", null, "UTC"));
+
     public static MainViewModel CreateMain(HomeViewModel home, RunProfileViewModel run) =>
         new(home,
             new AboutViewModel(new FakeDialogService()),
@@ -25,7 +33,8 @@ internal static class TestViewModels
             new ChecklistViewModel(
                 new PrepareRunner(null!, [], () => [], () => null!), new ProfileService([]), new FakeDialogService()),
             new CatalogsViewModel(new CleanupCatalog(1, []), new ProgramCatalog(1, [])),
-            run);
+            run,
+            CreateMedia(new InMemoryFileSystem(), store: null));
 
     public static MainViewModel CreateMain(InMemoryFileSystem? files = null)
     {
@@ -45,6 +54,7 @@ internal static class TestViewModels
                 new HostEnvironment(
                     TestServices.Create(files: files), new Elevation(), new FakeScheduledTasks(), new FakeRebooter(),
                     new FakeReportWriter(), store, new Serilog.LoggerConfiguration().CreateLogger(),
-                    TimeSpan.Zero, TimeSpan.Zero)));
+                    TimeSpan.Zero, TimeSpan.Zero)),
+            CreateMedia(files, store));
     }
 }

@@ -20,7 +20,7 @@
   <data name="Nav_About" xml:space="preserve"><value>Sobre</value></data>
   <data name="Home_Intro" xml:space="preserve"><value>O FormatKit prepara a reinstalação do Windows e reconstrói a máquina depois. Ele verifica o que poderia ser perdido antes de formatar e depois instala drivers, programas e configurações a partir de um perfil JSON.</value></data>
   <data name="Home_Before_Title" xml:space="preserve"><value>Antes de formatar</value></data>
-  <data name="Home_Before_Text" xml:space="preserve"><value>Rode o checklist para ver o que seria perdido.</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Rode o checklist para ver o que seria perdido e depois crie a mídia de instalação.</value></data>
   <data name="Home_Before_Checklist" xml:space="preserve"><value>Abrir Checklist</value></data>
   <data name="Home_After_Title" xml:space="preserve"><value>Depois de formatar</value></data>
   <data name="Home_After_Text" xml:space="preserve"><value>Execute o seu perfil para instalar drivers e programas e aplicar as configurações.</value></data>
@@ -176,5 +176,86 @@
   <data name="Run_ResumeNotScheduled" xml:space="preserve"><value>Não foi possível agendar a retomada automática. Após reiniciar, execute `formatkit run --resume`.</value></data>
   <data name="Run_NextAction" xml:space="preserve"><value>Próximo passo: {0}</value></data>
   <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>Se a janela de console que abriu pedir algo, digite lá.</value></data>
+  <data name="RunProfile_BlockedByMedia" xml:space="preserve"><value>A mídia de instalação está sendo criada. Uma execução pode reiniciar o PC, então precisa esperar isso terminar.</value></data>
+  <data name="Home_Before_Media" xml:space="preserve"><value>Abrir Mídia de instalação</value></data>
+  <data name="Media_Intro" xml:space="preserve"><value>Cria a mídia de instalação do Windows 11 a partir da ISO oficial, em um pendrive ou em uma pasta. Com um perfil, ele é executado sozinho no primeiro logon.</value></data>
+  <data name="Media_Iso" xml:space="preserve"><value>ISO do Windows 11</value></data>
+  <data name="Media_ChooseIso" xml:space="preserve"><value>Escolher ISO...</value></data>
+  <data name="Media_Profile" xml:space="preserve"><value>Perfil (opcional)</value></data>
+  <data name="Media_ProfileHint" xml:space="preserve"><value>Sem perfil, esta é uma instalação simples do Windows 11.</value></data>
+  <data name="Media_ChooseProfile" xml:space="preserve"><value>Escolher perfil...</value></data>
+  <data name="Media_ClearProfile" xml:space="preserve"><value>Sem perfil</value></data>
+  <data name="Media_Setup" xml:space="preserve"><value>Instalação do Windows</value></data>
+  <data name="Media_Setup_Account" xml:space="preserve"><value>Conta</value></data>
+  <data name="Media_Setup_Account_Local" xml:space="preserve"><value>Local: o Windows pede o nome e a senha</value></data>
+  <data name="Media_Setup_Account_Microsoft" xml:space="preserve"><value>Microsoft: as telas online normais</value></data>
+  <data name="Media_Setup_Edition" xml:space="preserve"><value>Edição</value></data>
+  <data name="Media_Setup_EditionDefault" xml:space="preserve"><value>Não definida: a instalação segue a licença do PC ou pergunta</value></data>
+  <data name="Media_Setup_ComputerName" xml:space="preserve"><value>Nome do computador</value></data>
+  <data name="Media_Setup_ComputerNameDefault" xml:space="preserve"><value>Não definido: o Windows escolhe um</value></data>
+  <data name="Media_Setup_Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Media_Setup_LanguageDefault" xml:space="preserve"><value>{0}, o idioma deste PC, se a ISO o tiver</value></data>
+  <data name="Media_Setup_Keyboard" xml:space="preserve"><value>Teclado</value></data>
+  <data name="Media_Setup_KeyboardDefault" xml:space="preserve"><value>{0}, o teclado deste PC</value></data>
+  <data name="Media_Setup_KeyboardLanguageDefault" xml:space="preserve"><value>O padrão do idioma</value></data>
+  <data name="Media_Setup_TimeZone" xml:space="preserve"><value>Fuso horário</value></data>
+  <data name="Media_Setup_TimeZoneDefault" xml:space="preserve"><value>{0}, o fuso horário deste PC</value></data>
+  <data name="Media_Target" xml:space="preserve"><value>Gravar em</value></data>
+  <data name="Media_TargetUsb" xml:space="preserve"><value>Pendrive (será apagado)</value></data>
+  <data name="Media_AllowHardDisk" xml:space="preserve"><value>Permitir um disco rígido externo</value></data>
+  <data name="Media_TargetFolder" xml:space="preserve"><value>Pasta</value></data>
+  <data name="Media_FolderHint" xml:space="preserve"><value>A pasta não pode existir ou precisa estar vazia.</value></data>
+  <data name="Media_ChooseFolder" xml:space="preserve"><value>Escolher pasta...</value></data>
+  <data name="Media_BlockedByRun" xml:space="preserve"><value>Um perfil está em execução. Ele pode reiniciar o PC, então a mídia precisa esperar ele terminar.</value></data>
+  <data name="Media_NeedsAdmin" xml:space="preserve"><value>Montar a ISO e listar os discos exige permissão de administrador: Continuar pede a permissão uma vez. Nada é apagado ainda.</value></data>
+  <data name="Media_Continue" xml:space="preserve"><value>Continuar</value></data>
+  <data name="Media_ChooseDisk" xml:space="preserve"><value>Escolha o disco USB que será apagado e gravado.</value></data>
+  <data name="Media_NoUsbDisk" xml:space="preserve"><value>Nenhum disco USB foi encontrado. Cancele, conecte o pendrive e continue de novo.</value></data>
+  <data name="Media_DiskTitle" xml:space="preserve"><value>Disco {0} - {1} {2} ({3}, {4})</value></data>
+  <data name="Media_Removable" xml:space="preserve"><value>removível</value></data>
+  <data name="Media_NotRemovable" xml:space="preserve"><value>não removível</value></data>
+  <data name="Media_NoVolumes" xml:space="preserve"><value>(sem volumes)</value></data>
+  <data name="Media_Refusal_NotUsb" xml:space="preserve"><value>Não pode ser usado: não está no barramento USB.</value></data>
+  <data name="Media_Refusal_BootOrSystem" xml:space="preserve"><value>Não pode ser usado: é o disco de boot ou do sistema.</value></data>
+  <data name="Media_Refusal_HardDisk" xml:space="preserve"><value>Não pode ser usado: é um disco rígido externo.</value></data>
+  <data name="Media_Refusal_HoldsSourceFiles" xml:space="preserve"><value>Não pode ser usado: guarda arquivos de que a mídia precisa ({0}). Copie-os para outra unidade antes.</value></data>
+  <data name="Media_Refusal_TooSmall" xml:space="preserve"><value>Não pode ser usado: é pequeno demais para a mídia.</value></data>
+  <data name="Media_Refusal_NoUniqueId" xml:space="preserve"><value>Não pode ser usado: o Windows não informa um ID único para ele, então não dá para diferenciá-lo de outro pendrive conectado depois. Tente outro pendrive ou outra porta.</value></data>
+  <data name="Media_HardDisksHidden" xml:space="preserve"><value>{0} disco(s) rígido(s) externo(s) ocultos. Volte e marque "Permitir um disco rígido externo" para incluí-los.</value></data>
+  <data name="Media_EraseWarning" xml:space="preserve"><value>TUDO no disco {0} será apagado. Digite o número do disco ({0}) para apagá-lo e gravar a mídia. Qualquer outra coisa cancela.</value></data>
+  <data name="Media_IsHardDisk" xml:space="preserve"><value>Este é um disco rígido externo.</value></data>
+  <data name="Media_TypedNumberName" xml:space="preserve"><value>Número do disco a apagar</value></data>
+  <data name="Media_Erase" xml:space="preserve"><value>Apagar e gravar</value></data>
+  <data name="Media_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Media_StopHint" xml:space="preserve"><value>Um apagamento já iniciado não é interrompido. Parar depois dele deixa o destino incompleto.</value></data>
+  <data name="Media_StopTitle" xml:space="preserve"><value>A mídia de instalação está sendo criada</value></data>
+  <data name="Media_StopQuestion" xml:space="preserve"><value>Parar? Um pendrive ou uma pasta já em gravação fica incompleto.</value></data>
+  <data name="Media_Back" xml:space="preserve"><value>Voltar</value></data>
+  <data name="Media_ChecklistReminder" xml:space="preserve"><value>Antes de formatar um PC com esta mídia, execute o Checklist nesse PC.</value></data>
+  <data name="Media_Preparing" xml:space="preserve"><value>Verificando a ISO e o perfil...</value></data>
+  <data name="Media_Erasing" xml:space="preserve"><value>Verificando o disco de novo e apagando...</value></data>
+  <data name="Media_Phase_Copying" xml:space="preserve"><value>Copiando os arquivos do Windows...</value></data>
+  <data name="Media_Phase_Splitting" xml:space="preserve"><value>Dividindo o install.wim para FAT32 (leva alguns minutos)...</value></data>
+  <data name="Media_Phase_WritingFormatKit" xml:space="preserve"><value>Gravando o FormatKit e o perfil...</value></data>
+  <data name="Media_Phase_WritingAnswerFile" xml:space="preserve"><value>Gravando o autounattend.xml...</value></data>
+  <data name="Media_Phase_Done" xml:space="preserve"><value>Concluído.</value></data>
+  <data name="Media_OutputNotEmpty" xml:space="preserve"><value>{0} já tem arquivos. Escolha uma pasta que não exista ou esteja vazia.</value></data>
+  <data name="Media_CliExeMissing" xml:space="preserve"><value>Um perfil precisa do formatkit.exe na mídia, e ele não foi encontrado em {0}. Coloque o formatkit.exe ao lado do FormatKitUI.exe. Nada foi alterado.</value></data>
+  <data name="Media_MissingInput" xml:space="preserve"><value>{0}: o arquivo ou a pasta não existe.</value></data>
+  <data name="Media_UnreadableInput" xml:space="preserve"><value>Não foi possível ler a pasta {0}.</value></data>
+  <data name="Media_OutputDriveUnreadable" xml:space="preserve"><value>Não foi possível ler o espaço livre de {0}: {1}</value></data>
+  <data name="Media_NotEnoughSpace" xml:space="preserve"><value>Espaço livre insuficiente em {0}: a mídia precisa de {1} e há {2} livres.</value></data>
+  <data name="Media_NoDisksAtAll" xml:space="preserve"><value>O Windows não retornou nenhum disco, nem o do sistema, então os pendrives não podem ser listados neste PC. Nada foi apagado.</value></data>
+  <data name="Media_Cancelled" xml:space="preserve"><value>Cancelado. Nada foi apagado.</value></data>
+  <data name="Media_DiskChanged" xml:space="preserve"><value>O disco {0} mudou ou foi desconectado depois de escolhido. Nada foi apagado. Tente de novo.</value></data>
+  <data name="Media_UsbDone" xml:space="preserve"><value>O pendrive está pronto. Inicie o PC por ele para formatar.</value></data>
+  <data name="Media_FolderDone" xml:space="preserve"><value>A mídia de instalação está pronta em {0}.</value></data>
+  <data name="Media_UsbIncomplete" xml:space="preserve"><value>O pendrive está incompleto ({0}). Execute isto de novo para corrigir.</value></data>
+  <data name="Media_FolderIncomplete" xml:space="preserve"><value>A mídia em {0} está incompleta ({1}). Apague a pasta e execute isto de novo.</value></data>
+  <data name="Media_EraseFailed" xml:space="preserve"><value>o apagamento não terminou</value></data>
+  <data name="Media_Interrupted" xml:space="preserve"><value>a gravação foi interrompida</value></data>
+  <data name="Media_EndedBeforeErase" xml:space="preserve"><value>O trabalho terminou inesperadamente, antes de apagar qualquer disco. Nada foi apagado.</value></data>
+  <data name="Media_EndedAfterErase" xml:space="preserve"><value>O trabalho terminou inesperadamente depois da confirmação do disco. O pendrive pode estar incompleto; executar isto de novo corrige.</value></data>
+  <data name="Media_EndedFolder" xml:space="preserve"><value>O trabalho terminou inesperadamente. A mídia em {0} pode estar incompleta; apague a pasta e execute isto de novo.</value></data>
   <data name="RunProfile_Resume" xml:space="preserve"><value>Retomar</value></data>
 </root>

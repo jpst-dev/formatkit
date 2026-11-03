@@ -11,7 +11,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware,
         CleanupDiagnosisViewModel diagnosis, ChecklistViewModel checklist,
-        CatalogsViewModel catalogs, RunProfileViewModel runProfile)
+        CatalogsViewModel catalogs, RunProfileViewModel runProfile, MediaViewModel media)
     {
         _home = home;
         _pages = new Dictionary<Page, object>
@@ -23,12 +23,20 @@ public sealed partial class MainViewModel : ObservableObject
             [Page.Checklist] = checklist,
             [Page.Catalogs] = catalogs,
             [Page.RunProfile] = runProfile,
+            [Page.Media] = media,
         };
         foreach (var page in Enum.GetValues<Page>().Where(p => !_pages.ContainsKey(p)))
             _pages[page] = new PlaceholderViewModel(page);
 
         RunProfile = runProfile;
+        Media = media;
         NavigateCommand = new RelayCommand<Page>(Navigate);
+        // A run can restart the PC, so it never overlaps a media job.
+        media.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MediaViewModel.IsRunInProgress))
+                runProfile.OtherWorkRunning = media.IsRunInProgress;
+        };
         home.NavigationRequested += Navigate;
         home.ResumeRequested += () => _ = ResumeAsync();
         // Home's banner follows the saved run state when a run ends too (the page is not shown during a run).
@@ -36,19 +44,27 @@ public sealed partial class MainViewModel : ObservableObject
         {
             if (e.PropertyName == nameof(RunProfileViewModel.HasInterruptedRun))
                 home.Refresh();
+            else if (e.PropertyName == nameof(RunProfileViewModel.IsRunInProgress))
+                media.OtherWorkRunning = runProfile.IsRunInProgress;
         };
         NavItems = Enum.GetValues<Page>()
-            .Where(p => p != Page.Media || IsMediaAvailable)
             .Select(p => new NavItem(p, Strings.Get($"Nav_{p}")))
             .ToList();
         _current = Page.Home;
     }
 
-    /// <summary>The installation-media page stays hidden until it exists.</summary>
-    public bool IsMediaAvailable => false;
-
     /// <summary>The Run profile page, which the window asks before closing during a run.</summary>
     public RunProfileViewModel RunProfile { get; }
+
+    /// <summary>The installation media page, which the window asks before closing during a media job.</summary>
+    public MediaViewModel Media { get; }
+
+    /// <summary>True while a run or a media job starts or runs: closing the window asks first.</summary>
+    public bool IsWorkInProgress => RunProfile.IsRunInProgress || Media.IsRunInProgress;
+
+    /// <summary>Closing the window: asks the page whose work is going on. Only one can be working.</summary>
+    public Task<bool> ConfirmCloseAsync() =>
+        Media.IsRunInProgress ? Media.ConfirmCloseAsync() : RunProfile.ConfirmCloseAsync();
 
     public IReadOnlyList<NavItem> NavItems { get; }
 
@@ -84,10 +100,5 @@ public sealed partial class MainViewModel : ObservableObject
         return RunProfile.ResumeAsync();
     }
 
-    public void Navigate(Page page)
-    {
-        if (page == Page.Media && !IsMediaAvailable)
-            return;
-        Current = page;
-    }
+    public void Navigate(Page page) => Current = page;
 }

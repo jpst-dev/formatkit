@@ -70,7 +70,8 @@ public partial class App : Application
                 new ProfileService(set.Modules), set.Modules, launcher, _host.Elevation, _dialogs,
                 new AppSettings(_host.Services.Files, Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatKit", "app.json")),
-                _host));
+                _host),
+            new MediaViewModel(new ProfileService(set.Modules), launcher, _host.Elevation, _dialogs, _host));
         _window = new MainWindow(main);
         _instance.Activated += (_, _) => Dispatcher.BeginInvoke(() => _window?.BringToFront());
         _instance.ResumeRequested += (_, _) => Dispatcher.BeginInvoke(() =>

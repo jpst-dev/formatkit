@@ -1,0 +1,169 @@
+<UserControl x:Class="FormatKit.App.Views.MediaPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:FormatKit.App.Localization">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32" MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Text="{loc:Loc Nav_Media}" FontSize="28" FontWeight="SemiBold" />
+
+            <!-- Inputs -->
+            <StackPanel Visibility="{Binding IsInputs, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{loc:Loc Media_Intro}" Margin="0,8,0,0" TextWrapping="Wrap" />
+
+                <TextBlock Text="{loc:Loc Media_Iso}" FontWeight="SemiBold" Margin="0,16,0,0" />
+                <TextBlock Text="{Binding IsoPath}" TextWrapping="Wrap" Opacity="0.75" />
+                <Button Content="{loc:Loc Media_ChooseIso}" Command="{Binding ChooseIsoCommand}"
+                        HorizontalAlignment="Left" Padding="16,4" Margin="0,4,0,0" />
+
+                <TextBlock Text="{loc:Loc Media_Profile}" FontWeight="SemiBold" Margin="0,16,0,0" />
+                <TextBlock Text="{loc:Loc Media_ProfileHint}" TextWrapping="Wrap" Opacity="0.75" />
+                <TextBlock Text="{Binding ProfileName}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0" />
+                <TextBlock Text="{Binding ProfilePath}" TextWrapping="Wrap" Opacity="0.75" />
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <Button Content="{loc:Loc Media_ChooseProfile}" Command="{Binding ChooseProfileCommand}" Padding="16,4" />
+                    <Button Content="{loc:Loc Media_ClearProfile}" Command="{Binding ClearProfileCommand}" Padding="16,4" Margin="8,0,0,0" />
+                </StackPanel>
+
+                <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Firebrick"
+                        Visibility="{Binding HasProfileErrors, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc RunProfile_Errors}" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding ProfileErrors}">
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Path}" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,6,0,0">
+                                        <TextBlock Text="{Binding Path}" Opacity="0.75" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{loc:Loc Media_Setup}" FontWeight="SemiBold" Margin="0,16,0,0" />
+                <ItemsControl ItemsSource="{Binding SetupRows}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,2,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Label}" Opacity="0.75" />
+                                <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="{loc:Loc Media_Target}" FontWeight="SemiBold" Margin="0,16,0,0" />
+                <RadioButton Content="{loc:Loc Media_TargetUsb}" IsChecked="{Binding IsUsbTarget}" GroupName="Target" Margin="0,4,0,0" />
+                <CheckBox Content="{loc:Loc Media_AllowHardDisk}" IsChecked="{Binding AllowHardDisk}" Margin="24,4,0,0"
+                          Visibility="{Binding IsUsbTarget, Converter={StaticResource BoolToVisibility}}" />
+                <RadioButton Content="{loc:Loc Media_TargetFolder}" IsChecked="{Binding IsFolderTarget}" GroupName="Target" Margin="0,8,0,0" />
+                <StackPanel Margin="24,4,0,0" Visibility="{Binding IsFolderTarget, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{loc:Loc Media_FolderHint}" TextWrapping="Wrap" Opacity="0.75" />
+                    <TextBlock Text="{Binding OutputFolder}" TextWrapping="Wrap" Opacity="0.75" />
+                    <Button Content="{loc:Loc Media_ChooseFolder}" Command="{Binding ChooseFolderCommand}"
+                            HorizontalAlignment="Left" Padding="16,4" Margin="0,4,0,0" />
+                </StackPanel>
+
+                <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="Orange"
+                        Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+                </Border>
+                <TextBlock Text="{loc:Loc Media_BlockedByRun}" TextWrapping="Wrap" Margin="0,12,0,0"
+                           Visibility="{Binding OtherWorkRunning, Converter={StaticResource BoolToVisibility}}" />
+                <TextBlock Text="{loc:Loc Media_NeedsAdmin}" TextWrapping="Wrap" Opacity="0.75" Margin="0,16,0,0" />
+                <Button Content="{loc:Loc Media_Continue}" Command="{Binding ContinueCommand}"
+                        HorizontalAlignment="Left" Padding="24,6" Margin="0,8,0,0" />
+            </StackPanel>
+
+            <!-- Disk choice -->
+            <StackPanel Visibility="{Binding IsChoosingDisk, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{loc:Loc Media_ChooseDisk}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                <TextBlock Text="{loc:Loc Media_NoUsbDisk}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,12,0,0"
+                           Visibility="{Binding HasNoDisks, Converter={StaticResource BoolToVisibility}}" />
+                <ListBox ItemsSource="{Binding Disks}" SelectedItem="{Binding SelectedDisk}" Margin="0,12,0,0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                            <Setter Property="IsEnabled" Value="{Binding IsEligible}" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Volumes}" Opacity="0.75" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Reason}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Text="{Binding HiddenHardDisksText}" TextWrapping="Wrap" Opacity="0.75" Margin="0,8,0,0"
+                           Visibility="{Binding HasHiddenHardDisks, Converter={StaticResource BoolToVisibility}}" />
+
+                <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="2" BorderBrush="Firebrick"
+                        Visibility="{Binding HasDiskSelected, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding EraseWarning}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc Media_IsHardDisk}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0"
+                                   Visibility="{Binding IsHardDiskSelected, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBox Text="{Binding TypedNumber, UpdateSourceTrigger=PropertyChanged}" Width="120"
+                                 HorizontalAlignment="Left" Margin="0,8,0,0"
+                                 AutomationProperties.Name="{loc:Loc Media_TypedNumberName}" />
+                        <Button Content="{loc:Loc Media_Erase}" Command="{Binding EraseCommand}"
+                                HorizontalAlignment="Left" Padding="16,4" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
+                <Button Content="{loc:Loc Media_Cancel}" Command="{Binding StopCommand}"
+                        HorizontalAlignment="Left" Padding="16,4" Margin="0,12,0,0" />
+            </StackPanel>
+
+            <!-- Writing -->
+            <StackPanel Visibility="{Binding IsWriting, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding StatusText}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0" />
+                <ProgressBar Value="{Binding Percent}" Maximum="100" Height="8" Margin="0,12,0,0" />
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="{loc:Loc RunProfile_Stop}" Command="{Binding StopCommand}" Padding="16,4" />
+                    <TextBlock Text="{loc:Loc Media_StopHint}" Opacity="0.75" Margin="12,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Result -->
+            <StackPanel Visibility="{Binding IsResult, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding FinalStatus}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0" />
+                <TextBlock Text="{loc:Loc Media_ChecklistReminder}" TextWrapping="Wrap" Margin="0,8,0,0"
+                           Visibility="{Binding ShowChecklistReminder, Converter={StaticResource BoolToVisibility}}" />
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="{loc:Loc Media_Back}" Command="{Binding BackCommand}" Padding="16,4" />
+                    <Button Content="{loc:Loc RunProfile_OpenLogs}" Command="{Binding OpenLogFolderCommand}" Padding="16,4" Margin="8,0,0,0"
+                            Visibility="{Binding EndedWithoutResult, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+            </StackPanel>
+
+            <ItemsControl ItemsSource="{Binding Notes}" Margin="0,12,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

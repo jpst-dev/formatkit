@@ -20,7 +20,7 @@
   <data name="Nav_About" xml:space="preserve"><value>About</value></data>
   <data name="Home_Intro" xml:space="preserve"><value>FormatKit prepares a Windows reinstall and rebuilds the machine afterwards. It checks what could be lost before you format, then installs drivers, programs and settings from a JSON profile.</value></data>
   <data name="Home_Before_Title" xml:space="preserve"><value>Before formatting</value></data>
-  <data name="Home_Before_Text" xml:space="preserve"><value>Run the checklist to find what would be lost.</value></data>
+  <data name="Home_Before_Text" xml:space="preserve"><value>Run the checklist to find what would be lost, then build the installation media.</value></data>
   <data name="Home_Before_Checklist" xml:space="preserve"><value>Open Checklist</value></data>
   <data name="Home_After_Title" xml:space="preserve"><value>After formatting</value></data>
   <data name="Home_After_Text" xml:space="preserve"><value>Run your profile to install drivers and programs and apply your settings.</value></data>
@@ -177,4 +177,85 @@
   <data name="Run_NextAction" xml:space="preserve"><value>Next step: {0}</value></data>
   <data name="RunProfile_TypeInConsole" xml:space="preserve"><value>If the console window that opened asks for something, type it there.</value></data>
   <data name="RunProfile_Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="RunProfile_BlockedByMedia" xml:space="preserve"><value>Installation media is being built. A run can restart the PC, so it must wait until that ends.</value></data>
+  <data name="Home_Before_Media" xml:space="preserve"><value>Open Installation media</value></data>
+  <data name="Media_Intro" xml:space="preserve"><value>Builds Windows 11 installation media from the official ISO, on a USB stick or in a folder. With a profile, the profile runs by itself on the first logon.</value></data>
+  <data name="Media_Iso" xml:space="preserve"><value>Windows 11 ISO</value></data>
+  <data name="Media_ChooseIso" xml:space="preserve"><value>Choose ISO...</value></data>
+  <data name="Media_Profile" xml:space="preserve"><value>Profile (optional)</value></data>
+  <data name="Media_ProfileHint" xml:space="preserve"><value>Without a profile this is a plain Windows 11 installation.</value></data>
+  <data name="Media_ChooseProfile" xml:space="preserve"><value>Choose profile...</value></data>
+  <data name="Media_ClearProfile" xml:space="preserve"><value>No profile</value></data>
+  <data name="Media_Setup" xml:space="preserve"><value>Windows setup</value></data>
+  <data name="Media_Setup_Account" xml:space="preserve"><value>Account</value></data>
+  <data name="Media_Setup_Account_Local" xml:space="preserve"><value>Local: Windows asks for the name and password</value></data>
+  <data name="Media_Setup_Account_Microsoft" xml:space="preserve"><value>Microsoft: the normal online screens</value></data>
+  <data name="Media_Setup_Edition" xml:space="preserve"><value>Edition</value></data>
+  <data name="Media_Setup_EditionDefault" xml:space="preserve"><value>Not set: Setup follows the PC's license or asks</value></data>
+  <data name="Media_Setup_ComputerName" xml:space="preserve"><value>Computer name</value></data>
+  <data name="Media_Setup_ComputerNameDefault" xml:space="preserve"><value>Not set: Windows chooses one</value></data>
+  <data name="Media_Setup_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Media_Setup_LanguageDefault" xml:space="preserve"><value>{0}, this PC's language, if the ISO has it</value></data>
+  <data name="Media_Setup_Keyboard" xml:space="preserve"><value>Keyboard</value></data>
+  <data name="Media_Setup_KeyboardDefault" xml:space="preserve"><value>{0}, this PC's keyboard</value></data>
+  <data name="Media_Setup_KeyboardLanguageDefault" xml:space="preserve"><value>The default of the language</value></data>
+  <data name="Media_Setup_TimeZone" xml:space="preserve"><value>Time zone</value></data>
+  <data name="Media_Setup_TimeZoneDefault" xml:space="preserve"><value>{0}, this PC's time zone</value></data>
+  <data name="Media_Target" xml:space="preserve"><value>Write to</value></data>
+  <data name="Media_TargetUsb" xml:space="preserve"><value>USB stick (erased)</value></data>
+  <data name="Media_AllowHardDisk" xml:space="preserve"><value>Allow an external hard disk</value></data>
+  <data name="Media_TargetFolder" xml:space="preserve"><value>Folder</value></data>
+  <data name="Media_FolderHint" xml:space="preserve"><value>The folder must not exist or must be empty.</value></data>
+  <data name="Media_ChooseFolder" xml:space="preserve"><value>Choose folder...</value></data>
+  <data name="Media_BlockedByRun" xml:space="preserve"><value>A profile is running. It can restart the PC, so the media must wait until it ends.</value></data>
+  <data name="Media_NeedsAdmin" xml:space="preserve"><value>Mounting the ISO and listing the disks need administrator rights: Continue asks for permission once. Nothing is erased yet.</value></data>
+  <data name="Media_Continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Media_ChooseDisk" xml:space="preserve"><value>Choose the USB disk to erase and write.</value></data>
+  <data name="Media_NoUsbDisk" xml:space="preserve"><value>No USB disk was found. Cancel, plug the stick in and continue again.</value></data>
+  <data name="Media_DiskTitle" xml:space="preserve"><value>Disk {0} - {1} {2} ({3}, {4})</value></data>
+  <data name="Media_Removable" xml:space="preserve"><value>removable</value></data>
+  <data name="Media_NotRemovable" xml:space="preserve"><value>not removable</value></data>
+  <data name="Media_NoVolumes" xml:space="preserve"><value>(no volumes)</value></data>
+  <data name="Media_Refusal_NotUsb" xml:space="preserve"><value>Cannot be used: it is not on the USB bus.</value></data>
+  <data name="Media_Refusal_BootOrSystem" xml:space="preserve"><value>Cannot be used: it is the boot or system disk.</value></data>
+  <data name="Media_Refusal_HardDisk" xml:space="preserve"><value>Cannot be used: it is an external hard disk.</value></data>
+  <data name="Media_Refusal_HoldsSourceFiles" xml:space="preserve"><value>Cannot be used: it holds files the media needs ({0}). Copy them to another drive first.</value></data>
+  <data name="Media_Refusal_TooSmall" xml:space="preserve"><value>Cannot be used: it is too small for the media.</value></data>
+  <data name="Media_Refusal_NoUniqueId" xml:space="preserve"><value>Cannot be used: Windows reports no unique ID for it, so it cannot be told apart from another stick plugged in later. Try another USB stick or port.</value></data>
+  <data name="Media_HardDisksHidden" xml:space="preserve"><value>{0} external hard disk(s) are hidden. Go back and check "Allow an external hard disk" to include them.</value></data>
+  <data name="Media_EraseWarning" xml:space="preserve"><value>EVERYTHING on disk {0} will be erased. Type the disk number ({0}) to erase it and write the media. Anything else cancels.</value></data>
+  <data name="Media_IsHardDisk" xml:space="preserve"><value>This is an external hard disk.</value></data>
+  <data name="Media_TypedNumberName" xml:space="preserve"><value>Disk number to erase</value></data>
+  <data name="Media_Erase" xml:space="preserve"><value>Erase and write</value></data>
+  <data name="Media_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Media_StopHint" xml:space="preserve"><value>An erase already started is not interrupted. A stop after it leaves the target incomplete.</value></data>
+  <data name="Media_StopTitle" xml:space="preserve"><value>Installation media is being built</value></data>
+  <data name="Media_StopQuestion" xml:space="preserve"><value>Stop? A USB stick or folder already being written stays incomplete.</value></data>
+  <data name="Media_Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Media_ChecklistReminder" xml:space="preserve"><value>Before formatting a PC from this media, run the Checklist on that PC.</value></data>
+  <data name="Media_Preparing" xml:space="preserve"><value>Checking the ISO and the profile...</value></data>
+  <data name="Media_Erasing" xml:space="preserve"><value>Checking the disk again and erasing it...</value></data>
+  <data name="Media_Phase_Copying" xml:space="preserve"><value>Copying the Windows files...</value></data>
+  <data name="Media_Phase_Splitting" xml:space="preserve"><value>Splitting install.wim for FAT32 (this takes a few minutes)...</value></data>
+  <data name="Media_Phase_WritingFormatKit" xml:space="preserve"><value>Writing FormatKit and the profile...</value></data>
+  <data name="Media_Phase_WritingAnswerFile" xml:space="preserve"><value>Writing autounattend.xml...</value></data>
+  <data name="Media_Phase_Done" xml:space="preserve"><value>Done.</value></data>
+  <data name="Media_OutputNotEmpty" xml:space="preserve"><value>{0} already holds files. Choose a folder that does not exist or is empty.</value></data>
+  <data name="Media_CliExeMissing" xml:space="preserve"><value>A profile needs formatkit.exe on the media, and it was not found at {0}. Put formatkit.exe next to FormatKitUI.exe. Nothing was changed.</value></data>
+  <data name="Media_MissingInput" xml:space="preserve"><value>{0}: the file or folder does not exist.</value></data>
+  <data name="Media_UnreadableInput" xml:space="preserve"><value>Could not read the folder {0}.</value></data>
+  <data name="Media_OutputDriveUnreadable" xml:space="preserve"><value>Could not read the free space of {0}: {1}</value></data>
+  <data name="Media_NotEnoughSpace" xml:space="preserve"><value>Not enough free space on {0}: the media needs {1} and {2} is free.</value></data>
+  <data name="Media_NoDisksAtAll" xml:space="preserve"><value>Windows returned no disks at all, not even the system disk, so USB sticks cannot be listed on this PC. Nothing was erased.</value></data>
+  <data name="Media_Cancelled" xml:space="preserve"><value>Cancelled. Nothing was erased.</value></data>
+  <data name="Media_DiskChanged" xml:space="preserve"><value>Disk {0} changed or was unplugged since it was chosen. Nothing was erased. Try again.</value></data>
+  <data name="Media_UsbDone" xml:space="preserve"><value>The USB stick is ready. Boot the PC to format from it.</value></data>
+  <data name="Media_FolderDone" xml:space="preserve"><value>The installation media is ready in {0}.</value></data>
+  <data name="Media_UsbIncomplete" xml:space="preserve"><value>The USB stick is incomplete ({0}). Run this again to fix it.</value></data>
+  <data name="Media_FolderIncomplete" xml:space="preserve"><value>The media in {0} is incomplete ({1}). Delete the folder and run this again.</value></data>
+  <data name="Media_EraseFailed" xml:space="preserve"><value>the erase did not complete</value></data>
+  <data name="Media_Interrupted" xml:space="preserve"><value>the writing was interrupted</value></data>
+  <data name="Media_EndedBeforeErase" xml:space="preserve"><value>The work ended unexpectedly, before any disk was erased. Nothing was erased.</value></data>
+  <data name="Media_EndedAfterErase" xml:space="preserve"><value>The work ended unexpectedly after the disk was confirmed. The USB stick may be incomplete; running this again fixes it.</value></data>
+  <data name="Media_EndedFolder" xml:space="preserve"><value>The work ended unexpectedly. The media in {0} may be incomplete; delete the folder and run this again.</value></data>
 </root>

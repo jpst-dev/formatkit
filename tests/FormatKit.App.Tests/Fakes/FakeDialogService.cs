@@ -25,6 +25,14 @@ public sealed class FakeDialogService : IDialogService
         return OpenFileResult;
     }
 
+    public string? FolderResult { get; set; }
+
+    public string? PickFolder()
+    {
+        Calls.Add("PickFolder");
+        return FolderResult;
+    }
+
     public string? SaveFile(string filter, string defaultName)
     {
         Calls.Add($"SaveFile:{filter}:{defaultName}");

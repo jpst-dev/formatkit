@@ -3,6 +3,9 @@ using FormatKit.App.Tests.Fakes;
 using FormatKit.App.Worker;
 using FormatKit.Core.Running;
 using FormatKit.Core.Steps;
+using FormatKit.Core.SystemAccess;
+using FormatKit.Media.Building;
+using FormatKit.Media.Usb;
 using Serilog;
 
 namespace FormatKit.App.Tests;
@@ -28,6 +31,12 @@ public class MessageChannelTests
         new ConsoleOpened(),
         new ConsoleLine("ssh-ed25519 AAAA me@pc"),
         new ConsoleClosed(),
+        new Disks(
+            [new DiskRow(3, "id", "SanDisk", 16, "USB", true, [new DiskVolume('G', "STICK"), new DiskVolume(null, null)], UsbRefusal.HoldsSourceFiles, [@"G:\a.iso"])],
+            2),
+        new ConfirmDisk("id", "3"),
+        new MediaProgressUpdate(MediaPhase.Splitting, 5, 10),
+        new MediaFinished(MediaFinishedStatus.DiskChanged, "changed"),
     };
 
     private static ILogger Log => new LoggerConfiguration().CreateLogger();

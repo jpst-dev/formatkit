@@ -37,6 +37,9 @@ public sealed class FakeWorkerLauncher : IWorkerLauncher
 
     public List<object> Script { get; } = [];
 
+    /// <summary>Adds these items to the <see cref="Script"/>.</summary>
+    public void Will(params object[] items) => Script.AddRange(items);
+
     public List<IReadOnlyList<string>> Jobs { get; } = [];
 
     public List<bool> Elevations { get; } = [];

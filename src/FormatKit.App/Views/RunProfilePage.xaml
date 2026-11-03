@@ -105,6 +105,8 @@
                     <TextBlock Text="{Binding RunMessage}" TextWrapping="Wrap" />
                 </Border>
 
+                <TextBlock Text="{loc:Loc RunProfile_BlockedByMedia}" TextWrapping="Wrap" Margin="0,12,0,0"
+                           Visibility="{Binding OtherWorkRunning, Converter={StaticResource BoolToVisibility}}" />
                 <Button Content="{loc:Loc RunProfile_Run}" Command="{Binding RunCommand}"
                         HorizontalAlignment="Left" Padding="24,6" Margin="0,16,0,0"
                         Visibility="{Binding HasPlan, Converter={StaticResource BoolToVisibility}}" />

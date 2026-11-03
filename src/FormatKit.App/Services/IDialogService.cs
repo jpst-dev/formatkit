@@ -6,6 +6,9 @@ public interface IDialogService
     /// <summary>Asks for a file to open; <paramref name="filter"/> is a Windows file dialog filter. Null when cancelled.</summary>
     string? OpenFile(string filter);
 
+    /// <summary>Asks for a folder. Null when cancelled.</summary>
+    string? PickFolder();
+
     /// <summary>Asks where to save a file. Null when cancelled.</summary>
     string? SaveFile(string filter, string defaultName);
 

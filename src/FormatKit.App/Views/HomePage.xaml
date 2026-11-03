@@ -26,8 +26,12 @@
 
             <TextBlock Text="{loc:Loc Home_Before_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,0" />
             <TextBlock Text="{loc:Loc Home_Before_Text}" TextWrapping="Wrap" Margin="0,4,0,0" />
-            <Button Content="{loc:Loc Home_Before_Checklist}" Command="{Binding GoToCommand}"
-                    CommandParameter="{x:Static vm:Page.Checklist}" HorizontalAlignment="Left" Margin="0,8,0,0" Padding="16,4" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Content="{loc:Loc Home_Before_Checklist}" Command="{Binding GoToCommand}"
+                        CommandParameter="{x:Static vm:Page.Checklist}" Padding="16,4" />
+                <Button Content="{loc:Loc Home_Before_Media}" Command="{Binding GoToCommand}"
+                        CommandParameter="{x:Static vm:Page.Media}" Margin="8,0,0,0" Padding="16,4" />
+            </StackPanel>
 
             <TextBlock Text="{loc:Loc Home_After_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,0" />
             <TextBlock Text="{loc:Loc Home_After_Text}" TextWrapping="Wrap" Margin="0,4,0,0" />

@@ -57,6 +57,10 @@ public sealed partial class RunProfileViewModel
     [ObservableProperty]
     private bool _hasInterruptedRun;
 
+    /// <summary>A media job is going on: a run could restart the PC in the middle of its write, so none may start.</summary>
+    [ObservableProperty]
+    private bool _otherWorkRunning;
+
     public bool HasRunMessage => RunMessage is not null;
 
     /// <summary>
@@ -84,11 +88,11 @@ public sealed partial class RunProfileViewModel
 
     private void InitializeRun()
     {
-        RunCommand = new AsyncRelayCommand(RunAsync, () => ReviewedHash is not null && HasPlan && !IsRunning);
+        RunCommand = new AsyncRelayCommand(RunAsync, () => ReviewedHash is not null && HasPlan && !IsRunning && !OtherWorkRunning);
         StopCommand = new AsyncRelayCommand(StopAsync, () => IsRunning && !_stopSent);
         OpenReportCommand = new RelayCommand(() => _dialogs.OpenFolder(ReportDirectory!), () => ReportDirectory is not null);
         OpenLogFolderCommand = new RelayCommand(() => _dialogs.OpenFolder(AppPaths.Default.LogsDirectory));
-        ResumeCommand = new AsyncRelayCommand(ResumeAsync, () => HasInterruptedRun && !IsRunning && !IsBusy);
+        ResumeCommand = new AsyncRelayCommand(ResumeAsync, () => HasInterruptedRun && !IsRunning && !IsBusy && !OtherWorkRunning);
         RefreshInterruptedRun();
     }
 
@@ -108,6 +112,12 @@ public sealed partial class RunProfileViewModel
         OnPropertyChanged(nameof(IsRunInProgress));
         RunCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged();
+        ResumeCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnOtherWorkRunningChanged(bool value)
+    {
+        RunCommand.NotifyCanExecuteChanged();
         ResumeCommand.NotifyCanExecuteChanged();
     }
 
@@ -170,7 +180,7 @@ public sealed partial class RunProfileViewModel
     /// </summary>
     public async Task ResumeAsync()
     {
-        if (IsBusy || IsRunning)
+        if (IsBusy || IsRunning || OtherWorkRunning)
             return;
 
         IsBusy = true;

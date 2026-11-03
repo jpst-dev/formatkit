@@ -1,6 +1,9 @@
 using System.Text.Json.Serialization;
 using FormatKit.Core.Running;
 using FormatKit.Core.Steps;
+using FormatKit.Core.SystemAccess;
+using FormatKit.Media.Building;
+using FormatKit.Media.Usb;
 
 namespace FormatKit.App.Worker;
 
@@ -17,6 +20,10 @@ namespace FormatKit.App.Worker;
 [JsonDerivedType(typeof(Cancel), "cancel")]
 [JsonDerivedType(typeof(RebootNow), "rebootNow")]
 [JsonDerivedType(typeof(RebootCancel), "rebootCancel")]
+[JsonDerivedType(typeof(Disks), "disks")]
+[JsonDerivedType(typeof(ConfirmDisk), "confirmDisk")]
+[JsonDerivedType(typeof(MediaProgressUpdate), "mediaProgress")]
+[JsonDerivedType(typeof(MediaFinished), "mediaFinished")]
 public abstract record WorkerMessage;
 
 public sealed record PlannedStep(string Id, string Title, bool RequiresAdmin, StepOutcome? DoneBefore = null);
@@ -67,3 +74,44 @@ public sealed record Cancel : WorkerMessage;
 public sealed record RebootNow : WorkerMessage;
 
 public sealed record RebootCancel : WorkerMessage;
+
+/// <summary>A disk the media job can show, with the verdict of the stick rules.</summary>
+public sealed record DiskRow(
+    int Number,
+    string UniqueId,
+    string FriendlyName,
+    long SizeBytes,
+    string BusType,
+    bool IsRemovable,
+    IReadOnlyList<DiskVolume> Volumes,
+    UsbRefusal Refusal,
+    IReadOnlyList<string> SourcesOnDisk);
+
+/// <summary>The USB disks; the job then waits for <see cref="ConfirmDisk"/> or <see cref="Cancel"/>.</summary>
+public sealed record Disks(IReadOnlyList<DiskRow> Items, int HiddenHardDisks) : WorkerMessage;
+
+/// <summary>
+/// The disk the user selected and what they typed, unchecked: the job compares it with the disk's number, in
+/// <see cref="UsbTarget.ConfirmAndPrepareAsync"/>.
+/// </summary>
+public sealed record ConfirmDisk(string UniqueId, string TypedNumber) : WorkerMessage;
+
+public sealed record MediaProgressUpdate(MediaPhase Phase, long CopiedBytes, long TotalBytes) : WorkerMessage;
+
+/// <summary>How a media job that got past its checks ended. Serialized as a camelCase string.</summary>
+public enum MediaFinishedStatus
+{
+    [JsonStringEnumMemberName("done")] Done,
+
+    /// <summary>The user cancelled, or typed anything but the disk's number; nothing was erased.</summary>
+    [JsonStringEnumMemberName("cancelled")] Cancelled,
+
+    /// <summary>The re-check before the erase found another disk; nothing was erased.</summary>
+    [JsonStringEnumMemberName("diskChanged")] DiskChanged,
+
+    /// <summary>The erase started, or the writing did, and did not finish: the target is partly written.</summary>
+    [JsonStringEnumMemberName("incomplete")] Incomplete,
+}
+
+/// <summary>The media job's result; <paramref name="Message"/> is shown as it is, and the window acts on the status.</summary>
+public sealed record MediaFinished(MediaFinishedStatus Status, string Message) : WorkerMessage;

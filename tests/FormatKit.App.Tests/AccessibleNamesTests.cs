@@ -22,6 +22,7 @@ public sealed class AccessibleNamesTests
         "HardwarePage.xaml:GpuPackageLines",
         "RunProfilePage.xaml:Items",
         "RunProfilePage.xaml:Messages",
+        "MediaPage.xaml:Notes",
     ];
 
     private static readonly string[] ListElements = ["ItemsControl", "ListBox", "ComboBox"];

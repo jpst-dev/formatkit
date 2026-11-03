@@ -13,14 +13,16 @@ namespace FormatKit.App.Worker;
 /// runs it through <see cref="RunSession"/> and reports over the channel. A <see cref="Cancel"/> from the window or the
 /// end of the stream stops the run after the current step; reboot replies go to <paramref name="rebooter"/>, which must
 /// be the rebooter in <paramref name="env"/>. Jobs: <c>run --profile &lt;path&gt; --profile-hash &lt;hash&gt;</c> and
-/// <c>run --resume</c>. <see cref="RunAsync"/> returns 0 after sending <see cref="Finished"/>, 2 after <see cref="Failed"/>.
+/// <c>run --resume</c>, and <see cref="MediaJobRequest"/>, which <see cref="MediaJob"/> runs. <see cref="RunAsync"/> returns
+/// 0 after sending <see cref="Finished"/> or <see cref="MediaFinished"/>, 2 after <see cref="Failed"/>.
 /// </summary>
-public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modules, PipeRebooter rebooter)
+public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modules, PipeRebooter rebooter, string? uiExePath = null)
 {
     public const int ExitFinished = 0;
     public const int ExitFailed = 2;
 
     private readonly TaskCompletionSource _stopRequested = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<ConfirmDisk> _diskChoice = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     /// <summary>Completes when the read loop asks the run to stop (tests wait on it).</summary>
     internal Task StopRequested => _stopRequested.Task;
@@ -41,8 +43,36 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
         }
     }
 
+    private async Task<int> RunMediaJobAsync(MessageChannel channel, IReadOnlyList<string> job, CancellationToken stop, CancellationToken ct)
+    {
+        if (MediaJobRequest.Parse(job) is not { } request)
+            return await FailAsync(channel, Strings.Format("Worker_InvalidJob", string.Join(' ', job)), ct).ConfigureAwait(false);
+
+        WorkerMessage result;
+        try
+        {
+            result = await new MediaJob(env, modules, channel, _diskChoice.Task, uiExePath ?? Environment.ProcessPath!, stop, ct)
+                .RunAsync(request).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw; // the host is shutting down
+        }
+        catch (Exception ex)
+        {
+            env.Log.Error(ex, "Worker: the media job failed");
+            result = new Failed(Strings.Format("Worker_Error", ex.Message));
+        }
+
+        await TrySendAsync(channel, result, ct).ConfigureAwait(false);
+        return result is Failed ? ExitFailed : ExitFinished;
+    }
+
     private async Task<int> RunJobAsync(MessageChannel channel, IReadOnlyList<string> job, CancellationToken stop, CancellationToken ct)
     {
+        if (job.Count > 0 && job[0] == MediaJobRequest.JobName)
+            return await RunMediaJobAsync(channel, job, stop, ct).ConfigureAwait(false);
+
         if (!TryParse(job, out var path, out var hash, out var resume))
             return await FailAsync(channel, Strings.Format("Worker_InvalidJob", string.Join(' ', job)), ct).ConfigureAwait(false);
 
@@ -165,6 +195,9 @@ public sealed class WorkerHost(HostEnvironment env, IReadOnlyList<IModule> modul
                         break;
                     case RebootNow or RebootCancel:
                         rebooter.Deliver(message);
+                        break;
+                    case ConfirmDisk choice:
+                        _diskChoice.TrySetResult(choice);
                         break;
                     default:
                         env.Log.Warning("Worker channel: unexpected {Type} ignored", message.GetType().Name);
