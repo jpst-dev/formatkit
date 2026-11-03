@@ -24,9 +24,7 @@ public sealed class VolumesCheck : IPrepareCheck
                 Strings.Get("Volumes_Unknown_Action"))];
         }
 
-        // A volume that may be a virtual disk on the Windows drive is reported by DevDriveCheck, never as "on another disk".
-        var lost = context.Windows.LostVhdxVolumes.Concat(context.Windows.UncheckedVhdxVolumes)
-            .Select(v => char.ToUpperInvariant(v.Letter)).ToHashSet();
+        var lost = context.Windows.LostVhdxVolumes.Select(v => char.ToUpperInvariant(v.Letter)).ToHashSet();
         var volumes = context.Windows.Volumes
             .Where(v => !lost.Contains(char.ToUpperInvariant(v.Letter)))
             .OrderBy(v => v.Letter)
@@ -44,7 +42,8 @@ public sealed class VolumesCheck : IPrepareCheck
         }
 
         var items = new List<PrepareItem>();
-        foreach (var volume in others)
+        // A volume that may be a virtual disk on the Windows drive is reported by DevDriveCheck, never as "on another disk".
+        foreach (var volume in others.Except(context.Windows.UncheckedVhdxVolumes))
         {
             var letter = char.ToUpperInvariant(volume.Letter);
             var disk = volume.DiskNumber ?? -1;

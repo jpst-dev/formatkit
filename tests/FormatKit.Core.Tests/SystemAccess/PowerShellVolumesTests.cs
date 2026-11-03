@@ -82,7 +82,6 @@ public class PowerShellVolumesTests
         Assert.Contains("Win32_LogicalDiskToPartition", script);
         Assert.Contains("Disk #", script);
         Assert.DoesNotContain("Antecedent.Name", script);
-        Assert.Contains("File Backed Virtual", script);
     }
 
     [Fact]
@@ -137,5 +136,12 @@ public class PowerShellVolumesTests
         // Get-Disk returned BusType as the string "File Backed Virtual" in the VM, so an [int] cast hid every VHDX.
         Assert.Contains("File Backed Virtual", PowerShellVolumes.Script);
         Assert.DoesNotContain("[int]$d.BusType", PowerShellVolumes.Script);
+    }
+
+    [Fact]
+    public void Script_also_recognizes_a_VHDX_by_its_file_and_never_calls_one_without_a_path_known()
+    {
+        Assert.Contains(@"$d.Location -match '\.vhdx?$'", PowerShellVolumes.Script);
+        Assert.Contains("if (-not $vhdx) { $vhdxKnown = $false }", PowerShellVolumes.Script);
     }
 }
