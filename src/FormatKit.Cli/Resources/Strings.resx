@@ -241,4 +241,7 @@
   <data name="Profile_PersonalData" xml:space="preserve">
     <value>The file holds personal data (name, e-mail, computer name). Do not publish it as is.</value>
   </data>
+  <data name="Profile_Reading" xml:space="preserve">
+    <value>Reading this PC. This can take a few minutes and changes nothing...</value>
+  </data>
 </root>

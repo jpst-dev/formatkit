@@ -23,7 +23,7 @@ public static class DevCapture
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                log.Warning(ex, "Capturing {Part} failed", part);
+                log.Debug(ex, "Capturing {Part} failed", part);
                 notes.Add(new CaptureNote(CaptureNoteKind.NotCaptured, $"{SectionPath}.{part}", Strings.Format("Capture_PartFailed", ex.Message)));
                 return null;
             }

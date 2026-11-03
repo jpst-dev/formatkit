@@ -24,7 +24,7 @@ public static class ProgramsCapture
                 case WingetStatus.WingetMissing:
                     return Disabled(Strings.Get("Capture_WingetMissing"));
                 case WingetStatus.Failed:
-                    log.Warning("winget export failed with exit code {Exit}: {Output}", result.ExitCode, result.Output);
+                    log.Debug("winget export failed with exit code {Exit}: {Output}", result.ExitCode, result.Output);
                     return Disabled(Strings.Format("Capture_ExportFailed", result.ExitCode));
             }
 
@@ -32,7 +32,7 @@ public static class ProgramsCapture
         }
         catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException)
         {
-            log.Warning(ex, "The winget export could not be read");
+            log.Debug(ex, "The winget export could not be read");
             return Disabled(Strings.Format("Capture_ExportUnreadable", ex.Message));
         }
         finally
@@ -93,7 +93,7 @@ public static class ProgramsCapture
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            log.Warning(ex, "The temporary export {Path} could not be deleted", path);
+            log.Debug(ex, "The temporary export {Path} could not be deleted", path);
         }
     }
 }

@@ -437,7 +437,7 @@ In an elevated terminal the command also reads the BitLocker recovery protectors
 
 ## Capture this machine
 
-Instead of writing a profile by hand, run this on the **old** Windows. It changes nothing except the file it writes, and it does not ask for elevation.
+Instead of writing a profile by hand, run this on the **old** Windows. It changes nothing except the file it writes, and it does not ask for elevation. It takes about two minutes.
 
 ```powershell
 formatkit profile capture E:\my-pc.json
@@ -448,7 +448,7 @@ It prints what was captured, what was not and why, and what you should review:
 | Section | What is captured | What is left to you |
 | --- | --- | --- |
 | `programs` | `winget export`, mapped to the catalog when possible. Runtimes and packages that ship with Windows are skipped. | `acceptAgreements` is written as `false`: `run` rejects the profile until you set it to `true`, because accepting those agreements is your decision. If winget never ran on this PC, run `winget list` once and accept its source agreements first. |
-| `cleanup` | Catalog items already applied here, as `include`. | Aggressive items are reported, not captured, because they need `confirmAggressive`. Contested items are captured and flagged. Items that could not be checked without administrator rights are listed. |
+| `cleanup` | Catalog items already applied here, as `include`. | Aggressive items are reported, not captured, because they need `confirmAggressive`. Contested items are captured and flagged. Without elevation the app items cannot be checked, so they are listed; run the command from an elevated terminal to include them. |
 | `drivers` | The default sources; drivers are detected on the new install. | |
 | `dev` | Git settings, SSH key type and comment, the WSL distro, user and `.wslconfig`, zsh and Oh My Zsh, Oh My Posh, a known Nerd Font, and the Dev Drive with its caches. | Keys are never read: only the `.pub` files are opened, so back up your `.ssh` folder if you want to keep your key. Dotfiles cannot be inferred, so add them yourself. |
 | `setup` | Computer name, language, keyboard and time zone. | The account type and the edition are choices for the new install. |

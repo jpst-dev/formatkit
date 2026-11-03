@@ -49,7 +49,7 @@ public static class CleanupCapture
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                log.Warning(ex, "Could not check cleanup item {Item}", item.Id);
+                log.Debug(ex, "Could not check cleanup item {Item}", item.Id);
                 unchecked_.Add(item.Id);
                 continue;
             }

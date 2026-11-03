@@ -64,6 +64,14 @@ public sealed class ProfileCommandsTests : IDisposable
     }
 
     [Fact]
+    public async Task Says_it_may_take_a_while_before_it_starts()
+    {
+        await Run(Output);
+
+        Assert.StartsWith("Reading this PC", _out.ToString());
+    }
+
+    [Fact]
     public async Task Does_not_ask_for_elevation()
     {
         Assert.Equal(ExitCodes.Ok, await Run(Output));

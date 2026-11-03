@@ -43,6 +43,7 @@ internal static class ProfileCommands
                 return ExitCodes.InvalidInput;
             }
 
+            o.WriteLine(Strings.Get("Profile_Reading"));
             var machine = PrepareCommands.Environment();
             var sources = ProfileCapture.RealSources(
                 services, context.Programs, context.Cleanup, context.Env.Dev ?? DevEnvironment.Current(),

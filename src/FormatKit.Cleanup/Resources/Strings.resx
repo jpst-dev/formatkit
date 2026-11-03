@@ -46,7 +46,7 @@
     <value>Captured, but their benefit is debated; check that you want them: {0}</value>
   </data>
   <data name="Capture_NotChecked" xml:space="preserve">
-    <value>Could not be checked without administrator rights or returned an error, so they are not in the profile: {0}</value>
+    <value>Could not be checked, usually because that needs administrator rights, so they are not in the profile. To check them, run this command again from an elevated terminal: {0}</value>
   </data>
   <data name="Capture_Summary" xml:space="preserve">
     <value>{0} applied items</value>

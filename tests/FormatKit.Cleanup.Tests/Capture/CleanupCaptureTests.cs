@@ -68,6 +68,25 @@ public class CleanupCaptureTests
         Assert.Contains(section.Notes, n => n.Kind == CaptureNoteKind.NotCaptured && n.Text.Contains("privacy.denied"));
     }
 
+    /// <summary>The console shows warnings, and the report already says this; a run without elevation would print one line per app.</summary>
+    [Fact]
+    public async Task A_check_that_throws_logs_nothing_at_warning_level()
+    {
+        var events = new List<Serilog.Events.LogEvent>();
+        var log = new Serilog.LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(new ListSink(events)).CreateLogger();
+
+        await CleanupCapture.RunAsync(NewCatalog(Item("privacy.denied")), _ => throw new UnauthorizedAccessException("no"), log, Ct);
+
+        var logged = Assert.Single(events);
+        Assert.True(logged.Level < Serilog.Events.LogEventLevel.Warning);
+        Assert.NotNull(logged.Exception);
+    }
+
+    private sealed class ListSink(List<Serilog.Events.LogEvent> events) : Serilog.Core.ILogEventSink
+    {
+        public void Emit(Serilog.Events.LogEvent logEvent) => events.Add(logEvent);
+    }
+
     [Fact]
     public async Task An_absent_target_is_left_out_without_a_note()
     {

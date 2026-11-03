@@ -46,7 +46,7 @@
     <value>Capturados, mas o benefício deles é discutível; confira se você os quer: {0}</value>
   </data>
   <data name="Capture_NotChecked" xml:space="preserve">
-    <value>Não puderam ser verificados sem direitos de administrador ou retornaram erro, então não estão no perfil: {0}</value>
+    <value>Não puderam ser verificados, em geral porque isso exige direitos de administrador, então não estão no perfil. Para verificá-los, rode este comando de novo em um terminal elevado: {0}</value>
   </data>
   <data name="Capture_Summary" xml:space="preserve">
     <value>{0} itens aplicados</value>
