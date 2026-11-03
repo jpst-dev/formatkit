@@ -48,4 +48,22 @@
   <data name="NextAction_SeeLog" xml:space="preserve"><value>See the log for the failed programs, then run again.</value></data>
   <data name="NextAction_SignIn" xml:space="preserve"><value>Sign in to Windows and run again.</value></data>
   <data name="Item_Failed_Error" xml:space="preserve"><value>failed: unexpected error (see the log)</value></data>
+  <data name="Capture_WingetMissing" xml:space="preserve">
+    <value>winget was not found on this PC, so no program was captured.</value>
+  </data>
+  <data name="Capture_ExportFailed" xml:space="preserve">
+    <value>winget export failed (exit code {0}), so no program was captured. If winget never ran here, run "winget list" once and accept its source agreements, then capture again. FormatKit does not accept them for you.</value>
+  </data>
+  <data name="Capture_ExportUnreadable" xml:space="preserve">
+    <value>The winget export could not be read, so no program was captured: {0}</value>
+  </data>
+  <data name="Capture_Summary" xml:space="preserve">
+    <value>{0} from the catalog, {1} from winget, {2} runtimes and Windows packages skipped</value>
+  </data>
+  <data name="Capture_SummaryNone" xml:space="preserve">
+    <value>nothing captured</value>
+  </data>
+  <data name="Capture_AcceptAgreements" xml:space="preserve">
+    <value>Set this to true to accept the winget and Microsoft Store agreements for these programs. "formatkit run" rejects the profile until you do; this decision is yours.</value>
+  </data>
 </root>
