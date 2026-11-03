@@ -1,3 +1,4 @@
+using System.Globalization;
 using FormatKit.Core.SystemAccess;
 
 namespace FormatKit.Media.Usb;
@@ -12,8 +13,32 @@ public sealed class UsbTarget(IDisks disks)
         return [.. all.Select(d => UsbEligibility.Check(d, allowHardDisk, sourcePaths, requiredBytes))];
     }
 
+    /// <summary>
+    /// The only way to erase a disk: asks for the typed number, which must be exactly the disk's number (spaces around
+    /// it aside), then re-checks the disk (<see cref="PrepareAsync"/>). Returns the root, or null when the disk is
+    /// refused or the answer is anything else; nothing is erased then. Throws <see cref="DiskChangedException"/>, also
+    /// without erasing, when the re-check fails.
+    /// </summary>
+    public async Task<string?> ConfirmAndPrepareAsync(UsbCandidate disk, IDiskConfirmation confirmation, bool allowHardDisk,
+        IReadOnlyList<string> sourcePaths, long requiredBytes, CancellationToken ct)
+    {
+        if (disk.Refusal != UsbRefusal.None)
+        {
+            return null;
+        }
+
+        var answer = await confirmation.AskAsync(disk, ct);
+        var expected = disk.Disk.Number.ToString(CultureInfo.InvariantCulture);
+        if (answer is null || !string.Equals(answer.Trim(), expected, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return await PrepareAsync(disk, allowHardDisk, sourcePaths, requiredBytes, ct);
+    }
+
     /// <summary>Lists again and erases only when the same disk (number and UniqueId) still passes every rule.</summary>
-    public async Task<string> PrepareAsync(UsbCandidate confirmed, bool allowHardDisk, IReadOnlyList<string> sourcePaths,
+    internal async Task<string> PrepareAsync(UsbCandidate confirmed, bool allowHardDisk, IReadOnlyList<string> sourcePaths,
         long requiredBytes, CancellationToken ct)
     {
         var number = confirmed.Disk.Number;
