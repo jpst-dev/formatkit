@@ -19,9 +19,12 @@ jobs:
       - name: Unit tests
         run: dotnet test -c Release -- --filter-not-trait "Category=Integration"
       - name: Publish
+        shell: pwsh
         run: |
-          dotnet publish src/FormatKit.Cli -c Release -o artifacts
-          dotnet publish src/FormatKit.App -c Release -o artifacts
+          # The executables report the version of the tag: v0.1.0-rc.1 is 0.1.0-rc.1.
+          $version = $env:GITHUB_REF_NAME.Substring(1)
+          dotnet publish src/FormatKit.Cli -c Release -o artifacts -p:Version=$version
+          dotnet publish src/FormatKit.App -c Release -o artifacts -p:Version=$version
       - name: SHA-256 sums
         shell: pwsh
         run: |
@@ -36,6 +39,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             artifacts/formatkit.exe
             artifacts/FormatKitUI.exe
@@ -43,8 +47,10 @@ jobs:
 
   # Deploys the site from the tag ref. Needs a tag rule `v*` under Settings >
   # Environments > github-pages > Deployment branches and tags, or the deploy is rejected.
+  # A prerelease skips it: the site only lists stable releases and fails the build when there are none.
   site:
     needs: release
+    if: ${{ !contains(github.ref_name, '-') }}
     uses: ./.github/workflows/pages.yml
     with:
       require-release: true
