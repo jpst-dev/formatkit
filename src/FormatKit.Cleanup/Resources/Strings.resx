@@ -39,4 +39,16 @@
   <data name="Skip_PrinterInstalled" xml:space="preserve"><value>skipped: a printer is installed on this machine (the print spooler is needed)</value></data>
   <data name="Warning_ExplorerRestartFailed" xml:space="preserve"><value>Windows Explorer did not come back after being restarted</value></data>
   <data name="NextAction_SignOutAndIn" xml:space="preserve"><value>Sign out and back in to bring the taskbar back.</value></data>
+  <data name="Capture_Aggressive" xml:space="preserve">
+    <value>Applied here but not captured, because aggressive items need your confirmation (add them to include and set confirmAggressive): {0}</value>
+  </data>
+  <data name="Capture_Contested" xml:space="preserve">
+    <value>Captured, but their benefit is debated; check that you want them: {0}</value>
+  </data>
+  <data name="Capture_NotChecked" xml:space="preserve">
+    <value>Could not be checked without administrator rights or returned an error, so they are not in the profile: {0}</value>
+  </data>
+  <data name="Capture_Summary" xml:space="preserve">
+    <value>{0} applied items</value>
+  </data>
 </root>
