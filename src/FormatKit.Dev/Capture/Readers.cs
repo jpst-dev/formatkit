@@ -76,7 +76,11 @@ internal static partial class WslReader
     private const string ShellScript =
         "command -v zsh >/dev/null 2>&1 && echo zsh=1; " +
         "[ -d \"$HOME/.oh-my-zsh\" ] && echo omz=1; " +
-        "if [ -f \"$HOME/.zshrc\" ]; then grep -E '^ZSH_THEME=' \"$HOME/.zshrc\"; sed -n '/^plugins=(/,/)/p' \"$HOME/.zshrc\"; fi; " +
+        "if [ -f \"$HOME/.zshrc\" ]; then grep -E '^ZSH_THEME=' \"$HOME/.zshrc\"; awk '" +
+        // Stops at the closing parenthesis, or at the first line that is not a plugin name: the rest of .zshrc may hold secrets and this output is logged.
+        "/^plugins=\\(/ { print; if (/\\)/) exit; p = 1; next } " +
+        "p { if ($0 !~ /^[ \\t]*[A-Za-z0-9._-]*[ \\t]*\\)?[ \\t]*$/) exit; print; if (/\\)/) exit }" +
+        "' \"$HOME/.zshrc\"; fi; " +
         "exit 0";
 
     [GeneratedRegex("""^ZSH_THEME=["']?([^"'\s]*)""", RegexOptions.Multiline)]
@@ -188,7 +192,7 @@ internal static partial class WindowsShellReader
     [GeneratedRegex(@"oh-my-posh(?:\.exe)?['""]?\s+init\s+\S+(?<rest>.*)", RegexOptions.IgnoreCase)]
     private static partial Regex InitLine();
 
-    [GeneratedRegex(@"--config[=\s]\s*['""]?(?<config>[^'""|\s]+)", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"--config[=\s]\s*(?:'(?<config>[^']+)'|""(?<config>[^""]+)""|(?<config>[^'""|\s]+))", RegexOptions.IgnoreCase)]
     private static partial Regex ConfigOption();
 
     [GeneratedRegex(@"\.omp\.(json|ya?ml|toml)\z", RegexOptions.IgnoreCase)]
@@ -207,11 +211,7 @@ internal static partial class WindowsShellReader
         var config = ConfigOption().Match(rest);
         if (config.Success)
         {
-            var value = config.Groups["config"].Value;
-            var theme = ThemeExtension().Replace(value[(value.LastIndexOfAny(['/', '\\']) + 1)..], "");
-            part["theme"] = theme;
-            if (theme != value)
-                notes.Add(new CaptureNote(CaptureNoteKind.Review, $"{DevCapture.SectionPath}.shell.windows.theme", Strings.Format("Capture_ThemeReduced", value, theme)));
+            AddTheme(part, config.Groups["config"].Value, notes);
         }
 
         var context = new StepContext(services, log);
@@ -219,6 +219,29 @@ internal static partial class WindowsShellReader
         if (font is not null)
             part["font"] = font;
         return part;
+    }
+
+    /// <summary>A location is reduced to the theme it names. It may be a URL with a token, so notes never repeat it.</summary>
+    private static void AddTheme(JsonObject part, string value, List<CaptureNote> notes)
+    {
+        var path = $"{DevCapture.SectionPath}.shell.windows.theme";
+        if (value.IndexOfAny(['/', '\\']) < 0 && !ThemeExtension().IsMatch(value))
+        {
+            part["theme"] = value;
+            return;
+        }
+
+        var location = value.Split('?', '#')[0];
+        var file = location[(location.LastIndexOfAny(['/', '\\']) + 1)..];
+        if (!ThemeExtension().IsMatch(file))
+        {
+            notes.Add(new CaptureNote(CaptureNoteKind.NotCaptured, path, Strings.Get("Capture_ThemeNotCaptured")));
+            return;
+        }
+
+        var theme = ThemeExtension().Replace(file, "");
+        part["theme"] = theme;
+        notes.Add(new CaptureNote(CaptureNoteKind.Review, path, Strings.Format("Capture_ThemeReduced", theme)));
     }
 
     private static string? FindInit(ServiceSet services, DevEnvironment env)

@@ -10,4 +10,10 @@
   <data name="Capture_DriversSummary" xml:space="preserve">
     <value>detectados na nova instalação</value>
   </data>
+  <data name="Capture_SectionFailed" xml:space="preserve">
+    <value>Não pôde ser lido: {0}</value>
+  </data>
+  <data name="Capture_SummaryFailed" xml:space="preserve">
+    <value>não pôde ser lido</value>
+  </data>
 </root>

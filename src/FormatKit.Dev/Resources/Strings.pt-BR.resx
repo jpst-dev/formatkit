@@ -81,7 +81,7 @@
     <value>O WSL não conseguiu ler {0} (código {1}).</value>
   </data>
   <data name="Capture_ThemeReduced" xml:space="preserve">
-    <value>Este PC usa "{0}"; o perfil guarda só o nome do tema "{1}". Um arquivo de tema personalizado precisa ser restaurado por você.</value>
+    <value>Este PC carrega o tema de um arquivo ou endereço; o perfil guarda só o nome do tema "{0}". Um arquivo de tema personalizado precisa ser restaurado por você.</value>
   </data>
   <data name="Capture_OtherDrives" xml:space="preserve">
     <value>Um perfil guarda um Dev Drive, então estes não estão nele: {0}</value>
@@ -91,5 +91,11 @@
   </data>
   <data name="Capture_DriveSizeUnknown" xml:space="preserve">
     <value>O tamanho de {0} não pôde ser lido. Adicione modules.dev.devDrive você mesmo.</value>
+  </data>
+  <data name="Capture_ThemeNotCaptured" xml:space="preserve">
+    <value>Este PC carrega o tema de um local que não indica um arquivo de tema, então ele não está no perfil.</value>
+  </data>
+  <data name="Capture_DriveLabel" xml:space="preserve">
+    <value>O rótulo do Dev Drive não pôde ser lido, ou um perfil não pode guardá-lo, e o "run" falha em um drive mantido com rótulo diferente. Rode este comando em um terminal elevado ou adicione modules.dev.devDrive você mesmo.</value>
   </data>
 </root>

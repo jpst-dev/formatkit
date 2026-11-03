@@ -81,7 +81,7 @@
     <value>WSL could not read {0} (exit code {1}).</value>
   </data>
   <data name="Capture_ThemeReduced" xml:space="preserve">
-    <value>This PC uses "{0}"; the profile holds only the theme name "{1}". A customized theme file must be restored by you.</value>
+    <value>This PC loads its theme from a file or address; the profile holds only the theme name "{0}". A customized theme file must be restored by you.</value>
   </data>
   <data name="Capture_OtherDrives" xml:space="preserve">
     <value>A profile holds one Dev Drive, so these are not in it: {0}</value>
@@ -91,5 +91,11 @@
   </data>
   <data name="Capture_DriveSizeUnknown" xml:space="preserve">
     <value>The size of {0} could not be read. Add modules.dev.devDrive yourself.</value>
+  </data>
+  <data name="Capture_ThemeNotCaptured" xml:space="preserve">
+    <value>This PC loads its theme from a location that names no theme file, so it is not in the profile.</value>
+  </data>
+  <data name="Capture_DriveLabel" xml:space="preserve">
+    <value>The label of the Dev Drive could not be read, or a profile cannot hold it, and "run" fails on a kept drive whose label differs. Run this command from an elevated terminal, or add modules.dev.devDrive yourself.</value>
   </data>
 </root>

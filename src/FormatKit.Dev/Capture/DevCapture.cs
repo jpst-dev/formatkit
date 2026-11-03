@@ -57,6 +57,13 @@ public static class DevCapture
 
         CaptureCleaner.Clean(value, env, notes);
 
+        // Without its label the parser's default would apply, and "run" fails on a kept drive with another label.
+        if (value["devDrive"] is JsonObject kept && kept["label"] is null)
+        {
+            value.Remove("devDrive");
+            notes.Add(new CaptureNote(CaptureNoteKind.NotCaptured, $"{SectionPath}.devDrive", Strings.Get("Capture_DriveLabel")));
+        }
+
         var parts = value.Select(p => p.Key).Where(k => k != "enabled").ToList();
         value["enabled"] = parts.Count > 0;
         notes.Add(new CaptureNote(CaptureNoteKind.NotCaptured, $"{SectionPath}.dotfiles", Strings.Get("Capture_Dotfiles")));

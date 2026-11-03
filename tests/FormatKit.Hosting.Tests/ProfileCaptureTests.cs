@@ -138,6 +138,30 @@ public sealed class ProfileCaptureTests
     }
 
     [Fact]
+    public async Task A_source_that_throws_costs_only_its_section()
+    {
+        var sources = Sources() with { Programs = _ => throw new System.ComponentModel.Win32Exception(5) };
+
+        var result = await Create(sources).RunAsync(Ct);
+
+        Assert.Empty(result.Errors);
+        Assert.False(Parsed(result)["modules"]!["programs"]!["enabled"]!.GetValue<bool>());
+        Assert.Contains(result.Notes, n => n.Kind == CaptureNoteKind.NotCaptured && n.Path == "modules.programs");
+    }
+
+    [Fact]
+    public async Task A_setup_source_that_throws_leaves_setup_empty()
+    {
+        var sources = Sources() with { Setup = () => throw new UnauthorizedAccessException("no") };
+
+        var result = await Create(sources).RunAsync(Ct);
+
+        Assert.Empty(result.Errors);
+        Assert.Empty(Parsed(result)["setup"]!.AsObject());
+        Assert.Contains(result.Notes, n => n.Kind == CaptureNoteKind.NotCaptured && n.Path == "setup");
+    }
+
+    [Fact]
     public async Task Cancellation_passes_through()
     {
         var sources = Sources() with { Dev = _ => throw new OperationCanceledException() };

@@ -316,6 +316,21 @@ public class DevCaptureTests
         Assert.Equal(["git", "docker"], shell["plugins"]!.AsArray().Select(n => Text(n)));
     }
 
+    /// <summary>The output reaches the log file, so a range that runs on past the plugins line would log the rest of .zshrc, tokens included.</summary>
+    [Fact]
+    public async Task Shell_script_never_prints_past_the_plugins()
+    {
+        var m = new Machine();
+        Wsl(m, "Ubuntu\n", shell: "zsh=1\n");
+
+        await m.Capture();
+
+        var script = m.Processes.Calls.Last(c => c.FileName == "wsl.exe").Arguments[^1];
+        Assert.DoesNotContain("sed", script);
+        Assert.Contains("awk", script);
+        Assert.DoesNotContain("cat ", script);
+    }
+
     [Fact]
     public async Task No_zsh_gives_no_wsl_shell()
     {
@@ -417,6 +432,42 @@ public class DevCaptureTests
     }
 
     [Fact]
+    public async Task Theme_note_never_prints_the_original_value()
+    {
+        var m = new Machine();
+        PoshProfile(m, "oh-my-posh init pwsh --config https://host/t/paradox.omp.json?token=abc123 | Invoke-Expression");
+
+        var section = await m.Capture();
+
+        Assert.Equal("paradox", Text(Windows(section)!["theme"]));
+        Assert.DoesNotContain(section.Notes, n => n.Text.Contains("abc123"));
+    }
+
+    [Theory]
+    [InlineData("https://host/abcSecret")]
+    [InlineData(@"C:\themes\custom")]
+    public async Task A_location_that_names_no_theme_file_is_not_captured(string config)
+    {
+        var m = new Machine();
+        PoshProfile(m, $"oh-my-posh init pwsh --config {config} | Invoke-Expression");
+
+        var section = await m.Capture();
+
+        Assert.Null(Windows(section)!["theme"]);
+        Assert.Contains(section.Notes, n => n.Kind == CaptureNoteKind.NotCaptured && n.Path == "modules.dev.shell.windows.theme");
+        Assert.DoesNotContain(section.Notes, n => n.Text.Contains("abcSecret"));
+    }
+
+    [Fact]
+    public async Task Theme_path_with_spaces_is_read_whole()
+    {
+        var m = new Machine();
+        PoshProfile(m, "oh-my-posh init pwsh --config \"C:\\Users\\John Smith\\mine.omp.json\" | Invoke-Expression");
+
+        Assert.Equal("mine", Text(Windows(await m.Capture())!["theme"]));
+    }
+
+    [Fact]
     public async Task Reads_windows_powershell_profile_too()
     {
         var m = new Machine();
@@ -483,6 +534,18 @@ public class DevCaptureTests
     public async Task Unknown_size_gets_a_note()
     {
         var section = await Drive(size: null).Capture();
+
+        Assert.Null(section.Value["devDrive"]);
+        Assert.Contains(section.Notes, n => n.Kind == CaptureNoteKind.NotCaptured && n.Path == "modules.dev.devDrive");
+    }
+
+    /// <summary>On run, a kept VHDX whose label differs from the profile fails, so a guessed label is worse than no Dev Drive.</summary>
+    [Theory]
+    [InlineData("")]
+    [InlineData("Bad!Label")]
+    public async Task Unknown_or_invalid_label_gets_a_note_and_no_part(string label)
+    {
+        var section = await Drive(label: label).Capture();
 
         Assert.Null(section.Value["devDrive"]);
         Assert.Contains(section.Notes, n => n.Kind == CaptureNoteKind.NotCaptured && n.Path == "modules.dev.devDrive");

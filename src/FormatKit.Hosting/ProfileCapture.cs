@@ -60,10 +60,10 @@ public sealed class ProfileCapture(
             new JsonObject { ["enabled"] = true, ["sources"] = new JsonArray("windowsUpdate", "oem", "gpu") },
             [],
             Strings.Get("Capture_DriversSummary"));
-        var programs = await sources.Programs(ct).ConfigureAwait(false);
-        var cleanup = await sources.Cleanup(ct).ConfigureAwait(false);
-        var dev = await sources.Dev(ct).ConfigureAwait(false);
-        var setup = sources.Setup();
+        var programs = await GuardAsync("modules.programs", sources.Programs, ct).ConfigureAwait(false);
+        var cleanup = await GuardAsync("modules.cleanup", sources.Cleanup, ct).ConfigureAwait(false);
+        var dev = await GuardAsync("modules.dev", sources.Dev, ct).ConfigureAwait(false);
+        var setup = Guard();
 
         var root = new JsonObject
         {
@@ -86,6 +86,38 @@ public sealed class ProfileCapture(
 
         var errors = Validate(root);
         return new ProfileCaptureResult(errors.Count == 0 ? root.ToJsonString(Output) : null, summaries, notes, errors);
+    }
+
+    /// <summary>A source that fails costs only its own section; the rest of the machine is still worth keeping.</summary>
+    private static async Task<CaptureSection> GuardAsync(
+        string path, Func<CancellationToken, Task<CaptureSection>> source, CancellationToken ct)
+    {
+        try
+        {
+            return await source(ct).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return Failed(new JsonObject { ["enabled"] = false }, path, ex);
+        }
+    }
+
+    private CaptureSection Guard()
+    {
+        try
+        {
+            return sources.Setup();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return Failed([], "setup", ex);
+        }
+    }
+
+    private static CaptureSection Failed(JsonObject value, string path, Exception ex)
+    {
+        var reason = Strings.Format("Capture_SectionFailed", ex.Message);
+        return new CaptureSection(value, [new CaptureNote(CaptureNoteKind.NotCaptured, path, reason)], Strings.Get("Capture_SummaryFailed"));
     }
 
     /// <summary>The agreements stay false in the file: that is the user's decision, not an error in the capture.</summary>
