@@ -7,4 +7,7 @@
   <data name="Error_Wmi" xml:space="preserve"><value>Não foi possível ler as informações do sistema: {0}</value></data>
   <data name="Marker_Contested" xml:space="preserve"><value>contestado</value></data>
   <data name="Marker_User" xml:space="preserve"><value>usuário</value></data>
+  <data name="Capture_DriversSummary" xml:space="preserve">
+    <value>detectados na nova instalação</value>
+  </data>
 </root>

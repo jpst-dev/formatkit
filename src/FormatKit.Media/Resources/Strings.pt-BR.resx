@@ -21,4 +21,7 @@
   <data name="Media_UnreadableFolder" xml:space="preserve"><value>Não foi possível ler a pasta {0} do ISO.</value></data>
   <data name="Media_DismountFailed" xml:space="preserve"><value>Não foi possível desmontar o ISO ({0}). Execute manualmente: Dismount-DiskImage -ImagePath {1}</value></data>
   <data name="Media_SplitFailed" xml:space="preserve"><value>Não foi possível dividir o install.wim: {0}</value></data>
+  <data name="Capture_AccountEdition" xml:space="preserve">
+    <value>O tipo de conta e a edição do Windows são escolhas da nova instalação, então não são capturados. A conta fica local a menos que você defina setup.account; defina setup.edition para escolher uma edição da ISO.</value>
+  </data>
 </root>

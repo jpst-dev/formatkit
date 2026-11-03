@@ -21,4 +21,7 @@
   <data name="Media_UnreadableFolder" xml:space="preserve"><value>Could not read the folder {0} of the ISO.</value></data>
   <data name="Media_DismountFailed" xml:space="preserve"><value>Could not dismount the ISO ({0}). Run by hand: Dismount-DiskImage -ImagePath {1}</value></data>
   <data name="Media_SplitFailed" xml:space="preserve"><value>Could not split install.wim: {0}</value></data>
+  <data name="Capture_AccountEdition" xml:space="preserve">
+    <value>The account type and the Windows edition are choices for the new install, so they are not captured. The account stays local unless you set setup.account; set setup.edition to pick an edition of the ISO.</value>
+  </data>
 </root>

@@ -7,4 +7,7 @@
   <data name="Error_Wmi" xml:space="preserve"><value>Could not read the system information: {0}</value></data>
   <data name="Marker_Contested" xml:space="preserve"><value>contested</value></data>
   <data name="Marker_User" xml:space="preserve"><value>user</value></data>
+  <data name="Capture_DriversSummary" xml:space="preserve">
+    <value>detected on the new install</value>
+  </data>
 </root>
