@@ -88,6 +88,7 @@ public sealed class CliApp
         root.Subcommands.Add(ProgramsCommands.Create(context));
         root.Subcommands.Add(DevCommands.Create(context));
         root.Subcommands.Add(PrepareCommands.Create(context));
+        root.Subcommands.Add(ProfileCommands.Create(context));
         root.Subcommands.Add(MediaCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
 

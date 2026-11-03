@@ -199,4 +199,49 @@
   <data name="Media_UsbDone" xml:space="preserve"><value>The USB stick is ready. Boot the PC to format from it.</value></data>
   <data name="Media_UsbEraseFailed" xml:space="preserve"><value>The erase did not complete</value></data>
   <data name="Media_UsbInterrupted" xml:space="preserve"><value>The USB write was interrupted</value></data>
+  <data name="Cmd_Profile" xml:space="preserve">
+    <value>Work with profiles.</value>
+  </data>
+  <data name="Cmd_ProfileCapture" xml:space="preserve">
+    <value>Writes a profile of this PC. Changes nothing else and needs no elevation.</value>
+  </data>
+  <data name="Arg_ProfileFile" xml:space="preserve">
+    <value>File that receives the profile.</value>
+  </data>
+  <data name="Opt_ProfileForce" xml:space="preserve">
+    <value>Overwrite the file if it exists.</value>
+  </data>
+  <data name="Profile_BadPath" xml:space="preserve">
+    <value>Invalid file path: {0}</value>
+  </data>
+  <data name="Profile_Exists" xml:space="preserve">
+    <value>{0} already exists. Use --force to overwrite it.</value>
+  </data>
+  <data name="Profile_Invalid" xml:space="preserve">
+    <value>The captured profile failed validation, so nothing was written. This is a FormatKit bug; please report it:</value>
+  </data>
+  <data name="Profile_WriteFailed" xml:space="preserve">
+    <value>{0} could not be written: {1}</value>
+  </data>
+  <data name="Profile_Captured" xml:space="preserve">
+    <value>Captured:</value>
+  </data>
+  <data name="Profile_NotCaptured" xml:space="preserve">
+    <value>Not captured:</value>
+  </data>
+  <data name="Profile_Review" xml:space="preserve">
+    <value>Review:</value>
+  </data>
+  <data name="Profile_Written" xml:space="preserve">
+    <value>Profile written to {0}</value>
+  </data>
+  <data name="Profile_OnWindowsDrive" xml:space="preserve">
+    <value>Warning: this file is on the Windows drive, and the format erases it. Copy it to another drive.</value>
+  </data>
+  <data name="Profile_PersonalData" xml:space="preserve">
+    <value>The file holds personal data (name, e-mail, computer name). Do not publish it as is.</value>
+  </data>
+  <data name="Profile_Reading" xml:space="preserve">
+    <value>Reading this PC. This can take a few minutes and changes nothing...</value>
+  </data>
 </root>

@@ -54,6 +54,10 @@ public sealed class WslClient(IProcessRunner processes)
         string distro, string user, IReadOnlyList<string> command, CancellationToken ct, TimeSpan? timeout = null) =>
         processes.RunAsync(ExecSpec(distro, user, command, timeout ?? Timeouts.Query), ct);
 
+    /// <summary>Runs a command as the distro's default user, whoever that is.</summary>
+    public Task<ProcessResult> ExecAsDefaultUserAsync(string distro, IReadOnlyList<string> command, CancellationToken ct) =>
+        processes.RunAsync(Spec(["-d", distro, "--exec", .. command], Timeouts.Query), ct);
+
     public Task<ProcessResult> WriteFileAsync(
         string distro, string user, string path, string content, CancellationToken ct) =>
         ExecAsync(distro, user, ["sh", "-c", WriteScript, "sh", path, content], ct);

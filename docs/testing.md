@@ -779,6 +779,28 @@ Restore `clean`, copy `formatkit.exe` to `C:\fk` and, in the VM, make a small VH
 
 **Expected:** `V:` is listed as a virtual disk stored on `C:` that is erased with the Windows drive, with `C:\fk\t.vhdx` in its detail. It is never listed as "on another disk".
 
+## Capture scenarios (32-34)
+
+`profile capture` must run **not elevated**: `vm.ps1 job` is elevated, so these scripts start it through a scheduled task with `RunLevel Limited` as the signed-in user, or use the `-Visible` console after dropping rights with `runas /trustlevel:0x20000`.
+
+## 32. Capture: clean VM
+
+Restore `clean`, and without ever running winget in the VM, run `formatkit profile capture C:\fk\clean.json`.
+
+**Expected:** exit 0 and a valid file. No agreement is accepted (`winget list` afterwards still asks for the source agreements). If winget refuses, `modules.programs` is disabled and the report says to run `winget list`. Then accept the agreements in the VM with `winget list`, capture with `--force` and read the package list: nothing that ships with Windows should remain in it.
+
+## 33. Capture: configured VM
+
+Restore with `nested`, run a dev profile with Git (a name with an accent, such as `João`), SSH, zsh, Oh My Posh and a Nerd Font, and a cleanup level. Capture as above.
+
+**Expected:** the captured values match the source profile, the accent is written literally in the file, `.ssh\id_ed25519` is never opened, and the applied cleanup items are in `include` with no `level`.
+
+## 34. Capture: the file is accepted by the other commands
+
+Set `acceptAgreements` to `true` in a captured file with programs, then run `formatkit run --profile <file> --dry-run`, `formatkit prepare check --profile <file>` and `formatkit media build --iso <iso> --output <folder> --profile <file>` up to its profile validation.
+
+**Expected:** all accept the file. Before setting `acceptAgreements`, `run` rejects it with the message about the agreements.
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:

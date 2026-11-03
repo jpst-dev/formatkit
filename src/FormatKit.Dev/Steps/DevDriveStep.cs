@@ -21,7 +21,7 @@ internal sealed class DevDriveStep(DevDriveOptions options) : IStep
     /// <summary>Room the VHDX's host volume must keep free beyond the drive's size.</summary>
     private const int HeadroomGB = 10;
 
-    private static readonly Dictionary<string, string> CacheVariables = new(StringComparer.Ordinal)
+    internal static readonly Dictionary<string, string> CacheVariables = new(StringComparer.Ordinal)
     {
         ["npm"] = "npm_config_cache",
         ["nuget"] = "NUGET_PACKAGES",

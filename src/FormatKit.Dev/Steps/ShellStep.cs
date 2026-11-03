@@ -368,7 +368,7 @@ internal sealed class ShellStep(ShellOptions options, WslOptions? wsl, DevEnviro
             : await InstallFontAsync(ohMyPosh, font, label, ctx, ct).ConfigureAwait(false);
     }
 
-    private static bool IsFontInstalled(string font, StepContext ctx)
+    internal static bool IsFontInstalled(string font, StepContext ctx)
     {
         var prefix = TerminalFragment.FontFamilies[font] + " ";
         return new[] { @"HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts", @"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" }
