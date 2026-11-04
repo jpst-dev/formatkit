@@ -95,4 +95,17 @@ Network errors, API errors, unexpected JSON, a wrong address, and a wrong size o
 
 ## Found while running
 
-Filled in during the VM runs.
+VM run on 2026-11-04, a build of this branch with `-p:Version=0.2.0` against the real v0.2.1 release, whose files have no update code, so this proves the update from the old side only.
+
+- `update --check` showed both versions and the page and changed nothing. `update --yes` exited 0 in 6 s, both hashes matched the release's `SHA256SUMS.txt`, and `--version` showed 0.2.1.
+- A start of a build with the update code removed both `.old` files. v0.2.1 itself leaves them, having no such code.
+- The window showed the Home banner at start. **Update now** replaced both files, the old process ended in about 6 s and the window reopened itself on 0.2.1.
+- With the setting off there was no banner and the checkbox was off; **Check for updates** on About still found the release and offered it.
+- A saved run state: exit 2, files unchanged. Without network: exit 1 with the reason, files unchanged.
+
+Decided while building, beyond the decisions above:
+
+- Closing the window during an update asks, stops the download and waits, so the process never ends during the swap.
+- The refusal is checked again just before the swap: a run started during the download must resume on the program it started with (final review).
+
+Not verified: a real update from a version that has the update code, until the release after this one; clicking the release page link; a locked `.old` with a real second copy running (unit test only, plus the reviewer's throwaway app showing the rename and delete behaviour).
