@@ -258,4 +258,49 @@
   <data name="Media_EndedAfterErase" xml:space="preserve"><value>O trabalho terminou inesperadamente depois da confirmação do disco. O pendrive pode estar incompleto; executar isto de novo corrige.</value></data>
   <data name="Media_EndedFolder" xml:space="preserve"><value>O trabalho terminou inesperadamente. A mídia em {0} pode estar incompleta; apague a pasta e execute isto de novo.</value></data>
   <data name="RunProfile_Resume" xml:space="preserve"><value>Retomar</value></data>
+  <data name="Home_UpdateAvailable" xml:space="preserve">
+    <value>Há um novo FormatKit disponível:</value>
+  </data>
+  <data name="Update_Now" xml:space="preserve">
+    <value>Atualizar agora</value>
+  </data>
+  <data name="Update_WhatsNew" xml:space="preserve">
+    <value>Ver novidades</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>O FormatKit {0} está disponível.</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>O FormatKit {0} está atualizado.</value>
+  </data>
+  <data name="Update_CheckFailed" xml:space="preserve">
+    <value>Não foi possível procurar atualizações: {0}</value>
+  </data>
+  <data name="Update_WaitForWork" xml:space="preserve">
+    <value>Há uma execução ou uma mídia em andamento. Atualize quando terminar.</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Baixando e conferindo a nova versão...</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>A atualização falhou e os arquivos atuais foram mantidos: {0}</value>
+  </data>
+  <data name="Update_ReopenManually" xml:space="preserve">
+    <value>O FormatKit foi atualizado, mas não conseguiu reabrir. Abra-o de novo.</value>
+  </data>
+  <data name="About_UpdateTitle" xml:space="preserve">
+    <value>Atualizações</value>
+  </data>
+  <data name="About_UpdateSetting" xml:space="preserve">
+    <value>Procurar atualizações ao abrir o aplicativo</value>
+  </data>
+  <data name="About_UpdateCheck" xml:space="preserve">
+    <value>Procurar atualizações</value>
+  </data>
+  <data name="Update_StopTitle" xml:space="preserve">
+    <value>Parar a atualização?</value>
+  </data>
+  <data name="Update_StopQuestion" xml:space="preserve">
+    <value>O FormatKit está baixando uma nova versão. Parar e fechar? Os arquivos atuais continuam como estão.</value>
+  </data>
 </root>

@@ -24,6 +24,26 @@
                 </StackPanel>
             </Border>
 
+            <Border Margin="0,12,0,0" Padding="12" CornerRadius="4" BorderThickness="1" BorderBrush="SteelBlue"
+                    Visibility="{Binding ShowUpdateBanner, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{loc:Loc Home_UpdateAvailable}" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding Update.Latest}" FontWeight="SemiBold" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Update.Status}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="{loc:Loc Update_Now}" Command="{Binding Update.UpdateCommand}" Padding="16,4" />
+                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center">
+                            <Hyperlink NavigateUri="{Binding Update.ReleasePage}" RequestNavigate="OnRequestNavigate"
+                                       AutomationProperties.Name="{loc:Loc Update_WhatsNew}">
+                                <TextBlock Text="{loc:Loc Update_WhatsNew}" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <TextBlock Text="{loc:Loc Home_Before_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,0" />
             <TextBlock Text="{loc:Loc Home_Before_Text}" TextWrapping="Wrap" Margin="0,4,0,0" />
             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">

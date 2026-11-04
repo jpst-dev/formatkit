@@ -258,4 +258,49 @@
   <data name="Media_EndedBeforeErase" xml:space="preserve"><value>The work ended unexpectedly, before any disk was erased. Nothing was erased.</value></data>
   <data name="Media_EndedAfterErase" xml:space="preserve"><value>The work ended unexpectedly after the disk was confirmed. The USB stick may be incomplete; running this again fixes it.</value></data>
   <data name="Media_EndedFolder" xml:space="preserve"><value>The work ended unexpectedly. The media in {0} may be incomplete; delete the folder and run this again.</value></data>
+  <data name="Home_UpdateAvailable" xml:space="preserve">
+    <value>A new FormatKit is available:</value>
+  </data>
+  <data name="Update_Now" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+  <data name="Update_WhatsNew" xml:space="preserve">
+    <value>See what's new</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>FormatKit {0} is available.</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>FormatKit {0} is up to date.</value>
+  </data>
+  <data name="Update_CheckFailed" xml:space="preserve">
+    <value>Could not check for updates: {0}</value>
+  </data>
+  <data name="Update_WaitForWork" xml:space="preserve">
+    <value>A run or a media job is going on. Update when it ends.</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Downloading and checking the new version...</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>The update failed and the current files were kept: {0}</value>
+  </data>
+  <data name="Update_ReopenManually" xml:space="preserve">
+    <value>FormatKit was updated, but could not reopen. Open it again yourself.</value>
+  </data>
+  <data name="About_UpdateTitle" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="About_UpdateSetting" xml:space="preserve">
+    <value>Check for updates when the app opens</value>
+  </data>
+  <data name="About_UpdateCheck" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Update_StopTitle" xml:space="preserve">
+    <value>Stop the update?</value>
+  </data>
+  <data name="Update_StopQuestion" xml:space="preserve">
+    <value>FormatKit is downloading a new version. Stop it and close? The current files stay as they are.</value>
+  </data>
 </root>

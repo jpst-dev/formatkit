@@ -7,6 +7,7 @@ namespace FormatKit.App.ViewModels;
 public sealed partial class HomeViewModel : ObservableObject
 {
     private readonly RunStateStore _state;
+    private readonly UpdateViewModel? _update;
 
     public HomeViewModel(RunStateStore state)
     {
@@ -24,7 +25,29 @@ public sealed partial class HomeViewModel : ObservableObject
 
     /// <summary>True when the run state holds an interrupted run.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowUpdateBanner))]
     private bool _hasInterruptedRun;
+
+    /// <summary>The newer release on offer; null when this window has no updater.</summary>
+    public UpdateViewModel? Update
+    {
+        get => _update;
+        init
+        {
+            _update = value;
+            if (value is not null)
+            {
+                value.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(UpdateViewModel.IsAvailable))
+                        OnPropertyChanged(nameof(ShowUpdateBanner));
+                };
+            }
+        }
+    }
+
+    /// <summary>An interrupted run comes first, and it would refuse the update anyway.</summary>
+    public bool ShowUpdateBanner => Update?.IsAvailable == true && !HasInterruptedRun;
 
     public IRelayCommand ResumeCommand { get; }
 
