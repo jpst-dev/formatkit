@@ -92,6 +92,14 @@ public sealed class Updater(
                 await DownloadAsync(assets[name], sums, folder, ct).ConfigureAwait(false);
 
             ct.ThrowIfCancellationRequested();
+
+            // A download takes minutes, and a run started meanwhile must resume on the program it started with.
+            if (Refusal() is { } late)
+            {
+                RemoveUpdates(folder);
+                return new UpdateResult(UpdateStatus.Refused, late, []);
+            }
+
             RemoveOld(folder, present);
             Swap(folder, present);
             log.Information("Updated {Files} to {Tag}", present, release.Tag);

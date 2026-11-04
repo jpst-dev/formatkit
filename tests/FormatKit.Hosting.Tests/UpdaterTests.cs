@@ -69,6 +69,24 @@ public sealed class UpdaterTests
     private Updater Create(string exe = Cli, string version = "0.2.1+abc") =>
         new(_source, _downloader, _files, new RunStateStore(_files, _paths), exe, version, Logger.None);
 
+    [Fact]
+    public async Task A_run_started_during_the_download_stops_the_swap()
+    {
+        _downloader.ContentFor = url =>
+        {
+            if (url.Segments[^1] == "FormatKitUI.exe")
+                new RunStateStore(_files, _paths).Save(new RunState(@"C:\p.json", "hash", ["a"], [], DateTimeOffset.UnixEpoch));
+            return Contents[url.Segments[^1]];
+        };
+
+        var result = await Create().UpdateAsync(Release(), Ct);
+
+        Assert.Equal(UpdateStatus.Refused, result.Status);
+        AssertOriginalsKept();
+        Assert.False(_files.FileExists(Cli + ".update"));
+        Assert.False(_files.FileExists(Ui + ".update"));
+    }
+
     private void AssertOriginalsKept()
     {
         Assert.Equal("old cli", _files.ReadAllText(Cli));
