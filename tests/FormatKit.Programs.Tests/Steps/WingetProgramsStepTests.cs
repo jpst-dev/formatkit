@@ -186,7 +186,7 @@ public class WingetProgramsStepTests : IDisposable
         Assert.Equal(StepOutcome.Failed, result.Outcome);
         Assert.Contains("Sign in", result.NextAction);
         Assert.Empty(user.Calls);
-        Assert.Contains("no user", result.Messages[0]);
+        Assert.Contains("nobody is signed in", result.Messages[0]);
     }
 
     [Fact]
@@ -309,8 +309,8 @@ public class WingetProgramsStepTests : IDisposable
 
         var result = await Step(false, Program("U.U", InstallContext.User)).ExecuteAsync(ctx, TestContext.Current.CancellationToken);
 
-        Assert.Equal("U.U: failed: no user is signed in", result.Messages[0]);
-        Assert.Equal("Sign in to Windows and run again.", result.NextAction);
+        Assert.Equal("U.U: failed: nobody is signed in at the PC's console", result.Messages[0]);
+        Assert.Equal("Sign in at the PC's console, not through a remote session, and run again.", result.NextAction);
     }
 
     [Fact]

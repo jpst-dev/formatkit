@@ -46,6 +46,44 @@ public sealed class ProfileCaptureTests
         Assert.All(modules, m => Assert.NotNull(m.Value!["enabled"]));
     }
 
+    private static JsonObject ShellWithPosh(bool posh) => new()
+    {
+        ["enabled"] = true,
+        ["shell"] = new JsonObject { ["windows"] = new JsonObject { ["ohMyPosh"] = posh } },
+    };
+
+    private static JsonObject CleanupWith(params string[] include) => new()
+    {
+        ["enabled"] = true,
+        ["include"] = new JsonArray([.. include.Select(i => (JsonNode)JsonValue.Create(i)!)]),
+    };
+
+    [Fact]
+    public async Task Oh_My_Posh_without_the_execution_policy_item_asks_for_review()
+    {
+        var result = await Create(Sources(cleanup: Section(CleanupWith("apps.solitaire")), dev: Section(ShellWithPosh(true)))).RunAsync(Ct);
+
+        var note = Assert.Single(result.Notes, n => n.Path == "modules.cleanup.include");
+        Assert.Equal(CaptureNoteKind.Review, note.Kind);
+        Assert.Contains("developer.ps-execution-policy", note.Text);
+    }
+
+    [Fact]
+    public async Task Oh_My_Posh_with_the_execution_policy_item_needs_no_review()
+    {
+        var result = await Create(Sources(cleanup: Section(CleanupWith("developer.ps-execution-policy")), dev: Section(ShellWithPosh(true)))).RunAsync(Ct);
+
+        Assert.DoesNotContain(result.Notes, n => n.Path == "modules.cleanup.include");
+    }
+
+    [Fact]
+    public async Task No_Oh_My_Posh_needs_no_execution_policy_review()
+    {
+        var result = await Create(Sources(cleanup: Section(CleanupWith()), dev: Section(ShellWithPosh(false)))).RunAsync(Ct);
+
+        Assert.DoesNotContain(result.Notes, n => n.Path == "modules.cleanup.include");
+    }
+
     [Fact]
     public async Task Name_and_schema_are_set()
     {

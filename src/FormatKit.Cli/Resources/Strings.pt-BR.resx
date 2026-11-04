@@ -244,4 +244,7 @@
   <data name="Profile_Reading" xml:space="preserve">
     <value>Lendo este PC. Isso pode levar alguns minutos e não muda nada...</value>
   </data>
+  <data name="Run_RemoteSession" xml:space="preserve">
+    <value>Aviso: esta é uma sessão remota (Área de Trabalho Remota ou sessão avançada do Hyper-V), então o FormatKit não encontra ninguém no console do PC. Programas por usuário, a senha do usuário do WSL e a chave SSH não serão concluídos. Execute no próprio console; no vmconnect, desmarque Exibir &gt; Sessão avançada.</value>
+  </data>
 </root>

@@ -74,6 +74,11 @@ internal static class RunCommand
             // Before RunFlow, so before elevation: the UAC prompt appears only after the countdown. The elevated
             // child gets the same arguments, but its parent already counted down: it must not wait again.
             var elevatedChild = parse.GetValue<bool>(CliApp.ElevatedChildFlag);
+
+            // Per-user installs and password prompts need someone at the console, so say it while Esc still works.
+            if (!elevatedChild && context.Env.Services.UserSession.IsRemoteSession)
+                o.WriteLine(Strings.Get("Run_RemoteSession"));
+
             if (wait is > 0 && !elevatedChild && context.Env.Services.Console.CanPrompt)
             {
                 var starter = context.Env.Countdown ?? new StartCountdown();

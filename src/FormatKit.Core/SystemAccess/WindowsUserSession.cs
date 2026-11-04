@@ -49,6 +49,19 @@ public sealed class WindowsUserSession : IUserSession
         }
     }
 
+    public bool IsRemoteSession
+    {
+        get
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            return IsOutsideConsole((uint)process.SessionId, WTSGetActiveConsoleSessionId());
+        }
+    }
+
+    /// <summary>Session 0 is services, where nobody is looking, and no console session means a switch is under way.</summary>
+    internal static bool IsOutsideConsole(uint processSession, uint consoleSession) =>
+        processSession != 0 && consoleSession != NoSession && processSession != consoleSession;
+
     public string? CurrentUserSid
     {
         get

@@ -36,6 +36,7 @@ public sealed class CliAppTests : IDisposable
     private readonly List<string> _countdownLines = [];
     private readonly List<string?> _typed = [];
     private bool _escPressed;
+    private readonly FakeUserSession _session = new();
     private const string ExePathWithSpaces = @"C:\Program Files\FormatKit\formatkit.exe";
 
     public CliAppTests()
@@ -58,7 +59,7 @@ public sealed class CliAppTests : IDisposable
 
     private CliApp App(IHardwareInfo? hardware = null)
     {
-        var services = TestServices.Create(files: _fs, console: _console);
+        var services = TestServices.Create(files: _fs, console: _console, session: _session);
         if (hardware is not null)
             services = services with { Hardware = hardware };
         else
@@ -104,6 +105,30 @@ public sealed class CliAppTests : IDisposable
 
         Assert.Equal(ExitCodes.Ok, exit);
         Assert.Empty(_rebooter.Calls);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Run_warns_only_in_a_remote_session(bool remote)
+    {
+        _session.IsRemoteSession = remote;
+
+        await Run("run", "--profile", WriteProfile(), "--dry-run");
+
+        Assert.Equal(remote, _out.ToString().Contains("remote session"));
+    }
+
+    [Fact]
+    public async Task Run_warns_before_the_countdown_so_it_can_still_be_cancelled()
+    {
+        _session.IsRemoteSession = true;
+        _escPressed = true;
+        MediaCommands.ExePath = () => ExePathWithSpaces;
+
+        await Run("run", "--profile", WriteProfile(), "--countdown", "60");
+
+        Assert.Contains("remote session", _out.ToString());
     }
 
     [Fact]

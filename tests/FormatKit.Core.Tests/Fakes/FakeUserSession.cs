@@ -11,4 +11,6 @@ public sealed class FakeUserSession : IUserSession
     public string? CurrentUserSid { get; set; } = "S-1-5-21-1000-1000-1000-1001";
 
     public uint? ConsoleSessionId { get; set; } = 1;
+
+    public bool IsRemoteSession { get; set; }
 }

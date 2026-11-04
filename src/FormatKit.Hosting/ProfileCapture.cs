@@ -83,9 +83,20 @@ public sealed class ProfileCapture(
             [("drivers", drivers), ("programs", programs), ("cleanup", cleanup), ("dev", dev), ("setup", setup)];
         var summaries = all.Select(s => new CaptureSummary(s.Name, s.Section.Summary)).ToList();
         var notes = all.SelectMany(s => s.Section.Notes).ToList();
+        if (NeedsExecutionPolicy(dev.Value, cleanup.Value))
+            notes.Add(new CaptureNote(CaptureNoteKind.Review, "modules.cleanup.include", Strings.Get("Capture_ExecutionPolicy")));
 
         var errors = Validate(root);
         return new ProfileCaptureResult(errors.Count == 0 ? root.ToJsonString(Output) : null, summaries, notes, errors);
+    }
+
+    /// <summary>A new Windows' default policy stops Windows PowerShell from loading the profile that starts Oh My Posh.</summary>
+    private static bool NeedsExecutionPolicy(JsonObject dev, JsonObject cleanup)
+    {
+        var posh = dev["shell"]?["windows"]?["ohMyPosh"]?.GetValue<bool>() == true;
+        var included = cleanup["include"] is JsonArray include
+            && include.Any(i => i?.GetValue<string>() == "developer.ps-execution-policy");
+        return posh && !included;
     }
 
     /// <summary>A source that fails costs only its own section; the rest of the machine is still worth keeping.</summary>

@@ -239,7 +239,7 @@ The VM needs internet and `winget` (App Installer). The signed-in user is the lo
    }
    ```
 
-   **Expected:** the Spotify item fails with "Sign in to Windows and run again." as its next action, Firefox installs normally, and the exit code is **1**. Sign in again and run once more: Spotify installs and the run ends with 0.
+   **Expected:** the Spotify item fails with "Sign in at the PC's console, not through a remote session, and run again." as its next action, Firefox installs normally, and the exit code is **1**. Sign in again and run once more: Spotify installs and the run ends with 0.
 
 ## 11. Programs: wrong hash on a direct installer
 
