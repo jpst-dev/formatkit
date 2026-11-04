@@ -91,6 +91,7 @@ public sealed class CliApp
         root.Subcommands.Add(ProfileCommands.Create(context));
         root.Subcommands.Add(MediaCommands.Create(context));
         root.Subcommands.Add(RunCommand.Create(context));
+        root.Subcommands.Add(UpdateCommand.Create(context));
 
         var parse = root.Parse(args);
         if (parse.Errors.Count > 0)

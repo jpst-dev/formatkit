@@ -247,4 +247,41 @@
   <data name="Run_RemoteSession" xml:space="preserve">
     <value>Warning: this is a remote session (Remote Desktop or a Hyper-V enhanced session), so FormatKit finds nobody at the PC's console. Per-user programs, the WSL user's password and the SSH key will not finish. Run it at the console itself; in vmconnect, turn off View &gt; Enhanced session.</value>
   </data>
+  <data name="Cmd_Update" xml:space="preserve">
+    <value>Check for a newer FormatKit and install it.</value>
+  </data>
+  <data name="Opt_UpdateCheck" xml:space="preserve">
+    <value>Only show whether a newer version exists.</value>
+  </data>
+  <data name="Opt_UpdateYes" xml:space="preserve">
+    <value>Install without asking.</value>
+  </data>
+  <data name="Update_CheckFailed" xml:space="preserve">
+    <value>Could not check for updates: {0}</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>FormatKit {0} is up to date.</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>FormatKit {1} is available (this is {0}).
+  {2}</value>
+  </data>
+  <data name="Update_NoConsole" xml:space="preserve">
+    <value>Nobody can answer here. Use 'formatkit update --yes' to install it.</value>
+  </data>
+  <data name="Update_Confirm" xml:space="preserve">
+    <value>Install it now? [y/N] </value>
+  </data>
+  <data name="Update_Declined" xml:space="preserve">
+    <value>Nothing was changed.</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Downloading and checking the new version...</value>
+  </data>
+  <data name="Update_Done" xml:space="preserve">
+    <value>Updated from {0} to {1}. It applies the next time you run FormatKit.</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>The update failed and the current files were kept: {0}</value>
+  </data>
 </root>

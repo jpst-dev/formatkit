@@ -7,7 +7,7 @@ using FormatKit.Core;
 using FormatKit.Core.Running;
 using FormatKit.Core.SystemAccess;
 using FormatKit.Core.Tests.Fakes;
-using FormatKit.Drivers;
+using FormatKit.Drivers.Catalog;
 using FormatKit.Hosting;
 using Serilog.Core;
 
@@ -143,7 +143,7 @@ public sealed class UpdateCommandTests : IDisposable
 
         var exit = await Run();
 
-        Assert.Equal(ExitCodes.Failed, exit);
+        Assert.Equal(ExitCodes.CompletedWithFailures, exit);
         Assert.Contains("--yes", _out.ToString());
         Assert.Equal("old", _fs.ReadAllText(Exe));
     }
@@ -155,7 +155,7 @@ public sealed class UpdateCommandTests : IDisposable
 
         var exit = await Run();
 
-        Assert.Equal(ExitCodes.Failed, exit);
+        Assert.Equal(ExitCodes.CompletedWithFailures, exit);
         Assert.Contains("offline", _out.ToString());
     }
 
@@ -164,7 +164,7 @@ public sealed class UpdateCommandTests : IDisposable
     {
         _source.Throws = new TimeoutException("slow");
 
-        Assert.Equal(ExitCodes.Failed, await Run("--check"));
+        Assert.Equal(ExitCodes.CompletedWithFailures, await Run("--check"));
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public sealed class UpdateCommandTests : IDisposable
 
         var exit = await Run("--yes");
 
-        Assert.Equal(ExitCodes.Failed, exit);
+        Assert.Equal(ExitCodes.CompletedWithFailures, exit);
         Assert.Contains("offline", _out.ToString());
         Assert.Equal("old", _fs.ReadAllText(Exe));
     }
