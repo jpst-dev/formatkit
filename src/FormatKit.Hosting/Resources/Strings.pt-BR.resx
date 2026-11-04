@@ -16,4 +16,7 @@
   <data name="Capture_SummaryFailed" xml:space="preserve">
     <value>não pôde ser lido</value>
   </data>
+  <data name="Capture_ExecutionPolicy" xml:space="preserve">
+    <value>O Oh My Posh inicia por um perfil do Windows PowerShell, que um Windows novo não executa por padrão. Adicione developer.ps-execution-policy a esta lista, ou a etapa do terminal fica pendente.</value>
+  </data>
 </root>

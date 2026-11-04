@@ -43,10 +43,10 @@
   <data name="Item_Failed_Timeout" xml:space="preserve"><value>falhou: tempo esgotado</value></data>
   <data name="Item_Failed_HashMismatch" xml:space="preserve"><value>falhou: hash SHA-256 n&#227;o confere</value></data>
   <data name="Item_Failed_Download" xml:space="preserve"><value>falhou: erro no download</value></data>
-  <data name="Item_Failed_NoUser" xml:space="preserve"><value>falhou: nenhum usu&#225;rio conectado</value></data>
+  <data name="Item_Failed_NoUser" xml:space="preserve"><value>falhou: ninguém conectado no console do PC</value></data>
   <data name="NextAction_WingetMissing" xml:space="preserve"><value>Instale ou repare o Instalador de Aplicativo (winget) e execute novamente.</value></data>
   <data name="NextAction_SeeLog" xml:space="preserve"><value>Veja o log para os programas que falharam e execute novamente.</value></data>
-  <data name="NextAction_SignIn" xml:space="preserve"><value>Entre no Windows e execute novamente.</value></data>
+  <data name="NextAction_SignIn" xml:space="preserve"><value>Entre no console do PC, não por uma sessão remota, e execute novamente.</value></data>
   <data name="Item_Failed_Error" xml:space="preserve"><value>falhou: erro inesperado (veja o log)</value></data>
   <data name="Capture_WingetMissing" xml:space="preserve">
     <value>O winget não foi encontrado neste PC, então nenhum programa foi capturado.</value>

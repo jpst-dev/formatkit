@@ -244,4 +244,7 @@
   <data name="Profile_Reading" xml:space="preserve">
     <value>Reading this PC. This can take a few minutes and changes nothing...</value>
   </data>
+  <data name="Run_RemoteSession" xml:space="preserve">
+    <value>Warning: this is a remote session (Remote Desktop or a Hyper-V enhanced session), so FormatKit finds nobody at the PC's console. Per-user programs, the WSL user's password and the SSH key will not finish. Run it at the console itself; in vmconnect, turn off View &gt; Enhanced session.</value>
+  </data>
 </root>

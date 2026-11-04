@@ -16,4 +16,7 @@
   <data name="Capture_SummaryFailed" xml:space="preserve">
     <value>could not be read</value>
   </data>
+  <data name="Capture_ExecutionPolicy" xml:space="preserve">
+    <value>Oh My Posh starts from a Windows PowerShell profile, which a new Windows does not run by default. Add developer.ps-execution-policy to this list, or the terminal step stays pending.</value>
+  </data>
 </root>

@@ -13,4 +13,7 @@ public interface IUserSession
 
     /// <summary>The WTS session id of the physical console, or null when there is none (for example during a session switch).</summary>
     uint? ConsoleSessionId => null;
+
+    /// <summary>True when this process runs in a session other than the console, such as Remote Desktop or a Hyper-V enhanced session.</summary>
+    bool IsRemoteSession => false;
 }
