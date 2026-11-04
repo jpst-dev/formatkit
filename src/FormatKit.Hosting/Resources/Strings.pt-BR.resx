@@ -19,4 +19,28 @@
   <data name="Capture_ExecutionPolicy" xml:space="preserve">
     <value>O Oh My Posh inicia por um perfil do Windows PowerShell, que um Windows novo não executa por padrão. Adicione developer.ps-execution-policy a esta lista, ou a etapa do terminal fica pendente.</value>
   </data>
+  <data name="Update_BadVersion" xml:space="preserve">
+    <value>Não foi possível ler a versão '{0}'.</value>
+  </data>
+  <data name="Update_NotReleased" xml:space="preserve">
+    <value>Esta cópia roda como '{0}', que não é um executável publicado do FormatKit.</value>
+  </data>
+  <data name="Update_RunPending" xml:space="preserve">
+    <value>Há uma execução não concluída. Conclua ou cancele essa execução antes de atualizar.</value>
+  </data>
+  <data name="Update_MissingAsset" xml:space="preserve">
+    <value>A versão publicada não inclui {0}.</value>
+  </data>
+  <data name="Update_MissingSum" xml:space="preserve">
+    <value>As somas de verificação da versão publicada não listam {0}.</value>
+  </data>
+  <data name="Update_BadAddress" xml:space="preserve">
+    <value>A versão publicada aponta para fora do repositório do FormatKit: {0}</value>
+  </data>
+  <data name="Update_BadFile" xml:space="preserve">
+    <value>O download de {0} está corrompido: o tamanho ou a soma de verificação não confere.</value>
+  </data>
+  <data name="Update_CloseFormatKit" xml:space="preserve">
+    <value>Uma versão anterior ainda está em execução. Feche todas as janelas do FormatKit e tente de novo.</value>
+  </data>
 </root>
