@@ -803,7 +803,7 @@ Set `acceptAgreements` to `true` in a captured file with programs, then run `for
 
 ## Update scenarios (35-37)
 
-The released version may have no update code, so build one that believes it is old: `dotnet publish src/FormatKit.Cli -c Release -o artifacts -p:Version=0.2.0` and the same for `src/FormatKit.App`. Copy both to `C:k` in the VM. Never run a real update on the host.
+The released version may have no update code, so build one that believes it is old: `dotnet publish src/FormatKit.Cli -c Release -o artifacts -p:Version=0.2.0` and the same for `src/FormatKit.App`. Copy both to `C:\fk` in the VM. Never run a real update on the host.
 
 ## 35. Update: the command line
 
