@@ -31,4 +31,7 @@ public sealed partial class AboutViewModel : ObservableObject
     public IReadOnlyList<CliCommandInfo> CliCommands { get; }
 
     public IRelayCommand OpenLogFolderCommand { get; }
+
+    /// <summary>The update section; null when this window has no updater.</summary>
+    public UpdateViewModel? Update { get; init; }
 }

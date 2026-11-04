@@ -68,8 +68,14 @@ public sealed class InMemoryFileSystem : IFileSystem
         WriteCount++;
     }
 
+    /// <summary>A move this returns true for throws <see cref="IOException"/>.</summary>
+    public Func<string, string, bool>? FailMove { get; set; }
+
     public void Move(string source, string destination)
     {
+        if (FailMove?.Invoke(source, destination) == true)
+            throw new IOException($"Move refused: {source}");
+
         var text = ReadAllText(source);
         if (_files.ContainsKey(destination))
             throw new IOException($"destination exists: {destination}");

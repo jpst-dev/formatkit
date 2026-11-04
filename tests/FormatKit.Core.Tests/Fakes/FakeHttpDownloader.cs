@@ -6,6 +6,9 @@ public sealed class FakeHttpDownloader(InMemoryFileSystem files) : IHttpDownload
 {
     public string Content { get; set; } = "installer-bytes";
 
+    /// <summary>Content per address; <see cref="Content"/> when null.</summary>
+    public Func<Uri, string>? ContentFor { get; set; }
+
     public Exception? Throws { get; set; }
 
     /// <summary>The token passed with the last call.</summary>
@@ -19,7 +22,7 @@ public sealed class FakeHttpDownloader(InMemoryFileSystem files) : IHttpDownload
         Token = ct;
         if (Throws is not null)
             throw Throws;
-        files.Seed(destination, Content);
+        files.Seed(destination, ContentFor?.Invoke(url) ?? Content);
         return Task.CompletedTask;
     }
 }

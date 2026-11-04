@@ -801,6 +801,28 @@ Set `acceptAgreements` to `true` in a captured file with programs, then run `for
 
 **Expected:** all accept the file. Before setting `acceptAgreements`, `run` rejects it with the message about the agreements.
 
+## Update scenarios (35-37)
+
+The released version may have no update code, so build one that believes it is old: `dotnet publish src/FormatKit.Cli -c Release -o artifacts -p:Version=0.2.0` and the same for `src/FormatKit.App`. Copy both to `C:\fk` in the VM. Never run a real update on the host.
+
+## 35. Update: the command line
+
+Run `formatkit update --check`, then `formatkit update --yes`, then `formatkit --version`.
+
+**Expected:** `--check` shows both versions and the release page and changes nothing. `--yes` exits 0 and both files are replaced. `--version` shows the latest release. The `.old` files are gone after the next start.
+
+## 36. Update: the window
+
+Rebuild as above, copy again, open `FormatKitUI.exe` in a basic session.
+
+**Expected:** the Home banner shows the new version. **Update now** closes the window and opens it again on the new version, which About confirms. With the setting off on About, reopening shows no banner, and **Check for updates** still finds the release.
+
+## 37. Update: refused and failed
+
+With a saved run state (interrupt a run), run `formatkit update --yes`. Then finish the run, cut the VM's network and run it again.
+
+**Expected:** the first exits 2 and the second exits 1 with the reason. The files are unchanged after both.
+
 ## Hardware-only checklist (cannot be verified in a VM)
 
 Confirm on real machines and fix the code/docs if wrong:

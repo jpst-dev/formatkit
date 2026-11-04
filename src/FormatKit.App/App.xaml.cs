@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using FormatKit.App.Localization;
@@ -56,22 +58,28 @@ public partial class App : Application
         if (e.Args.Length > 0 && arguments.Mode == AppMode.Window)
             _host.Log.Warning("Unrecognized arguments, opening the window: {Arguments}", e.Args);
 
+        // Clears what an earlier update could not delete while that version was running.
+        Updater.RemoveLeftovers(_host.Services.Files, Environment.ProcessPath!);
+        var settings = new AppSettings(_host.Services.Files, Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatKit", "app.json"));
+        var update = CreateUpdate(_host, settings);
+
         var set = ModuleSet.CreateReal(_host.Services, _host.Log, _host.NetworkRetryDelay, _host.Dev);
         var runner = new PrepareRunner(_host, set.Modules, PrepareChecks.All, PrepareEnvironment.Current);
         var launcher = new WorkerLauncher(new ElevationStarter(), _host.Log);
         var main = new MainViewModel(
-            new HomeViewModel(_host.StateStore),
-            new AboutViewModel(_dialogs),
+            new HomeViewModel(_host.StateStore) { Update = update },
+            new AboutViewModel(_dialogs) { Update = update },
             new HardwareViewModel(_host.Services, set.Vendors, _host.Log),
             new CleanupDiagnosisViewModel(_host.Services, set.Issues, _host.Log),
             new ChecklistViewModel(runner, new ProfileService(set.Modules), _dialogs, _host.Log),
             new CatalogsViewModel(set.Cleanup, set.Programs),
             new RunProfileViewModel(
                 new ProfileService(set.Modules), set.Modules, launcher, _host.Elevation, _dialogs,
-                new AppSettings(_host.Services.Files, Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatKit", "app.json")),
+                settings,
                 _host),
-            new MediaViewModel(new ProfileService(set.Modules), launcher, _host.Elevation, _dialogs, _host));
+            new MediaViewModel(new ProfileService(set.Modules), launcher, _host.Elevation, _dialogs, _host),
+            update);
         _window = new MainWindow(main);
         _instance.Activated += (_, _) => Dispatcher.BeginInvoke(() => _window?.BringToFront());
         _instance.ResumeRequested += (_, _) => Dispatcher.BeginInvoke(() =>
@@ -86,6 +94,44 @@ public partial class App : Application
             // Started by the resume scheduled task after a reboot: open on Run profile and continue the run.
             _ = main.ResumeAsync();
         }
+        else
+        {
+            _ = update.CheckOnStartAsync();
+        }
+    }
+
+    private UpdateViewModel CreateUpdate(HostEnvironment host, AppSettings settings)
+    {
+        var version = typeof(App).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
+        var update = new UpdateViewModel(
+            new Updater(
+                new GitHubReleaseSource(version), new HttpDownloader(), host.Services.Files, host.StateStore,
+                Environment.ProcessPath!, version, host.Log),
+            settings,
+            _dialogs);
+        update.RestartRequested += RestartAfterUpdate;
+        return update;
+    }
+
+    /// <summary>
+    /// The instance goes first: with its mutex still held, the new process would only signal this one and exit.
+    /// </summary>
+    private void RestartAfterUpdate()
+    {
+        try
+        {
+            _instance?.Dispose();
+            _instance = null;
+            Process.Start(new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)
+        {
+            _host?.Log.Warning(ex, "Could not reopen after the update");
+            _dialogs.ShowError(Strings.Get("Update_ReopenManually"));
+        }
+
+        Shutdown(0);
     }
 
     /// <summary>

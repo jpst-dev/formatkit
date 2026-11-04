@@ -36,7 +36,7 @@ internal static class TestViewModels
             run,
             CreateMedia(new InMemoryFileSystem(), store: null));
 
-    public static MainViewModel CreateMain(InMemoryFileSystem? files = null)
+    public static MainViewModel CreateMain(InMemoryFileSystem? files = null, UpdateViewModel? update = null)
     {
         files ??= new InMemoryFileSystem();
         var store = Store(files);
@@ -55,6 +55,7 @@ internal static class TestViewModels
                     TestServices.Create(files: files), new Elevation(), new FakeScheduledTasks(), new FakeRebooter(),
                     new FakeReportWriter(), store, new Serilog.LoggerConfiguration().CreateLogger(),
                     TimeSpan.Zero, TimeSpan.Zero)),
-            CreateMedia(files, store));
+            CreateMedia(files, store),
+            update);
     }
 }

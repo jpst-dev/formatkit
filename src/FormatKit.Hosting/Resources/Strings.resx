@@ -19,4 +19,28 @@
   <data name="Capture_ExecutionPolicy" xml:space="preserve">
     <value>Oh My Posh starts from a Windows PowerShell profile, which a new Windows does not run by default. Add developer.ps-execution-policy to this list, or the terminal step stays pending.</value>
   </data>
+  <data name="Update_BadVersion" xml:space="preserve">
+    <value>The version '{0}' could not be read.</value>
+  </data>
+  <data name="Update_NotReleased" xml:space="preserve">
+    <value>This copy runs as '{0}', which is not a released FormatKit executable.</value>
+  </data>
+  <data name="Update_RunPending" xml:space="preserve">
+    <value>A run is unfinished. Finish or cancel it before updating.</value>
+  </data>
+  <data name="Update_MissingAsset" xml:space="preserve">
+    <value>The release does not include {0}.</value>
+  </data>
+  <data name="Update_MissingSum" xml:space="preserve">
+    <value>The release's checksums do not list {0}.</value>
+  </data>
+  <data name="Update_BadAddress" xml:space="preserve">
+    <value>The release points outside FormatKit's repository: {0}</value>
+  </data>
+  <data name="Update_BadFile" xml:space="preserve">
+    <value>The download of {0} is damaged: its size or checksum does not match.</value>
+  </data>
+  <data name="Update_CloseFormatKit" xml:space="preserve">
+    <value>A previous version is still running. Close every FormatKit window and try again.</value>
+  </data>
 </root>

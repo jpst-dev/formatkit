@@ -247,4 +247,41 @@
   <data name="Run_RemoteSession" xml:space="preserve">
     <value>Aviso: esta é uma sessão remota (Área de Trabalho Remota ou sessão avançada do Hyper-V), então o FormatKit não encontra ninguém no console do PC. Programas por usuário, a senha do usuário do WSL e a chave SSH não serão concluídos. Execute no próprio console; no vmconnect, desmarque Exibir &gt; Sessão avançada.</value>
   </data>
+  <data name="Cmd_Update" xml:space="preserve">
+    <value>Procura uma versão mais nova do FormatKit e instala.</value>
+  </data>
+  <data name="Opt_UpdateCheck" xml:space="preserve">
+    <value>Só mostra se existe uma versão mais nova.</value>
+  </data>
+  <data name="Opt_UpdateYes" xml:space="preserve">
+    <value>Instala sem perguntar.</value>
+  </data>
+  <data name="Update_CheckFailed" xml:space="preserve">
+    <value>Não foi possível procurar atualizações: {0}</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>O FormatKit {0} está atualizado.</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>O FormatKit {1} está disponível (esta é a {0}).
+  {2}</value>
+  </data>
+  <data name="Update_NoConsole" xml:space="preserve">
+    <value>Ninguém pode responder aqui. Use 'formatkit update --yes' para instalar.</value>
+  </data>
+  <data name="Update_Confirm" xml:space="preserve">
+    <value>Instalar agora? [s/N] </value>
+  </data>
+  <data name="Update_Declined" xml:space="preserve">
+    <value>Nada foi alterado.</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Baixando e conferindo a nova versão...</value>
+  </data>
+  <data name="Update_Done" xml:space="preserve">
+    <value>Atualizado da {0} para a {1}. Vale na próxima vez que você executar o FormatKit.</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>A atualização falhou e os arquivos atuais foram mantidos: {0}</value>
+  </data>
 </root>

@@ -11,7 +11,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public MainViewModel(HomeViewModel home, AboutViewModel about, HardwareViewModel hardware,
         CleanupDiagnosisViewModel diagnosis, ChecklistViewModel checklist,
-        CatalogsViewModel catalogs, RunProfileViewModel runProfile, MediaViewModel media)
+        CatalogsViewModel catalogs, RunProfileViewModel runProfile, MediaViewModel media, UpdateViewModel? update = null)
     {
         _home = home;
         _pages = new Dictionary<Page, object>
@@ -35,7 +35,7 @@ public sealed partial class MainViewModel : ObservableObject
         media.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MediaViewModel.IsRunInProgress))
-                runProfile.OtherWorkRunning = media.IsRunInProgress;
+                runProfile.OtherWorkRunning = media.IsRunInProgress || update?.IsUpdating == true;
         };
         home.NavigationRequested += Navigate;
         home.ResumeRequested += () => _ = ResumeAsync();
@@ -45,13 +45,28 @@ public sealed partial class MainViewModel : ObservableObject
             if (e.PropertyName == nameof(RunProfileViewModel.HasInterruptedRun))
                 home.Refresh();
             else if (e.PropertyName == nameof(RunProfileViewModel.IsRunInProgress))
-                media.OtherWorkRunning = runProfile.IsRunInProgress;
+                media.OtherWorkRunning = runProfile.IsRunInProgress || update?.IsUpdating == true;
         };
+        _update = update;
+        if (update is not null)
+        {
+            update.WorkInProgress = () => RunProfile.IsRunInProgress || Media.IsRunInProgress;
+            update.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName != nameof(UpdateViewModel.IsUpdating))
+                    return;
+                runProfile.OtherWorkRunning = media.IsRunInProgress || update.IsUpdating;
+                media.OtherWorkRunning = runProfile.IsRunInProgress || update.IsUpdating;
+            };
+        }
+
         NavItems = Enum.GetValues<Page>()
             .Select(p => new NavItem(p, Strings.Get($"Nav_{p}")))
             .ToList();
         _current = Page.Home;
     }
+
+    private readonly UpdateViewModel? _update;
 
     /// <summary>The Run profile page, which the window asks before closing during a run.</summary>
     public RunProfileViewModel RunProfile { get; }
@@ -59,12 +74,16 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>The installation media page, which the window asks before closing during a media job.</summary>
     public MediaViewModel Media { get; }
 
-    /// <summary>True while a run or a media job starts or runs: closing the window asks first.</summary>
-    public bool IsWorkInProgress => RunProfile.IsRunInProgress || Media.IsRunInProgress;
+    /// <summary>True while a run or a media job starts or runs, or an update runs: closing the window asks first.</summary>
+    public bool IsWorkInProgress => RunProfile.IsRunInProgress || Media.IsRunInProgress || _update?.IsUpdating == true;
 
     /// <summary>Closing the window: asks the page whose work is going on. Only one can be working.</summary>
-    public Task<bool> ConfirmCloseAsync() =>
-        Media.IsRunInProgress ? Media.ConfirmCloseAsync() : RunProfile.ConfirmCloseAsync();
+    public Task<bool> ConfirmCloseAsync()
+    {
+        if (_update?.IsUpdating == true)
+            return _update.ConfirmCloseAsync();
+        return Media.IsRunInProgress ? Media.ConfirmCloseAsync() : RunProfile.ConfirmCloseAsync();
+    }
 
     public IReadOnlyList<NavItem> NavItems { get; }
 
