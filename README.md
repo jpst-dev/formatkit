@@ -33,6 +33,21 @@ Download `formatkit.exe` from the [Releases](../../releases) page. It is self-co
 
 The binary is **not code-signed**, so Windows SmartScreen may show "Windows protected your PC". Click **More info**, then **Run anyway** if you trust the source. You can also build it yourself (see below).
 
+### Updating
+
+You download FormatKit once. After that, `formatkit update` or **Update now** in the window installs newer versions:
+
+- The window looks for a newer release once when it opens, in the background, and shows a banner on Home. Nothing is installed until you click. You can turn this off on the About page. The command line never checks by itself.
+- `formatkit update` shows the versions and asks. `--check` only reports, and `--yes` installs without asking.
+- Both executables are replaced together when both are in the folder; one that is missing is not added. The new files are checked against the release's `SHA256SUMS.txt` before anything is replaced, and any failure keeps the current files. This catches a damaged download, not a compromised release: the files are not code-signed.
+- Only stable releases are offered, and never an older version than yours.
+- Updating is refused while a run is interrupted or waiting for a reboot, because the resume starts this same file. Finish the run first.
+- The folder must be writable, since no elevation is asked for. In `C:\Program Files`, download the new version by hand.
+
+A running command line finishes with the old version; the next start uses the new one. The window reopens itself.
+
+Versions before 0.3.0 cannot update themselves: download 0.3.0 by hand once.
+
 ## Commands
 
 | Command | What it does |
@@ -55,6 +70,7 @@ The binary is **not code-signed**, so Windows SmartScreen may show "Windows prot
 | `formatkit profile capture <file> [--force]` | Writes a profile of this PC to rebuild it after the format. Read-only, no elevation. See [Capture this machine](#capture-this-machine). |
 | `formatkit media build --iso <iso> --output <folder> [--profile <file>]` | Writes the Windows 11 installation media to a folder. See [Make the installation media](#make-the-installation-media). |
 | `formatkit media usb --iso <iso> [--profile <file>] [--disk <n>] [--allow-hard-disk]` | Erases a USB stick you choose and writes the same media to it. Asks for elevation. |
+| `formatkit update [--check] [--yes]` | Installs the latest release over this copy. See [Updating](#updating). |
 | `--verbose` (global) | Shows detailed logging. |
 
 Output language follows the Windows UI language (English and Brazilian Portuguese).
@@ -129,14 +145,14 @@ The window runs without administrator rights. It asks for UAC only when you star
 
 | Page | What it does |
 | --- | --- |
-| Home | Shows what is available and a **Resume** banner when an interrupted run is found. |
+| Home | Shows what is available, a **Resume** banner when an interrupted run is found, and an **Update now** banner when a newer version exists. |
 | Checklist | `prepare check`: an optional profile, the results by status, and **Save as Markdown**. |
 | Run profile | Open a profile (or the built-in "Drivers only"), review the plan, confirm, then follow each step with a **Stop** button, the result and a reboot countdown. A run resumes in this same window after a reboot. |
 | Installation media | `media build` and `media usb`: a Windows 11 ISO, an optional profile, and a folder or a USB stick. Before a stick is erased you choose the disk and type its number, and the disk is checked again. |
 | Hardware | The detected hardware, as `formatkit hardware`. |
 | Cleanup diagnosis | `cleanup check`: tweaks that break or weaken this PC, with the fix. |
 | Catalogs | The cleanup and programs catalogs. |
-| About | Version, repository, **Open log folder** and the CLI-only commands. |
+| About | Version, repository, **Check for updates** and its setting, **Open log folder** and the CLI-only commands. |
 
 Profiles are opened and shown, not edited. The window runs the profile you reviewed: if the file changes before the run starts, it is refused and you review it again. A profile on the media needs `formatkit.exe` next to `FormatKitUI.exe`, because the first logon runs the CLI; a plain stick does not. A run and a media job block each other.
 
@@ -540,6 +556,8 @@ Pushing a tag like `v0.1.0` (or `v0.1.0-rc.1` for a prerelease, which does not d
 [MIT](LICENSE)
 
 ## Resumo em português
+
+Para atualizar, use `formatkit update` ou **Atualizar agora** na janela: você só baixa uma vez.
 
 O FormatKit é uma ferramenta de linha de comando para Windows que automatiza a parte chata de uma reinstalação limpa: detecta o hardware e instala os drivers a partir de um perfil JSON. Estado atual: núcleo, drivers, limpeza do sistema, instalação de programas (winget, catálogo e instaladores diretos com verificação de hash), ambiente de desenvolvimento (WSL, Git, SSH, dotfiles, shell e Dev Drive) e checklist de preparação (`formatkit prepare check`, somente leitura: mostra o que a formatação apagaria e o que salvar antes). A interface gráfica (`FormatKitUI.exe`, uma janela WPF sobre o mesmo motor, que só pede UAC ao executar um perfil ou ao criar a mídia) já está disponível, assim como a mídia de instalação (`formatkit media build` e `formatkit media usb`, ou a página Mídia de instalação da janela: pendrive ou pasta de instalação do Windows 11 a partir da ISO oficial, com resposta automática e execução do perfil no primeiro logon; um perfil na mídia precisa do `formatkit.exe` ao lado do `FormatKitUI.exe`).
 
