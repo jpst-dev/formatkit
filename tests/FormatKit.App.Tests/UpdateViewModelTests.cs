@@ -262,12 +262,12 @@ public sealed class UpdateViewModelTests
         _dialogs.ConfirmResult = false;
         var running = update.UpdateCommand.ExecuteAsync(null);
 
-        Assert.False(await update.ConfirmCloseAsync().WaitAsync(CloseLimit));
+        Assert.False(await update.ConfirmCloseAsync().WaitAsync(CloseLimit, TestContext.Current.CancellationToken));
 
         Assert.True(update.IsUpdating);
         Assert.False(running.IsCompleted);
         _dialogs.ConfirmResult = true;
-        await update.ConfirmCloseAsync().WaitAsync(CloseLimit); // Lets the update end with the test.
+        await update.ConfirmCloseAsync().WaitAsync(CloseLimit, TestContext.Current.CancellationToken); // Lets the update end with the test.
     }
 
     [Fact]
@@ -281,7 +281,7 @@ public sealed class UpdateViewModelTests
         _dialogs.ConfirmResult = true;
         var running = update.UpdateCommand.ExecuteAsync(null);
 
-        Assert.True(await update.ConfirmCloseAsync().WaitAsync(CloseLimit));
+        Assert.True(await update.ConfirmCloseAsync().WaitAsync(CloseLimit, TestContext.Current.CancellationToken));
 
         Assert.True(running.IsCompleted);
         Assert.False(update.IsUpdating);
@@ -389,7 +389,7 @@ public sealed class UpdateViewModelTests
         _dialogs.ConfirmResult = true;
         _ = update.UpdateCommand.ExecuteAsync(null);
 
-        Assert.True(await main.ConfirmCloseAsync().WaitAsync(CloseLimit));
+        Assert.True(await main.ConfirmCloseAsync().WaitAsync(CloseLimit, TestContext.Current.CancellationToken));
 
         Assert.False(update.IsUpdating);
     }
